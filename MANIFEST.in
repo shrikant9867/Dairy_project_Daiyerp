@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include dairy_erp *.css
+recursive-include dairy_erp *.csv
+recursive-include dairy_erp *.html
+recursive-include dairy_erp *.ico
+recursive-include dairy_erp *.js
+recursive-include dairy_erp *.json
+recursive-include dairy_erp *.md
+recursive-include dairy_erp *.png
+recursive-include dairy_erp *.py
+recursive-include dairy_erp *.svg
+recursive-include dairy_erp *.txt
+recursive-exclude dairy_erp *.pyc

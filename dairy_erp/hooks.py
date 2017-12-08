@@ -79,13 +79,11 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Address": {
+		"after_insert": "dairy_erp.customization.customization.set_warehouse"
+	}
+}
 
 # Scheduled Tasks
 # ---------------

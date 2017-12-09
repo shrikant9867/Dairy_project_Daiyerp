@@ -60,43 +60,43 @@ def get_data():
 				}							
 			]
 		},
-		# {
-		# 	"label": _("Documents"),
-		# 	"icon": "icon-star",
-		# 	"items": [
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Material Request",
-		# 			"description": _(" "),
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Purchase Order",
-		# 			"description": _(" "),
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Delivery Note",
-		# 			"description": _(" "),
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Sales Invoice",
-		# 			"description": _(" "),
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Purchase Invoice",
-		# 			"description": _(" "),
-		# 		},
-		# 		{
-		# 			"type": "doctype",
-		# 			"name": "Payment Entry",
-		# 			"description": _(" "),
-		# 		}
+		{
+			"label": _("Documents"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Material Request",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Purchase Order",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Delivery Note",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Sales Invoice",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Purchase Invoice",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Entry",
+					"description": _(" "),
+				}
 			
-		# 	]
-		# },
+			]
+		},
 		{
 			"label": _("Setup"),
 			"icon": "icon-star",
@@ -113,5 +113,16 @@ def get_data():
 				}
 
 			]
-		}		
+		},
+		{
+			"label": _("Vlcc"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Vlcc",
+					"description": _(" "),
+				}
+			]
+		}			
 	]			

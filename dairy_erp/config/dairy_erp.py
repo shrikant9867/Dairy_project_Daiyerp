@@ -120,9 +120,27 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Vlcc",
+					"name": "Village Level Collection Centre",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer",
 					"description": _(" "),
 				}
 			]
-		}			
+		},
+		{
+			"label": _("Dairy"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "page",
+					"name": "dairy-dashboard",
+					"label": "Dairy Dashboard",
+					"description": _(" "),
+				}
+			]
+		}				
 	]			
+

@@ -105,7 +105,7 @@ doc_events = {
 # 		"dairy_erp.tasks.monthly"
 # 	]
 # }
-
+fixtures=['Property Setter','Custom Field']
 # Testing
 # -------
 

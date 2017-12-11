@@ -13,7 +13,7 @@ def set_warehouse(doc, method):
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"]:
 		wr_house_doc = frappe.new_doc("Warehouse")
 		wr_house_doc.warehouse_name = doc.address_title
-		wr_house_doc.company = doc.links[0].link_name
+		wr_house_doc.company =  doc.links[0].link_name if doc.links else []
 		wr_house_doc.insert()
 		doc.warehouse = wr_house_doc.name
 		doc.save()

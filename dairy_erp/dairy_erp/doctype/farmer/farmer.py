@@ -10,6 +10,10 @@ class Farmer(Document):
 	def after_insert(self):
 		"""create customer & supplier for A/C head"""
 		
+		self.create_supplier()
+		self.create_customer()
+	
+	def create_supplier(self):
 		supl_doc = frappe.new_doc("Supplier")
 		supl_doc.supplier_name = self.full_name
 		supl_doc.supplier_type = "Distributor"
@@ -21,6 +25,7 @@ class Farmer(Document):
 			})
 		supl_doc.insert()
 
+	def create_customer(self):
 		custmer_doc = frappe.new_doc("Customer")
 		custmer_doc.customer_name = self.full_name
 		custmer_doc.company = self.vlcc_name
@@ -30,5 +35,3 @@ class Farmer(Document):
 			"account": frappe.db.get_value("Company",self.vlcc_name, "default_receivable_account")
 			})
 		custmer_doc.insert()
-
-		

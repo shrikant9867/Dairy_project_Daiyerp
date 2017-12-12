@@ -31,4 +31,13 @@ frappe.ui.form.on('Village Level Collection Centre', {
 	address: function(frm) {
 		erpnext.utils.get_address_display(frm, "address", "address_display");
 	},
+	vlcc_name: function(frm) {
+		if(frm.doc.__islocal) {
+			let parts = frm.doc.vlcc_name.split();
+			let abbr = $.map(parts, function (p) {
+				return p? p.substr(0, 1) : null;
+			}).join("");
+			frm.set_value("abbr", abbr);
+		}
+	}
 });

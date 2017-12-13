@@ -92,7 +92,7 @@ class VillageLevelCollectionCentre(Document):
 		   for Plant offices.plant offices > customer ==> for Dairy and vice versa.
 		"""
 		
-		if frappe.db.exists('Customer', self.vlcc_name):
+		if not frappe.db.exists('Customer', self.vlcc_name):
 			comp = frappe.get_doc("Address", self.chilling_centre)
 			custmer_doc = frappe.new_doc("Customer")
 			custmer_doc.customer_name = self.vlcc_name

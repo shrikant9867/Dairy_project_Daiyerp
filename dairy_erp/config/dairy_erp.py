@@ -110,6 +110,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Warehouse",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Dairy Log",
+					"description": _(" "),
 				}
 
 			]

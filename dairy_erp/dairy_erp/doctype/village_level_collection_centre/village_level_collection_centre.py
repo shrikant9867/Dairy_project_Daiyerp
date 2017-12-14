@@ -10,10 +10,15 @@ from frappe.model.document import Document
 class VillageLevelCollectionCentre(Document):
 	def validate(self):
 		self.validate_vlcc_abbr()
+		self.validate_vlcc_id()
 
 	def validate_vlcc_abbr(self):
 		if frappe.db.sql("select abbr from `tabVillage Level Collection Centre`  where name!=%s and abbr=%s", (self.name, self.abbr)):
 			frappe.throw(_("Abbreviation already used for another vlcc,please use another"))
+
+	def validate_vlcc_id(self):
+		if frappe.db.sql("select amcu_id from `tabVillage Level Collection Centre` where amcu_id = %s",(self.amcu_id)):
+			frappe.throw(_("Amcu id exist already"))
 
 	def after_insert(self):
 		"""create company and w/h configure associated company"""

@@ -120,7 +120,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Vlcc"),
+			"label": _("Village Level Collection Centre"),
 			"icon": "icon-star",
 			"items": [
 				{

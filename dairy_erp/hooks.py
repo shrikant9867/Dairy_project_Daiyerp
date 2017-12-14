@@ -81,7 +81,9 @@ app_license = "MIT"
 
 doc_events = {
 	"Address": {
-		"after_insert": "dairy_erp.customization.customization.set_warehouse"
+		"after_insert": "dairy_erp.customization.customization.set_warehouse",
+		"on_update": "dairy_erp.customization.customization.update_warehouse",
+		"validate": "dairy_erp.customization.customization.validate_headoffice"
 	}
 }
 

@@ -1,34 +1,43 @@
-.panel-green {
-    border-color: #5cb85c;
-    background-color: #5cb85c;
-}
-.huge{
-	font-size: 40px;
-	color: white;
-}
-.small{
-	font-size: 10px;
-	color: white;
+.row.content {height: 1500px} 
+
+.sidenav {
+  background-color: #f7fafc;
+  height: 100%;
+  border-right: 1px solid #d1d8dd;
 }
 
-/* Set height of the grid so .sidenav can be 100% (adjust if needed) */
-    .row.content {height: 1500px}
-    
-    /* Set gray background color and 100% height */
-    .sidenav {
-      background-color: #f1f1f1;
-      height: 100%;
-    }
-    /* On small screens, set height to 'auto' for sidenav and grid */
-    @media screen and (max-width: 767px) {
-      .sidenav {
-        height: auto;
-        padding: 15px;
-      }
-      .row.content {height: auto;} 
-    }
-.panel-green .panel-heading {
-    border-color: #5cb85c;
-    color: #fff;
-    background-color: #5cb85c;
+.milk-procure{
+  width:90px;height:32px;
+  border: 1px solid #ced5db;
+  border-radius: 35px;
+  background-color: #f7fafc;
+  margin-top: 10px;
+}
+
+.vlcc-request{
+  margin-left:50px;
+  width:90px;
+  height:32px;
+  border: 1px solid #ced5db;
+  border-radius: 35px;
+  margin-top:30px;
+  background-color: #f7fafc;
+  color:white;
+}
+
+.milk-panel{
+  padding-top:2px;
+  color:#36414c;
+  font-size:17px;
+}
+
+
+.nav > li > a.nav-hover:hover{
+  text-decoration: underline;
+  color: #4286f4;
+}
+
+.empty-message{
+    margin-top: 70px;
+    margin-left: 70px;
 }

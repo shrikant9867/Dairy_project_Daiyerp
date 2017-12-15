@@ -27,6 +27,13 @@ frappe.ui.form.on('Village Level Collection Centre', {
 				}
 			};
 		});
+		frm.set_query("address", function () {
+			return {
+				"filters": {
+					"address_type" :  ["not in",["Camp Office", "Chilling Centre", "Head Office", "Plant"]]
+				}
+			};
+		});
 	},
 	address: function(frm) {
 		erpnext.utils.get_address_display(frm, "address", "address_display");

@@ -29,3 +29,13 @@ def validate_headoffice(doc, method):
 def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
 	set_warehouse(doc)
+
+def create_supplier_type():
+	if not frappe.db.exists('Supplier Type', "Dairy Local"):
+		supp_doc = frappe.new_doc("Supplier Type")
+		supp_doc.supplier_type = "Dairy Local"
+		supp_doc.save()
+	if not frappe.db.exists('Supplier Type', "VLCC Local"):
+		supp_doc = frappe.new_doc("Supplier Type")
+		supp_doc.supplier_type = "VLCC Local"
+		supp_doc.save()

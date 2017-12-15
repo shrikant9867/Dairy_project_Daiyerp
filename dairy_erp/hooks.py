@@ -55,7 +55,7 @@ app_license = "MIT"
 # ------------
 
 # before_install = "dairy_erp.install.before_install"
-# after_install = "dairy_erp.install.after_install"
+after_install = "dairy_erp.customization.customization.create_supplier_type"
 
 # Desk Notifications
 # ------------------

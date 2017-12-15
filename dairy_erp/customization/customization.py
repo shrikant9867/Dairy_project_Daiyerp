@@ -17,3 +17,13 @@ def set_warehouse(doc, method):
 		wr_house_doc.insert()
 		doc.warehouse = wr_house_doc.name
 		doc.save()
+
+def create_supplier_type():
+	if not frappe.db.exists('Supplier Type', "Dairy Local"):
+		supp_doc = frappe.new_doc("Supplier Type")
+		supp_doc.supplier_type = "Dairy Local"
+		supp_doc.save()
+	if not frappe.db.exists('Supplier Type', "VLCC Local"):
+		supp_doc = frappe.new_doc("Supplier Type")
+		supp_doc.supplier_type = "VLCC Local"
+		supp_doc.save()

@@ -1,73 +1,321 @@
-<br>
-<br>
-<div class="row">
-    <div class="col-xs-2">
-        <aside>
-        <nav>
-            <div class="sidenav">
-                <section class="options">
-                    <p style="padding: 5px;text-align: center;"><b>VLCC Dashboard</b></p>
-                    <ul class="vlcc_ul">
-                        <li class="vlcc_ul">VLCC</li>
-                        <li class="vlcc_ul">Camp Office</li>
-                        <li class="vlcc_ul">Chilling Centre</li>
-                        <li class="vlcc_ul">Plant Office</li>
-                        <li class="vlcc_ul">Head Office</li>
-                        <li class="vlcc_ul">Farmer</li>
-                        <li class="vlcc_ul">Supplier</li>
-                        <li class="vlcc_ul">Contact</li>
-                    </ul>
-                </section>
-            </div> 
-            <hr style=" background-color: rgb(18,18,18);
-                            width: 1px;
-                            height: 364px;
-                            box-shadow: none">
-        </nav>   
-        </aside>
+<div class="container-fluid"> 
+  <div class="row content">
+    <div class="col-sm-2 sidenav">
+      <ul class="nav nav-pills nav-stacked">
+        <li><a href="/desk#List/Vlcc/List">VLCC</a></li>
+        <li><a href="/desk#List/Address/List">Head Office</a></li>
+        <li><a href="/desk#List/Address/List">Camp Office</a></li>
+        <li><a href="/desk#List/Address/List">Chilling Center</a></li>
+        <li><a href="/desk#List/Address/List">Plant Office</a></li>
+        <li><a href="/desk#List/Supplier/List">Supplier</a></li>
+        <li><a href="/desk#List/Farmer/List">Farmer</a></li>
+      </ul><br>
     </div>
-    <div class="col-xs-10">     
-        <div class="row">
-            <div class="col-xs-4">      
-                <div class="panel panel-default">
-                    <div class="panel-heading">Total Milk Procured</div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-xs-6">
-                               <span>Last Week</span> 
-                            </div>
-                            <div class="col-xs-6">
-                                <span>This Week</span>  
-                            </div>
-                            
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-4">      
-                <div class="panel panel-default">
-                    <div class="panel-heading">Total Material Request Pending</div>
-                    <div class="panel-body">Total VLCC Requests</div>
-                </div>
-            </div>
-            <div class="col-xs-4">      
-                <div class="panel panel-default">
-                    <div class="panel-heading">Total Amount Of Milk Procured</div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-xs-6">
-                               <span>Last Week</span> 
-                            </div>
-                            <div class="col-xs-6">
-                                <span>This Week</span>  
-                            </div>
-                            
-                        </div>
-                    </div>
-                </div>
-            </div>
 
+    <div class="col-sm-10">
+        <br>
+      <div class="col-sm-4 text-center">
+            <div class="panel panel-default">
+                <div class="panel-heading">Total Milk Procured</div>
+                <div class="panel-body">
+                    <div class="col-sm-6">
+                        <div class="span 2">Last Week</div>
+                        <span style="font-size:10px;">(in Ltrs.)</span>
+                        <div class="rounded-circle" style="width:100px;height:50px;border: 1px solid black;border-radius: 35px;background-color: #5e64ff;color:white;"><div style="padding-top:2px;color:white;font-size:30px;">20K</div></div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="span 2">This Week</div>
+                        <span style="font-size:10px;">(in Ltrs.)</span>
+                        <div class="rounded-circle" style="width:100px;height:50px;border: 1px solid black;border-radius: 35px;background-color: #5e64ff;"><div style="padding-top:2px;color:white;font-size:30px;">1K</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4 text-center">
+            <div class="panel panel-default">
+                <div class="panel-heading">Total Indents Pending</div>
+                <div class="panel-body">
+                    <div class="col-sm-12">
+                        <div class="span 2">Total VLCC Requests</div>
+                        <div style="margin-top:20px;"></div>
+                        <div class="row-centered" align="center" style="margin-left:50px;width:100px;height:50px;border: 1px solid black;border-radius: 35px;margin-top:20px;background-color: #5e64ff;color:white;"><div style="padding-top:2px;color:white;font-size:30px;">1K</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4 text-center">
+            <div class="panel panel-default">
+                <div class="panel-heading">Total Amount of Milk Procured</div>
+                <div class="panel-body">
+                    <div class="col-sm-6">
+                        <div class="span 2">Last Week</div>
+                        <span style="font-size:10px;">(in Rs.)</span>
+                        <div class="rounded-circle" style="width:100px;height:50px;border: 1px solid black;border-radius: 35px;background-color: #5e64ff;"><div style="padding-top:2px;color:white;font-size:30px;">440K</div></div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="span 2">This Week</div>
+                        <span style="font-size:10px;">(in Rs.)</span>
+                        <div class="rounded-circle" style="width:100px;height:50px;border: 1px solid black;border-radius: 35px;background-color: #5e64ff;"><div style="padding-top:2px;color:white;font-size:30px;">22K</div></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
+    <hr>
+    <br>
+    <div class="col-sm-5">
+      <div class="text-left">
+      <a href="/desk#List/Address/List" style="font-size: 15px;margin-left: 21px;"><b>Addresses </b></a>
+      </div>
+      <br>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Head Office
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-left">
+            <a href="/desk#List/Address/List" style="font-size: 15px;margin-left: 15px;"><b>Camp Offices </b></a>
+        </div>
+        <br>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Camp Office #1
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Camp Office #2
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <a href="/desk#List/Supplier/List">More Camp Offices.....</a>
+        </div>
+        <div class="text-left">
+            <a href="/desk#List/Address/List" style="font-size: 15px;margin-left: 21px;"><b>Chilling Centers </b></a>
+        </div>
+        <br>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Chilling Center #1
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Chilling Center #2
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <a href="/desk#List/Supplier/List">More Chilling Centers...</a>
+        </div>
+        <div class="text-left">
+            <a href="/desk#List/Address/List" style="font-size: 15px;margin-left: 21px;"><b>Plant Office </b></a>
+        </div>
+        <br>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Plant Office #1
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Plant Office #2
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <a href="/desk#List/Supplier/List">More Plant Offices...</a>
+        </div>
+    </div>
+    <div class="col-sm-5">
+      <div class="text-left">
+        <a href="/desk#List/Vlcc/List" style="font-size: 15px;margin-left: 21px;"><b>Farmer</b></a>
+        <a class="fa fa-plus" id= "new_vlcc"></a>
+      </div>
+      <br>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Farmer #1
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Farmer #2
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <a href="/desk#List/Farmer/List">More Farmers...</a>
+        </div>
+        <div class="text-left">
+            <a href="/desk#List/Supplier/List" style="font-size: 15px;margin-left: 21px;"> <b>Suppliers</b></a>
+            <a class="fa fa-plus" id= "new_supp"></a>
+        </div>
+        <br>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Supplier #1
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Supplier #2
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Supplier #3
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Supplier #4
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        Supplier #5
+                    </h4>
+                </div>
+
+                <div class="panel-wrapper collapse in">
+                    <div class="panel-body">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <a href="/desk#List/Supplier/List">More Suppliers....</a>
+        </div>
+    </div>
 </div>

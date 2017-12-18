@@ -17,8 +17,9 @@ class VillageLevelCollectionCentre(Document):
 			frappe.throw(_("Abbreviation already used for another vlcc,please use another"))
 
 	def validate_vlcc_id(self):
-		if frappe.db.sql("select amcu_id from `tabVillage Level Collection Centre` where amcu_id = %s",(self.amcu_id)):
-			frappe.throw(_("Amcu id exist already"))
+		if self.is_new():		
+			if frappe.db.sql("select amcu_id from `tabVillage Level Collection Centre` where amcu_id = %s",(self.amcu_id)):
+				frappe.throw(_("Amcu id exist already"))
 
 	def after_insert(self):
 		"""create company and w/h configure associated company"""
@@ -31,6 +32,11 @@ class VillageLevelCollectionCentre(Document):
 		self.create_supplier()
 		self.create_customer()
 		
+	def on_update_after_submit(self):
+		print "#####"
+		self.create_supplier()
+		self.create_customer()
+
 	def create_company(self):
 		comp_doc = frappe.new_doc("Company")
 		comp_doc.company_name = self.vlcc_name
@@ -50,8 +56,9 @@ class VillageLevelCollectionCentre(Document):
 		"""Supplier specific to company for inter-company transaction(stock and accounts)
 		   Reconfigurable camp/plant-check for supplier existence and A/C head	
 		"""
-		
+		print "++++inn create supplier"
 		if not frappe.db.exists('Supplier', self.vlcc_name):
+			print "*****"
 			comp = frappe.get_doc("Address", self.chilling_centre)
 			supl_doc = frappe.new_doc("Supplier")
 			supl_doc.supplier_name = self.vlcc_name

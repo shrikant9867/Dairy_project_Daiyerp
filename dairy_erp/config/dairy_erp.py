@@ -132,6 +132,12 @@ def get_data():
 					"type": "doctype",
 					"name": "Farmer",
 					"description": _(" "),
+				},
+				{
+					"type": "page",
+					"name": "vlcc-dashboard",
+					"label": "Vlcc Dashboard",
+					"description": _(" "),
 				}
 			]
 		},

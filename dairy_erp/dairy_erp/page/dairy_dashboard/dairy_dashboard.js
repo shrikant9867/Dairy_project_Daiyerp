@@ -29,7 +29,7 @@ dashboard = Class.extend({
 	render_view : function(){
 		var me = this;
 		$(frappe.render_template("dairy_dashboard",{"data":me.data || {}})).appendTo(me.page.main);
-		$.each(me.data,function(i,d){
+		$.each(me.data.addr,function(i,d){
 				if(d && d.address_type == "Head Office"){
 					$('#head-office').hide()
 				}

@@ -65,8 +65,11 @@ def get_vlcc_data():
 	return frappe.db.sql("""select name,address_display as addr from `tabVillage Level Collection Centre` limit 2""",as_dict=1)
 
 def get_supplier_data():
-	address = frappe.db.sql("""select a.name,a.address_type,a.pincode,a.address_line1,a.state,a.address_line2,a.city,a.country,a.email_id,a.phone,a.fax,
-							s.name as supplier,s.supplier_type from `tabAddress` a,`tabDynamic Link` d,`tabSupplier` s where d.parent = a.name and d.link_name = s.name and d.link_doctype = 'Supplier' and s.supplier_type = 'Dairy Local'""",as_dict=1)
+	address = frappe.db.sql("""select a.name,a.address_type,a.pincode,a.address_line1,a.state,a.address_line2,a.city,a.country,a.email_id,a.phone,a.fax, s.name as supplier,s.supplier_type 
+							   from `tabSupplier` s  
+							   left join `tabDynamic Link` d on d.link_name = s.name 
+							   left join `tabAddress` a on d.parent = a.name 
+							   where s.supplier_type = 'Dairy Local' limit 2""",as_dict=1)
 	if address:
 		for addr in address:
 			office_addr = address_manipulation(addr)

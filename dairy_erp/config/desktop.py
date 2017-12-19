@@ -10,5 +10,13 @@ def get_data():
 			"icon": "octicon octicon-file-directory",
 			"type": "module",
 			"label": _("Dairy Erp")
-		}
+		},
+			{
+			"module_name": "Dairy",
+			"color": "#589494",
+			"icon": "fa fa-paw",
+			"type": "page",
+			"link": "dairy-dashboard",
+			"label": _("Dairy Dashboard")
+		},
 	]

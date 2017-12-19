@@ -62,7 +62,7 @@ def address_manipulation(addr):
 	return final_addr
 
 def get_vlcc_data():
-	return frappe.db.sql("""select name,address_display as addr from `tabVillage Level Collection Centre`""",as_dict=1)
+	return frappe.db.sql("""select name,address_display as addr from `tabVillage Level Collection Centre` limit 2""",as_dict=1)
 
 def get_supplier_data():
 	address = frappe.db.sql("""select a.name,a.address_type,a.pincode,a.address_line1,a.state,a.address_line2,a.city,a.country,a.email_id,a.phone,a.fax,
@@ -73,5 +73,3 @@ def get_supplier_data():
 			addr.update({"addr":office_addr})
 			final_addr = ""
 		return address
-	# condition = "where supplier_type = 'Dairy Local'"
-	# return [{}]frappe.db.sql("""select name,address_html as addr from `tabSupplier`""",as_dict=1,debug=1)

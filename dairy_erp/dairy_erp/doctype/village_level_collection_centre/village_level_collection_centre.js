@@ -3,6 +3,11 @@
 
 frappe.ui.form.on('Village Level Collection Centre', {
 	refresh: function(frm) {
+		if(!frm.doc.__islocal){
+			frm.add_custom_button(__("Dairy Dashboard"), function() {
+				frappe.set_route("dairy-dashboard");
+			})
+		}
 
 	},
 	onload: function(frm) {

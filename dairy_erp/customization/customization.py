@@ -25,6 +25,8 @@ def validate_headoffice(doc, method):
 		frappe.throw(_("Head Office exist already"))
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.links:
 		frappe.throw(_("Please Choose Company"))
+	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.centre_id:
+		frappe.throw(_("Amcu id needed"))
 
 def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
@@ -39,3 +41,10 @@ def create_supplier_type():
 		supp_doc = frappe.new_doc("Supplier Type")
 		supp_doc.supplier_type = "VLCC Local"
 		supp_doc.save()
+
+def set_defaults(args=None):
+	"""after wizard set global defaults for Dairy Entity(Operational)"""
+	#not working currently 
+	comp_doc = frappe.get_doc("Company",args.get('name'))
+	comp_doc.is_dairy = 1
+	comp_doc.save()

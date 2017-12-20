@@ -13,7 +13,7 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-
+setup_wizard_complete = "dairy_erp.customization.customization.set_defaults"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/dairy_erp/css/dairy_erp.css"
 # app_include_js = "/assets/dairy_erp/js/dairy_erp.js"
@@ -26,7 +26,10 @@ app_license = "MIT"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+    "Address":["customization/address.js"],
+    "Supplier":["customization/supplier.js"]
+    }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

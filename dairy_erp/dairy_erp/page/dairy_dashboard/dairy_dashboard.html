@@ -65,51 +65,51 @@
     <div class="col-sm-5">
       <div class="text-left">
       <a class = "head-office-list" style="font-size: 15px;margin-left: 16px;"><b>Head Office </b></a>
-    <a class="fa fa-plus new_add" id = "head-office"></a>
+    <a class="fa fa-plus" id = "head-office"></a>
       </div>
       <br>
         <div class="col-md-12">
         {% if(data.addr){ %}
             {% for(var i=0, l=data.addr.length; i < l; i++) { %}
-                {% if(data.addr[i].address_type == "Head Office" && data.addr[i].office_addr) { %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a>
-                        </h4>
-                    </div>
-                <div class="panel-wrapper collapse in">
-                        <div class="panel-body">
-                            {%= data.addr[i].office_addr %}
+                    {% if(data.addr[i].address_type == "Head Office" && data.addr[i].office_addr) { %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a>
+                            </h4>
                         </div>
-                </div>
-                </div>
-                    {% } %}
+                    <div class="panel-wrapper collapse in">
+                            <div class="panel-body">
+                                {%= data.addr[i].office_addr %}
+                            </div>
+                    </div>
+                    </div>
+                {% } %}
             {% } %}
         {% } %}
         </div>
         <div class="text-left">
             <a class = "camp-office" style="font-size: 15px;margin-left: 15px;"><b>Camp Offices </b></a>
-            <a class="fa fa-plus new_add"></a> 
+            <a class="fa fa-plus" id = "camp-office"></a> 
         </div>
         <br>
       <div class="col-md-12">
       {% if(data.addr){ %}
             {% for(var i=0, l=data.addr.length; i < l; i++) { %}
-                {% if(data.addr[i].address_type == "Camp Office" && data.addr[i].office_addr) { %}
-                <div class="panel panel-default" style="margin-bottom: 32px">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                           <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a> 
-                        </h4>
-                    </div>
-                <div class="panel-wrapper collapse in">
-                        <div class="panel-body">
-                            {%= data.addr[i].office_addr %}
+                    {% if(data.addr[i].address_type == "Camp Office" && data.addr[i].office_addr) { %}
+                        <div class="panel panel-default" style="margin-bottom: 32px">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                   <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a> 
+                                </h4>
+                            </div>
+                        <div class="panel-wrapper collapse in">
+                                <div class="panel-body">
+                                    {%= data.addr[i].office_addr %}
+                                </div>
                         </div>
-                </div>
-                </div>
-                    {% } %}
+                        </div>
+                {% } %}
             {% } %}
         </div>
         <div class="text-center camp-office" style="margin-bottom: 27px">
@@ -118,58 +118,58 @@
         {% } %}
         <div class="text-left">
             <a class="chilling-centre" style="font-size: 15px;margin-left: 15px;"><b>Chilling Centres </b></a>
-            <a class="fa fa-plus new_add"></a>
+            <a class="fa fa-plus" id="chilling-centre"></a>
         </div>
         <br>
         <div class="col-md-12">
         {% if(data.addr){ %}
             {% for(var i=0, l=data.addr.length; i < l; i++) { %}
                 {% if(data.addr[i].address_type == "Chilling Centre" && data.addr[i].office_addr) { %}
-                <div class="panel panel-default" style="margin-bottom: 32px">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a> 
-                        </h4>
-                    </div>
-                <div class="panel-wrapper collapse in">
-                        <div class="panel-body">
-                            {%= data.addr[i].office_addr %}
+                    <div class="panel panel-default" style="margin-bottom: 32px">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a> 
+                            </h4>
                         </div>
-                </div>
-                </div>
-                    {% } %}
+                    <div class="panel-wrapper collapse in">
+                            <div class="panel-body">
+                                {%= data.addr[i].office_addr %}
+                            </div>
+                    </div>
+                    </div>
+                {% } %}
             {% } %}
         </div>
         <div class="text-center" style="margin-bottom: 27px">
-            <a class="chilling-centre">More Chilling Centres</a>
+            <a class="chilling-centre">More Chilling Centres...</a>
         </div>
         {% } %}
         <div class="text-left">
             <a class="plant" style="font-size: 15px;margin-left: 15px;"><b>Plant Offices </b></a>
-            <a class="fa fa-plus new_add"></a>
+            <a class="fa fa-plus" id="plant"></a>
         </div>
         <br>
         <div class="col-md-12">
         {% if(data.addr){ %}
             {% for(var i=0, l=data.addr.length; i < l; i++) { %}
-                {% if(data.addr[i].address_type == "Plant" && data.addr[i].office_addr) { %}
-                <div class="panel panel-default" style="margin-bottom: 32px">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
-                            <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a> 
-                        </h4>
-                    </div>
-                <div class="panel-wrapper collapse in">
-                        <div class="panel-body">
-                            {%= data.addr[i].office_addr %}
+                    {% if(data.addr[i].address_type == "Plant" && data.addr[i].office_addr) { %}
+                    <div class="panel panel-default" style="margin-bottom: 32px">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a> 
+                            </h4>
                         </div>
-                </div>
-                </div>
-                    {% } %}
+                    <div class="panel-wrapper collapse in">
+                            <div class="panel-body">
+                                {%= data.addr[i].office_addr %}
+                            </div>
+                    </div>
+                    </div>
+                {% } %}
             {% } %}
         </div>
         <div class="text-center" style="margin-bottom: 27px">
-            <a class="plant">More Plant Offices</a>
+            <a class="plant">More Plant Offices...</a>
         </div>
         {% } %}
     </div>
@@ -182,7 +182,6 @@
         <div class="col-md-12">
         {% if(data.vlcc){ %}
             {% for(var i=0, l=data.vlcc.length; i < l; i++) { %}
-                {% if (data.vlcc[i].addr) %}
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4 class="panel-title">
@@ -191,16 +190,21 @@
                         </div>
 
                         <div class="panel-wrapper collapse in">
+                        {% if (data.vlcc[i].addr) { %}
                             <div class="panel-body">
                                 {%= data.vlcc[i].addr %}
                             </div>
+                        {% } else { %}
+                            <div class="panel-body msg-box">
+                               <span>No Address Found</span>
+                            </div>
+                        {% } %}
                         </div>
                     </div>
-                {% } %}
             {% } %}
         </div>
-        <div class="text-center">
-            <a href="/desk#List/Village Level Collection Centre/List">More VLCCs</a>
+        <div class="text-center" style="margin-bottom: 27px">
+            <a href="/desk#List/Village Level Collection Centre/List">More VLCCs...</a>
         </div>
         {% } %}    
         <div class="text-left">
@@ -211,7 +215,6 @@
         <div class="col-md-12">
         {% if(data.supplier){ %}
             {% for(var i=0, l=data.supplier.length; i < l; i++) { %}
-                {% if (data.supplier[i].addr) %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title">
@@ -220,16 +223,22 @@
                     </div>
 
                     <div class="panel-wrapper collapse in">
-                        <div class="panel-body">
-                            {%= data.supplier[i].addr %}
-                        </div>
+                        {% if (data.supplier[i].addr) { %}
+                            <div class="panel-body">
+                                {%= data.supplier[i].addr %}
+                            </div>
+                        {% } else { %}
+                            <div class="panel-body msg-box">
+                               <span>No Address Found</span>
+                            </div>
+                        {% } %}
+                    </div>
                     </div>
                 </div>
-                 {% } %}
             {% } %}
         </div>
         <div class="text-center">
-            <a class="supplier-list">More Suppliers</a>
+            <a class="supplier-list">More Suppliers...</a>
         </div>
         {% } %}
     </div>
@@ -237,8 +246,8 @@
 {% } else { %}
     <div class="row">
         <div class="col-xs-2"></div>
-        <div class="col-xs-9 empty-message">
-            <span class="text-center" style="font-size: 20px;">Please add master data from left</span>
+        <div class="col-xs-9 empty-message msg-box">
+            <span class="text-center" style="font-size: 15px;">Please add masters data from left</span>
         </div>
     </div>
 {% } %}

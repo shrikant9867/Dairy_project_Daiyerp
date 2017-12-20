@@ -6,7 +6,7 @@ frappe.pages['dairy-dashboard'].on_page_load = function(wrapper) {
 	});
 
 	wrapper.dashboard = new dashboard(wrapper)
-
+	frappe.breadcrumbs.add("Dairy Erp");
 }
 
 dashboard = Class.extend({
@@ -15,6 +15,9 @@ dashboard = Class.extend({
 		this.wrapper = wrapper;
 		this.page = wrapper.page
 		this.render_address()
+		this.page.add_inner_button(__("Reload"), function() {
+			location.reload();
+		});
 	},
 	render_address : function(){
 		var me = this;

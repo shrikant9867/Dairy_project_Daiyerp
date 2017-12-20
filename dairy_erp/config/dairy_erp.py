@@ -134,6 +134,11 @@ def get_data():
 					"description": _(" "),
 				},
 				{
+					"type": "doctype",
+					"name": "Local Sale",
+					"description": _(" "),
+				},
+				{
 					"type": "page",
 					"name": "vlcc-dashboard",
 					"label": "Vlcc Dashboard",

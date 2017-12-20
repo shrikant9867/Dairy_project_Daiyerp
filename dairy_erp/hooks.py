@@ -13,7 +13,7 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-
+setup_wizard_complete = "dairy_erp.customization.customization.set_defaults"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/dairy_erp/css/dairy_erp.css"
 # app_include_js = "/assets/dairy_erp/js/dairy_erp.js"

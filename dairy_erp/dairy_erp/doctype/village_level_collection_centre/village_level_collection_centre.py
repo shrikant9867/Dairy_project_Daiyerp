@@ -5,12 +5,21 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+import re
 from frappe.model.document import Document
 
 class VillageLevelCollectionCentre(Document):
 	def validate(self):
 		self.validate_vlcc_abbr()
 		self.validate_vlcc_id()
+		self.validate_email_user()
+
+	def validate_email_user(self):
+		if self.is_new() and frappe.db.sql("select email_id from `tabVillage Level Collection Centre` where email_id =%s",(self.email_id)):
+			frappe.throw(_('User Exist already'))
+		
+		if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', self.email_id) == None:
+			frappe.throw(_('Email not valid'))
 
 	def validate_vlcc_abbr(self):
 		if frappe.db.sql("select abbr from `tabVillage Level Collection Centre`  where name!=%s and abbr=%s", (self.name, self.abbr)):
@@ -27,13 +36,9 @@ class VillageLevelCollectionCentre(Document):
 		self.create_warehouse()
 		self.create_supplier()
 		self.create_customer()
+		self.create_user()
 
 	def on_update(self):
-		self.create_supplier()
-		self.create_customer()
-		
-	def on_update_after_submit(self):
-		print "#####"
 		self.create_supplier()
 		self.create_customer()
 
@@ -56,9 +61,7 @@ class VillageLevelCollectionCentre(Document):
 		"""Supplier specific to company for inter-company transaction(stock and accounts)
 		   Reconfigurable camp/plant-check for supplier existence and A/C head	
 		"""
-		print "++++inn create supplier"
 		if not frappe.db.exists('Supplier', self.vlcc_name):
-			print "*****"
 			comp = frappe.get_doc("Address", self.chilling_centre)
 			supl_doc = frappe.new_doc("Supplier")
 			supl_doc.supplier_name = self.vlcc_name
@@ -138,3 +141,15 @@ class VillageLevelCollectionCentre(Document):
 						"account": frappe.db.get_value("Company", self.vlcc_name, "default_receivable_account")
 					})
 				custmer_doc_exist.save()
+
+	def create_user(self):
+		if not frappe.db.exists('User', self.email_id):
+			operator = frappe.new_doc("User")
+			operator.email = self.email_id
+			operator.first_name = self.name1
+			operator.insert()
+		if self.operator_same_as_agent and not frappe.db.exists('User', self.email_id):
+			agent = frappe.new_doc("User")
+			agent.email = self.operator_email_id
+			agent.first_name = self.operator_name
+			agent.save()

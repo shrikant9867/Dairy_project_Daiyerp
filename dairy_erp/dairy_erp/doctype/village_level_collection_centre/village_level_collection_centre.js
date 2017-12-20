@@ -8,7 +8,9 @@ frappe.ui.form.on('Village Level Collection Centre', {
 				frappe.set_route("dairy-dashboard");
 			})
 		}
-
+		frm.set_df_property("email_id", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("abbr", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("name1", "read_only", frm.doc.__islocal ? 0:1);
 	},
 	onload: function(frm) {
 		frm.set_query("chilling_centre", function () {

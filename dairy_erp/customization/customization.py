@@ -59,11 +59,24 @@ def make_user_give_perm(doc):
 		frappe.throw("User exists already") 
 
 def validate_headoffice(doc, method):
-	
+	count = 0
+	for row in doc.links:
+		count += 1
+	if doc.is_new() and frappe.db.sql("select name from `tabAddress` where centre_id = '{0}'".format(doc.centre_id)):
+		frappe.throw(_("Id exist Already"))
 	if frappe.db.sql("select address_type from tabAddress where address_type = 'Head Office' and not name = '{0}'".format(doc.name)) and doc.address_type == "Head Office":
 		frappe.throw(_("Head Office exist already"))
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.links:
 		frappe.throw(_("Please Choose Company"))
+	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.centre_id:
+		frappe.throw(_("Amcu id needed"))
+	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and count!=1:
+		frappe.throw(_("Only one entry allowed row"))
+	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"]:
+		for row in doc.links:
+			if row.get('link_doctype') != "Company":
+				frappe.throw(_("Row entry must be company"))
+
 	validate_user(doc)
 
 def validate_user(doc):
@@ -74,14 +87,18 @@ def validate_user(doc):
 	elif doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.operator_name:
 		frappe.throw("Please add Operator name")
 
-
-
 def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
 	set_warehouse(doc)
 
 
+def after_install():
+	create_supplier_type()
+	create_item_group()
+
+
 def create_supplier_type():
+
 	if not frappe.db.exists('Supplier Type', "Dairy Local"):
 		supp_doc = frappe.new_doc("Supplier Type")
 		supp_doc.supplier_type = "Dairy Local"
@@ -91,24 +108,14 @@ def create_supplier_type():
 		supp_doc.supplier_type = "VLCC Local"
 		supp_doc.save()
 
-@frappe.whitelist()
-def get_camp_office(doctype, txt, searchfield, start, page_len, filters):
-	branch_office = frappe.db.get_value("User",frappe.session.user,"branch_office")
-	return frappe.db.sql("""select name from `tabAddress` where name=%s""",branch_office)
 
-@frappe.whitelist()
-def get_pending_mr(data):
-	data = json.loads(data)
-	return frappe.db.sql("""select name,camp_office,schedule_date,company from `tabMaterial Request` where camp_office = %s and status = 'Pending'""",(data.get('camp_office')),as_dict=1)
-
-@frappe.whitelist()
-def get_item_table(data,doc):
-	data = json.loads(data)
-	doc = json.loads(doc)
-	mr_list = []
-	for mr in data:
-		items = frappe.db.sql("""select distinct mr.name,mr_item.item_code,mr_item.item_name,mr_item.description,mr_item.qty,mr_item.schedule_date
-			from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
-			where mr.name = mr_item.parent and mr.name = %s""",(mr.get('name')),as_dict=1)
-		mr_list.append(items)
-	return mr_list
+def create_item_group():
+	
+	item_groups = ['Cattle feed', 'Mineral Mixtures', 'Medicines', 'Artificial Insemination Services',
+		'Veterinary Services', 'Others/Miscellaneous','Milk & Products']
+	for i in item_groups:
+		if not frappe.db.exists('Item Group',i):
+			item_grp = frappe.new_doc("Item Group")
+			item_grp.parent_item_group = "All Item Groups"
+			item_grp.item_group_name = i
+			item_grp.insert()

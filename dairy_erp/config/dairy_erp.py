@@ -143,7 +143,13 @@ def get_data():
 					"name": "vlcc-dashboard",
 					"label": "Vlcc Dashboard",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Milk Collection Record",
+					"description": _(" "),
 				}
+				
 			]
 		},
 		{
@@ -154,6 +160,11 @@ def get_data():
 					"type": "page",
 					"name": "dairy-dashboard",
 					"label": "Dairy Dashboard",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Milk Collection Record",
 					"description": _(" "),
 				}
 			]

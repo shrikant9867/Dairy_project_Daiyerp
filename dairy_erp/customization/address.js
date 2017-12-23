@@ -7,6 +7,7 @@ frappe.ui.form.on("Address", {
 		}
 		frm.set_df_property("user", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("operator_name", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("centre_id", "read_only", frm.doc.__islocal ? 0:1);
 	}
 
 })

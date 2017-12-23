@@ -20,19 +20,44 @@ def set_warehouse(doc, method=None):
 			doc.save()
 
 def validate_headoffice(doc, method):
-	
+	count = 0
+	for row in doc.links:
+		count += 1
+	if doc.is_new() and frappe.db.sql("select name from `tabAddress` where centre_id = '{0}'".format(doc.centre_id)):
+		frappe.throw(_("Id exist Already"))
 	if frappe.db.sql("select address_type from tabAddress where address_type = 'Head Office' and not name = '{0}'".format(doc.name)) and doc.address_type == "Head Office":
 		frappe.throw(_("Head Office exist already"))
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.links:
 		frappe.throw(_("Please Choose Company"))
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.centre_id:
 		frappe.throw(_("Amcu id needed"))
+	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and count!=1:
+		frappe.throw(_("Only one entry allowed row"))
+	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"]:
+		for row in doc.links:
+			if row.get('link_doctype') != "Company":
+				frappe.throw(_("Row entry must be company"))
+
 
 def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
 	set_warehouse(doc)
 
+def after_install():
+	create_supplier_type()
+	create_item_group()
+	
+
+def set_defaults(args=None):
+	"""after wizard set global defaults for Dairy Entity(Operational)"""
+	#not working currently 
+	comp_doc = frappe.get_doc("Company",args.get('name'))
+	comp_doc.is_dairy = 1
+	comp_doc.save()
+
+
 def create_supplier_type():
+
 	if not frappe.db.exists('Supplier Type', "Dairy Local"):
 		supp_doc = frappe.new_doc("Supplier Type")
 		supp_doc.supplier_type = "Dairy Local"
@@ -42,9 +67,13 @@ def create_supplier_type():
 		supp_doc.supplier_type = "VLCC Local"
 		supp_doc.save()
 
-def set_defaults(args=None):
-	"""after wizard set global defaults for Dairy Entity(Operational)"""
-	#not working currently 
-	comp_doc = frappe.get_doc("Company",args.get('name'))
-	comp_doc.is_dairy = 1
-	comp_doc.save()
+def create_item_group():
+	
+	item_groups = ['Cattle feed', 'Mineral Mixtures', 'Medicines', 'Artificial Insemination Services',
+		'Veterinary Services', 'Others/Miscellaneous','Milk & Products']
+	for i in item_groups:
+		if not frappe.db.exists('Item Group',i):
+			item_grp = frappe.new_doc("Item Group")
+			item_grp.parent_item_group = "All Item Groups"
+			item_grp.item_group_name = i
+			item_grp.insert()

@@ -58,7 +58,7 @@ doctype_js = {
 # ------------
 
 # before_install = "dairy_erp.install.before_install"
-after_install = "dairy_erp.customization.customization.create_supplier_type"
+after_install = "dairy_erp.customization.customization.after_install"
 
 # Desk Notifications
 # ------------------

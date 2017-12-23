@@ -5,6 +5,7 @@ frappe.ui.form.on("Address", {
 				frappe.set_route("dairy-dashboard");
 			})
 		}
+		frm.set_df_property("centre_id", "read_only", frm.doc.__islocal ? 0:1);
 	}
 
 })

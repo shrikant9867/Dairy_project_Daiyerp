@@ -161,6 +161,11 @@ def get_data():
 					"name": "dairy-dashboard",
 					"label": "Dairy Dashboard",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Milk Collection Record",
+					"description": _(" "),
 				}
 			]
 		}				

@@ -6,18 +6,57 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 import json
+import re
+
 
 def set_warehouse(doc, method=None):
 	"""configure w/h for dairy components"""
+	if frappe.db.sql("""select name from `tabAddress` where address_type ='Head Office'"""):
+		if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and \
+		   not frappe.db.exists('Warehouse', doc.address_title + " - "+frappe.db.get_value("Company",doc.links[0].link_name,"abbr")):
+				wr_house_doc = frappe.new_doc("Warehouse")
+				wr_house_doc.warehouse_name = doc.address_title
+				wr_house_doc.company =  doc.links[0].link_name if doc.links else []
+				wr_house_doc.insert()
+				doc.warehouse = wr_house_doc.name
+				doc.save()
+	else:
+		frappe.throw("Please create Head Office first for Dairy")
 
-	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and \
-	   not frappe.db.exists('Warehouse', doc.address_title + " - "+frappe.db.get_value("Company",doc.links[0].link_name,"abbr")):
-			wr_house_doc = frappe.new_doc("Warehouse")
-			wr_house_doc.warehouse_name = doc.address_title
-			wr_house_doc.company =  doc.links[0].link_name if doc.links else []
-			wr_house_doc.insert()
-			doc.warehouse = wr_house_doc.name
-			doc.save()
+
+def validate_dairy_company(doc,method=None):
+	if doc.address_type == 'Head Office':
+		for link in doc.links:
+			if link.link_doctype == 'Company':
+				comp_doc = frappe.get_doc("Company",link.link_name)
+				comp_doc.is_dairy = 1
+				comp_doc.save()
+	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
+		make_user_give_perm(doc)
+
+def make_user_give_perm(doc):
+	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+	if not frappe.db.sql("select name from `tabUser` where name=%s", doc.user):
+		user_doc = frappe.new_doc("User")
+		user_doc.email = doc.user
+		user_doc.first_name = doc.operator_name
+		user_doc.operator_type = doc.address_type
+		user_doc.branch_office = doc.name
+		user_doc.send_welcome_email = 0
+		user_doc.flags.ignore_permissions = True
+		user_doc.flags.ignore_mandatory = True
+		user_doc.save()
+		add_all_roles_to(user_doc.name)
+		perm_doc = frappe.new_doc("User Permission")
+		perm_doc.user = user_doc.email
+		perm_doc.allow = "Address"
+		perm_doc.for_value = doc.name
+		perm_doc.flags.ignore_permissions = True
+		perm_doc.flags.ignore_mandatory = True
+		perm_doc.save()
+
+	else:
+		frappe.throw("User exists already") 
 
 def validate_headoffice(doc, method):
 	count = 0
@@ -38,22 +77,24 @@ def validate_headoffice(doc, method):
 			if row.get('link_doctype') != "Company":
 				frappe.throw(_("Row entry must be company"))
 
+	validate_user(doc)
+
+def validate_user(doc):
+	if doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.user and not doc.operator_name:
+		frappe.throw("Please add Operator Email ID and Name")
+	elif doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.user:
+		frappe.throw("Please add Operator Email ID")
+	elif doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.operator_name:
+		frappe.throw("Please add Operator name")
 
 def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
 	set_warehouse(doc)
 
+
 def after_install():
 	create_supplier_type()
 	create_item_group()
-	
-
-def set_defaults(args=None):
-	"""after wizard set global defaults for Dairy Entity(Operational)"""
-	#not working currently 
-	comp_doc = frappe.get_doc("Company",args.get('name'))
-	comp_doc.is_dairy = 1
-	comp_doc.save()
 
 
 def create_supplier_type():
@@ -66,6 +107,7 @@ def create_supplier_type():
 		supp_doc = frappe.new_doc("Supplier Type")
 		supp_doc.supplier_type = "VLCC Local"
 		supp_doc.save()
+
 
 def create_item_group():
 	

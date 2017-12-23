@@ -13,10 +13,9 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-
 # include js, css files in header of desk.html
 # app_include_css = "/assets/dairy_erp/css/dairy_erp.css"
-# app_include_js = "/assets/dairy_erp/js/dairy_erp.js"
+# app_include_js = "/assets/dairy_erp/js/dialog.min.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/dairy_erp/css/dairy_erp.css"
@@ -28,7 +27,10 @@ app_license = "MIT"
 # include js in doctype views
 doctype_js = {
     "Address":["customization/address.js"],
-    "Supplier":["customization/supplier.js"]
+    "Supplier":["customization/supplier.js"],
+    "Material Request":["customization/material_request/material_request.js"],
+    "Purchase Order":["customization/purchase_order/purchase_order.js"],
+    "User":["customization/user/user.js"]
     }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -84,7 +86,7 @@ after_install = "dairy_erp.customization.customization.create_supplier_type"
 
 doc_events = {
 	"Address": {
-		"after_insert": "dairy_erp.customization.customization.set_warehouse",
+		"after_insert": ["dairy_erp.customization.customization.set_warehouse","dairy_erp.customization.customization.validate_dairy_company"],
 		"on_update": "dairy_erp.customization.customization.update_warehouse",
 		"validate": "dairy_erp.customization.customization.validate_headoffice"
 	}

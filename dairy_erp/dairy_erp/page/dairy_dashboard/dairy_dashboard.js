@@ -45,7 +45,9 @@ dashboard = Class.extend({
 		})
 		$(me.page.main).find("#camp-office").on("click",function(){
 			frappe.route_options = {
-				"address_type": "Camp Office"
+				"address_type": "Camp Office",
+				"Dynamic Link.link_doctype" : "Company",
+				"Dynamic Link.link_name" : "Dairy"
 			};
 			frappe.new_doc("Address")
 		})

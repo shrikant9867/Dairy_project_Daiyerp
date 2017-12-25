@@ -94,7 +94,7 @@ def update_warehouse(doc, method):
 
 def after_install():
 	create_supplier_type()
-	create_item_group()
+	# create_item_group()
 
 
 def create_supplier_type():

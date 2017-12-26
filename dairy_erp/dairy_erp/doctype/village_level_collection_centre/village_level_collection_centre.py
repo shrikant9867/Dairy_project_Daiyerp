@@ -32,12 +32,16 @@ class VillageLevelCollectionCentre(Document):
 
 	def after_insert(self):
 		"""create company and w/h configure associated company"""
-		self.create_company()
-		self.create_warehouse()
-		self.create_supplier()
-		self.create_customer()
-		self.create_user()
-
+		
+		try:
+			self.create_company()
+			self.create_warehouse()
+			self.create_supplier()
+			self.create_customer()
+			self.create_user()
+		except Exception,e:
+			frappe.msgprint(_("Something went wrong",frappe.get_traceback()))
+		
 	def on_update(self):
 		self.create_supplier()
 		self.create_customer()
@@ -147,9 +151,15 @@ class VillageLevelCollectionCentre(Document):
 			operator = frappe.new_doc("User")
 			operator.email = self.email_id
 			operator.first_name = self.name1
+			operator.send_welcome_email = 0
+			operator.flags.ignore_permissions = True
+			operator.flags.ignore_mandatory = True
 			operator.insert()
 		if self.operator_same_as_agent and not frappe.db.exists('User', self.email_id):
 			agent = frappe.new_doc("User")
 			agent.email = self.operator_email_id
 			agent.first_name = self.operator_name
+			agent.send_welcome_email = 0
+			agent.flags.ignore_permissions = True
+			agent.flags.ignore_mandatory = True
 			agent.save()

@@ -1962,7 +1962,7 @@
   "modified": "2017-12-22 16:54:51.395668", 
   "name": "User-operator_type", 
   "no_copy": 0, 
-  "options": "\nCamp Office\nChilling Centre\nPlant", 
+  "options": "\nCamp Office\nChilling Centre\nPlant\nVLCC", 
   "permlevel": 0, 
   "precision": "", 
   "print_hide": 0, 

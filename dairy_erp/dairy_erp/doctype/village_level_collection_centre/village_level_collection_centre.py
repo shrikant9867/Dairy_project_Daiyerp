@@ -13,7 +13,13 @@ class VillageLevelCollectionCentre(Document):
 		self.validate_vlcc_abbr()
 		self.validate_vlcc_id()
 		self.validate_email_user()
+		self.validate_comp_exist()
 
+	def validate_comp_exist(self):
+		print  self.name == frappe.db.get_value("Company",{"is_dairy":1},'name')
+		if self.name == frappe.db.get_value("Company",{"is_dairy":1},'name'):
+			frappe.throw(_("Company Exist already"))
+	
 	def validate_email_user(self):
 		if self.is_new() and frappe.db.sql("select email_id from `tabVillage Level Collection Centre` where email_id =%s",(self.email_id)):
 			frappe.throw(_('User Exist already'))

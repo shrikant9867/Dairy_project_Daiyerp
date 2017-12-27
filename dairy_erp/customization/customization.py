@@ -34,7 +34,6 @@ def set_co_warehouse_po(doc,method=None):
 			for item in doc.items:
 				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
 
-
 def validate_dairy_company(doc,method=None):
 	if doc.address_type == 'Head Office':
 		for link in doc.links:
@@ -44,14 +43,6 @@ def validate_dairy_company(doc,method=None):
 				comp_doc.save()
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		make_user(doc)
-
-
-def set_vlcc_warehouse_mr(doc,method=None):
-	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
-		if doc.items:
-			for item in doc.items:
-				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
-
 
 def make_user(doc):
 	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
@@ -135,9 +126,6 @@ def create_supplier_type():
 		supp_doc.save()
 
 
-def user_query(doctype, txt, searchfield, start, page_len, filters):
-	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
-		return frappe.db.sql("""select name from tabCustomer where customer_group = 'Farmer'""")
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	item_groups = [str('Cattle feed'), str('Mineral Mixtures'), str('Medicines'), str('Artificial Insemination Services'),
@@ -190,7 +178,13 @@ def set_co_warehouse_pr(doc,method=None):
 				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
 
 def set_vlcc_warehouse(doc,method=None):
-	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
+	if branch_office.get('operator_type') == 'Camp Office':
+		if doc.items:
+			for item in doc.items:
+				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
+
+	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
 			for item in doc.items:
 				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
@@ -216,12 +210,15 @@ def create_customer_group():
 			cust_grp.customer_group_name = i
 			cust_grp.insert()
 
-def user_query(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("select name from tabCustomer where customer_group = 'Farmer'")
-
-
 def user_query_dn(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("select name from tabCustomer where customer_group = 'Vlcc'")
+	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'Camp Office':
+		return frappe.db.sql("select name from tabCustomer where customer_group = 'Vlcc'")
+	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+		return frappe.db.sql("select name from tabCustomer where customer_group = 'Farmer'")
 
 def user_query_po(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("select name from tabSupplier where supplier_type = 'Dairy Local'")
+
+def user_query(doctype, txt, searchfield, start, page_len, filters):
+	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+		return frappe.db.sql("""select name from tabCustomer where customer_group = 'Farmer'""")

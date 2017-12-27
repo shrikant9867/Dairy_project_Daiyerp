@@ -13,7 +13,7 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-
+setup_wizard_complete = "dairy_erp.customization.customization.create_item_group"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/dairy_erp/css/dairy_erp.css"
 # app_include_js = "/assets/dairy_erp/js/dialog.min.js"
@@ -31,7 +31,8 @@ doctype_js = {
     "Supplier":["customization/supplier.js"],
     "Material Request":["customization/material_request/material_request.js"],
     "Purchase Order":["customization/purchase_order/purchase_order.js"],
-    "User":["customization/user/user.js"]
+    "User":["customization/user/user.js"],
+    "Sales Order":["customization/sales_order/sales_order.js"]
     }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -90,7 +91,23 @@ doc_events = {
 		"after_insert": ["dairy_erp.customization.customization.set_warehouse","dairy_erp.customization.customization.validate_dairy_company"],
 		"on_update": "dairy_erp.customization.customization.update_warehouse",
 		"validate": "dairy_erp.customization.customization.validate_headoffice"
-	}
+	},
+    "Purchase Order":{
+        "validate":"dairy_erp.customization.customization.set_co_warehouse_po"
+    },
+    "Purchase Receipt":{
+        "on_submit": "dairy_erp.customization.customization.make_pi",
+        "validate": ["dairy_erp.customization.customization.set_vlcc_warehouse","dairy_erp.customization.customization.set_co_warehouse_pr"]
+    },
+    "Sales Order":{
+        "on_submit":"dairy_erp.customization.customization.make_so_against_vlcc"
+    },
+    "Delivery Note":{
+        "on_submit": "dairy_erp.customization.customization.make_si_against_vlcc"
+    },
+    "Material Request":{
+        "validate": "dairy_erp.customization.customization.set_vlcc_warehouse_mr"
+    }
 }
 
 # Scheduled Tasks

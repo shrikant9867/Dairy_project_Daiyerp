@@ -28,6 +28,7 @@ class Farmer(Document):
 	def create_customer(self):
 		custmer_doc = frappe.new_doc("Customer")
 		custmer_doc.customer_name = self.full_name
+		custmer_doc.customer_group = "Farmer"
 		custmer_doc.company = self.vlcc_name
 		custmer_doc.append("accounts",
 			{

@@ -56,7 +56,8 @@ def make_fmrc(data, response_dict):
 								if farmer_associate_vlcc(data,row):							
 									vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
 									farmer = frappe.db.get_value("Farmer",{"vlcc_name": vlcc},'name')
-									farmer_supplier = frappe.db.get_value("Farmer",farmer,'full_name')
+									print "++++++++++++++",farmer,vlcc
+									farmer_supplier = frappe.db.get_value("Farmer",row.get('farmerid'),'full_name')
 									row.update(
 										{
 											"collectiontime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000)),
@@ -88,7 +89,9 @@ def make_fmrc(data, response_dict):
 							
 							else : 
 								frappe.throw(_("vlcc does not exist!"))					
-		
+						else:
+							response_dict.update({row.get('farmerid'):["Created already check server.Exception if any check dairy log"]})
+
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
@@ -118,7 +121,8 @@ def validate_society_exist(data):
 
 def farmer_associate_vlcc(data, row):
 	vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
-	return frappe.db.get_value("Farmer",{"vlcc_name": vlcc},'name')
+	print "++++++++++",vlcc
+	return frappe.db.get_value("Farmer",{"vlcc_name": vlcc,"name":row.get('farmerid')},'name')
 
 
 def make_purchase_receipt_vlcc(data, row, vlcc, farmer, response_dict):
@@ -175,14 +179,25 @@ def create_farmer(data):
 			for row in api_data:
 				if row.get('society_id'):
 					vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
-					if vlcc and not frappe.db.exists("Farmer",row.get("farmer_id")):
-						farmer_obj = frappe.new_doc("Farmer")
-						farmer_obj.full_name = row.get('full_name')
-						farmer_obj.farmer_id = row.get('farmer_id')
-						farmer_obj.contact_number = row.get('contact_no')
-						farmer_obj.vlcc_name = vlcc
-						farmer_obj.insert()
-						response_dict.update({"status":"success","data":farmer_obj.__dict__})
+					if vlcc :
+						print"vlcc exist"
+						if not frappe.db.sql("select full_name from `tabFarmer` where full_name=%s",(row.get("full_name"))):
+							if not frappe.db.exists("Farmer",row.get("farmer_id")):
+								farmer_obj = frappe.new_doc("Farmer")
+								farmer_obj.full_name = row.get('full_name')
+								farmer_obj.farmer_id = row.get('farmer_id')
+								farmer_obj.contact_number = row.get('contact_no')
+								farmer_obj.vlcc_name = vlcc
+								farmer_obj.insert()
+								response_dict.update({"status":"success","data":farmer_obj.__dict__})
+							else:
+								frappe.throw(_("Id Exist"))
+						else:
+							frappe.throw("Farmer Exist with same name")
+					else:
+						frappe.throw(_("Society does not exist"))
+				else:
+					frappe.throw(_("Society ID does not exist"))
 	
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
@@ -231,7 +246,6 @@ def make_vmrc(data, response_dict):
 						collectiontime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000))
 						collectiondate = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 						vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
-						print "$$$$",vlcc_name
 						vmrc = validate_vmrc_entry(data,row, collectiontime, collectiondate)
 						if not vmrc:
 							if validate_society_exist_dairy(data):
@@ -260,7 +274,6 @@ def make_vmrc(data, response_dict):
 									vmrc_doc.flags.ignore_permissions = True
 									vmrc_doc.submit()
 									response_dict.get(row.get('farmerid')).append({"vmrc":vmrc_doc.name})
-									print "________________",response_dict
 									vlcc = validate_vlcc(row)
 									if row.get('status') == "Accept":
 										make_purchase_receipt_dairy(data, row, vlcc_name, response_dict)
@@ -268,6 +281,8 @@ def make_vmrc(data, response_dict):
 									frappe.throw(_("Vlcc Does not exist"))
 							else :
 								frappe.throw(_("Society does not exist"))
+						else:
+							response_dict.update({row.get('farmerid'):["created already check erpnext.Exception if any check dairy log"]})
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
@@ -452,7 +467,6 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 def purchase_invoice_against_farmer(data, row, vlcc,  farmer, item_, response_dict):
 
 	try:
-		print "_______________________",data,vlcc,farmer
 		pi_obj = frappe.new_doc("Purchase Invoice")
 		pi_obj.supplier =  farmer
 		pi_obj.company = vlcc

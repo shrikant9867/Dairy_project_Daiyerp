@@ -11,6 +11,7 @@ import re
 
 def set_warehouse(doc, method=None):
 	"""configure w/h for dairy components"""
+
 	if frappe.db.sql("""select name from `tabAddress` where address_type ='Head Office'"""):
 		if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and \
 		   not frappe.db.exists('Warehouse', doc.address_title + " - "+frappe.db.get_value("Company",doc.links[0].link_name,"abbr")):
@@ -33,6 +34,7 @@ def validate_dairy_company(doc,method=None):
 				comp_doc.save()
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		make_user_give_perm(doc)
+
 
 def make_user_give_perm(doc):
 	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
@@ -69,13 +71,15 @@ def validate_headoffice(doc, method):
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.links:
 		frappe.throw(_("Please Choose Company"))
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.centre_id:
-		frappe.throw(_("Amcu id needed"))
+		frappe.throw(_("Centre id needed"))
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and count!=1:
 		frappe.throw(_("Only one entry allowed row"))
-	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"]:
+	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		for row in doc.links:
 			if row.get('link_doctype') != "Company":
 				frappe.throw(_("Row entry must be company"))
+			elif row.get('link_name') and  frappe.get_value("Company",row.get('link_name'),'is_dairy') != 1:
+				frappe.throw(_("Please choose <b>Dairy only</b>"))
 
 	validate_user(doc)
 
@@ -119,3 +123,13 @@ def create_item_group():
 			item_grp.parent_item_group = "All Item Groups"
 			item_grp.item_group_name = i
 			item_grp.insert()
+
+def user_query(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("select name from tabCustomer where customer_group = 'Farmer'")
+
+
+def user_query_dn(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("select name from tabCustomer where customer_group = 'Vlcc'")
+
+def user_query_po(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("select name from tabSupplier where supplier_type = 'Dairy Local'")

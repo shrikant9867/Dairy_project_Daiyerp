@@ -4,5 +4,37 @@
 frappe.ui.form.on('Farmer', {
 	refresh: function(frm) {
 
+	},
+	onload: function(frm) {
+		var user_company = get_session_user_type()
+		frm.set_query("vlcc_name", function () {
+			return {
+				"filters": {
+					"name": user_company,
+				}
+			};
+		});
 	}
 });
+
+
+get_session_user_type = function() {
+	var user;
+	frappe.call({
+		method: "frappe.client.get_value",
+		args: {
+			doctype: "User",
+			filters: {"name": frappe.session.user},
+			fieldname: "company"
+		},
+		async:false,
+		callback: function(r){
+			if(r.message){
+			console.log(r.message)	
+			user = r.message.company			
+			}
+		}
+	});
+
+	return user
+}

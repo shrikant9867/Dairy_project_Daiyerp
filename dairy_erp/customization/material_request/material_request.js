@@ -1,6 +1,21 @@
 frappe.ui.form.on('Material Request', {
 	refresh: function(frm) {
-		if(!frm.doc.__islocal && frm.doc.docstatus == 1){
+		var operator_type
+		frappe.call({
+			method: "frappe.client.get_value",
+			async : false,
+			args: {
+				doctype: "User",
+				filters: {"name": frappe.session.user},
+				fieldname: "operator_type"
+			},
+			callback: function(r){
+				if(r.message){
+					operator_type = r.message.operator_type
+				}
+			}
+		});
+		if(!frm.doc.__islocal && frm.doc.docstatus == 1 && operator_type == 'Camp Office'){
 			frm.add_custom_button(__("Make PO"), function() {
 				make_dialog(frm)
 			})
@@ -16,6 +31,7 @@ frappe.ui.form.on('Material Request', {
 			};
 		});
 	}
+
 
 })
 

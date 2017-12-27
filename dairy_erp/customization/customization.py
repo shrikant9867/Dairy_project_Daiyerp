@@ -7,7 +7,8 @@ from frappe import _
 from frappe.model.document import Document
 import json
 import re
-
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 
 def set_warehouse(doc, method=None):
 	"""configure w/h for dairy components"""
@@ -24,6 +25,15 @@ def set_warehouse(doc, method=None):
 	else:
 		frappe.throw("Please create Head Office first for Dairy")
 
+def set_co_warehouse_po(doc,method=None):
+	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
+	if branch_office.get('operator_type') == 'Camp Office':	
+		dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
+		doc.company = dairy
+		if doc.items:
+			for item in doc.items:
+				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
+
 
 def validate_dairy_company(doc,method=None):
 	if doc.address_type == 'Head Office':
@@ -33,10 +43,17 @@ def validate_dairy_company(doc,method=None):
 				comp_doc.is_dairy = 1
 				comp_doc.save()
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
-		make_user_give_perm(doc)
+		make_user(doc)
 
 
-def make_user_give_perm(doc):
+def set_vlcc_warehouse_mr(doc,method=None):
+	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+		if doc.items:
+			for item in doc.items:
+				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
+
+
+def make_user(doc):
 	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 	if not frappe.db.sql("select name from `tabUser` where name=%s", doc.user):
 		user_doc = frappe.new_doc("User")
@@ -45,20 +62,27 @@ def make_user_give_perm(doc):
 		user_doc.operator_type = doc.address_type
 		user_doc.branch_office = doc.name
 		user_doc.send_welcome_email = 0
+		user_doc.new_password = "admin"
 		user_doc.flags.ignore_permissions = True
 		user_doc.flags.ignore_mandatory = True
 		user_doc.save()
 		add_all_roles_to(user_doc.name)
-		perm_doc = frappe.new_doc("User Permission")
-		perm_doc.user = user_doc.email
-		perm_doc.allow = "Address"
-		perm_doc.for_value = doc.name
-		perm_doc.flags.ignore_permissions = True
-		perm_doc.flags.ignore_mandatory = True
-		perm_doc.save()
-
+		give_permission(user_doc,"Address",doc.name)
+		if doc.address_type == 'Camp Office':
+			dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
+			if dairy:
+				give_permission(user_doc,"Company",dairy)
 	else:
 		frappe.throw("User exists already") 
+
+def give_permission(user_doc,allowed_doctype,for_value):
+	perm_doc = frappe.new_doc("User Permission")
+	perm_doc.user = user_doc.email
+	perm_doc.allow = allowed_doctype
+	perm_doc.for_value = for_value
+	perm_doc.flags.ignore_permissions = True
+	perm_doc.flags.ignore_mandatory = True
+	perm_doc.save()
 
 def validate_headoffice(doc, method):
 	count = 0
@@ -98,8 +122,6 @@ def update_warehouse(doc, method):
 
 def after_install():
 	create_supplier_type()
-	# create_item_group()
-
 
 def create_supplier_type():
 
@@ -113,8 +135,68 @@ def create_supplier_type():
 		supp_doc.save()
 
 
-def create_item_group():
+def user_query(doctype, txt, searchfield, start, page_len, filters):
+	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+		return frappe.db.sql("""select name from tabCustomer where customer_group = 'Farmer'""")
+
+def item_query(doctype, txt, searchfield, start, page_len, filters):
+	item_groups = [str('Cattle feed'), str('Mineral Mixtures'), str('Medicines'), str('Artificial Insemination Services'),
+		str('Veterinary Services'), str('Others/Miscellaneous'),str('Milk & Products')]
+	return frappe.db.sql("""select name from tabItem where item_group in {0}""".format(tuple(item_groups)))
+
+def make_pi(doc,method=None):
+	operator_type = frappe.db.get_value("User",frappe.session.user,"operator_type")
+	if operator_type == 'Camp Office' or operator_type == 'VLCC':
+		pi = frappe.get_doc(make_purchase_invoice(doc.name))
+		pi.insert()
+		pi.submit()
+
+def make_so_against_vlcc(doc,method=None):
+	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC' and \
+		frappe.db.get_value("Customer",doc.customer,"customer_group") == 'Farmer':
+		vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"camp_office")
+		a = frappe.db.get_value("Address",{"name":vlcc},"warehouse")
+		so = frappe.new_doc("Sales Order")
+		so.company = frappe.db.get_value("Company",{"is_dairy":1},"name")
+		so.customer = doc.company
+		for item in doc.items:
+			so.append("items", {
+				"item_code": item.item_code,
+				"item_name": item.item_name,
+				"description":item.description,
+				"qty": item.qty,
+				"delivery_date":item.delivery_date,
+				"warehouse": frappe.db.get_value("Address",{"name":vlcc},"warehouse"),
+				"price_list_rate": item.price_list_rate,
+				"rate": item.rate
+			})
+		so.flags.ignore_permissions = True
+		so.flags.ignore_mandatory = True
+		so.save()
+		so.submit()
+
+def make_si_against_vlcc(doc,method=None):
+	operator_type = frappe.db.get_value("User",frappe.session.user,"operator_type")
+	if operator_type == 'Camp Office' or operator_type == 'VLCC':
+		si = make_sales_invoice(doc.name)
+		si.submit()
+
+
+def set_co_warehouse_pr(doc,method=None):
+	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
+	if branch_office.get('operator_type') == 'Camp Office':
+		if doc.items:
+			for item in doc.items:
+				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
+
+def set_vlcc_warehouse(doc,method=None):
+	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+		if doc.items:
+			for item in doc.items:
+				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 	
+
+def create_item_group(args=None):
 	item_groups = ['Cattle feed', 'Mineral Mixtures', 'Medicines', 'Artificial Insemination Services',
 		'Veterinary Services', 'Others/Miscellaneous','Milk & Products']
 	for i in item_groups:
@@ -123,6 +205,16 @@ def create_item_group():
 			item_grp.parent_item_group = "All Item Groups"
 			item_grp.item_group_name = i
 			item_grp.insert()
+	create_customer_group()
+
+def create_customer_group():
+	customer_groups = ['Farmer', 'Vlcc', 'Dairy']
+	for i in customer_groups:
+		if not frappe.db.exists('Customer Group',i):
+			cust_grp = frappe.new_doc("Customer Group")
+			cust_grp.parent_customer_group = "All Customer Groups"
+			cust_grp.customer_group_name = i
+			cust_grp.insert()
 
 def user_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("select name from tabCustomer where customer_group = 'Farmer'")

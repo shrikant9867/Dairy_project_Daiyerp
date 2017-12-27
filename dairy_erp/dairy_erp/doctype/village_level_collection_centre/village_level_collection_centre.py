@@ -153,19 +153,40 @@ class VillageLevelCollectionCentre(Document):
 				custmer_doc_exist.save()
 
 	def create_user(self):
+		from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 		if not frappe.db.exists('User', self.email_id):
 			operator = frappe.new_doc("User")
 			operator.email = self.email_id
 			operator.first_name = self.name1
+			operator.operator_type = "VLCC"
+			operator.new_password = "admin"
 			operator.send_welcome_email = 0
 			operator.flags.ignore_permissions = True
 			operator.flags.ignore_mandatory = True
 			operator.insert()
+			add_all_roles_to(operator.name)
+			create_user_permission(operator,self.name)
+			
 		if self.operator_same_as_agent and not frappe.db.exists('User', self.email_id):
 			agent = frappe.new_doc("User")
 			agent.email = self.operator_email_id
 			agent.first_name = self.operator_name
+			agent.operator_type = "VLCC"
+			agent.new_password = "admin"
 			agent.send_welcome_email = 0
 			agent.flags.ignore_permissions = True
 			agent.flags.ignore_mandatory = True
 			agent.save()
+			add_all_roles_to(agent.name)
+			create_user_permission(agent,self.name)
+
+def create_user_permission(user,name):
+	perm_doc = frappe.new_doc("User Permission")
+	perm_doc.user = user.email
+	perm_doc.allow = "Company"
+	perm_doc.for_value = name
+	perm_doc.flags.ignore_permissions = True
+	perm_doc.flags.ignore_mandatory = True
+	perm_doc.save()
+
+			

@@ -32,11 +32,13 @@ dashboard = Class.extend({
 	render_view : function(){
 		var me = this;
 		$(frappe.render_template("dairy_dashboard",{"data":me.data || {}})).appendTo(me.page.main);
-		$.each(me.data.addr,function(i,d){
-				if(d && d.address_type == "Head Office"){
-					$('#head-office').hide()
-				}
-		})
+		if(me.data){
+			$.each(me.data.addr,function(i,d){
+					if(d && d.address_type == "Head Office"){
+						$('#head-office').hide()
+					}
+			})	
+		}
 		$(me.page.main).find("#head-office").on("click",function(){
 			frappe.route_options = {
 				"address_type": "Head Office"

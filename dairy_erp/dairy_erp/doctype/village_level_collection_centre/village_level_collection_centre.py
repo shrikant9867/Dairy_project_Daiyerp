@@ -13,7 +13,13 @@ class VillageLevelCollectionCentre(Document):
 		self.validate_vlcc_abbr()
 		self.validate_vlcc_id()
 		self.validate_email_user()
+		self.validate_comp_exist()
 
+	def validate_comp_exist(self):
+		print  self.name == frappe.db.get_value("Company",{"is_dairy":1},'name')
+		if self.name == frappe.db.get_value("Company",{"is_dairy":1},'name'):
+			frappe.throw(_("Company Exist already"))
+	
 	def validate_email_user(self):
 		if self.is_new() and frappe.db.sql("select email_id from `tabVillage Level Collection Centre` where email_id =%s",(self.email_id)):
 			frappe.throw(_('User Exist already'))
@@ -32,12 +38,16 @@ class VillageLevelCollectionCentre(Document):
 
 	def after_insert(self):
 		"""create company and w/h configure associated company"""
-		self.create_company()
-		self.create_warehouse()
-		self.create_supplier()
-		self.create_customer()
-		self.create_user()
-
+		
+		try:
+			self.create_company()
+			self.create_warehouse()
+			self.create_supplier()
+			self.create_customer()
+			self.create_user()
+		except Exception,e:
+			frappe.msgprint(_("Something went wrong",frappe.get_traceback()))
+		
 	def on_update(self):
 		self.create_supplier()
 		self.create_customer()
@@ -150,15 +160,22 @@ class VillageLevelCollectionCentre(Document):
 			operator.first_name = self.name1
 			operator.operator_type = "VLCC"
 			operator.new_password = "admin"
+			operator.send_welcome_email = 0
+			operator.flags.ignore_permissions = True
+			operator.flags.ignore_mandatory = True
 			operator.insert()
 			add_all_roles_to(operator.name)
 			create_user_permission(operator,self.name)
+			
 		if self.operator_same_as_agent and not frappe.db.exists('User', self.email_id):
 			agent = frappe.new_doc("User")
 			agent.email = self.operator_email_id
 			agent.first_name = self.operator_name
 			agent.operator_type = "VLCC"
 			agent.new_password = "admin"
+			agent.send_welcome_email = 0
+			agent.flags.ignore_permissions = True
+			agent.flags.ignore_mandatory = True
 			agent.save()
 			add_all_roles_to(agent.name)
 			create_user_permission(agent,self.name)
@@ -171,3 +188,5 @@ def create_user_permission(user,name):
 	perm_doc.flags.ignore_permissions = True
 	perm_doc.flags.ignore_mandatory = True
 	perm_doc.save()
+
+			

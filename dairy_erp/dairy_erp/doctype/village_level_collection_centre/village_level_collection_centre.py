@@ -121,6 +121,7 @@ class VillageLevelCollectionCentre(Document):
 			comp = frappe.get_doc("Address", self.chilling_centre)
 			custmer_doc = frappe.new_doc("Customer")
 			custmer_doc.customer_name = self.vlcc_name
+			custmer_doc.customer_group = "Vlcc"
 			if comp.links:
 				custmer_doc.company = comp.links[0].link_name
 				custmer_doc.append("accounts",

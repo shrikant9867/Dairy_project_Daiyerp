@@ -160,6 +160,7 @@ class VillageLevelCollectionCentre(Document):
 			operator.first_name = self.name1
 			operator.operator_type = "VLCC"
 			operator.new_password = "admin"
+			operator.company = self.name
 			operator.send_welcome_email = 0
 			operator.flags.ignore_permissions = True
 			operator.flags.ignore_mandatory = True
@@ -173,6 +174,7 @@ class VillageLevelCollectionCentre(Document):
 			agent.first_name = self.operator_name
 			agent.operator_type = "VLCC"
 			agent.new_password = "admin"
+			agent.company = self.name
 			agent.send_welcome_email = 0
 			agent.flags.ignore_permissions = True
 			agent.flags.ignore_mandatory = True

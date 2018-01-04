@@ -254,14 +254,14 @@ def create_vmrc(data):
 
 def make_vmrc(data, response_dict):
 	""":Dairy"""
-
+	traceback = ""
 	if data.get('societyid'):
 		for i,v in data.items():
 			if i == "collectionEntryList":
 				if not validate_duplicate_dict(v):	
 					for row in v:
 						try:
-							response_dict.update({row.get('farmerid'):[]})
+							response_dict.update({row.get('farmerid')+"-"+row.get('milktype'):[]})
 							collectiontime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000))
 							collectiondate = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 							vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
@@ -292,23 +292,25 @@ def make_vmrc(data, response_dict):
 					 					vmrc_doc.update(row)
 										vmrc_doc.flags.ignore_permissions = True
 										vmrc_doc.submit()
-										response_dict.get(row.get('farmerid')).append({"vmrc":vmrc_doc.name})
+										response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"vmrc":vmrc_doc.name})
 										vlcc = validate_vlcc(row)
 										if row.get('status') == "Accept":
 											make_purchase_receipt_dairy(data, row, vlcc_name, response_dict)
 									else:
+										traceback = "vlcc does not exist"
 										frappe.throw(_("Vlcc Does not exist"))
 								else :
+									traceback = "Society Does Not Exist"
 									frappe.throw(_("Society does not exist"))
 							else:
-								response_dict.update({row.get('farmerid'):["created already check erpnext.Exception if any check dairy log"]})
+								response_dict.update({row.get('farmerid')+"-"+row.get('milktype'):["created already check erpnext.Exception if any check dairy log"]})
 
 						except Exception,e:
 							utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 							data = data, message=e, traceback=frappe.get_traceback())
-							response_dict.get(row.get('farmerid')).append({"error":frappe.get_traceback()})
+							response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})
 				else:
-					response_dict.update({"status":"Error -  Duplicate Entry"})			
+					response_dict.update({"status":"Error -  Duplicate Entry","response": "Please remove Duplications from list"})			
 
 
 def validate_vmrc_entry(data, row, collectiontime, collectiondate):
@@ -386,12 +388,12 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict):
 		})
 		delivry_obj.flags.ignore_permissions = True
 		delivry_obj.submit()
-		response_dict.get(row.get('farmerid')).append({"Delivery Note" : delivry_obj.name})
+		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Delivery Note" : delivry_obj.name})
 		sales_invoice_against_dairy(data, row, customer, warehouse, item_, vlcc, cost_center, response_dict)
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
-		response_dict.get(row.get('farmerid')).append({"error":frappe.get_traceback()})
+		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error":frappe.get_traceback()})
 
 
 def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost_center, response_dict):
@@ -413,7 +415,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
 		})
 		si_obj.flags.ignore_permissions = True
 		si_obj.submit()
-		response_dict.get(row.get('farmerid')).append({"sales invoice": si_obj.name})
+		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"sales invoice": si_obj.name})
 
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
@@ -440,7 +442,7 @@ def make_purchase_receipt(data, row, vlcc, company, item_, response_dict):
 		)
 		purchase_rec.flags.ignore_permissions = True
 		purchase_rec.submit()
-		response_dict.get(row.get('farmerid')).append({"purchase_receipt": purchase_rec.name})
+		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase_receipt": purchase_rec.name})
 		delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict)
 
 	except Exception,e:
@@ -478,7 +480,7 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 		)
 		pi_obj.flags.ignore_permissions = True
 		pi_obj.submit()
-		response_dict.get(row.get('farmerid')).append({"purchase invoice":pi_obj.name})
+		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})
 	
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",

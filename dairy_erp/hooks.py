@@ -102,13 +102,15 @@ doc_events = {
         "validate": ["dairy_erp.customization.customization.set_vlcc_warehouse","dairy_erp.customization.customization.set_co_warehouse_pr"]
     },
     "Sales Order":{
-        "on_submit":"dairy_erp.customization.customization.make_so_against_vlcc"
+        "on_submit":"dairy_erp.customization.customization.make_so_against_vlcc",
+        "validate": "dairy_erp.customization.customization.set_vlcc_warehouse"
     },
     "Delivery Note":{
-        "on_submit": "dairy_erp.customization.customization.make_si_against_vlcc"
+        "on_submit": "dairy_erp.customization.customization.make_si_against_vlcc",
+        "validate":"dairy_erp.customization.customization.set_vlcc_warehouse"
     },
     "Material Request":{
-        "validate": "dairy_erp.customization.customization.set_vlcc_warehouse_mr"
+        "validate": "dairy_erp.customization.customization.set_vlcc_warehouse"
     }
 }
 

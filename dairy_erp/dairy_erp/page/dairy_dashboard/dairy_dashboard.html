@@ -1,18 +1,16 @@
 <div class="container-fluid"> 
   <div class="row content">
     <div class="col-sm-2 sidenav">
-      <h4>Dairy Dashboard</h4>
       <ul class="nav nav-pills nav-stacked">
-        <li class="active"><a href="#section1">Dairy</a></li>
-        <li><a href="#section2">VLCC</a></li>
-        <li><a href="#section3">Head Office</a></li>
-        <li><a href="#section3">Camp Office</a></li>
-        <li><a href="#section3">Chilling Center</a></li>
-        <li><a href="#section3">Supplier</a></li>
-        <li><a href="#section3">Plant Office</a></li>
+        <li><a class="head-office-list nav-hover">Head Office</a></li>
+        <li><a class="camp-office nav-hover">Camp Office</a></li>
+        <li><a class="chilling-centre nav-hover">Chilling Center</a></li>
+        <li><a class="plant nav-hover">Plant Office</a></li>
+        <li><a class = "nav-hover" href="/desk#List/Village Level Collection Centre/List">VLCC</a></li>
+        <li><a class="supplier-list nav-hover">Supplier</a></li>
       </ul><br>
     </div>
-
+{% if(data.addr){ %}
     <div class="col-sm-10">
         <br>
       <div class="col-sm-4 text-center">
@@ -22,12 +20,12 @@
                     <div class="col-sm-6">
                         <div class="span 2">Last Week</div>
                         <span style="font-size:10px;">(in Ltrs.)</span>
-                        <div class="rounded-circle" style="width:100px;height:50px;border: 1px solid black;border-radius: 35px;background-color: #5e64ff;color:white;"><div style="padding-top:2px;color:white;font-size:30px;">20K</div></div>
+                        <div class="rounded-circle milk-procure"><div class="milk-panel"></div></div>
                     </div>
                     <div class="col-sm-6">
                         <div class="span 2">This Week</div>
                         <span style="font-size:10px;">(in Ltrs.)</span>
-                        <div class="rounded-circle" style="width:100px;height:50px;border: 1px solid black;border-radius: 35px;background-color: #5e64ff;"><div style="padding-top:2px;color:white;font-size:30px;">1K</div></div>
+                        <div class="rounded-circle milk-procure"><div class="milk-panel"></div></div>
                     </div>
                 </div>
             </div>
@@ -39,7 +37,7 @@
                     <div class="col-sm-12">
                         <div class="span 2">Total VLCC Requests</div>
                         <div style="margin-top:20px;"></div>
-                        <div class="row-centered" align="center" style="margin-left:50px;width:100px;height:50px;border: 1px solid black;border-radius: 35px;margin-top:20px;background-color: #5e64ff;color:white;"><div style="padding-top:2px;color:white;font-size:30px;">1K</div></div>
+                        <div class="row-centered vlcc-request" align="center"><div class="milk-panel"></div></div>
                     </div>
                 </div>
             </div>
@@ -51,12 +49,12 @@
                     <div class="col-sm-6">
                         <div class="span 2">Last Week</div>
                         <span style="font-size:10px;">(in Rs.)</span>
-                        <div class="rounded-circle" style="width:100px;height:50px;border: 1px solid black;border-radius: 35px;background-color: #5e64ff;"><div style="padding-top:2px;color:white;font-size:30px;">440K</div></div>
+                        <div class="rounded-circle milk-procure"><div class="milk-panel"></div></div>
                     </div>
                     <div class="col-sm-6">
                         <div class="span 2">This Week</div>
                         <span style="font-size:10px;">(in Rs.)</span>
-                        <div class="rounded-circle" style="width:100px;height:50px;border: 1px solid black;border-radius: 35px;background-color: #5e64ff;"><div style="padding-top:2px;color:white;font-size:30px;">22K</div></div>
+                        <div class="rounded-circle milk-procure"><div class="milk-panel"></div></div>
                     </div>
                 </div>
             </div>
@@ -65,248 +63,193 @@
     <hr>
     <br>
     <div class="col-sm-5">
-      <div class="text-center">Addresses</div>
+      <div class="text-left">
+      <a class = "head-office-list" style="font-size: 15px;margin-left: 16px;"><b>Head Office </b></a>
+    <a class="fa fa-plus" id = "head-office"></a>
+      </div>
       <br>
+        {% if(data.addr){ %}
         <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Head Office
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            {% for(var i=0, l=data.addr.length; i < l; i++) { %}
+                    {% if(data.addr[i].address_type == "Head Office" && data.addr[i].office_addr) { %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a>
+                            </h4>
+                        </div>
+                    <div class="panel-wrapper collapse in">
+                            <div class="panel-body">
+                                {%= data.addr[i].office_addr %}
+                            </div>
                     </div>
-                </div>
-            </div>
+                    </div>
+                {% } %}
+            {% } %}
         </div>
-        <div class="text-center">Camp Office</div>
+        {% } %}
+        <div class="text-left">
+            <a class = "camp-office" style="font-size: 15px;margin-left: 15px;"><b>Camp Offices </b></a>
+            <a class="fa fa-plus" id = "camp-office"></a> 
+        </div>
+        <br>
+      {% if(data.addr){ %}
+      <div class="col-md-12">
+            {% for(var i=0, l=data.addr.length; i < l; i++) { %}
+                    {% if(data.addr[i].address_type == "Camp Office" && data.addr[i].office_addr) { %}
+                        <div class="panel panel-default" style="margin-bottom: 32px">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                   <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a> 
+                                </h4>
+                            </div>
+                        <div class="panel-wrapper collapse in">
+                                <div class="panel-body">
+                                    {%= data.addr[i].office_addr %}
+                                </div>
+                        </div>
+                        </div>
+                {% } %}
+            {% } %}
+        </div>
+        <div class="text-center camp-office" style="margin-bottom: 27px">
+            <a href="/desk#List/Address/List">More Camp Offices...</a>
+        </div>
+        {% } %}
+        <div class="text-left">
+            <a class="chilling-centre" style="font-size: 15px;margin-left: 15px;"><b>Chilling Centres </b></a>
+            <a class="fa fa-plus" id="chilling-centre"></a>
+        </div>
         <br>
         <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Camp Office #1
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        {% if(data.addr){ %}
+            {% for(var i=0, l=data.addr.length; i < l; i++) { %}
+                {% if(data.addr[i].address_type == "Chilling Centre" && data.addr[i].office_addr) { %}
+                    <div class="panel panel-default" style="margin-bottom: 32px">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a> 
+                            </h4>
+                        </div>
+                    <div class="panel-wrapper collapse in">
+                            <div class="panel-body">
+                                {%= data.addr[i].office_addr %}
+                            </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Camp Office #2
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </div>
-                </div>
-            </div>
+                {% } %}
+            {% } %}
         </div>
-        <div class="text-center">
-            <a href="/desk#List/Supplier/List">More Camp Offices</a>
+        <div class="text-center" style="margin-bottom: 27px">
+            <a class="chilling-centre">More Chilling Centres...</a>
         </div>
-        <div class="text-center">Chilling Center</div>
+        {% } %}
+        <div class="text-left">
+            <a class="plant" style="font-size: 15px;margin-left: 15px;"><b>Plant Offices </b></a>
+            <a class="fa fa-plus" id="plant"></a>
+        </div>
         <br>
+        {% if(data.addr){ %}
         <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Chilling Center #1
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            {% for(var i=0, l=data.addr.length; i < l; i++) { %}
+                    {% if(data.addr[i].address_type == "Plant" && data.addr[i].office_addr) { %}
+                    <div class="panel panel-default" style="margin-bottom: 32px">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a href="/desk#Form/Address/{{ data.addr[i].name }}">{%= data.addr[i].name %}</a> 
+                            </h4>
+                        </div>
+                    <div class="panel-wrapper collapse in">
+                            <div class="panel-body">
+                                {%= data.addr[i].office_addr %}
+                            </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Chilling Center #2
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </div>
-                </div>
-            </div>
+                {% } %}
+            {% } %}
         </div>
-        <div class="text-center">
-            <a href="/desk#List/Supplier/List">More Chilling Centers</a>
+        <div class="text-center" style="margin-bottom: 27px">
+            <a class="plant">More Plant Offices...</a>
         </div>
-        <div class="text-center">Plant Office</div>
-        <br>
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Plant Office #1
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Plant Office #2
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="text-center">
-            <a href="/desk#List/Supplier/List">More Plant Offices</a>
-        </div>
+        {% } %}
     </div>
     <div class="col-sm-5">
-      <div class="text-center">VLCC</div>
+      <div class="text-left">
+        <a href="/desk#List/Village Level Collection Centre/List" style="font-size: 15px;margin-left: 21px;"><b>VLCC</b></a>
+        <a class="fa fa-plus" id= "new_vlcc"></a>
+      </div>
       <br>
+        {% if(data.vlcc){ %}
         <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        VLCC #1
-                    </h4>
-                </div>
+            {% for(var i=0, l=data.vlcc.length; i < l; i++) { %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a href="/desk#Form/Village Level Collection Centre/{{ data.vlcc[i].name }}">{%= data.vlcc[i].name %}</a> 
+                            </h4>
+                        </div>
 
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        <div class="panel-wrapper collapse in">
+                        {% if (data.vlcc[i].addr) { %}
+                            <div class="panel-body">
+                                {%= data.vlcc[i].addr %}
+                            </div>
+                        {% } else { %}
+                            <div class="panel-body msg-box">
+                               <span>No address added yet.</span>
+                            </div>
+                        {% } %}
+                        </div>
                     </div>
-                </div>
-            </div>
+            {% } %}
         </div>
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        VLCC #2
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-            </div>
+        <div class="text-center" style="margin-bottom: 27px">
+            <a href="/desk#List/Village Level Collection Centre/List">More VLCCs...</a>
         </div>
-        <div class="text-center">
-            <a href="/desk#List/Vlcc/List">More VLCCs</a>
+        {% } %}    
+        <div class="text-left">
+            <a class="supplier-list" style="font-size: 15px;margin-left: 21px;"> <b>Suppliers</b></a>
+            <a class="fa fa-plus" id= "new_supp"></a>
         </div>
-        <div class="text-center">Suppliers</div>
         <br>
+        {% if(data.supplier){ %}
         <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Supplier #1
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            {% for(var i=0, l=data.supplier.length; i < l; i++) { %}
+                {% if (data.supplier[i].supplier) { %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a href="/desk#Form/Supplier/{{ data.supplier[i].supplier }}">{%= data.supplier[i].supplier %}</a>
+                        </h4>
                     </div>
-                </div>
-            </div>
+
+                    <div class="panel-wrapper collapse in">
+                        {% if (data.supplier[i].addr) { %}
+                            <div class="panel-body">
+                                {%= data.supplier[i].addr %}
+                            </div>
+                         {% } else { %}
+                            <div class="panel-body msg-box">
+                               <span>No address added yet.</span>        
+                            </div>
+                        {% } %}
+                    </div>
+                    </div>
+                 {% } %}
+            {% } %}
         </div>
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Supplier #2
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Supplier #3
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Supplier #4
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">
-                        Supplier #5
-                    </h4>
-                </div>
-
-                <div class="panel-wrapper collapse in">
-                    <div class="panel-body">
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </div>
-                </div>
-            </div>
         </div>
         <div class="text-center">
-            <a href="/desk#List/Supplier/List">More Suppliers</a>
+            <a class="supplier-list">More Suppliers...</a>
         </div>
+        {% } %}
     </div>
 </div>
-
-<footer class="container-fluid">
-  <p>Footer Text</p>
-</footer>
+{% } else { %}
+    <div class="row">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-9 empty-message msg-box">
+            <span class="text-center" style="font-size: 15px;">Please add masters data from left menu</span>
+        </div>
+    </div>
+{% } %}

@@ -110,19 +110,64 @@ def get_data():
 					"type": "doctype",
 					"name": "Warehouse",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Dairy Log",
+					"description": _(" "),
 				}
 
 			]
 		},
 		{
-			"label": _("Vlcc"),
+			"label": _("Village Level Collection Centre"),
 			"icon": "icon-star",
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Vlcc",
+					"name": "Village Level Collection Centre",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Local Sale",
+					"description": _(" "),
+				},
+				{
+					"type": "page",
+					"name": "vlcc-dashboard",
+					"label": "Vlcc Dashboard",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Milk Collection Record",
+					"description": _(" "),
+				}
+				
+			]
+		},
+		{
+			"label": _("Dairy"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "page",
+					"name": "dairy-dashboard",
+					"label": "Dairy Dashboard",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Milk Collection Record",
 					"description": _(" "),
 				}
 			]
-		}			
+		}				
 	]			
+

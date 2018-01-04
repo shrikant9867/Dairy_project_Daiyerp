@@ -5,6 +5,90 @@ frappe.pages['dairy-dashboard'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	$(frappe.render_template("dairy_dashboard")).appendTo(page.main);
-
+	wrapper.dashboard = new dashboard(wrapper)
+	frappe.breadcrumbs.add("Dairy Erp");
 }
+
+dashboard = Class.extend({
+	init : function(wrapper){
+		var me = this;
+		this.wrapper = wrapper;
+		this.page = wrapper.page
+		this.render_address()
+		this.page.add_inner_button(__("Reload"), function() {
+			location.reload();
+		});
+	},
+	render_address : function(){
+		var me = this;
+		frappe.call({
+			method:"dairy_erp.dairy_erp.page.dairy_dashboard.dairy_dashboard.get_data",
+			callback : function(r){
+				me.data = r.message
+				me.render_view()
+			}
+		})
+	},
+	render_view : function(){
+		var me = this;
+		$(frappe.render_template("dairy_dashboard",{"data":me.data || {}})).appendTo(me.page.main);
+		if(me.data){
+			$.each(me.data.addr,function(i,d){
+					if(d && d.address_type == "Head Office"){
+						$('#head-office').hide()
+					}
+			})	
+		}
+		$(me.page.main).find("#head-office").on("click",function(){
+			frappe.route_options = {
+				"address_type": "Head Office"
+			};
+			frappe.new_doc("Address")
+		})
+		$(me.page.main).find("#camp-office").on("click",function(){
+			frappe.route_options = {
+				"address_type": "Camp Office",
+				"Dynamic Link.link_doctype" : "Company",
+				"Dynamic Link.link_name" : "Dairy"
+			};
+			frappe.new_doc("Address")
+		})
+		$(me.page.main).find("#chilling-centre").on("click",function(){
+			frappe.route_options = {
+				"address_type": "Chilling Centre"
+			};
+			frappe.new_doc("Address")
+		})
+		$(me.page.main).find("#plant").on("click",function(){
+			frappe.route_options = {
+				"address_type": "Plant"
+			};
+			frappe.new_doc("Address")
+		})
+		$(me.page.main).find("#new_vlcc").on("click",function(){
+			frappe.new_doc("Village Level Collection Centre")
+		})
+		$(me.page.main).find("#new_supp").on("click",function(){
+			frappe.route_options = {
+				"supplier_type": "Dairy Local"
+			};
+			frappe.new_doc("Supplier")
+		})
+		$(me.page.main).find(".camp-office").on("click",function(){
+			frappe.set_route("List", "Address", {'address_type': "Camp Office"});
+		})
+		$(me.page.main).find(".head-office-list").on("click",function(){
+			frappe.set_route("List", "Address", {'address_type': "Head Office"});
+		})
+		$(me.page.main).find(".chilling-centre").on("click",function(){
+			frappe.set_route("List", "Address", {'address_type': "Chilling Centre"});
+		})	
+		$(me.page.main).find(".plant").on("click",function(){
+			frappe.set_route("List", "Address", {'address_type': "Plant"});
+		})
+		$(me.page.main).find(".supplier-list").on("click",function(){
+			frappe.set_route("List", "Supplier", {'supplier_type': "Dairy Local"});
+		})	
+		
+	}
+})

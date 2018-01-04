@@ -34,7 +34,9 @@ doctype_js = {
     "User":["customization/user/user.js"],
     "Sales Order":["customization/sales_order/sales_order.js"]
     }
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {
+    "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"]
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 

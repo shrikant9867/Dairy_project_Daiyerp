@@ -60,7 +60,6 @@ def make_fmrc(data, response_dict):
 								if not fmrc_entry:
 									if validate_society_exist(data):
 										if farmer_associate_vlcc(data,row):
-											print "$$$$$$$$$$"							
 											vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
 											farmer = frappe.db.get_value("Farmer",{"vlcc_name": vlcc},'name')
 											farmer_supplier = frappe.db.get_value("Farmer",row.get('farmerid'),'full_name')
@@ -199,7 +198,6 @@ def create_farmer(data):
 				if row.get('society_id'):
 					vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
 					if vlcc :
-						print"vlcc exist"
 						if not frappe.db.sql("select full_name from `tabFarmer` where full_name=%s",(row.get("full_name"))):
 							if not frappe.db.exists("Farmer",row.get("farmer_id")):
 								farmer_obj = frappe.new_doc("Farmer")
@@ -225,7 +223,6 @@ def create_farmer(data):
 			except Exception,e:
 				utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 				data = data, message=e, traceback=frappe.get_traceback())
-				print "++++++++++++++++++++",
 				response_dict.get(row.get('farmer_id')).append({"Error": traceback})
 				# response_dict.get(row('farmer_id')).append(farmer_obj.name)
 
@@ -274,7 +271,7 @@ def make_vmrc(data, response_dict):
 								vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
 								vmrc = validate_vmrc_entry(data,row, collectiontime, collectiondate)
 								if not vmrc:
-									if not validate_society_exist_dairy(data):
+									if  validate_society_exist_dairy(data):
 										if validate_vlcc(row):
 											row.update(
 												{
@@ -312,7 +309,7 @@ def make_vmrc(data, response_dict):
 								else:
 									response_dict.update({row.get('farmerid')+"-"+row.get('milktype'):["created already check erpnext.Exception if any check dairy log"]})
 							else:
-								response_dict.update({"status":"Error","response":"Data Missing","message": "farmerid,milktype,collectiontime,milkquantity,rate are manadatory"})
+								response_dict.update({"status":"Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate are manadatory"})
 						else:
 							response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"Error","response":"Data Missing","message":"imeinumber,collectionDate,shift,rcvdTime are manadatory"})
 					except Exception,e:
@@ -322,10 +319,8 @@ def make_vmrc(data, response_dict):
 
 
 def validate_vmrc_entry(data, row, collectiontime, collectiondate):
-
-	return frappe.db.sql(""" select name,collectiontime,societyid,rcvdtime,
-						collectiondate,shift,farmerid,milktype from 
-						`tabVlcc Milk Collection Record` where societyid='{0}' and 
+	
+	return frappe.db.sql(""" select name from `tabVlcc Milk Collection Record` where societyid='{0}' and 
 						collectiontime = '{1}' and collectiondate = '{2}'
 						and  rcvdtime = '{3}' and shift = '{4}' and farmerid = '{5}' and
 						milktype = '{6}'""".format(data.get('societyid'),collectiontime,

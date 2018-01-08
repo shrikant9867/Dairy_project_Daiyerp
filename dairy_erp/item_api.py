@@ -48,7 +48,7 @@ def get_masters():
 		response_dict.update({"items":get_items(),"uom": get_uom(),"camp_office": vlcc_details.get('camp_office'), "vlcc": vlcc_details.get('name')})
 	except Exception,e:
 			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
-			data = row.get('name'), message=e, traceback=frappe.get_traceback())
+			data = "", message=e, traceback=frappe.get_traceback())
 			response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
 	return response_dict	
 

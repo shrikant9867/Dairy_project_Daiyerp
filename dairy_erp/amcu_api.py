@@ -126,7 +126,7 @@ def validate_fmrc_entry(data, row):
 		where societyid='{0}' and collectiontime = '{1}' and collectiondate = '{2}'
 		and  rcvdtime = '{3}' and shift = '{4}' and farmerid = '{5}' and milktype = '{6}'
 		""".format(data.get('societyid'),collectiontime,collectiondate,
-			data.get('rcvdtime'),data.get('shift'),row.get('farmerid'),row.get('milktype')),as_dict=1,debug=1
+			data.get('rcvdtime'),data.get('shift'),row.get('farmerid'),row.get('milktype')),as_dict=1
 		)
 
 
@@ -157,10 +157,8 @@ def make_purchase_receipt_vlcc(data, row, vlcc, farmer, response_dict, fmrc):
 		elif row.get('milktype') == "BUFFALO":
 			item_code = "BUFFALO Milk"
 		cost_center = frappe.db.get_value("Cost Center", {"company": vlcc}, 'name')
-		print "_________",cost_center,vlcc,fmrc
 		item_ = frappe.get_doc("Item",item_code)
 		if farmer:
-			print "_________________________________"
 			purchase_rec = frappe.new_doc("Purchase Receipt")
 			purchase_rec.farmer_milk_collection_record = fmrc
 			purchase_rec.supplier =  farmer
@@ -326,13 +324,6 @@ def make_vmrc(data, response_dict):
 
 
 def validate_vmrc_entry(data, row, collectiontime, collectiondate):
-	
-	print data.get('rcvdtime'),frappe.db.sql(""" select name,rcvdtime from `tabVlcc Milk Collection Record` where societyid='{0}' and 
-						collectiontime = '{1}' and collectiondate = '{2}'
-						and  rcvdtime = '{3}' and shift = '{4}' and farmerid = '{5}' and
-						milktype = '{6}'""".format(data.get('societyid'),collectiontime,
-						collectiondate,data.get('rcvdtime'),data.get('shift'),
-						row.get('farmerid'),row.get('milktype')),as_dict=1)
 
 	return frappe.db.sql(""" select name from `tabVlcc Milk Collection Record` where societyid='{0}' and 
 						collectiontime = '{1}' and collectiondate = '{2}'

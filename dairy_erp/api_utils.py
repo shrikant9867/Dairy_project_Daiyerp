@@ -44,3 +44,15 @@ def make_mobile_log(**kwargs):
 	mlog.insert(ignore_permissions=True)
 	frappe.db.commit()
 	return mlog.name
+
+@frappe.whitelist()
+def user_type():
+	response_dict = {}
+	try:
+		if frappe.session.user != "Administrator":
+			user_doc = frappe.get_doc("User",frappe.session.user)
+			response_dict.update({"operator_type" : user_doc.operator_type})
+	except Exception, e:
+		response_dict.update({"status":"Error", "error":e, "traceback":frappe.get_traceback()})
+	return response_dict
+

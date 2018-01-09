@@ -44,8 +44,11 @@ def get_item_qty(item):
 def get_masters():
 	response_dict = {}
 	try:
-		vlcc_details = get_camp_office()
-		response_dict.update({"items":get_items(),"uom": get_uom(),"camp_office": vlcc_details.get('camp_office'), "vlcc": vlcc_details.get('name')})
+		if frappe.session.user != "Administrator":
+			vlcc_details = get_camp_office()
+			response_dict.update({"items":get_items(),"uom": get_uom(),"camp_office": vlcc_details.get('camp_office'), "vlcc": vlcc_details.get('name')})
+		else:
+			frappe.throw(_("User cannot be administrator"))
 	except Exception,e:
 			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
 			data = "", message=e, traceback=frappe.get_traceback())

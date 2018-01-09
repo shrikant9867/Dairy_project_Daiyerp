@@ -35,7 +35,8 @@ doctype_js = {
     "Sales Order":["customization/sales_order/sales_order.js"]
     }
 doctype_list_js = {
-    "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"]
+    "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"],
+    "Material Request" :["customization/material_request/material_request_list.js"]
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

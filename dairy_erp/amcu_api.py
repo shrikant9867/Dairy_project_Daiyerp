@@ -14,6 +14,7 @@ from frappe.utils.data import to_timedelta
 import time
 from frappe import _
 import dairy_utils as utils
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 import requests
 import json
 
@@ -409,23 +410,7 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 
 def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost_center, response_dict, dn_name, vmrc):
 	try:
-		si_obj = frappe.new_doc("Sales Invoice")
-		si_obj.customer = customer
-		si_obj.company = vlcc
-		si_obj.vlcc_milk_collection_record = vmrc
-		si_obj.append("items",
-		{
-			"item_code": item_.item_code,
-			"item_name": item_.item_code,
-			"description": item_.item_code,
-			"uom": "Litre",
-			"qty": row.get('milkquantity'),
-			"rate": row.get('rate'),
-			"amount": row.get('amount'),
-			"warehouse": warehouse,
-			"cost_center": cost_center,
-			"delivery_note": dn_name
-		})
+		si_obj = make_sales_invoice(dn_name)
 		si_obj.flags.ignore_permissions = True
 		si_obj.submit()
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"sales invoice": si_obj.name})

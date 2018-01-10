@@ -384,6 +384,7 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 		delivry_obj.customer = customer
 		delivry_obj.vlcc_milk_collection_record = vmrc
 		delivry_obj.company = vlcc
+		print "________________",cost_center
 		delivry_obj.append("items",
 		{
 			"item_code": item_.item_code,
@@ -410,8 +411,20 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 
 def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost_center, response_dict, dn_name, vmrc):
 	try:
-		si_obj = make_sales_invoice(dn_name)
-		si_obj.flags.ignore_permissions = True
+		si_obj = frappe.new_doc("Sales Invoice")
+ 		si_obj.customer = customer
+ 		si_obj.company = vlcc
+		si_obj.vlcc_milk_collection_record = vmrc
+ 		si_obj.append("items",
+ 		{
+ 			"item_code": item_.item_code,
+ 			"rate": row.get('rate'),
+ 			"amount": row.get('amount'),
+ 			"warehouse": warehouse,
+			"cost_center": cost_center,
+			"delivery_note": dn_name
+ 		})
+ 		si_obj.flags.ignore_permissions = True
 		si_obj.submit()
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"sales invoice": si_obj.name})
 
@@ -421,7 +434,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
 
 
 def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc):
-
+	print "____________________________",frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
 	try:
 		purchase_rec = frappe.new_doc("Purchase Receipt")
 		purchase_rec.supplier =  vlcc

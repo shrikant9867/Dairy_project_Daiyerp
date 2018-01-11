@@ -7,19 +7,20 @@ frappe.ui.form.on('Material Request', {
 			args: {
 				doctype: "User",
 				filters: {"name": frappe.session.user},
-				fieldname: "operator_type"
+				fieldname: ["operator_type","company"]
 			},
 			callback: function(r){
 				if(r.message){
 					operator_type = r.message.operator_type
+					get_co(r.message.company)
 				}
 			}
 		});
-		if(!frm.doc.__islocal && frm.doc.docstatus == 1 && operator_type == 'Camp Office'){
+		/*if(!frm.doc.__islocal && frm.doc.docstatus == 1 && operator_type == 'Camp Office'){
 			frm.add_custom_button(__("Make PO"), function() {
 				make_dialog(frm)
 			})
-		}
+		}*/
 
 	},
 	onload : function (frm) {
@@ -30,10 +31,30 @@ frappe.ui.form.on('Material Request', {
 				}
 			};
 		});
+
 	}
 
 
 })
+
+get_co = function(company){
+	frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Village Level Collection Centre",
+				filters: {"name": company},
+				fieldname: ["camp_office","warehouse"]
+			},
+			callback: function(r){
+				if(r.message){
+					cur_frm.set_value("camp_office",r.message.camp_office)
+					$.each(cur_frm.doc.items,function(i,d){
+						frappe.model.set_value(d.doctype, d.name, "warehouse", r.message.warehouse);
+					})
+				}
+			}
+	});
+}
 
 make_dialog = function(frm){
 	var dialog = new frappe.ui.Dialog({

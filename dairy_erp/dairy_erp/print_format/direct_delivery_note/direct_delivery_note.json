@@ -1,0 +1,22 @@
+{
+ "align_labels_right": 0, 
+ "creation": "2018-01-09 16:31:34.810215", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Purchase Order", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "html": "<div class=\"page-break\">\n    <div class=\"print-heading\">\n\t\t<h2>Delivery Note</h2>\n\t\t{%- if not doc.is_dropship -%}\n\t\t\t<b><small style=\"color: red\">*This is not a dropship order</small></b>\n\t\t{%- endif -%}\n    </div>\n    <div class=\"row section-break\">\n        <div class=\"col-xs-6 column-break\">\n                <div class=\"row\">\n\t\t\t\t\t<div class=\"col-xs-5 text-right\">\n\t\t\t\t\t\t<label>Supplier Name</label>\n\t\t\t\t\t</div>\n\t\t\t\t\t<div class=\"col-xs-7  value\">\n\t\t\t\t\t\t{{doc.supplier_name}}\n\t\t\t\t\t</div>\n\t\t\t\t</div>\t\t\n        </div>\n        \n        <div class=\"col-xs-6 column-break\">\n            <div class=\"row\">\n\t\t\t\t<div class=\"col-xs-5 text-right\">\n\t\t\t\t\t<label>Date</label>\n\t\t\t\t</div>\n\t\t\t\t<div class=\"col-xs-7  value\">\n\t\t\t\t\t{{frappe.utils.formatdate(doc.transaction_date)}}\n\t\t\t\t</div>\n\t\t\t</div>\n           \n        </div>\n    </div>\n\t<table class=\"table table-bordered\">\n\t\t<thead>\t\n\t\t\t<tr>\n\t\t\t\t<th>Reference No.</th>\n\t\t\t\t<th>Customer Name</th>\n\t\t\t\t<th>Customer Address</th>\n\t\t\t\t<th>Required Date</th>\n\t\t\t\t<th>Item Name</th>\n\t\t\t\t<th class=\"text-right\">Qty</th>\n\t\t\t</tr>\n\t\t</thead>\n\t\t<tbody>\n\t\t\t{%- for row in doc.items -%}\n\t\t\t<tr>\n\t\t\t\t<td style=\"width: 3%; text-align: center;\">{{ row.material_request }}</td>\n\t\t\t\t<td style=\"width: 3%; text-align: center;\">{{ row.customer }}</td>\n\t\t\t\t<td style=\"width: 3%;\">{{ row.address }}</td>\n\t\t\t\t<td style=\"width: 3%;text-align: center;\">{{ frappe.utils.formatdate(row.schedule_date) }}</td>\n\t\t\t\t<td style=\"width: 5%;text-align: center;\">\n\t\t\t\t\t{{ row.item_name }}\n\t\t\t\t</td>\n\t\t\t\t<td style=\"width: 5%; text-align: right;\">{{ row.qty }} {{ row.uom or row.stock_uom }}</td>\n\t\t\t</tr>\n\t\t\t{% if row.page_break -%}\n\t\t</tbody>\n\t</table>\n\t<div class=\"page-break\"></div>\n\t <div class=\"print-heading\">\n\t\t<h2>Delivery Note</h2>\n    </div>\n     <div class=\"row section-break\">\n        <div class=\"col-xs-6 column-break\">\n                <div class=\"row\">\n\t\t\t\t\t<div class=\"col-xs-5 text-right\">\n\t\t\t\t\t\t<label>Supplier Name</label>\n\t\t\t\t\t</div>\n\t\t\t\t\t<div class=\"col-xs-7  value\">\n\t\t\t\t\t\t{{doc.supplier_name}}\n\t\t\t\t\t</div>\n\t\t\t\t</div>\t\t\n        </div>\n        \n        <div class=\"col-xs-6 column-break\">\n            <div class=\"row\">\n\t\t\t\t<div class=\"col-xs-5 text-right\">\n\t\t\t\t\t<label>Date</label>\n\t\t\t\t</div>\n\t\t\t\t<div class=\"col-xs-7  value\">\n\t\t\t\t\t{{frappe.utils.formatdate(doc.transaction_date)}}\n\t\t\t\t</div>\n\t\t\t</div>\n           \n        </div>\n    </div>\n\t<table class=\"table table-bordered\">\n\t\t<thead>\t\n\t\t\t\t<tr>\n\t\t\t\t\t<th>Reference No.</th>\n\t\t\t\t\t<th>Customer Name</th>\n\t\t\t\t\t<th>Customer Address</th>\n\t\t\t\t\t<th>Required Date</th>\n\t\t\t\t\t<th>Item Name</th>\n\t\t\t\t\t<th class=\"text-right\">Qty</th>\n\t\t\t\t</tr>\n\t\t</thead>\n\t\t<tbody>\n\t\t\t{%- endif %}\n\n\n\t\t\t{%- endfor -%}\n\t\t</tbody>\n\t\t\t</table>\n</div>", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2018-01-10 18:55:41.810139", 
+ "modified_by": "Administrator", 
+ "module": "Dairy Erp", 
+ "name": "Direct Delivery Note", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}

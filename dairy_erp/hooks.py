@@ -26,6 +26,9 @@ setup_wizard_complete = "dairy_erp.customization.customization.create_item_group
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
+doctype_list_js = {
+"Material Request":["customization/material_request/material_request_list.js"]
+}
 doctype_js = {
     "Address":["customization/address.js"],
     "Supplier":["customization/supplier.js"],
@@ -93,11 +96,11 @@ doc_events = {
 		"validate": "dairy_erp.customization.customization.validate_headoffice"
 	},
     "Purchase Order":{
-        "validate":"dairy_erp.customization.customization.set_co_warehouse_po"
+        "validate":["dairy_erp.customization.customization.set_co_warehouse_po","dairy_erp.customization.customization.set_page_break"]
     },
     "Purchase Receipt":{
-        "on_submit": "dairy_erp.customization.customization.make_pi",
-        "validate": ["dairy_erp.customization.customization.set_vlcc_warehouse","dairy_erp.customization.customization.set_co_warehouse_pr"]
+        "on_submit": "dairy_erp.customization.customization.submit_dn",
+        "validate": ["dairy_erp.customization.customization.set_co_warehouse_pr"]
     },
     "Sales Order":{
         "on_submit":"dairy_erp.customization.customization.make_so_against_vlcc",
@@ -105,7 +108,8 @@ doc_events = {
     },
     "Delivery Note":{
         "on_submit": "dairy_erp.customization.customization.make_si_against_vlcc",
-        "validate":"dairy_erp.customization.customization.set_vlcc_warehouse"
+        "validate":"dairy_erp.customization.customization.set_vlcc_warehouse",
+        "after_insert":"dairy_erp.customization.customization.make_purchase_receipt"
     },
     "Material Request":{
         "validate": "dairy_erp.customization.customization.set_vlcc_warehouse"
@@ -132,7 +136,7 @@ doc_events = {
 # 		"dairy_erp.tasks.monthly"
 # 	]
 # }
-fixtures=['Property Setter','Custom Field']
+fixtures=['Property Setter','Custom Field','Print Format']
 # Testing
 # -------
 

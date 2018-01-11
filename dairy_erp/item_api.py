@@ -19,7 +19,7 @@ def get_items():
 	"""Mobile API's common to sell and purchase 
 	"""
 	
-	response_dict = frappe.db.sql("""select name,item_name,description,weight_uom from `tabItem` where 
+	response_dict = frappe.db.sql("""select name as item_code,item_name,description,weight_uom from `tabItem` where 
 		item_group in ('Cattle feed', 'Mineral Mixtures', 'Medicines', 
 		'Artificial Insemination Services') and is_stock_item=1 and disabled =0""",as_dict = 1)
 	for row in response_dict:

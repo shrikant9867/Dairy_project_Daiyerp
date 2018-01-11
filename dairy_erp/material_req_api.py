@@ -38,19 +38,14 @@ def create_mr(data):
 	try:
 		data_ = json.loads(data)
 		if data_:
-			for row in data_:
-				try:
-					mr_exist = frappe.db.get_value("Material Request",{"client_id":row.get('client_id')}, 'name')
-					if not mr_exist:
-						response_data.append({"status": "success","name": make_mr(row)})
-					else:
-						response_data.append({"status": "success", "name": mr_exist})
-
-				except Exception,e:
-					utils.make_mobile_log(title="Sync failed for Data push",method="create_mr", status="Error",
-					data = data, message=e, traceback=frappe.get_traceback())
-					response_data.append({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
-		response_dict.update({"status":"success","data":response_data})
+			if data_.get('client_id') and data_.get('camp_office') and data_.get('schedule_date'):
+				mr_exist = frappe.db.get_value("Material Request",{"client_id":data_.get('client_id')}, 'name')
+				if not mr_exist:
+					response_dict.update({"status": "success","name": make_mr(data_)})
+				else:
+					response_dict.update({"status": "success", "name": mr_exist})
+			else:
+				response_dict.update({"status":"error", "response":"client id, camp office , item are required "})
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict

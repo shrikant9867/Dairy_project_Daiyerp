@@ -112,6 +112,9 @@ doc_events = {
     },
     "Material Request":{
         "validate": "dairy_erp.customization.customization.set_vlcc_warehouse"
+    },
+    "Supplier":{
+        "validate": "dairy_erp.customization.customization.set_company"
     }
 }
 

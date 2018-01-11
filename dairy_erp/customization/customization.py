@@ -124,6 +124,14 @@ def create_supplier_type():
 		supp_doc = frappe.new_doc("Supplier Type")
 		supp_doc.supplier_type = "VLCC Local"
 		supp_doc.save()
+	if not frappe.db.exists('Supplier Type', "Dairy Type"):
+		supp_doc = frappe.new_doc("Supplier Type")
+		supp_doc.supplier_type = "Dairy Local"
+		supp_doc.save()
+	if not frappe.db.exists('Supplier Type', "Vlcc Type"):
+		supp_doc = frappe.new_doc("Supplier Type")
+		supp_doc.supplier_type = "Dairy Local"
+		supp_doc.save()
 
 
 
@@ -222,3 +230,15 @@ def user_query_po(doctype, txt, searchfield, start, page_len, filters):
 def user_query(doctype, txt, searchfield, start, page_len, filters):
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		return frappe.db.sql("""select name from tabCustomer where customer_group = 'Farmer'""")
+
+def set_company(doc, method):
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+	if user_doc.get('operator_type') == "VLCC" and doc.supplier_type == "VLCC Local":
+		doc.company = user_doc.get('company')
+
+def user_query_pr(doctype, txt, searchfield, start, page_len, filters):
+	print "33333333",frappe.db.sql("select name from tabSupplier where supplier_type = 'Dairy Local'")
+	return frappe.db.sql("select name from tabSupplier where supplier_type = 'Dairy Local'")
+
+def user_query_pr_(doctype, txt, searchfield, start, page_len, filters):
+	print "+++++++++++++++++++++++"

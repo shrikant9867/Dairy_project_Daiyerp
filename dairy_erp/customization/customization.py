@@ -141,6 +141,14 @@ def create_supplier_type():
 		supp_doc = frappe.new_doc("Supplier Type")
 		supp_doc.supplier_type = "VLCC Local"
 		supp_doc.save()
+	if not frappe.db.exists('Supplier Type', "Dairy Type"):
+		supp_doc = frappe.new_doc("Supplier Type")
+		supp_doc.supplier_type = "Dairy Local"
+		supp_doc.save()
+	if not frappe.db.exists('Supplier Type', "Vlcc Type"):
+		supp_doc = frappe.new_doc("Supplier Type")
+		supp_doc.supplier_type = "Dairy Local"
+		supp_doc.save()
 
 
 
@@ -167,12 +175,28 @@ def submit_dn(doc,method=None):
 				dn_flag = 1
 				dn = frappe.get_doc("Delivery Note",item.delivery_note)
 				for data in dn.items:
+					dn_flag = 2
 					if item.qty < data.qty:
 						rejected = data.qty - item.qty
 						data.qty = item.qty
 						data.rejected_qty = rejected
-				dn.flags.ignore_permissions = True		
-				dn.submit()
+					if data.material_request:		
+						mr = frappe.get_doc("Material Request",data.material_request)
+						for i in mr.items:
+							if i.qty == data.qty:
+							# if mr.per_ordered == 100:
+								mr.per_delivered = 100
+								mr.set_status("Delivered")
+								mr.save()
+							elif i.qty > data.qty:
+								qty = i.qty - data.qty
+								mr.per_delivered = 99.99
+								mr.set_status("Partially Delivered")
+								mr.save()
+								frappe.db.sql("""update `tabMaterial Request Item` set qty = {0} where parent = '{1}'""".format(qty,mr.name))
+				if dn_flag == 2:
+					dn.flags.ignore_permissions = True		
+					dn.submit()
 				si = make_sales_invoice(dn.name)
 				si.flags.ignore_permissions = True
 				si.submit()
@@ -382,3 +406,8 @@ def make_purchase_receipt(doc,method=None):
 			for item in doc.items:
 				item.purchase_receipt = purchase_rec.name
 			doc.save()
+			
+def set_company(doc, method):
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+	if user_doc.get('operator_type') == "VLCC" and doc.supplier_type == "VLCC Local":
+		doc.company = user_doc.get('company')

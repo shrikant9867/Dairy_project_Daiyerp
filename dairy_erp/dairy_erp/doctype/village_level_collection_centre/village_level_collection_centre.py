@@ -75,9 +75,9 @@ class VillageLevelCollectionCentre(Document):
 			comp = frappe.get_doc("Address", self.chilling_centre)
 			supl_doc = frappe.new_doc("Supplier")
 			supl_doc.supplier_name = self.vlcc_name
-			supl_doc.supplier_type = "Distributor"
+			supl_doc.supplier_type = "Vlcc Type"
 			if comp.links:
-				supl_doc.company = comp.links[0].link_name 
+				# supl_doc.company = comp.links[0].link_name 
 				supl_doc.append("accounts",
 					{
 					"company": comp.links[0].link_name,
@@ -88,8 +88,8 @@ class VillageLevelCollectionCentre(Document):
 		if not frappe.db.exists('Supplier', self.camp_office):
 			suppl_doc_vlcc = frappe.new_doc("Supplier")
 			suppl_doc_vlcc.supplier_name = self.camp_office
-			suppl_doc_vlcc.supplier_type = "Distributor"
-			suppl_doc_vlcc.company = self.vlcc_name
+			suppl_doc_vlcc.supplier_type = "Dairy Type"
+			# suppl_doc_vlcc.company = self.vlcc_name
 			suppl_doc_vlcc.append("accounts",
 				{
 					"company": self.vlcc_name,

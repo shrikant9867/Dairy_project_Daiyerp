@@ -115,7 +115,7 @@ doc_events = {
         "after_insert":"dairy_erp.customization.customization.make_purchase_receipt"
     },
     "Material Request":{
-        "validate": "dairy_erp.customization.customization.set_vlcc_warehouse"
+        "validate": "dairy_erp.customization.customization.set_mr_warehouse"
     },
     "Supplier":{
         "validate": "dairy_erp.customization.customization.set_company"

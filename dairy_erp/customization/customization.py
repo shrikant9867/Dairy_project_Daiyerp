@@ -180,8 +180,14 @@ def submit_dn(doc,method=None):
 						rejected = data.qty - item.qty
 						data.qty = item.qty
 						data.rejected_qty = rejected
+					if item.qty > data.qty:
+						frappe.throw("Quantity should not be greater than {0}".format(data.qty))
+
 					if data.material_request:		
 						mr = frappe.get_doc("Material Request",data.material_request)
+						# mr.per_closed = 100
+						# mr.set_status("Closed")
+						# mr.save()
 						for i in mr.items:
 							if i.qty == data.qty:
 							# if mr.per_ordered == 100:
@@ -235,6 +241,11 @@ def submit_dn(doc,method=None):
 						"amount": item.amount,
 						"warehouse": frappe.db.get_value("Address",{"name":po_doc.camp_office},"warehouse")
 					})
+					if item.material_request:
+						mr = frappe.get_doc("Material Request",item.material_request)
+						for i in mr.items:
+							if item.qty > i.qty:
+								frappe.throw("Quantity should not be greater than {0}".format(i.qty))
 		if dropship:
 			si.flags.ignore_permissions = True
 			si.submit()
@@ -338,9 +349,19 @@ def set_vlcc_warehouse(doc,method=None):
 				item.cost_center = 'Main - '+ company_abbr
 
 	if branch_office.get('operator_type') == 'VLCC':
+		if doc.customer:
+			if frappe.db.get_value("Customer",{"name":doc.customer},"customer_group") == "Farmer":
+				if doc.items:
+					for item in doc.items:
+						item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
+
+def set_mr_warehouse(doc,method=None):
+	branch_office = frappe.db.get_value("User",frappe.session.user,["operator_type","company"],as_dict=1)
+	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
 			for item in doc.items:
 				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
+
 	
 
 def create_item_group(args=None):

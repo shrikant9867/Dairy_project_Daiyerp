@@ -33,7 +33,23 @@ def set_co_warehouse_po(doc,method=None):
 		if doc.items:
 			for item in doc.items:
 				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
+				if item.material_request:
+					mr = frappe.get_doc("Material Request",item.material_request)
+					item.customer = mr.company
+					item.address = frappe.db.get_value("Village Level Collection Centre",{"name":mr.company},"address_display")
+	if branch_office.get('operator_type') == 'VLCC':
+		vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"camp_office")
+		for item in doc.items:
+			item.warehouse = frappe.db.get_value("Address",{"name":vlcc},"warehouse")
 
+
+
+def set_page_break(doc,method=None):
+	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
+	if branch_office.get('operator_type') == 'Camp Office' and doc.is_dropship == 1:
+		for item in doc.items:
+			item.page_break = 1
+		doc.items[-1].page_break = 0
 def validate_dairy_company(doc,method=None):
 	if doc.address_type == 'Head Office':
 		for link in doc.links:
@@ -46,12 +62,14 @@ def validate_dairy_company(doc,method=None):
 
 def make_user(doc):
 	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
 	if not frappe.db.sql("select name from `tabUser` where name=%s", doc.user):
 		user_doc = frappe.new_doc("User")
 		user_doc.email = doc.user
 		user_doc.first_name = doc.operator_name
 		user_doc.operator_type = doc.address_type
 		user_doc.branch_office = doc.name
+		user_doc.company = dairy
 		user_doc.send_welcome_email = 0
 		user_doc.new_password = "admin"
 		user_doc.flags.ignore_permissions = True
@@ -60,7 +78,6 @@ def make_user(doc):
 		add_all_roles_to(user_doc.name)
 		give_permission(user_doc,"Address",doc.name)
 		if doc.address_type == 'Camp Office':
-			dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
 			if dairy:
 				give_permission(user_doc,"Company",dairy)
 	else:
@@ -140,12 +157,108 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		str('Veterinary Services'), str('Others/Miscellaneous'),str('Milk & Products')]
 	return frappe.db.sql("""select name from tabItem where item_group in {0}""".format(tuple(item_groups)))
 
-def make_pi(doc,method=None):
-	operator_type = frappe.db.get_value("User",frappe.session.user,"operator_type")
-	if operator_type == 'Camp Office' or operator_type == 'VLCC':
-		pi = frappe.get_doc(make_purchase_invoice(doc.name))
-		pi.insert()
-		pi.submit()
+# def make_pi(doc,method=None):
+	# operator_type = frappe.db.get_value("User",frappe.session.user,"operator_type")
+	# if operator_type == 'Camp Office' or operator_type == 'VLCC':
+	# 	pi = frappe.get_doc(make_purchase_invoice(doc.name))
+	# 	pi.insert()
+	# 	pi.submit()
+	
+def submit_dn(doc,method=None):
+	po_list = []
+	dn_flag = 0
+	local_supplier = ""
+	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
+	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+		for item in doc.items:
+			if item.delivery_note:
+				dn_flag = 1
+				dn = frappe.get_doc("Delivery Note",item.delivery_note)
+				for data in dn.items:
+					dn_flag = 2
+					if item.qty < data.qty:
+						rejected = data.qty - item.qty
+						data.qty = item.qty
+						data.rejected_qty = rejected
+					if data.material_request:		
+						mr = frappe.get_doc("Material Request",data.material_request)
+						for i in mr.items:
+							if i.qty == data.qty:
+							# if mr.per_ordered == 100:
+								mr.per_delivered = 100
+								mr.set_status("Delivered")
+								mr.save()
+							elif i.qty > data.qty:
+								qty = i.qty - data.qty
+								mr.per_delivered = 99.99
+								mr.set_status("Partially Delivered")
+								mr.save()
+								frappe.db.sql("""update `tabMaterial Request Item` set qty = {0} where parent = '{1}'""".format(qty,mr.name))
+				if dn_flag == 2:
+					dn.flags.ignore_permissions = True		
+					dn.submit()
+				si = make_sales_invoice(dn.name)
+				si.flags.ignore_permissions = True
+				si.submit()
+
+		
+			po = frappe.db.sql("""select p.name,pi.material_request from `tabPurchase Order` p,`tabPurchase Order Item` pi where p.company = 'Dairy' 
+							and pi.material_request = %s and p.docstatus = 1 and p.name = pi.parent""",(item.material_request),as_dict=1)
+			for i in po:
+				po_list.append(i.get('name'))
+				mr = frappe.get_doc("Material Request",i.get('material_request'))
+				mr.per_closed = 100
+				mr.set_status("Closed")
+				mr.save()
+		if dn_flag:
+			pi = frappe.get_doc(make_purchase_invoice(doc.name))
+			pi.flags.ignore_permissions = True
+			pi.submit()
+		dropship = 0
+		for po in po_list:
+			po_doc = frappe.get_doc("Purchase Order",po)
+			if po_doc.is_dropship == 1:
+				dropship = 1
+				local_supplier = po_doc.supplier
+				si = frappe.new_doc("Sales Invoice")
+				si.customer = doc.company
+				si.company = dairy
+				for item in doc.items:
+					si.append("items",
+					{
+						"item_code": item.item_code,
+						"item_name": item.item_code,
+						"description": item.item_code,
+						"uom": item.uom,
+						"qty": item.qty,
+						"rate": item.rate,
+						"amount": item.amount,
+						"warehouse": frappe.db.get_value("Address",{"name":po_doc.camp_office},"warehouse")
+					})
+		if dropship:
+			si.flags.ignore_permissions = True
+			si.submit()
+			pi = frappe.get_doc(make_purchase_invoice(doc.name))
+			pi.flags.ignore_permissions = True
+			pi.submit()
+			# pi_obj = frappe.new_doc("Purchase Invoice")
+			# pi_obj.supplier =  local_supplier
+			# pi_obj.company = dairy
+			# for item in doc.items:
+			# 	pi_obj.append("items",
+			# 		{
+			# 			"item_code": item.item_code,
+			# 			"item_name": item.item_code,
+			# 			"description": item.item_code,
+			# 			"uom": item.uom,
+			# 			"qty": item.qty,
+			# 			"rate": item.rate,
+			# 			"amount": item.rate,
+			# 			"warehouse": frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
+			# 		}
+			# 	)
+			# pi_obj.flags.ignore_permissions = True
+			# pi_obj.submit()
 
 def make_so_against_vlcc(doc,method=None):
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC' and \
@@ -172,10 +285,31 @@ def make_so_against_vlcc(doc,method=None):
 		so.submit()
 
 def make_si_against_vlcc(doc,method=None):
+	# operator_type = frappe.db.get_value("User",frappe.session.user,"operator_type")
+	# if operator_type == 'Camp Office' or operator_type == 'VLCC':
+	# 	si = make_sales_invoice(doc.name)
+	# 	si.submit()
 	operator_type = frappe.db.get_value("User",frappe.session.user,"operator_type")
-	if operator_type == 'Camp Office' or operator_type == 'VLCC':
-		si = make_sales_invoice(doc.name)
-		si.submit()
+	if operator_type == 'Camp Office':
+		for item in doc.items:
+			if item.material_request:
+				mr = frappe.get_doc("Material Request",item.material_request)
+				for data in mr.items:
+					if data.qty == item.qty:
+						# if mr.per_ordered == 100:
+						mr.per_delivered = 100
+						mr.set_status("Delivered")
+						mr.save()
+					elif data.qty > item.qty:
+						qty = data.qty - item.qty
+						mr.per_delivered = 99.99
+						mr.set_status("Partially Delivered")
+						mr.save()
+						frappe.db.sql("""update `tabMaterial Request Item` set qty = {0} where parent = '{1}'""".format(qty,mr.name))
+			if item.purchase_receipt:
+				pr = frappe.get_doc("Purchase Receipt",item.purchase_receipt)
+				if pr.docstatus == 0:
+					frappe.throw("You are not allow to submit")
 
 
 def set_co_warehouse_pr(doc,method=None):
@@ -183,14 +317,25 @@ def set_co_warehouse_pr(doc,method=None):
 	if branch_office.get('operator_type') == 'Camp Office':
 		if doc.items:
 			for item in doc.items:
-				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
+				if not item.delivery_note:
+					item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
+	if branch_office.get('operator_type') == 'VLCC':
+		if doc.items:
+			pass
+			# for item in doc.items:
+				# pass
+				# item.rate = frappe.db.get_value("Item Price",{"item_code":item.item_code,"buying":1,"price_list":"Standard Selling"},"price_list_rate")
 
 def set_vlcc_warehouse(doc,method=None):
-	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
+	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type","company"],as_dict=1)
 	if branch_office.get('operator_type') == 'Camp Office':
+		company_abbr = frappe.db.get_value("Company", branch_office.get('company'), "abbr")
+		doc.company = branch_office.get('company')
 		if doc.items:
 			for item in doc.items:
 				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
+				item.expense_account = 'Cost of Goods Sold - '+ company_abbr
+				item.cost_center = 'Main - '+ company_abbr
 
 	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
@@ -231,14 +376,38 @@ def user_query(doctype, txt, searchfield, start, page_len, filters):
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		return frappe.db.sql("""select name from tabCustomer where customer_group = 'Farmer'""")
 
+def make_purchase_receipt(doc,method=None):
+	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type","company"],as_dict=1)
+	mr_flag = 0
+	if branch_office.get('operator_type') == 'Camp Office':
+		for item in doc.items:
+			if item.material_request:
+				mr_flag = 1
+		if mr_flag:		
+			purchase_rec = frappe.new_doc("Purchase Receipt")
+			purchase_rec.supplier =  branch_office.get('branch_office')
+			purchase_rec.company = doc.customer
+			for item in doc.items:
+				purchase_rec.append("items",
+					{
+						"item_code": item.item_code,
+						"item_name": item.item_code,
+						"description": item.item_code,
+						"uom": item.uom,
+						"qty": item.qty,
+						"rate":item.rate,
+						"amount": item.amount,
+						"delivery_note":doc.name,
+						"warehouse": frappe.db.get_value("Village Level Collection Centre",{"name":doc.customer},"warehouse")
+					}
+				)
+			purchase_rec.flags.ignore_permissions = True
+			purchase_rec.save()
+			for item in doc.items:
+				item.purchase_receipt = purchase_rec.name
+			doc.save()
+			
 def set_company(doc, method):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 	if user_doc.get('operator_type') == "VLCC" and doc.supplier_type == "VLCC Local":
 		doc.company = user_doc.get('company')
-
-def user_query_pr(doctype, txt, searchfield, start, page_len, filters):
-	print "33333333",frappe.db.sql("select name from tabSupplier where supplier_type = 'Dairy Local'")
-	return frappe.db.sql("select name from tabSupplier where supplier_type = 'Dairy Local'")
-
-def user_query_pr_(doctype, txt, searchfield, start, page_len, filters):
-	print "+++++++++++++++++++++++"

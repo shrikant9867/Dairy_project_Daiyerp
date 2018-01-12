@@ -113,6 +113,7 @@ def update_warehouse(doc, method):
 
 def after_install():
 	create_supplier_type()
+	create_local_customer()
 
 def create_supplier_type():
 
@@ -125,6 +126,12 @@ def create_supplier_type():
 		supp_doc.supplier_type = "VLCC Local"
 		supp_doc.save()
 
+def create_local_customer():
+
+	if not frappe.db.exists('Customer', "Vlcc Local Customer"):
+		loc_cust_doc = frappe.new_doc("Customer")
+		loc_cust_doc.name = "Vlcc Local Cust"
+		loc_cust_doc.save()
 
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
@@ -202,7 +209,7 @@ def create_item_group(args=None):
 	create_customer_group()
 
 def create_customer_group():
-	customer_groups = ['Farmer', 'Vlcc', 'Dairy']
+	customer_groups = ['Farmer', 'Vlcc', 'Dairy', 'Vlcc Local Customer']
 	for i in customer_groups:
 		if not frappe.db.exists('Customer Group',i):
 			cust_grp = frappe.new_doc("Customer Group")

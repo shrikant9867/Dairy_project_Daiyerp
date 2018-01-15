@@ -1,7 +1,5 @@
-// Copyright (c) 2017, indictrans technologies and contributors
+// Copyright (c) 2018, indictrans technologies and contributors
 // For license information, please see license.txt
-
-{% include 'erpnext/selling/sales_common.js' %}
 
 cur_frm.add_fetch('item_code','item_name','item_name');
 cur_frm.add_fetch('item_code','description','description');
@@ -11,50 +9,15 @@ cur_frm.add_fetch('item_code','item_group','item_group');
 cur_frm.add_fetch('item_code','stock_uom','uom');
 cur_frm.add_fetch('item_code','image','image');
 
-frappe.ui.form.on('Local Sale', {
+frappe.ui.form.on('Service Note', {
 	refresh: function(frm) {
 
-	},
-
-	onload: function(frm) {
-		frappe.call({
-			method: "dairy_erp.dairy_erp.doctype.local_sale.local_sale.fetch_balance_qty",
-			callback: function(r) {
-				if(r.message){
-					frm.set_value("cow_milk_qty_local",r.message.cow_milk)
-					frm.set_value("buffalo_milk_qty_local",r.message.buff_milk)
-					frm.set_value("cow_milk_quantity_farmer",r.message.cow_milk)
-					frm.set_value("buffalo_milk_qty_farmer",r.message.buff_milk)
-				}
-				// frm.set_value("buffalo_milk_qty_local", r.message.BUFFALO Milk)
-			}
-		})
-	},
-
-	local_customer_or_farmer: function(frm){
-		if (cur_frm.doc.local_customer_or_farmer == "Vlcc Local Customer") {
-			frappe.call({
-				method: "frappe.client.get_value",
-				args: {
-					doctype: "Customer",
-					fieldname: "name",
-					filters: { name: "Vlcc Local Cust" },
-				},
-				callback: function(r) {
-					if(r.message) {
-						frm.set_value("customer", r.message.name);
-					}
-				}
-			});
-		}
-	} 
+	}
 });
 
-
-
-frappe.ui.form.on('Sales Order Item', {
+frappe.ui.form.on('Delivery Note Item', {
 	item_code: function(frm, cdt, cdn) {
-			if (cur_frm.doc.local_customer_or_farmer){
+			if (cur_frm.doc.customer){
 				var child = locals[cdt][cdn];
 				if(child){
 					if (child.item_code){
@@ -84,7 +47,7 @@ frappe.ui.form.on('Sales Order Item', {
 				cur_frm.refresh_fields('item_code');
 			}
 			else{
-				frappe.throw('Please specify: Customer or Farmer. It is needed to fetch Item Details');
+				frappe.throw('Please specify: Customer. It is needed to fetch Item Details');
 				cur_frm.reload_doc()
 			}
 

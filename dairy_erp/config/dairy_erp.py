@@ -93,6 +93,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Payment Entry",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Purchase Receipt",
+					"description": _(" "),
 				}
 			
 			]

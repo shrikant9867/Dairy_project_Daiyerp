@@ -88,6 +88,7 @@ def give_permission(user_doc,allowed_doctype,for_value):
 	perm_doc.user = user_doc.email
 	perm_doc.allow = allowed_doctype
 	perm_doc.for_value = for_value
+	perm_doc.apply_for_all_roles = 0
 	perm_doc.flags.ignore_permissions = True
 	perm_doc.flags.ignore_mandatory = True
 	perm_doc.save()
@@ -177,11 +178,14 @@ def submit_dn(doc,method=None):
 				for data in dn.items:
 					dn_flag = 2
 					if item.qty < data.qty:
+						print "iside if..\n\n"
 						rejected = data.qty - item.qty
 						data.qty = item.qty
 						data.rejected_qty = rejected
-					if item.qty > data.qty:
-						frappe.throw("Quantity should not be greater than {0}".format(data.qty))
+					# elif item.qty > data.qty:
+					# 	print item.qty,"item.qty....\n\n"
+					# 	print data.qty,"data.qty...\n\n"
+					# 	frappe.throw("Quantity should not be greater than {0}".format(data.qty))
 
 					if data.material_request:		
 						mr = frappe.get_doc("Material Request",data.material_request)
@@ -190,22 +194,35 @@ def submit_dn(doc,method=None):
 						# mr.save()
 						for i in mr.items:
 							if i.qty == data.qty:
-							# if mr.per_ordered == 100:
 								mr.per_delivered = 100
 								mr.set_status("Delivered")
+								mr.flags.ignore_permissions = True
 								mr.save()
 							elif i.qty > data.qty:
 								qty = i.qty - data.qty
 								mr.per_delivered = 99.99
 								mr.set_status("Partially Delivered")
+								mr.flags.ignore_permissions = True
 								mr.save()
-								frappe.db.sql("""update `tabMaterial Request Item` set qty = {0} where parent = '{1}'""".format(qty,mr.name))
 				if dn_flag == 2:
 					dn.flags.ignore_permissions = True		
 					dn.submit()
-				si = make_sales_invoice(dn.name)
-				si.flags.ignore_permissions = True
-				si.submit()
+				si_obj = frappe.new_doc("Sales Invoice")
+		 		si_obj.customer = dn.customer
+		 		si_obj.company = dn.company
+		 		for item in dn.items:
+			 		si_obj.append("items",
+			 		{
+			 			"item_code": item.item_code,
+			 			"rate": item.rate,
+			 			"amount": item.amount,
+			 			"warehouse": item.warehouse,
+						"cost_center": item.cost_center,
+						"delivery_note": dn.name
+			 		})
+		 		si_obj.flags.ignore_permissions = True
+		 		si_obj.insert()
+				si_obj.submit()
 
 		
 			po = frappe.db.sql("""select p.name,pi.material_request from `tabPurchase Order` p,`tabPurchase Order Item` pi where p.company = 'Dairy' 
@@ -252,24 +269,6 @@ def submit_dn(doc,method=None):
 			pi = frappe.get_doc(make_purchase_invoice(doc.name))
 			pi.flags.ignore_permissions = True
 			pi.submit()
-			# pi_obj = frappe.new_doc("Purchase Invoice")
-			# pi_obj.supplier =  local_supplier
-			# pi_obj.company = dairy
-			# for item in doc.items:
-			# 	pi_obj.append("items",
-			# 		{
-			# 			"item_code": item.item_code,
-			# 			"item_name": item.item_code,
-			# 			"description": item.item_code,
-			# 			"uom": item.uom,
-			# 			"qty": item.qty,
-			# 			"rate": item.rate,
-			# 			"amount": item.rate,
-			# 			"warehouse": frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
-			# 		}
-			# 	)
-			# pi_obj.flags.ignore_permissions = True
-			# pi_obj.submit()
 
 def make_so_against_vlcc(doc,method=None):
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC' and \
@@ -310,13 +309,15 @@ def make_si_against_vlcc(doc,method=None):
 						# if mr.per_ordered == 100:
 						mr.per_delivered = 100
 						mr.set_status("Delivered")
+						mr.flags.ignore_permissions = True
 						mr.save()
 					elif data.qty > item.qty:
 						qty = data.qty - item.qty
 						mr.per_delivered = 99.99
 						mr.set_status("Partially Delivered")
+						mr.flags.ignore_permissions = True
 						mr.save()
-						frappe.db.sql("""update `tabMaterial Request Item` set qty = {0} where parent = '{1}'""".format(qty,mr.name))
+						# frappe.db.sql("""update `tabMaterial Request Item` set qty = {0} where parent = '{1}'""".format(qty,mr.name))
 			if item.purchase_receipt:
 				pr = frappe.get_doc("Purchase Receipt",item.purchase_receipt)
 				if pr.docstatus == 0:
@@ -332,10 +333,9 @@ def set_co_warehouse_pr(doc,method=None):
 					item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
 	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
-			pass
-			# for item in doc.items:
-				# pass
-				# item.rate = frappe.db.get_value("Item Price",{"item_code":item.item_code,"buying":1,"price_list":"Standard Selling"},"price_list_rate")
+			vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
+			for item in doc.items:
+				item.warehouse = vlcc
 
 def set_vlcc_warehouse(doc,method=None):
 	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type","company"],as_dict=1)

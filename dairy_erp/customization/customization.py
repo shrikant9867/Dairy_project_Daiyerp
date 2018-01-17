@@ -171,6 +171,7 @@ def submit_dn(doc,method=None):
 	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		for item in doc.items:
+			print item.__dict__,"#############################"
 			if item.delivery_note:
 				dn_flag = 1
 				dn = frappe.get_doc("Delivery Note",item.delivery_note)
@@ -216,10 +217,10 @@ def submit_dn(doc,method=None):
 				mr.per_closed = 100
 				mr.set_status("Closed")
 				mr.save()
-		if dn_flag:
-			pi = frappe.get_doc(make_purchase_invoice(doc.name))
-			pi.flags.ignore_permissions = True
-			pi.submit()
+			if dn_flag:
+				pi = frappe.get_doc(make_purchase_invoice(doc.name))
+				pi.flags.ignore_permissions = True
+				pi.submit()
 		dropship = 0
 		for po in po_list:
 			po_doc = frappe.get_doc("Purchase Order",po)
@@ -332,10 +333,10 @@ def set_co_warehouse_pr(doc,method=None):
 					item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
 	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
-			pass
-			# for item in doc.items:
-				# pass
-				# item.rate = frappe.db.get_value("Item Price",{"item_code":item.item_code,"buying":1,"price_list":"Standard Selling"},"price_list_rate")
+			vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
+			for item in doc.items:
+				item.warehouse = vlcc
+
 
 def set_vlcc_warehouse(doc,method=None):
 	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type","company"],as_dict=1)

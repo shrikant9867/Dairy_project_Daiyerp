@@ -63,6 +63,7 @@ class VillageLevelCollectionCentre(Document):
 		wr_hs_doc = frappe.new_doc("Warehouse")
 		wr_hs_doc.warehouse_name = self.vlcc_name
 		wr_hs_doc.company = self.vlcc_name
+		wr_hs_doc.flags.ignore_permissions = True
 		wr_hs_doc.insert()
 		self.warehouse = wr_hs_doc.name
 		self.save()
@@ -83,6 +84,7 @@ class VillageLevelCollectionCentre(Document):
 					"company": comp.links[0].link_name,
 					"account": frappe.db.get_value("Company",comp.links[0].link_name, "default_payable_account")
 					}) 
+			supl_doc.flags.ignore_permissions = True
 			supl_doc.insert()
 
 		if not frappe.db.exists('Supplier', self.camp_office):
@@ -95,6 +97,7 @@ class VillageLevelCollectionCentre(Document):
 					"company": self.vlcc_name,
 					"account": frappe.db.get_value("Company", self.vlcc_name, "default_payable_account")
 				})
+			suppl_doc_vlcc.flags.ignore_permissions = True
 			suppl_doc_vlcc.insert()
 		else:
 			flag = True
@@ -107,6 +110,7 @@ class VillageLevelCollectionCentre(Document):
 						"company": self.vlcc_name,
 						"account": frappe.db.get_value("Company", self.vlcc_name, "default_payable_account")
 					})
+				suppl_doc_exist.flags.ignore_permissions = True		
 				suppl_doc_exist.save()	
 
 
@@ -129,6 +133,7 @@ class VillageLevelCollectionCentre(Document):
 					"company": comp.links[0].link_name,
 					"account": frappe.db.get_value("Company",comp.links[0].link_name, "default_receivable_account")
 				})
+			custmer_doc.flags.ignore_permissions = True		
 			custmer_doc.insert()
 		
 		if not frappe.db.exists('Customer', self.plant_office):
@@ -139,6 +144,7 @@ class VillageLevelCollectionCentre(Document):
 					"company": self.vlcc_name,
 					"account": frappe.db.get_value("Company", self.vlcc_name, "default_receivable_account")
 				})
+			custmer_doc_vlcc.flags.ignore_permissions = True		
 			custmer_doc_vlcc.insert()
 		else:
 			flag = True
@@ -151,6 +157,7 @@ class VillageLevelCollectionCentre(Document):
 						"company": self.vlcc_name,
 						"account": frappe.db.get_value("Company", self.vlcc_name, "default_receivable_account")
 					})
+				custmer_doc_exist.flags.ignore_permissions = True		
 				custmer_doc_exist.save()
 
 	def create_user(self):

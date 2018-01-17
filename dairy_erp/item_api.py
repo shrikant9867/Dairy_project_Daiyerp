@@ -54,7 +54,8 @@ def get_masters():
 				"farmer": get_farmer(),
 				"suppliers": get_supplier(),
 				"terms_and_condition": terms_condition(),
-				"taxes": taxes_templates()
+				"sales_taxes": taxes_templates(),
+				"purchase_taxes":pr_taxes_templates()
 			})
 		else:
 			frappe.throw(_("User cannot be administrator"))
@@ -77,7 +78,7 @@ def get_farmer():
 	return frappe.db.sql("""select name as id,full_name ,vlcc_name from `tabFarmer` where vlcc_name ='{0}'""".format(company.get('company')),as_dict =1)
 
 def terms_condition():
-	return frappe.db.sql("""select name from `tabTerms and Conditions` where vlcc ='{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
+	return frappe.db.sql("""select name,terms from `tabTerms and Conditions` where vlcc ='{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
 
 def get_supplier():
 	return frappe.db.sql("""select name from `tabSupplier` where supplier_type = 'VLCC Local'""",as_dict=1)
@@ -92,3 +93,9 @@ def get_seesion_company_datails():
 
 	user_doc = frappe.get_doc("User",frappe.session.user)
 	return {"company" : user_doc.company}
+
+def pr_taxes_templates():
+	taxes_ =  frappe.db.sql(""" select name from `tabPurchase Taxes and Charges Template` where disabled =0 and company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
+	for row in taxes_:
+		row.update({"template":frappe.db.sql("""select charge_type,description,rate from `tabPurchase Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
+	return taxes_

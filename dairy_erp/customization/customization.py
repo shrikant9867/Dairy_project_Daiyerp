@@ -143,11 +143,11 @@ def create_supplier_type():
 		supp_doc.save()
 	if not frappe.db.exists('Supplier Type', "Dairy Type"):
 		supp_doc = frappe.new_doc("Supplier Type")
-		supp_doc.supplier_type = "Dairy Local"
+		supp_doc.supplier_type = "Dairy Type"
 		supp_doc.save()
 	if not frappe.db.exists('Supplier Type', "Vlcc Type"):
 		supp_doc = frappe.new_doc("Supplier Type")
-		supp_doc.supplier_type = "Dairy Local"
+		supp_doc.supplier_type = "Vlcc Type"
 		supp_doc.save()
 
 

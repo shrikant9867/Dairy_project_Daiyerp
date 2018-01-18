@@ -166,7 +166,8 @@ class VillageLevelCollectionCentre(Document):
 			operator.flags.ignore_permissions = True
 			operator.flags.ignore_mandatory = True
 			operator.insert()
-			add_all_roles_to(operator.name)
+			# add_all_roles_to(operator.name)
+			operator.add_roles("Vlcc Operator")
 			create_user_permission(operator,self.name)
 			
 		if self.operator_same_as_agent and not frappe.db.exists('User', self.email_id):

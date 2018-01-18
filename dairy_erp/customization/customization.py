@@ -75,7 +75,13 @@ def make_user(doc):
 		user_doc.flags.ignore_permissions = True
 		user_doc.flags.ignore_mandatory = True
 		user_doc.save()
-		add_all_roles_to(user_doc.name)
+		# add_all_roles_to(user_doc.name)
+		if doc.address_type == 'Camp Office':
+			user_doc.add_roles("Camp Operator")
+		elif doc.address_type == "Chilling Centre":
+			user_doc.add_roles("Chilling Center Operator")
+		else:
+			add_all_roles_to(user_doc.name)
 		give_permission(user_doc,"Address",doc.name)
 		if doc.address_type == 'Camp Office':
 			if dairy:

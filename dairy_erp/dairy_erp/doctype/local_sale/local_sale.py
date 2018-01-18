@@ -11,14 +11,14 @@ from frappe import _
 import requests
 import json
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
+import re, urllib, datetime, math, time
+from erpnext.selling.doctype.sales_order.sales_order import SalesOrder
 
 # Sid Customization
 
 class LocalSale(Document):
 	def validate(self):
 		self.total_weight()
-
-	
 
 	def total_weight(self):
 		total = 0
@@ -96,6 +96,6 @@ def fetch_balance_qty():
 	return items_dict
 
 @frappe.whitelist()
-def get_uoms(item):
-	uom = frappe.db.sql("""select uom `tabItem` where item_code = {0}""".format(item))
-	print "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]",uom
+def get_vlcc_warehouse():
+	warehouse = frappe.db.get_value("Village Level Collection Centre", {"email_id": frappe.session.user}, 'warehouse')
+	return warehouse

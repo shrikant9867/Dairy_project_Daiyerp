@@ -6,7 +6,6 @@
 cur_frm.add_fetch('item_code','item_name','item_name');
 cur_frm.add_fetch('item_code','description','description');
 cur_frm.add_fetch('item_code','stock_uom','stock_uom');
-cur_frm.add_fetch('item_code','default_warehouse','warehouse');
 cur_frm.add_fetch('item_code','item_group','item_group');
 cur_frm.add_fetch('item_code','stock_uom','uom');
 cur_frm.add_fetch('item_code','image','image');
@@ -26,7 +25,6 @@ frappe.ui.form.on('Local Sale', {
 					frm.set_value("cow_milk_quantity_farmer",r.message.cow_milk)
 					frm.set_value("buffalo_milk_qty_farmer",r.message.buff_milk)
 				}
-				// frm.set_value("buffalo_milk_qty_local", r.message.BUFFALO Milk)
 			}
 		})
 	},
@@ -43,6 +41,22 @@ frappe.ui.form.on('Local Sale', {
 				callback: function(r) {
 					if(r.message) {
 						frm.set_value("customer", r.message.name);
+					}
+				}
+			});
+		}
+	},
+	farmer: function(frm){
+		if (cur_frm.doc.farmer) {
+			frappe.session.user
+			frappe.call({
+				method:"dairy_erp.dairy_erp.doctype.service_note.service_note.get_effective_credit",
+				args:{
+					"customer": cur_frm.doc.farmer_name
+				},
+				callback: function(r) {
+					if(r.message) {
+						frm.set_value("effective_credit", r.message);			
 					}
 				}
 			});
@@ -65,7 +79,6 @@ frappe.ui.form.on('Sales Order Item', {
 							},
 							callback: function(r) {
 								if(r.message) {
-									// console.log(r.message)
 									frappe.model.set_value(cdt, cdn, "qty",1);
 					 				frappe.model.set_value(cdt, cdn, "price_list_rate",parseFloat(r.message));
 							 		frappe.model.set_value(cdt, cdn, "rate",child.price_list_rate);
@@ -78,7 +91,15 @@ frappe.ui.form.on('Sales Order Item', {
 							 		frappe.model.set_value(cdt, cdn, "base_net_amount",amount);			
 								}
 							}
-						})
+						});
+						frappe.call({
+							method:"dairy_erp.dairy_erp.doctype.local_sale.local_sale.get_vlcc_warehouse",
+							callback: function(r) {
+								if(r.message) {
+									frappe.model.set_value(cdt, cdn, "warehouse",r.message)	
+								}
+							}
+						});
 					}
 				}	
 				cur_frm.refresh_fields('item_code');

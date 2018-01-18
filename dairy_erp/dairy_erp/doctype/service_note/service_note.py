@@ -5,6 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from frappe.utils import getdate, nowdate, flt, cint
+from datetime import datetime, timedelta,date
 
 class ServiceNote(Document):
 	def validate(self):
@@ -44,3 +47,18 @@ class ServiceNote(Document):
 		self.base_net_total = total
 		self.net_total = total
 		self.grand_total = total
+
+@frappe.whitelist()
+def get_effective_credit(customer):
+	company = frappe.db.get_value("User", frappe.session.user, "company")
+	purchase_total = frappe.db.sql("""select name,sum(grand_total) as purchase_total from `tabPurchase Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True) 
+	sales_total = frappe.db.sql("""select name,sum(grand_total) as sales_total from `tabSales Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True)
+	if purchase_total[0].get('purchase_total') and sales_total[0].get('sales_total'):
+		eff_amt = purchase_total[0].get('purchase_total') - sales_total[0].get('sales_total')
+		return eff_amt
+	elif sales_total[0].get('sales_total'):
+		eff_amt = 0.0
+		return eff_amt
+	else:
+		eff_amt = 0.0
+		return eff_amt

@@ -12,6 +12,22 @@ cur_frm.add_fetch('item_code','image','image');
 frappe.ui.form.on('Service Note', {
 	refresh: function(frm) {
 
+	},
+	customer: function(frm) {
+		if (cur_frm.doc.customer) {
+			frappe.call({
+				method:"dairy_erp.dairy_erp.doctype.service_note.service_note.get_effective_credit",
+				args:{
+					"customer": cur_frm.doc.customer
+				},
+				callback: function(r) {
+					if(r.message) {
+						// console.log(r.message)
+						frm.set_value("effective_credit", r.message);			
+					}
+				}
+			})
+		}
 	}
 });
 
@@ -41,7 +57,17 @@ frappe.ui.form.on('Delivery Note Item', {
 							 		frappe.model.set_value(cdt, cdn, "base_net_amount",amount);			
 								}
 							}
-						})
+						});
+
+						frappe.call({
+							method:"dairy_erp.dairy_erp.doctype.local_sale.local_sale.get_vlcc_warehouse",
+							callback: function(r) {
+								if(r.message) {
+									// console.log(r.message)
+									frappe.model.set_value(cdt, cdn, "warehouse",r.message)	
+								}
+							}
+						});
 					}
 				}	
 				cur_frm.refresh_fields('item_code');

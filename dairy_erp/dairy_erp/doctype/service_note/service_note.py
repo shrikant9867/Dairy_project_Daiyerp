@@ -17,8 +17,9 @@ class ServiceNote(Document):
 		self.sales_invoice_against_dairy()
 
 	def sales_invoice_against_dairy(self):
+		customer = frappe.db.get_value("Farmer",self.customer,"full_name")
 		si_obj = frappe.new_doc("Sales Invoice")
-		si_obj.customer = self.customer
+		si_obj.customer = frappe.db.get_value("Farmer",self.customer,"full_name")
 		si_obj.company = self.company
 		si_obj_cost_center = frappe.db.get_value("Company",si_obj.company,'cost_center')
 		for row in self.items:

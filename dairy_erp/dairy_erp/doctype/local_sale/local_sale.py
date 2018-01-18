@@ -8,8 +8,10 @@ from frappe.model.document import Document
 from frappe.utils import flt, cstr, cint
 import time
 from frappe import _
+from dairy_erp.api_utils import make_mobile_log
 import requests
 import json
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
 import re, urllib, datetime, math, time
 from erpnext.selling.doctype.sales_order.sales_order import SalesOrder
@@ -54,6 +56,39 @@ class LocalSale(Document):
 				})
 		delivry_obj.flags.ignore_permissions = True
 		delivry_obj.submit()
+		si_obj = make_sales_invoice(delivry_obj.name)
+		si_obj.flags.ignore_permissions = True
+		si_obj.submit()
+		# self.create_sale_invoice_ls()
+		print "========================="
+
+	def create_sale_invoice_ls(self):
+		print "____________",self.name
+		try:
+			si_obj = frappe.new_doc("Sales Invoice")
+			si_obj.customer = self.customer
+			si_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
+			si_obj_cost_center = frappe.db.get_value("Company",si_obj.company,'cost_center')
+			si_obj.due_date = self.posting_time
+			for row in self.items:
+				si_obj.append("items",
+				{
+					"item_code": row.get('item_code'),
+					"item_name": row.get('item_code'),
+					"description": row.get('item_code'),
+					"uom": "Litre",
+					"qty": row.get('qty'),
+					"rate": row.get('rate'),
+					"amount": row.get('amount'),
+					"warehouse": row.get("warehouse"),
+					"cost_center": si_obj_cost_center
+				})
+			si_obj.flags.ignore_permissions = True
+			# si_obj.service_note = self.name
+			si_obj.submit()
+		except Exception,e:
+			make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
+			data = "", message=e, traceback=frappe.get_traceback())
 
 @frappe.whitelist()
 def get_price_list_rate(item):

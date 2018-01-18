@@ -63,6 +63,7 @@ class VillageLevelCollectionCentre(Document):
 		wr_hs_doc = frappe.new_doc("Warehouse")
 		wr_hs_doc.warehouse_name = self.vlcc_name
 		wr_hs_doc.company = self.vlcc_name
+		wr_hs_doc.flags.ignore_permissions = True
 		wr_hs_doc.insert()
 		self.warehouse = wr_hs_doc.name
 		self.save()
@@ -75,26 +76,28 @@ class VillageLevelCollectionCentre(Document):
 			comp = frappe.get_doc("Address", self.chilling_centre)
 			supl_doc = frappe.new_doc("Supplier")
 			supl_doc.supplier_name = self.vlcc_name
-			supl_doc.supplier_type = "Distributor"
+			supl_doc.supplier_type = "Vlcc Type"
 			if comp.links:
-				supl_doc.company = comp.links[0].link_name 
+				# supl_doc.company = comp.links[0].link_name 
 				supl_doc.append("accounts",
 					{
 					"company": comp.links[0].link_name,
 					"account": frappe.db.get_value("Company",comp.links[0].link_name, "default_payable_account")
 					}) 
+			supl_doc.flags.ignore_permissions = True
 			supl_doc.insert()
 
 		if not frappe.db.exists('Supplier', self.camp_office):
 			suppl_doc_vlcc = frappe.new_doc("Supplier")
 			suppl_doc_vlcc.supplier_name = self.camp_office
-			suppl_doc_vlcc.supplier_type = "Distributor"
-			suppl_doc_vlcc.company = self.vlcc_name
+			suppl_doc_vlcc.supplier_type = "Dairy Type"
+			# suppl_doc_vlcc.company = self.vlcc_name
 			suppl_doc_vlcc.append("accounts",
 				{
 					"company": self.vlcc_name,
 					"account": frappe.db.get_value("Company", self.vlcc_name, "default_payable_account")
 				})
+			suppl_doc_vlcc.flags.ignore_permissions = True
 			suppl_doc_vlcc.insert()
 		else:
 			flag = True
@@ -107,6 +110,7 @@ class VillageLevelCollectionCentre(Document):
 						"company": self.vlcc_name,
 						"account": frappe.db.get_value("Company", self.vlcc_name, "default_payable_account")
 					})
+				suppl_doc_exist.flags.ignore_permissions = True		
 				suppl_doc_exist.save()	
 
 
@@ -121,6 +125,7 @@ class VillageLevelCollectionCentre(Document):
 			comp = frappe.get_doc("Address", self.chilling_centre)
 			custmer_doc = frappe.new_doc("Customer")
 			custmer_doc.customer_name = self.vlcc_name
+			custmer_doc.customer_group = "Vlcc"
 			if comp.links:
 				custmer_doc.company = comp.links[0].link_name
 				custmer_doc.append("accounts",
@@ -128,6 +133,7 @@ class VillageLevelCollectionCentre(Document):
 					"company": comp.links[0].link_name,
 					"account": frappe.db.get_value("Company",comp.links[0].link_name, "default_receivable_account")
 				})
+			custmer_doc.flags.ignore_permissions = True		
 			custmer_doc.insert()
 		
 		if not frappe.db.exists('Customer', self.plant_office):
@@ -138,6 +144,7 @@ class VillageLevelCollectionCentre(Document):
 					"company": self.vlcc_name,
 					"account": frappe.db.get_value("Company", self.vlcc_name, "default_receivable_account")
 				})
+			custmer_doc_vlcc.flags.ignore_permissions = True		
 			custmer_doc_vlcc.insert()
 		else:
 			flag = True
@@ -150,6 +157,7 @@ class VillageLevelCollectionCentre(Document):
 						"company": self.vlcc_name,
 						"account": frappe.db.get_value("Company", self.vlcc_name, "default_receivable_account")
 					})
+				custmer_doc_exist.flags.ignore_permissions = True		
 				custmer_doc_exist.save()
 
 	def create_user(self):

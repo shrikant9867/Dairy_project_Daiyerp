@@ -115,6 +115,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Dairy Log",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Mobile App Log",
+					"description": _(" "),
 				}
 
 			]

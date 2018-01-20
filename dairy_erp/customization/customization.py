@@ -167,7 +167,7 @@ def create_local_customer():
 
 	if not frappe.db.exists('Customer', "Vlcc Local Customer"):
 		loc_cust_doc = frappe.new_doc("Customer")
-		loc_cust_doc.name = "Vlcc Local Cust"
+		loc_cust_doc.name = "Vlcc Local Customer"
 		loc_cust_doc.save()
 
 

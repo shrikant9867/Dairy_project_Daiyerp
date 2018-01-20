@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2017, Indictrans and contributer and contributors
 # For license information, please see license.txt
+
+#20 Jan 2018 added by chaitrali -
+# 1. Role and Report Permission Solved 
+# 2. Tested at local
+# 3. Added role in coding 
 from __future__ import unicode_literals
 import frappe
 from frappe import _

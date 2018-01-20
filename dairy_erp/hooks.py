@@ -142,7 +142,7 @@ doc_events = {
 # 		"dairy_erp.tasks.monthly"
 # 	]
 # }
-fixtures=['Property Setter','Custom Field','Print Format','Role','Custom DocPerm']
+fixtures=['Property Setter','Custom Field','Print Format','Role','Custom DocPerm','Role Permission for Page and Report']
 # Testing
 # -------
 

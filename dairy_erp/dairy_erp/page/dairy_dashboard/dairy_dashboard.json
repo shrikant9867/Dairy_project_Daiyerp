@@ -12,7 +12,10 @@
  "page_name": "Dairy Dashboard", 
  "roles": [
   {
-   "role": "Administrator"
+   "role": "Dairy Operator"
+  }, 
+  {
+   "role": "Camp Operator"
   }
  ], 
  "script": null, 

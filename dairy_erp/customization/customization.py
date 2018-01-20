@@ -142,6 +142,7 @@ def update_warehouse(doc, method):
 
 def after_install():
 	create_supplier_type()
+	create_local_customer()
 
 def create_supplier_type():
 
@@ -162,6 +163,12 @@ def create_supplier_type():
 		supp_doc.supplier_type = "Vlcc Type"
 		supp_doc.save()
 
+def create_local_customer():
+
+	if not frappe.db.exists('Customer', "Vlcc Local Customer"):
+		loc_cust_doc = frappe.new_doc("Customer")
+		loc_cust_doc.name = "Vlcc Local Cust"
+		loc_cust_doc.save()
 
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
@@ -183,6 +190,7 @@ def submit_dn(doc,method=None):
 	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		for item in doc.items:
+			print item.__dict__,"#############################"
 			if item.delivery_note:
 				dn_flag = 1
 				dn = frappe.get_doc("Delivery Note",item.delivery_note)
@@ -244,10 +252,10 @@ def submit_dn(doc,method=None):
 				mr.per_closed = 100
 				mr.set_status("Closed")
 				mr.save()
-		if dn_flag:
-			pi = frappe.get_doc(make_purchase_invoice(doc.name))
-			pi.flags.ignore_permissions = True
-			pi.submit()
+			if dn_flag:
+				pi = frappe.get_doc(make_purchase_invoice(doc.name))
+				pi.flags.ignore_permissions = True
+				pi.submit()
 		dropship = 0
 		for po in po_list:
 			po_doc = frappe.get_doc("Purchase Order",po)
@@ -387,7 +395,7 @@ def create_item_group(args=None):
 	create_customer_group()
 
 def create_customer_group():
-	customer_groups = ['Farmer', 'Vlcc', 'Dairy']
+	customer_groups = ['Farmer', 'Vlcc', 'Dairy', 'Vlcc Local Customer']
 	for i in customer_groups:
 		if not frappe.db.exists('Customer Group',i):
 			cust_grp = frappe.new_doc("Customer Group")

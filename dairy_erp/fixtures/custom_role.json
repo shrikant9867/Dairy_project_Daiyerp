@@ -5,6 +5,7 @@
   "modified": "2018-01-20 14:32:04.454388", 
   "name": "01398fc277", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Sales Register", 
   "roles": [
@@ -22,6 +23,7 @@
   "modified": "2018-01-20 14:32:04.469048", 
   "name": "a927a0e7b8", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Purchase Register", 
   "roles": [
@@ -39,6 +41,7 @@
   "modified": "2018-01-20 14:32:04.801521", 
   "name": "53e30011ce", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Itemised Sales Register", 
   "roles": [
@@ -56,6 +59,7 @@
   "modified": "2018-01-20 14:32:04.818747", 
   "name": "12a9849032", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Itemised Purchase Register", 
   "roles": [
@@ -73,6 +77,7 @@
   "modified": "2018-01-20 14:32:04.833807", 
   "name": "4e806b1645", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Balance", 
   "roles": [
@@ -96,6 +101,7 @@
   "modified": "2018-01-20 14:32:04.852377", 
   "name": "1f5ed39b20", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Ledger", 
   "roles": [
@@ -125,6 +131,7 @@
   "modified": "2018-01-20 14:32:04.971067", 
   "name": "b0ba9237bc", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "Accounts Receivable", 
   "roles": [
@@ -154,6 +161,7 @@
   "modified": "2018-01-20 14:32:05.013182", 
   "name": "f68c1a9ef8", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "Accounts Payable", 
   "roles": [
@@ -189,6 +197,7 @@
   "modified": "2018-01-20 14:32:05.036712", 
   "name": "7b7db89dd1", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "GL Entry", 
   "report": "General Ledger", 
   "roles": [
@@ -221,6 +230,7 @@
   "modified": "2018-01-20 14:32:05.053911", 
   "name": "5ff13c1457", 
   "page": "dairy-dashboard", 
+  "parent": null, 
   "ref_doctype": null, 
   "report": null, 
   "roles": [
@@ -235,6 +245,7 @@
   "modified": "2018-01-20 14:48:53.692233", 
   "name": "a7dfc8e1dc", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Sales Register", 
   "roles": [
@@ -252,6 +263,7 @@
   "modified": "2018-01-20 14:48:53.857803", 
   "name": "7b41adf052", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Purchase Register", 
   "roles": [
@@ -269,6 +281,7 @@
   "modified": "2018-01-20 14:48:53.866962", 
   "name": "a85243d820", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Itemised Sales Register", 
   "roles": [
@@ -286,6 +299,7 @@
   "modified": "2018-01-20 14:48:54.002289", 
   "name": "0039e69a35", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Itemised Purchase Register", 
   "roles": [
@@ -303,6 +317,7 @@
   "modified": "2018-01-20 14:48:54.009945", 
   "name": "99af33949b", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Balance", 
   "roles": [
@@ -326,6 +341,7 @@
   "modified": "2018-01-20 14:48:54.018514", 
   "name": "908c1d0e38", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Ledger", 
   "roles": [
@@ -355,6 +371,7 @@
   "modified": "2018-01-20 14:48:54.030105", 
   "name": "cd78227b9a", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "Accounts Receivable", 
   "roles": [
@@ -384,6 +401,7 @@
   "modified": "2018-01-20 14:48:54.040413", 
   "name": "802bc8d800", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "Accounts Payable", 
   "roles": [
@@ -419,6 +437,7 @@
   "modified": "2018-01-20 14:48:54.053829", 
   "name": "268af6b913", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "GL Entry", 
   "report": "General Ledger", 
   "roles": [
@@ -451,6 +470,7 @@
   "modified": "2018-01-20 14:48:54.065188", 
   "name": "5d1a61feec", 
   "page": "dairy-dashboard", 
+  "parent": null, 
   "ref_doctype": null, 
   "report": null, 
   "roles": [
@@ -465,6 +485,7 @@
   "modified": "2018-01-20 15:21:01.421300", 
   "name": "6bdd84ef54", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Sales Register", 
   "roles": [
@@ -482,6 +503,7 @@
   "modified": "2018-01-20 15:21:01.427519", 
   "name": "458b37e659", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Purchase Register", 
   "roles": [
@@ -499,6 +521,7 @@
   "modified": "2018-01-20 15:21:01.433636", 
   "name": "08f0b466bc", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Itemised Sales Register", 
   "roles": [
@@ -516,6 +539,7 @@
   "modified": "2018-01-20 15:21:01.440066", 
   "name": "0d3d61497a", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Itemised Purchase Register", 
   "roles": [
@@ -533,6 +557,7 @@
   "modified": "2018-01-20 15:21:01.617544", 
   "name": "5f4548f576", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Balance", 
   "roles": [
@@ -556,6 +581,7 @@
   "modified": "2018-01-20 15:21:01.629886", 
   "name": "7dd9f65305", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Ledger", 
   "roles": [
@@ -585,6 +611,7 @@
   "modified": "2018-01-20 15:21:01.639306", 
   "name": "22caaf8c00", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "Accounts Receivable", 
   "roles": [
@@ -614,6 +641,7 @@
   "modified": "2018-01-20 15:21:01.648511", 
   "name": "77bca33fa8", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "Accounts Payable", 
   "roles": [
@@ -649,6 +677,7 @@
   "modified": "2018-01-20 15:21:01.659659", 
   "name": "ba93b1d89c", 
   "page": null, 
+  "parent": null, 
   "ref_doctype": "GL Entry", 
   "report": "General Ledger", 
   "roles": [
@@ -681,6 +710,7 @@
   "modified": "2018-01-20 15:21:01.668673", 
   "name": "e61a7412b1", 
   "page": "dairy-dashboard", 
+  "parent": null, 
   "ref_doctype": null, 
   "report": null, 
   "roles": [

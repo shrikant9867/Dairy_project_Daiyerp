@@ -172,7 +172,7 @@ class VillageLevelCollectionCentre(Document):
 			operator.send_welcome_email = 0
 			operator.flags.ignore_permissions = True
 			operator.flags.ignore_mandatory = True
-			operator.insert()
+			operator.save()
 			# add_all_roles_to(operator.name)
 			operator.add_roles("Vlcc Operator")
 			create_user_permission(operator,self.name)
@@ -188,7 +188,8 @@ class VillageLevelCollectionCentre(Document):
 			agent.flags.ignore_permissions = True
 			agent.flags.ignore_mandatory = True
 			agent.save()
-			add_all_roles_to(agent.name)
+			agent.add_roles("Vlcc Operator")
+			# add_all_roles_to(agent.name)
 			create_user_permission(agent,self.name)
 
 def create_user_permission(user,name):

@@ -102,15 +102,15 @@ doc_events = {
         "validate":["dairy_erp.customization.customization.set_co_warehouse_po","dairy_erp.customization.customization.set_page_break"]
     },
     "Purchase Receipt":{
-        "on_submit": "dairy_erp.customization.customization.submit_dn",
-        "validate": ["dairy_erp.customization.customization.set_co_warehouse_pr"]
+        "on_submit": "dairy_erp.customization.customization.on_submit_pr",
+        "validate": ["dairy_erp.customization.customization.set_co_warehouse_pr","dairy_erp.customization.customization.validate_qty"]
     },
     "Sales Order":{
         "on_submit":"dairy_erp.customization.customization.make_so_against_vlcc",
         "validate": "dairy_erp.customization.customization.set_vlcc_warehouse"
     },
     "Delivery Note":{
-        "on_submit": "dairy_erp.customization.customization.make_si_against_vlcc",
+        "on_submit": "dairy_erp.customization.customization.validate_pr",
         "validate":"dairy_erp.customization.customization.set_vlcc_warehouse",
         "after_insert":"dairy_erp.customization.customization.make_purchase_receipt"
     },

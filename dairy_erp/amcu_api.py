@@ -418,6 +418,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
  		si_obj.append("items",
  		{
  			"item_code": item_.item_code,
+ 			"qty":row.get('milkquantity'),
  			"rate": row.get('rate'),
  			"amount": row.get('amount'),
  			"warehouse": warehouse,
@@ -472,6 +473,7 @@ def create_item(row):
 			item = frappe.new_doc("Item")
 			item.item_code = row.get('milktype')+" Milk"
 			item.item_group = "Milk & Products"
+			item.weight_uom = "Litre"
 			item.is_stock_item = 1
 			item.insert()
 

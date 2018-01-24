@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from dairy_erp.dairy_utils import make_dairy_log
 import re
 from frappe.model.document import Document
 
@@ -38,15 +39,13 @@ class VillageLevelCollectionCentre(Document):
 
 	def after_insert(self):
 		"""create company and w/h configure associated company"""
+	
+		self.create_company()
+		self.create_warehouse()
+		self.create_supplier()
+		self.create_customer()
+		self.create_user()
 		
-		try:
-			self.create_company()
-			self.create_warehouse()
-			self.create_supplier()
-			self.create_customer()
-			self.create_user()
-		except Exception,e:
-			frappe.msgprint(_("Something went wrong",frappe.get_traceback()))
 		
 	def on_update(self):
 		self.create_supplier()
@@ -57,6 +56,7 @@ class VillageLevelCollectionCentre(Document):
 		comp_doc.company_name = self.vlcc_name
 		comp_doc.abbr = self.abbr
 		comp_doc.default_currency = "INR"
+		comp_doc.flags.ignore_permissions = True
 		comp_doc.insert() 
 
 	def create_warehouse(self):

@@ -57,14 +57,14 @@ class VillageLevelCollectionCentre(Document):
 		comp_doc.abbr = self.abbr
 		comp_doc.default_currency = "INR"
 		comp_doc.flags.ignore_permissions = True
-		comp_doc.insert() 
+		comp_doc.save() 
 
 	def create_warehouse(self):
 		wr_hs_doc = frappe.new_doc("Warehouse")
 		wr_hs_doc.warehouse_name = self.vlcc_name
 		wr_hs_doc.company = self.vlcc_name
 		wr_hs_doc.flags.ignore_permissions = True
-		wr_hs_doc.insert()
+		wr_hs_doc.save()
 		self.warehouse = wr_hs_doc.name
 		self.save()
 
@@ -85,7 +85,7 @@ class VillageLevelCollectionCentre(Document):
 					"account": frappe.db.get_value("Company",comp.links[0].link_name, "default_payable_account")
 					}) 
 			supl_doc.flags.ignore_permissions = True
-			supl_doc.insert()
+			supl_doc.save()
 
 		if not frappe.db.exists('Supplier', self.camp_office):
 			suppl_doc_vlcc = frappe.new_doc("Supplier")
@@ -98,7 +98,7 @@ class VillageLevelCollectionCentre(Document):
 					"account": frappe.db.get_value("Company", self.vlcc_name, "default_payable_account")
 				})
 			suppl_doc_vlcc.flags.ignore_permissions = True
-			suppl_doc_vlcc.insert()
+			suppl_doc_vlcc.save()
 		else:
 			flag = True
 			suppl_doc_exist = frappe.get_doc("Supplier", self.camp_office)
@@ -134,7 +134,7 @@ class VillageLevelCollectionCentre(Document):
 					"account": frappe.db.get_value("Company",comp.links[0].link_name, "default_receivable_account")
 				})
 			custmer_doc.flags.ignore_permissions = True		
-			custmer_doc.insert()
+			custmer_doc.save()
 		
 		if not frappe.db.exists('Customer', self.plant_office):
 			custmer_doc_vlcc = frappe.new_doc("Customer")
@@ -145,7 +145,7 @@ class VillageLevelCollectionCentre(Document):
 					"account": frappe.db.get_value("Company", self.vlcc_name, "default_receivable_account")
 				})
 			custmer_doc_vlcc.flags.ignore_permissions = True		
-			custmer_doc_vlcc.insert()
+			custmer_doc_vlcc.save()
 		else:
 			flag = True
 			custmer_doc_exist = frappe.get_doc("Customer",self.plant_office)

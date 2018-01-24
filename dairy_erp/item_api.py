@@ -24,7 +24,7 @@ def get_items():
 		'Artificial Insemination Services') and is_stock_item=1 and disabled =0""",as_dict = 1)
 	for row in response_dict:
 		try:
-			row.update({"qty": get_item_qty(row.get('name'))})
+			row.update({"qty": get_item_qty(row.get('name')),"uom":frappe.db.sql("select uom,conversion_factor from `tabUOM Conversion Detail` where parent = '{0}'".format(row.get('item_code')),as_dict=1)})
 
 		except Exception,e:
 			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
@@ -48,7 +48,7 @@ def get_masters():
 			vlcc_details = get_camp_office()
 			response_dict.update({
 				"items":get_items(),
-				"uom": get_uom(),
+				# "uom": get_uom(),
 				"camp_office": vlcc_details.get('camp_office'),
 				"vlcc": vlcc_details.get('name'),
 				"farmer": get_farmer(),
@@ -81,7 +81,11 @@ def terms_condition():
 	return frappe.db.sql("""select name,terms from `tabTerms and Conditions` where vlcc ='{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
 
 def get_supplier():
-	return frappe.db.sql("""select name from `tabSupplier` where supplier_type = 'VLCC Local'""",as_dict=1)
+	supplier = frappe.db.sql("""select name from `tabSupplier` where supplier_type in ('VLCC Local','Dairy Type')""",as_dict=1)
+	print supplier
+	for row in supplier:
+		update_supplier_value(row)
+	return supplier
 
 def taxes_templates():
 	taxes_ =  frappe.db.sql(""" select name from `tabSales Taxes and Charges Template` where disabled =0 and company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
@@ -99,3 +103,9 @@ def pr_taxes_templates():
 	for row in taxes_:
 		row.update({"template":frappe.db.sql("""select charge_type,description,rate from `tabPurchase Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
 	return taxes_
+
+def update_supplier_value(row):
+	supplier_item_price = frappe.db.sql("select name from `tabSupplier Item Price` where branch_office = '{0}' and customer = '{1}'".format(row.get('name'),get_seesion_company_datails().get('company')),as_dict=1)
+	print "_____________",supplier_item_price
+	if supplier_item_price:
+		row.update({"item_prices": frappe.db.sql("select item,price from `tabSupplier Item Price Child` where parent = '{0}'".format(supplier_item_price[0].get('name')),as_dict=1)})

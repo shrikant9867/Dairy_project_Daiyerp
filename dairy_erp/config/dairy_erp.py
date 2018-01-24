@@ -153,6 +153,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Farmer Milk Collection Record",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Item Price",
+					"description": _(" "),
 				}
 				
 			]

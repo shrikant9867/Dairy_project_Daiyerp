@@ -21,7 +21,7 @@ def get_mr_list(data):
 	try:
 		mr_list = frappe.db.sql("""select name,schedule_date,camp_office from `tabMaterial Request` where company= '{0}' and status ='Pending' order by creation  desc limit 10""".format(get_seesion_company_datails().get('company')),as_dict=1)
 		for row in mr_list:
-			row.update({"items": frappe.db.sql("select item_code, qty from `tabMaterial Request Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
+			row.update({"items": frappe.db.sql("select item_code,item_name, qty from `tabMaterial Request Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
 		response_dict.update({"status":"success","data":mr_list})
 	except Exception,e:
 			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",

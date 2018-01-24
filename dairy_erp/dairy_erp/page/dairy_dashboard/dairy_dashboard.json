@@ -4,7 +4,7 @@
  "docstatus": 0, 
  "doctype": "Page", 
  "idx": 0, 
- "modified": "2017-12-08 15:13:23.719949", 
+ "modified": "2017-12-09 12:20:00.267510", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "dairy-dashboard", 
@@ -12,7 +12,10 @@
  "page_name": "Dairy Dashboard", 
  "roles": [
   {
-   "role": "Administrator"
+   "role": "Dairy Operator"
+  }, 
+  {
+   "role": "Camp Operator"
   }
  ], 
  "script": null, 

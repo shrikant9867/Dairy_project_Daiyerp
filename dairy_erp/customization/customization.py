@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2017, Indictrans and contributer and contributors
 # For license information, please see license.txt
+
+#20 Jan 2018 added by chaitrali -
+# 1. Role and Report Permission Solved 
+# 2. Tested at local
+# 3. Added role in coding 
 from __future__ import unicode_literals
 import frappe
 from frappe import _
@@ -75,7 +80,13 @@ def make_user(doc):
 		user_doc.flags.ignore_permissions = True
 		user_doc.flags.ignore_mandatory = True
 		user_doc.save()
-		add_all_roles_to(user_doc.name)
+		# add_all_roles_to(user_doc.name)
+		if doc.address_type == 'Camp Office':
+			user_doc.add_roles("Camp Operator")
+		elif doc.address_type == "Chilling Centre":
+			user_doc.add_roles("Chilling Center Operator")
+		else:
+			add_all_roles_to(user_doc.name)
 		give_permission(user_doc,"Address",doc.name)
 		if doc.address_type == 'Camp Office':
 			if dairy:
@@ -88,6 +99,7 @@ def give_permission(user_doc,allowed_doctype,for_value):
 	perm_doc.user = user_doc.email
 	perm_doc.allow = allowed_doctype
 	perm_doc.for_value = for_value
+	perm_doc.apply_for_all_roles = 0
 	perm_doc.flags.ignore_permissions = True
 	perm_doc.flags.ignore_mandatory = True
 	perm_doc.save()
@@ -130,6 +142,7 @@ def update_warehouse(doc, method):
 
 def after_install():
 	create_supplier_type()
+	create_local_customer()
 
 def create_supplier_type():
 
@@ -150,6 +163,12 @@ def create_supplier_type():
 		supp_doc.supplier_type = "Vlcc Type"
 		supp_doc.save()
 
+def create_local_customer():
+
+	if not frappe.db.exists('Customer', "Vlcc Local Customer"):
+		loc_cust_doc = frappe.new_doc("Customer")
+		loc_cust_doc.name = "Vlcc Local Customer"
+		loc_cust_doc.save()
 
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
@@ -178,11 +197,14 @@ def submit_dn(doc,method=None):
 				for data in dn.items:
 					dn_flag = 2
 					if item.qty < data.qty:
+						print "iside if..\n\n"
 						rejected = data.qty - item.qty
 						data.qty = item.qty
 						data.rejected_qty = rejected
-					if item.qty > data.qty:
-						frappe.throw("Quantity should not be greater than {0}".format(data.qty))
+					# elif item.qty > data.qty:
+					# 	print item.qty,"item.qty....\n\n"
+					# 	print data.qty,"data.qty...\n\n"
+					# 	frappe.throw("Quantity should not be greater than {0}".format(data.qty))
 
 					if data.material_request:		
 						mr = frappe.get_doc("Material Request",data.material_request)
@@ -191,22 +213,35 @@ def submit_dn(doc,method=None):
 						# mr.save()
 						for i in mr.items:
 							if i.qty == data.qty:
-							# if mr.per_ordered == 100:
 								mr.per_delivered = 100
 								mr.set_status("Delivered")
+								mr.flags.ignore_permissions = True
 								mr.save()
 							elif i.qty > data.qty:
 								qty = i.qty - data.qty
 								mr.per_delivered = 99.99
 								mr.set_status("Partially Delivered")
+								mr.flags.ignore_permissions = True
 								mr.save()
-								frappe.db.sql("""update `tabMaterial Request Item` set qty = {0} where parent = '{1}'""".format(qty,mr.name))
 				if dn_flag == 2:
 					dn.flags.ignore_permissions = True		
 					dn.submit()
-				si = make_sales_invoice(dn.name)
-				si.flags.ignore_permissions = True
-				si.submit()
+				si_obj = frappe.new_doc("Sales Invoice")
+		 		si_obj.customer = dn.customer
+		 		si_obj.company = dn.company
+		 		for item in dn.items:
+			 		si_obj.append("items",
+			 		{
+			 			"item_code": item.item_code,
+			 			"rate": item.rate,
+			 			"amount": item.amount,
+			 			"warehouse": item.warehouse,
+						"cost_center": item.cost_center,
+						"delivery_note": dn.name
+			 		})
+		 		si_obj.flags.ignore_permissions = True
+		 		si_obj.insert()
+				si_obj.submit()
 
 		
 			po = frappe.db.sql("""select p.name,pi.material_request from `tabPurchase Order` p,`tabPurchase Order Item` pi where p.company = 'Dairy' 
@@ -253,24 +288,6 @@ def submit_dn(doc,method=None):
 			pi = frappe.get_doc(make_purchase_invoice(doc.name))
 			pi.flags.ignore_permissions = True
 			pi.submit()
-			# pi_obj = frappe.new_doc("Purchase Invoice")
-			# pi_obj.supplier =  local_supplier
-			# pi_obj.company = dairy
-			# for item in doc.items:
-			# 	pi_obj.append("items",
-			# 		{
-			# 			"item_code": item.item_code,
-			# 			"item_name": item.item_code,
-			# 			"description": item.item_code,
-			# 			"uom": item.uom,
-			# 			"qty": item.qty,
-			# 			"rate": item.rate,
-			# 			"amount": item.rate,
-			# 			"warehouse": frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
-			# 		}
-			# 	)
-			# pi_obj.flags.ignore_permissions = True
-			# pi_obj.submit()
 
 def make_so_against_vlcc(doc,method=None):
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC' and \
@@ -311,13 +328,15 @@ def make_si_against_vlcc(doc,method=None):
 						# if mr.per_ordered == 100:
 						mr.per_delivered = 100
 						mr.set_status("Delivered")
+						mr.flags.ignore_permissions = True
 						mr.save()
 					elif data.qty > item.qty:
 						qty = data.qty - item.qty
 						mr.per_delivered = 99.99
 						mr.set_status("Partially Delivered")
+						mr.flags.ignore_permissions = True
 						mr.save()
-						frappe.db.sql("""update `tabMaterial Request Item` set qty = {0} where parent = '{1}'""".format(qty,mr.name))
+						# frappe.db.sql("""update `tabMaterial Request Item` set qty = {0} where parent = '{1}'""".format(qty,mr.name))
 			if item.purchase_receipt:
 				pr = frappe.get_doc("Purchase Receipt",item.purchase_receipt)
 				if pr.docstatus == 0:
@@ -336,7 +355,6 @@ def set_co_warehouse_pr(doc,method=None):
 			vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 			for item in doc.items:
 				item.warehouse = vlcc
-
 
 def set_vlcc_warehouse(doc,method=None):
 	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type","company"],as_dict=1)
@@ -377,7 +395,7 @@ def create_item_group(args=None):
 	create_customer_group()
 
 def create_customer_group():
-	customer_groups = ['Farmer', 'Vlcc', 'Dairy']
+	customer_groups = ['Farmer', 'Vlcc', 'Dairy', 'Vlcc Local Customer']
 	for i in customer_groups:
 		if not frappe.db.exists('Customer Group',i):
 			cust_grp = frappe.new_doc("Customer Group")

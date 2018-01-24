@@ -4,13 +4,17 @@
  "docstatus": 0, 
  "doctype": "Page", 
  "idx": 0, 
- "modified": "2017-12-11 13:37:15.186286", 
+ "modified": "2018-01-16 15:45:13.408228", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "vlcc-dashboard", 
  "owner": "Administrator", 
  "page_name": "vlcc dashboard", 
- "roles": [], 
+ "roles": [
+  {
+   "role": "Vlcc Operator"
+  }
+ ], 
  "script": null, 
  "standard": "Yes", 
  "style": null, 

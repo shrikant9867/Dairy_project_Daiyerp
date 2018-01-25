@@ -153,6 +153,16 @@ def get_data():
 					"type": "doctype",
 					"name": "Farmer Milk Collection Record",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Veterinary AI Technician",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Service Note",
+					"description": _(" "),
 				}
 				
 			]

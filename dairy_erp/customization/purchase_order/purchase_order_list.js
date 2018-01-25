@@ -1,4 +1,4 @@
-frappe.listview_settings['Purchase Receipt'] = {
+frappe.listview_settings['Purchase Order'] = {
 	onload: function(me) {
 		user_type = get_session_user_type()
 		if ((frappe.session.user != "Administrator")) {
@@ -30,6 +30,7 @@ get_session_user_type = function() {
 		async:false,
 		callback: function(r){
 			if(r.message){	
+	
 				user = {
 					"operator_type": r.message.operator_type,
 					"company": r.message.company

@@ -26,9 +26,10 @@ setup_wizard_complete = "dairy_erp.customization.customization.create_item_group
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_list_js = {
-"Material Request":["customization/material_request/material_request_list.js"]
-}
+# doctype_list_js = {
+# "Material Request":["customization/material_request/material_request_list.js"],
+# "Purchase Invoice":["customization/purchase_invoice/purchase_invoice_list.js"]
+# }
 doctype_js = {
     "Address":["customization/address.js"],
     "Supplier":["customization/supplier.js"],
@@ -39,7 +40,9 @@ doctype_js = {
     }
 doctype_list_js = {
     "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"],
-    "Material Request" :["customization/material_request/material_request_list.js"]
+    "Material Request" :["customization/material_request/material_request_list.js"],
+    "Purchase Invoice":["customization/purchase_invoice/purchase_invoice_list.js"],
+    "Purchase Order":["customization/purchase_order/purchase_order_list.js"],
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

@@ -175,11 +175,12 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 def on_submit_pr(doc,method=None):
 	submit_dn(doc)
 	validate_qty_against_mi(doc)
-	check_if_dropship(doc)
+	check_if_dropship(doc) 
 	
 def submit_dn(doc):
 	"""on submit of PR @VLCC DN gets auto submitted"""
 
+	
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC' and not doc.is_new():
 		#check dn association with pr(1-1 mapping)
 		dn_value = frappe.db.sql("""select parent from `tabDelivery Note Item` where purchase_receipt = '{0}' """.format(doc.name),as_dict=1)
@@ -300,6 +301,7 @@ def check_if_dropship(doc):
 
 	mr_list = []
 	conditions = ""
+
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		for item in doc.items:
 			if item.material_request:
@@ -309,44 +311,66 @@ def check_if_dropship(doc):
 			conditions = "and pi.material_request = '{0}'".format(mr_list[0]) if len(mr_list) == 1 else "and pi.material_request in {0}".format(tuple(mr_list))
 
 		#check PO with dropship
-		po = frappe.db.sql("""select p.name,pi.material_request from `tabPurchase Order` p,`tabPurchase Order Item` pi where p.company = 'Dairy' 
-						{0} and p.docstatus = 1 and p.name = pi.parent and p.is_dropship = 1 group by pi.material_request""".format(conditions),as_dict=1)
-		if po:
-			po_data = [data.get('name') for data in po]
+		if conditions:
+			po = frappe.db.sql("""select p.name,pi.material_request from `tabPurchase Order` p,`tabPurchase Order Item` pi where p.company = 'Dairy' 
+							{0} and p.docstatus = 1 and p.name = pi.parent and p.is_dropship = 1 group by pi.material_request""".format(conditions),as_dict=1,debug=1)
+			if po:
+				po_data = [data.get('name') for data in po]
 
-			for data in set(po_data):
-				po_doc = frappe.get_doc("Purchase Order",data)
+				for data in set(po_data):
+					po_doc = frappe.get_doc("Purchase Order",data)
 
-				pi = make_pi_against_localsupp(po_doc)		#Purchase Invoice @CO in use case 2
+					pi = make_pi_against_localsupp(po_doc)		#Purchase Invoice @CO in use case 2
 
-				if po_doc.is_dropship == 1:
-					si = frappe.new_doc("Sales Invoice")
-					si.customer = doc.company
-					si.company = frappe.db.get_value("Company",{"is_dairy":1},"name")
+					if po_doc.is_dropship == 1:
+						si = frappe.new_doc("Sales Invoice")
+						si.customer = doc.company
+						si.company = frappe.db.get_value("Company",{"is_dairy":1},"name")
 
-					for item in doc.items:
-						si.append("items",
-							{
-								"item_code": item.item_code,
-								"item_name": item.item_code,
-								"description": item.item_code,
-								"uom": item.uom,
-								"qty": item.qty,
-								"rate": item.rate,
-								"amount": item.amount,
-								"warehouse": frappe.db.get_value("Address",{"name":po_doc.camp_office},"warehouse")
-							})
+						for item in doc.items:
+							si.append("items",
+								{
+									"item_code": item.item_code,
+									"item_name": item.item_code,
+									"description": item.item_code,
+									"uom": item.uom,
+									"qty": item.qty,
+									"rate": item.rate,
+									"amount": item.amount,
+									"warehouse": frappe.db.get_value("Address",{"name":po_doc.camp_office},"warehouse")
+								})
 
-			si.flags.ignore_permissions = True  		#Sales Invoice @CO in use case 2
-			si.save()
-			si.submit()
+				si.flags.ignore_permissions = True  		#Sales Invoice @CO in use case 2
+				si.save()
+				si.submit()
 
-			pi.flags.ignore_permissions = True  		#Purchase Invoice @CO in use case 2
-			pi.save()
-			pi.submit()
+				pi.flags.ignore_permissions = True  		#Purchase Invoice @CO in use case 2
+				pi.save()
+				pi.submit()
 
-			make_pi(doc)			#Purchase Invoice @VLCC in use case 2
+				make_pi(doc)			#Purchase Invoice @VLCC in use case 2
+				mi_status_update(doc)
 
+
+def mi_status_update(doc):
+
+	material_req_list = frappe.db.sql("""select sum(qty) as qty_sum, material_request from `tabPurchase Receipt Item` 
+				where parent = '{0}' group by material_request""".format(doc.name),as_dict=1)
+
+	for row in material_req_list:
+		material_request_updater = frappe.get_doc("Material Request",row.get('material_request'))
+		mr_qty = get_material_req_qty(material_request_updater)
+		
+		if mr_qty > row.get('qty_sum'):
+			material_request_updater.per_delivered = 99.99
+			material_request_updater.set_status("Partially Delivered")
+			material_request_updater.save()
+
+		elif mr_qty == row.get('qty_sum'):
+			material_request_updater.per_delivered = 100
+			material_request_updater.set_status("Delivered")
+			material_request_updater.save()
+	
 
 
 def validate_qty(doc, method):

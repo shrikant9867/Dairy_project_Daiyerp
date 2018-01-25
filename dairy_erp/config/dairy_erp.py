@@ -135,11 +135,6 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Village Level Collection Centre",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
 					"name": "Farmer",
 					"description": _(" "),
 				},
@@ -161,6 +156,16 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Veterinary AI Technician",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Service Note",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
 					"name": "Supplier Item Price",
 					"description": _(" "),
 				}
@@ -172,6 +177,11 @@ def get_data():
 			"icon": "icon-star",
 			"items": [
 				{
+					"type": "doctype",
+					"name": "Village Level Collection Centre",
+					"description": _(" "),
+				},
+				{
 					"type": "page",
 					"name": "dairy-dashboard",
 					"label": "Dairy Dashboard",
@@ -182,6 +192,7 @@ def get_data():
 					"name": "Vlcc Milk Collection Record",
 					"description": _(" "),
 				}
+
 			]
 		}				
 	]			

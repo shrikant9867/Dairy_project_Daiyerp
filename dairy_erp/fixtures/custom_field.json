@@ -2091,7 +2091,7 @@
   "modified": "2017-12-22 16:54:51.395668", 
   "name": "User-operator_type", 
   "no_copy": 0, 
-  "options": "\nCamp Office\nChilling Centre\nPlant\nVLCC", 
+  "options": "\nCamp Office\nChilling Centre\nPlant\nVLCC\nVet AI Technician", 
   "parent": null, 
   "permlevel": 0, 
   "precision": "", 

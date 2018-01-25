@@ -39,7 +39,7 @@ class ServiceNote(Document):
 		si_obj.flags.ignore_permissions = True
 		si_obj.service_note = self.name
 		si_obj.submit()
-		frappe.msgprint(_("Sales Invoice: {0} Created!!!".format("<a href='#Form/Sales Invoice/{0}'>{0}</a>".format(si_obj.name))))
+		frappe.msgprint(_("Sales Invoice :'{0}' Created".format("<a href='#Form/Sales Invoice/{0}'>{0}</a>".format(si_obj.name))))
 
 	def total_weight(self):
 		total = 0

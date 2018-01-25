@@ -15,6 +15,12 @@ frappe.ui.form.on('Village Level Collection Centre', {
 	},
 	
 	onload: function(frm) {
+		if(frm.doc.__islocal){
+			frm.set_value("address","")
+			frm.set_value("chilling_centre","")
+			frm.set_value("camp_office","")
+			frm.set_value("plant_office","")
+		}
 		frm.set_query("chilling_centre", function () {
 			return {
 				"filters": {

@@ -7,4 +7,12 @@ import frappe
 from frappe.model.document import Document
 
 class VetAITechnician(Document):
-	pass
+	def validate(self):
+		self.create_vet_ai_user()
+
+	# def on_submit(self):
+		
+
+	def create_vet_ai_user(self):
+		print "**************************",self
+		

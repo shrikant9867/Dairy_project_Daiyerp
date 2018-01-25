@@ -43,6 +43,7 @@ doctype_list_js = {
     "Material Request" :["customization/material_request/material_request_list.js"],
     "Purchase Invoice":["customization/purchase_invoice/purchase_invoice_list.js"],
     "Purchase Order":["customization/purchase_order/purchase_order_list.js"],
+    "Delivery Note":["customization/delivery_note/delivery_note_list.js"],
 }
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

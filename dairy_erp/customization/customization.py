@@ -301,6 +301,7 @@ def check_if_dropship(doc):
 
 	mr_list = []
 	conditions = ""
+	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
 
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		for item in doc.items:
@@ -312,8 +313,8 @@ def check_if_dropship(doc):
 
 		#check PO with dropship
 		if conditions:
-			po = frappe.db.sql("""select p.name,pi.material_request from `tabPurchase Order` p,`tabPurchase Order Item` pi where p.company = 'Dairy' 
-							{0} and p.docstatus = 1 and p.name = pi.parent and p.is_dropship = 1 group by pi.material_request""".format(conditions),as_dict=1,debug=1)
+			po = frappe.db.sql("""select p.name,pi.material_request from `tabPurchase Order` p,`tabPurchase Order Item` pi where p.company = '{0}' 
+							{1} and p.docstatus = 1 and p.name = pi.parent and p.is_dropship = 1 group by pi.material_request""".format(dairy,conditions),as_dict=1,debug=1)
 			if po:
 				po_data = [data.get('name') for data in po]
 

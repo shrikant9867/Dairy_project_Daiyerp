@@ -46,6 +46,8 @@ def execute(filters=None):
 	# testing
 	l1 = [['Jayvant',10,'Purchase Invoice'],['Jayvant',20,'Sales Invoice'],['Shraddha',30,'Purchase Invoice'],['Jayvant',40,'Sales Invoice'],['Shraddha',50,'Sales Invoice']]
 	dict1 = {}
+	temp = []
+	dictList = []
 	# for l in l1:
 	# 	print "++++++++++++",l[0]
 	# 	if l[0] not in dict1:
@@ -63,10 +65,10 @@ def execute(filters=None):
 		
 		new_Receivable.append([i[1],i[10]])
 
-	for key, value in dict.iteritems():
+	for key, value in dict1.iteritems():
 	    temp = [key,value]
-	    dictlist.append(temp)
-	print "++++++++++++",dict1
+	    dictList.append(temp)
+	print "++++++++++++",dictList
 
 	Vlcc_data = frappe.db.sql("select vlcc_name from `tabFarmer`")
 

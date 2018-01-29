@@ -2077,6 +2077,7 @@
   "name": "User-operator_type", 
   "no_copy": 0, 
   "options": "\nCamp Office\nChilling Centre\nPlant\nVLCC\nVet AI Technician", 
+  "parent": null,
   "permlevel": 0, 
   "precision": "", 
   "print_hide": 0, 

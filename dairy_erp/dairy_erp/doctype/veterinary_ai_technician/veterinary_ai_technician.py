@@ -23,11 +23,6 @@ class VeterinaryAITechnician(Document):
 			frappe.throw(_('Email not valid'))
 
 	def create_vet_ai_user(self):
-		# print "**************************",self.email
-		# print "**************************",self.vet_or_ai_name
-		# print "**************************",self.vlcc
-		# print "**************************",self.address
-		# print "**************************",self.contact
 		if not frappe.db.exists('User', self.email):
 			ai_tech_obj = frappe.new_doc("User")
 			ai_tech_obj.email = self.email

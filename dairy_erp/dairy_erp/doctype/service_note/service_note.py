@@ -75,7 +75,7 @@ def get_vet_ai_company(user):
 
 @frappe.whitelist()
 def get_custom_item(doctype, txt, searchfield, start, page_len, filters):
-	query_item = frappe.db.sql("""select item_code,item_group from `tabItem` where item_group in ('Cattle feed','Medicines', 'Artificial Insemination Services','Veterinary Services')""")
+	query_item = frappe.db.sql("""select item_code,item_group from `tabItem` where item_group in ('Medicines', 'Services')""")
 	return query_item
 
 @frappe.whitelist()

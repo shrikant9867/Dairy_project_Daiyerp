@@ -14,7 +14,10 @@ frappe.ui.form.on('Farmer', {
 				}
 			};
 		});
-	}
+	},
+	address: function(frm) {
+		erpnext.utils.get_address_display(frm, "address", "address_details");
+	},
 });
 
 

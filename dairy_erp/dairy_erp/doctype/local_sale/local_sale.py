@@ -59,47 +59,47 @@ class LocalSale(Document):
 		si_obj = make_sales_invoice(delivry_obj.name)
 		si_obj.flags.ignore_permissions = True
 		si_obj.submit()
-		# self.create_sale_invoice_ls()
-		print "========================="
+		frappe.msgprint(_("Delivery Note: {0} Created!!! \n Sales Invoice: {1} Created!!!".format(delivry_obj.name,si_obj.name)))
 
-	def create_sale_invoice_ls(self):
-		print "____________",self.name
-		try:
-			si_obj = frappe.new_doc("Sales Invoice")
-			si_obj.customer = self.customer
-			si_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
-			si_obj_cost_center = frappe.db.get_value("Company",si_obj.company,'cost_center')
-			si_obj.due_date = self.posting_time
-			for row in self.items:
-				si_obj.append("items",
-				{
-					"item_code": row.get('item_code'),
-					"item_name": row.get('item_code'),
-					"description": row.get('item_code'),
-					"uom": "Litre",
-					"qty": row.get('qty'),
-					"rate": row.get('rate'),
-					"amount": row.get('amount'),
-					"warehouse": row.get("warehouse"),
-					"cost_center": si_obj_cost_center
-				})
-			si_obj.flags.ignore_permissions = True
-			# si_obj.service_note = self.name
-			si_obj.submit()
-		except Exception,e:
-			make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
-			data = "", message=e, traceback=frappe.get_traceback())
+	# def create_sale_invoice_ls(self):
+	# 	print "____________",self.name
+	# 	try:
+	# 		si_obj = frappe.new_doc("Sales Invoice")
+	# 		si_obj.customer = self.customer
+	# 		si_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
+	# 		si_obj_cost_center = frappe.db.get_value("Company",si_obj.company,'cost_center')
+	# 		si_obj.due_date = self.posting_time
+	# 		for row in self.items:
+	# 			si_obj.append("items",
+	# 			{
+	# 				"item_code": row.get('item_code'),
+	# 				"item_name": row.get('item_code'),
+	# 				"description": row.get('item_code'),
+	# 				"uom": "Litre",
+	# 				"qty": row.get('qty'),
+	# 				"rate": row.get('rate'),
+	# 				"amount": row.get('amount'),
+	# 				"warehouse": row.get("warehouse"),
+	# 				"cost_center": si_obj_cost_center
+	# 			})
+	# 		si_obj.flags.ignore_permissions = True
+	# 		# si_obj.service_note = self.name
+	# 		si_obj.submit()
+	# 		frappe.msgprint(_("Sales Invoice: {0} Created!!!".format(self.name))
+		# except Exception,e:
+		# 	make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
+		# 	data = "", message=e, traceback=frappe.get_traceback())
 
-@frappe.whitelist()
-def get_price_list_rate(item):
-	if item:
-		rate = frappe.db.sql("""select price_list_rate from `tabItem Price`
-						 		where item_name = '{0}' and 
-						 		price_list ='Standard Selling'""".format(item),as_list=1)
-		if rate:
-			return rate[0][0]
-		else:
-			return 0
+# @frappe.whitelist()
+# def get_price_list_rate(item):
+# 	if item:
+# 		rate = frappe.db.sql("""select price_list_rate from `tabItem Price`
+# 						 		where item_name = '{0}' and 
+# 						 		price_list ='Standard Selling'""".format(item),as_list=1)
+# 		if rate:
+# 			return rate[0][0]
+# 		else:
+# 			return 0
 
 @frappe.whitelist()
 def get_milk_qty_local():
@@ -130,7 +130,7 @@ def fetch_balance_qty():
 
 	return items_dict
 
-@frappe.whitelist()
-def get_vlcc_warehouse():
-	warehouse = frappe.db.get_value("Village Level Collection Centre", {"email_id": frappe.session.user}, 'warehouse')
-	return warehouse
+# @frappe.whitelist()
+# def get_vlcc_warehouse():
+# 	warehouse = frappe.db.get_value("Village Level Collection Centre", {"email_id": frappe.session.user}, 'warehouse')
+# 	return warehouse

@@ -2,10 +2,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.243919", 
-  "name": "f29ff14758", 
+  "modified": "2017-11-27 13:02:33.071753", 
+  "name": "97c710bf27", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Sales Register", 
   "roles": [
@@ -20,10 +19,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.259414", 
-  "name": "69fdf8efa2", 
+  "modified": "2017-11-27 13:02:33.084851", 
+  "name": "7d99dd19c7", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Purchase Register", 
   "roles": [
@@ -38,10 +36,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.273464", 
-  "name": "ada8a6ca53", 
+  "modified": "2017-11-27 13:02:33.192112", 
+  "name": "ec5923ea01", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Itemised Sales Register", 
   "roles": [
@@ -56,10 +53,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.289088", 
-  "name": "97a032926e", 
+  "modified": "2017-11-27 13:02:33.199656", 
+  "name": "5eefba9b1c", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Itemised Purchase Register", 
   "roles": [
@@ -74,10 +70,77 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.302844", 
-  "name": "2d2ce3b319", 
+  "modified": "2018-01-25 14:55:50.947154", 
+  "name": "b02efeeaf2", 
   "page": null, 
-  "parent": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-01-25 14:55:50.972059", 
+  "name": "8f540ca4f4", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-01-25 14:55:51.081438", 
+  "name": "3440eec37d", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Itemised Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-01-25 14:55:51.087590", 
+  "name": "a4455357c4", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Itemised Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-01-25 14:55:51.097777", 
+  "name": "210eb11f3a", 
+  "page": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Balance", 
   "roles": [
@@ -98,10 +161,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.319740", 
-  "name": "15121295b1", 
+  "modified": "2018-01-25 14:55:51.105061", 
+  "name": "194cc10e3b", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Ledger", 
   "roles": [
@@ -128,10 +190,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.336617", 
-  "name": "f8075c399c", 
+  "modified": "2018-01-25 14:55:51.114030", 
+  "name": "7c41517c6a", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "Accounts Receivable", 
   "roles": [
@@ -158,10 +219,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.354151", 
-  "name": "87f90b75e7", 
+  "modified": "2018-01-25 14:55:51.125200", 
+  "name": "62a5214504", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "Accounts Payable", 
   "roles": [
@@ -194,10 +254,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.487246", 
-  "name": "ee77dfd047", 
+  "modified": "2018-01-25 14:55:51.143436", 
+  "name": "461c5abed4", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "GL Entry", 
   "report": "General Ledger", 
   "roles": [
@@ -227,10 +286,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.511536", 
-  "name": "53d189ad91", 
+  "modified": "2018-01-25 14:55:51.154487", 
+  "name": "1604b7f600", 
   "page": "dairy-dashboard", 
-  "parent": null, 
   "ref_doctype": null, 
   "report": null, 
   "roles": [
@@ -242,10 +300,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.525721", 
-  "name": "9fa6a8d186", 
+  "modified": "2018-01-25 14:55:51.160473", 
+  "name": "b1311df45d", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Sales Register", 
   "roles": [
@@ -260,10 +317,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.539445", 
-  "name": "65a3cbc2ce", 
+  "modified": "2018-01-25 14:55:51.165690", 
+  "name": "cb38aec697", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Purchase Register", 
   "roles": [
@@ -278,10 +334,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.553263", 
-  "name": "6da70905a1", 
+  "modified": "2018-01-25 14:55:51.171660", 
+  "name": "757c1e40a1", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Itemised Sales Register", 
   "roles": [
@@ -296,10 +351,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.566793", 
-  "name": "7fc44f5c09", 
+  "modified": "2018-01-25 14:55:51.178102", 
+  "name": "15c5b3710b", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Itemised Purchase Register", 
   "roles": [
@@ -314,10 +368,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.580891", 
-  "name": "3f9fa5142d", 
+  "modified": "2018-01-25 14:55:51.184902", 
+  "name": "32a01a2e42", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Balance", 
   "roles": [
@@ -338,10 +391,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.596745", 
-  "name": "50e53111ad", 
+  "modified": "2018-01-25 14:55:51.194505", 
+  "name": "14d7eee985", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Ledger", 
   "roles": [
@@ -368,10 +420,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.613787", 
-  "name": "311382d4ce", 
+  "modified": "2018-01-25 14:55:51.206539", 
+  "name": "024db21d45", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "Accounts Receivable", 
   "roles": [
@@ -398,10 +449,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.633307", 
-  "name": "71b758f9dc", 
+  "modified": "2018-01-25 14:55:51.217337", 
+  "name": "c1a906c7ff", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "Accounts Payable", 
   "roles": [
@@ -434,10 +484,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.654584", 
-  "name": "7325d09790", 
+  "modified": "2018-01-25 14:55:51.229228", 
+  "name": "251bc1f67f", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "GL Entry", 
   "report": "General Ledger", 
   "roles": [
@@ -467,10 +516,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.673527", 
-  "name": "174633b202", 
+  "modified": "2018-01-25 14:55:51.240166", 
+  "name": "4a928a575b", 
   "page": "dairy-dashboard", 
-  "parent": null, 
   "ref_doctype": null, 
   "report": null, 
   "roles": [
@@ -482,10 +530,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.685653", 
-  "name": "c01f1d6485", 
+  "modified": "2018-01-25 14:55:51.245860", 
+  "name": "90e71953c8", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Sales Register", 
   "roles": [
@@ -500,10 +547,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.697939", 
-  "name": "ac42897e49", 
+  "modified": "2018-01-25 14:55:51.252576", 
+  "name": "ab22fc2b31", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Purchase Register", 
   "roles": [
@@ -518,10 +564,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.709724", 
-  "name": "27c0a617e3", 
+  "modified": "2018-01-25 14:55:51.259675", 
+  "name": "52da38cd54", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Itemised Sales Register", 
   "roles": [
@@ -536,10 +581,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.721684", 
-  "name": "0d4774cb95", 
+  "modified": "2018-01-25 14:55:51.266258", 
+  "name": "07a8e7945f", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Itemised Purchase Register", 
   "roles": [
@@ -554,10 +598,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.735607", 
-  "name": "a7de314780", 
+  "modified": "2018-01-25 14:55:51.273098", 
+  "name": "fd36787718", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Balance", 
   "roles": [
@@ -578,10 +621,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.754267", 
-  "name": "ce9481399b", 
+  "modified": "2018-01-25 14:55:51.281739", 
+  "name": "e9e9e0c32c", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Ledger", 
   "roles": [
@@ -608,10 +650,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.774358", 
-  "name": "f3753d7e2b", 
+  "modified": "2018-01-25 14:55:51.292456", 
+  "name": "5ea2c9a17a", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "Accounts Receivable", 
   "roles": [
@@ -638,10 +679,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.793247", 
-  "name": "a6abda4516", 
+  "modified": "2018-01-25 14:55:51.303905", 
+  "name": "5224a6371e", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "Accounts Payable", 
   "roles": [
@@ -674,10 +714,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.811521", 
-  "name": "59d9500071", 
+  "modified": "2018-01-25 14:55:51.317602", 
+  "name": "71f9f5d46a", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "GL Entry", 
   "report": "General Ledger", 
   "roles": [
@@ -707,10 +746,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-01-25 00:19:16.828803", 
-  "name": "d86dfc9bf5", 
+  "modified": "2018-01-25 14:55:51.329897", 
+  "name": "7fc8f44270", 
   "page": "dairy-dashboard", 
-  "parent": null, 
   "ref_doctype": null, 
   "report": null, 
   "roles": [

@@ -86,11 +86,10 @@ def get_vlcc_warehouse():
 @frappe.whitelist()
 def get_price_list_rate(item):
 	if item:
-		rate = frappe.db.sql("""select price_list_rate from `tabItem Price`
-						 		where item_name = '{0}' and 
-						 		price_list ='Standard Selling'""".format(item),as_list=1)
+		rate = frappe.db.get_value("Item Price", {"item_name": item}, 'price_list_rate')
+		# rate = frappe.db.sql("""select price_list_rate from `tabItem Price` where item_name = '{0}' and price_list ='Standard Selling'""".format(item),as_list=1)
 		if rate:
-			return rate[0][0]
+			return rate
 		else:
 			return 0
 

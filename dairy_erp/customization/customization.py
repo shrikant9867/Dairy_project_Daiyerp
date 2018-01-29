@@ -243,25 +243,28 @@ def make_pi(doc):
 		pi.submit()
 
 
-def make_pi_against_localsupp(doc):
+def make_pi_against_localsupp(po_doc,pr_doc):
 	"""Make PI for CO(dairy) local supplier @CO Use case 2"""
-
+	
+	pr_flag = 0
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		pi = frappe.new_doc("Purchase Invoice")
-		pi.supplier = doc.supplier
-		pi.company = doc.company
-		for item in doc.items:
-			pi.append("items",
-				{
-					"qty":item.qty,
-					"item_code": item.item_code,
-					"rate": item.rate,
-					"amount": item.amount,
-					"warehouse": item.warehouse,
-					"purchase_order": doc.name
-				})
-		return pi
-
+		pi.supplier = po_doc.supplier
+		pi.company = po_doc.company
+		for row , row_ in zip(po_doc.items, pr_doc.items):
+			if row.material_request == row_.material_request:
+				pr_flag = 1
+				pi.append("items",
+					{
+						"qty":row.qty,
+						"item_code": row.item_code,
+						"rate": row.rate,
+						"amount": row.amount,
+						"warehouse": row.warehouse,
+						"purchase_order": po_doc.name
+					})
+		if pr_flag == 1:
+			return pi
 
 def validate_qty_against_mi(doc):
 	"""update Material Request Status mapped with delivery Note"""
@@ -321,7 +324,7 @@ def check_if_dropship(doc):
 				for data in set(po_data):
 					po_doc = frappe.get_doc("Purchase Order",data)
 
-					pi = make_pi_against_localsupp(po_doc)		#Purchase Invoice @CO in use case 2
+					pi = make_pi_against_localsupp(po_doc,doc)		#Purchase Invoice @CO in use case 2
 
 					if po_doc.is_dropship == 1:
 						si = frappe.new_doc("Sales Invoice")
@@ -344,10 +347,11 @@ def check_if_dropship(doc):
 				si.flags.ignore_permissions = True  		#Sales Invoice @CO in use case 2
 				si.save()
 				si.submit()
-
-				pi.flags.ignore_permissions = True  		#Purchase Invoice @CO in use case 2
-				pi.save()
-				pi.submit()
+				
+				if pi:
+					pi.flags.ignore_permissions = True  		#Purchase Invoice @CO in use case 2
+					pi.save()
+					pi.submit()
 
 				make_pi(doc)			#Purchase Invoice @VLCC in use case 2
 				mi_status_update(doc)

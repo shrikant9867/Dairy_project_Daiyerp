@@ -19,13 +19,14 @@ def get_items():
 	"""Mobile API's common to sell and purchase 
 	"""
 	
-	response_dict = frappe.db.sql("""select name as item_code,item_name,description,weight_uom from `tabItem` where 
+	response_dict = frappe.db.sql("""select name as item_code,item_name,description,standard_rate,stock_uom from `tabItem` where 
 		item_group in ('Cattle feed', 'Mineral Mixtures', 'Medicines', 
 		'Artificial Insemination Services') and is_stock_item=1 and disabled =0""",as_dict = 1)
 	for row in response_dict:
 		try:
-			row.update({"qty": get_item_qty(row.get('name')),"uom":frappe.db.sql("select uom,conversion_factor from `tabUOM Conversion Detail` where parent = '{0}'".format(row.get('item_code')),as_dict=1)})
-
+			row.update({"qty": get_item_qty(row.get('name')),"uom":frappe.db.sql("select um.uom,um.conversion_factor * i.standard_rate as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = '{0}'".format(row.get('item_code')),as_dict=1)})
+			# row.get('uom').append({"uom": frappe.db.get_value('Item',row.get('item_code'),'stock_uom'),"rate": frappe.db.get_value('Item',row.get('item_code'), "standard_rate")})
+		
 		except Exception,e:
 			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
 			data = row.get('name'), message=e, traceback=frappe.get_traceback())
@@ -108,4 +109,4 @@ def update_supplier_value(row):
 	supplier_item_price = frappe.db.sql("select name from `tabSupplier Item Price` where branch_office = '{0}' and customer = '{1}'".format(row.get('name'),get_seesion_company_datails().get('company')),as_dict=1)
 	print "_____________",supplier_item_price
 	if supplier_item_price:
-		row.update({"item_prices": frappe.db.sql("select item,price from `tabSupplier Item Price Child` where parent = '{0}'".format(supplier_item_price[0].get('name')),as_dict=1)})
+		row.update({"items": frappe.db.sql("select item as item_code,item_name,price as rate from `tabSupplier Item Price Child` where parent = '{0}'".format(supplier_item_price[0].get('name')),as_dict=1)})

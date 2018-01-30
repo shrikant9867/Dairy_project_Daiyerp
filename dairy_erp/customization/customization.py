@@ -261,8 +261,8 @@ def make_pi_against_localsupp(po_doc,pr_doc):
 				pr_flag = 1
 				pi.append("items",
 					{
-						"qty":row.qty,
-						"item_code": row.item_code,
+						"qty":row_.qty,
+						"item_code": row_.item_code,
 						"rate": row.rate,
 						"amount": row.amount,
 						"warehouse": row.warehouse,

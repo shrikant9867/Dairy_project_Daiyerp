@@ -36,6 +36,6 @@ class VeterinaryAITechnician(Document):
 			ai_tech_obj.flags.ignore_mandatory = True
 			ai_tech_obj.save()
 			ai_tech_obj.add_roles("Vet/AI Technician")
-			frappe.msgprint(_("User Created!!!",self.vet_or_ai_name))
+			frappe.msgprint(_("User Created!!!",ai_tech_obj.first_name.vet_or_ai_name))
 		else:
 			frappe.msgprint(_("User not Created!!!"))

@@ -123,3 +123,5 @@ def update_supplier_value(row):
 					
 				}
 			)
+	else:
+		row.update({"items":[]})

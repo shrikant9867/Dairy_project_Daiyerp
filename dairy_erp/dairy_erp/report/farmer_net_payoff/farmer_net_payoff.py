@@ -63,9 +63,6 @@ def get_column(filters):
 	# 	})
 
 def get_data(filters):
-	print "\n \n \n \n ------------------------------------------------------------"
-	print "filters",filters
-
 	supplier_args = {
 		"party_type": "Supplier",
 		"naming_by": ["Buying Settings", "supp_master_name"],
@@ -83,8 +80,6 @@ def get_data(filters):
 
 	Payable = ReceivablePayableReport(filters).run(supplier_args)
 	Receivable = ReceivablePayableReport(filters).run(customer_args)
-	
-	print "\n Payable",Payable
 
 	sup_payable = []
 	customer_recv = []
@@ -94,8 +89,6 @@ def get_data(filters):
 	customer_recv_list = []
 	return_list =[]
 	data = []
-	print "sup_payable",sup_payable
-	print "customer_recv",customer_recv
 	
 	for ele in sup_payable:
 		temp ={
@@ -113,8 +106,6 @@ def get_data(filters):
 		}
 		customer_recv_list.append(temp)
 	return_list = customer_recv_list
-	print "sup_payable",sup_payable_list
-	print "customer_recv",customer_recv_list
 	
 	for ele in sup_payable_list:
 		name = ele.get('name')
@@ -124,7 +115,6 @@ def get_data(filters):
 			if item.get('name') == name:
 				item['amt'] = amt - item['amt']
 				item['payable'] =payable
-	print "\nReturn List",return_list
 
 
 	if return_list and sup_payable:
@@ -176,9 +166,7 @@ def get_data(filters):
 				temp =[farmer_id[0].get('farmer_id'),ele.get('name'),Payable,receivable,net_pay_off]
 				data.append(temp)
 
-			print "\n Data",data
 		else:
-			print "\n Data",data
 			data =[]
 	return data
 
@@ -223,3 +211,10 @@ def get_user_company():
 	user_name = frappe.session.user
 	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
 	return company_name
+
+@frappe.whitelist()
+def get_farmers(doctype,text,searchfields,start,pagelen,filters):
+	user_name = frappe.session.user
+	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
+	farmers = frappe.db.sql(""" select name,full_name from `tabFarmer` where vlcc_name ='{0}'""".format(company_name[0][0]),as_list=1)
+	return farmers

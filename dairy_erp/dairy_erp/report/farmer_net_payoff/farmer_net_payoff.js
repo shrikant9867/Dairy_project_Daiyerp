@@ -18,12 +18,6 @@ frappe.query_reports["Farmer Net Payoff"] = {
 			"options": "Farmer"
 		},
 		{
-			"fieldname":"vlcc",
-			"label": __("Vlcc"),
-			"fieldtype": "Link",
-			"options": "Vlcc"
-		},
-		{
 			"fieldname":"report_date",
 			"label": __("As on Date"),
 			"fieldtype": "Date",
@@ -59,7 +53,7 @@ frappe.query_reports["Farmer Net Payoff"] = {
 			"fieldtype": "Int",
 			"default": "90",
 			"reqd": 1
-		}
+		},
 
 	]
 }

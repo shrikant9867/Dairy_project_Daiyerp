@@ -100,6 +100,21 @@ frappe.ui.form.on('Sales Order Item', {
 								}
 							}
 						});
+
+						frappe.call({
+							method: "frappe.client.get_value",
+							args: {
+								doctype: "UOM Conversion Detail",
+								filters: {"parent": child.item_code},
+								fieldname: "conversion_factor"
+							},
+							callback: function(r){
+								if(r.message){
+									// console.log(r.message.conversion_factor)
+									frappe.model.set_value(cdt, cdn, "conversion_factor",r.message.conversion_factor)
+								}
+							}
+						});
 					}
 				}	
 				cur_frm.refresh_fields('item_code');

@@ -137,7 +137,7 @@ def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
 	set_warehouse(doc)
 
-
+@frappe.whitelist()
 def after_install():
 	create_supplier_type()
 	# create_local_customer()
@@ -163,9 +163,14 @@ def create_supplier_type():
 
 def create_local_customer():
 
-	if not frappe.db.exists('Customer', "Vlcc Local Customer"):
+	if not frappe.db.exists('Customer', "Vlcc Local Cust"):
 		loc_cust_doc = frappe.new_doc("Customer")
-		loc_cust_doc.name = "Vlcc Local Customer"
+		loc_cust_doc.name = "Vlcc Local Cust"
+		loc_cust_doc.customer_name = "Vlcc Local Cust"
+		loc_cust_doc.customer_group = "Vlcc Local Customer"
+		loc_cust_doc.territory = "All Territories"
+		loc_cust_doc.flags.ignore_permissions = True
+		loc_cust_doc.flags.ignore_mandatory = True
 		loc_cust_doc.save()
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
@@ -477,6 +482,7 @@ def create_item_group(args=None):
 			item_grp.item_group_name = i
 			item_grp.insert()
 	create_customer_group()
+	create_local_customer()
 
 def create_customer_group():
 	customer_groups = ['Farmer', 'Vlcc', 'Dairy','Vlcc Local Customer']

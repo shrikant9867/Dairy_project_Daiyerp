@@ -194,6 +194,18 @@ def get_data():
 				}
 
 			]
+		},
+		{
+			"label": _("Village Level Collection Centre Reports"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "report",
+					"name": "Farmer Net Payoff",
+					"doctype": "Farmer",
+					"is_query_report": True
+				}
+			]
 		}				
 	]			
 

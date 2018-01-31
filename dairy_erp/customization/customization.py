@@ -10,6 +10,8 @@ import re
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
+from frappe.model.mapper import get_mapped_doc
+
 
 def set_warehouse(doc, method=None):
 	"""configure w/h for dairy components"""
@@ -245,26 +247,21 @@ def make_pi(doc):
 
 def make_pi_against_localsupp(po_doc,pr_doc):
 	"""Make PI for CO(dairy) local supplier @CO Use case 2"""
-	
-	pr_flag = 0
-	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
-		pi = frappe.new_doc("Purchase Invoice")
-		pi.supplier = po_doc.supplier
-		pi.company = po_doc.company
-		for row , row_ in zip(po_doc.items, pr_doc.items):
-			if row.material_request == row_.material_request:
-				pr_flag = 1
-				pi.append("items",
-					{
-						"qty":row_.qty,
-						"item_code": row_.item_code,
-						"rate": row.rate,
-						"amount": row.amount,
-						"warehouse": row.warehouse,
-						"purchase_order": po_doc.name
-					})
-		if pr_flag == 1:
-			return pi
+
+	pi = frappe.new_doc("Purchase Invoice")
+	pi.supplier = po_doc.supplier
+	pi.company = po_doc.company
+
+	for row_ in pr_doc.items:
+		pi.append("items",
+			{
+				"qty":row_.qty,
+				"item_code": row_.item_code,
+				"rate": frappe.db.get('Item Price',{'name':row_.item_code,'buying':'1','company':po_doc.company,'price_list':po_doc.buying_price_list},'rate'),
+				"purchase_order": po_doc.name
+			})
+
+	return pi
 
 def validate_qty_against_mi(doc):
 	"""update Material Request Status mapped with delivery Note"""
@@ -317,7 +314,7 @@ def check_if_dropship(doc):
 		#check PO with dropship
 		if conditions:
 			po = frappe.db.sql("""select p.name,pi.material_request from `tabPurchase Order` p,`tabPurchase Order Item` pi where p.company = '{0}' 
-							{1} and p.docstatus = 1 and p.name = pi.parent and p.is_dropship = 1 group by pi.material_request""".format(dairy,conditions),as_dict=1,debug=1)
+							{1} and p.docstatus = 1 and p.name = pi.parent and p.is_dropship = 1 group by pi.material_request""".format(dairy,conditions),as_dict=1)
 			if po:
 				po_data = [data.get('name') for data in po]
 

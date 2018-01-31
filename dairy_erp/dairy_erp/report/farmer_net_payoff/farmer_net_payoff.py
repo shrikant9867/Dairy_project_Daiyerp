@@ -1,14 +1,3 @@
-# # Copyright (c) 2013, indictrans technologies and contributors
-# # For license information, please see license.txt
-
-# from __future__ import unicode_literals
-# import frappe
-
-# def execute(filters=None):
-# 	columns, data = [], []
-# 	return columns, data
-
-
 # Copyright (c) 2013, indictrans technologies and contributors
 # For license information, please see license.txt
 
@@ -63,111 +52,119 @@ def get_column(filters):
 	# 	})
 
 def get_data(filters):
-	supplier_args = {
-		"party_type": "Supplier",
-		"naming_by": ["Buying Settings", "supp_master_name"],
-	}
-
-	filters["supplier"] = frappe.db.get_value("Farmer",filters.get("farmer"),"full_name")
-
-	customer_args = {
-		"party_type": "Customer",
-		"naming_by": ["Selling Settings", "cust_master_name"],
-	}
-
-	filters["supplier"] = ""
-	filters["customer"] = frappe.db.get_value("Farmer",filters.get("farmer"),"full_name")
-
-	Payable = ReceivablePayableReport(filters).run(supplier_args)
-	Receivable = ReceivablePayableReport(filters).run(customer_args)
-
-	sup_payable = []
-	customer_recv = []
-	sup_payable = get_payable_data(Payable)
-	customer_recv = get_receivable_data(Receivable)
-	sup_payable_list = []
-	customer_recv_list = []
-	return_list =[]
-	data = []
 	
-	for ele in sup_payable:
-		temp ={
-			'name':ele[0],
-			'amt':ele[1],
-			'payable':ele[1]
+	if filters.get("company"):
+
+		print"\n\n FILTERS ",filters
+		supplier_args = {
+			"party_type": "Supplier",
+			"naming_by": ["Buying Settings", "supp_master_name"],
 		}
-		sup_payable_list.append(temp)
-	
-	for ele in customer_recv:
-		temp ={
-			'name':ele[0],
-			'amt':ele[1],
-			"receivable":ele[1]
+
+		filters["supplier"] = frappe.db.get_value("Farmer",filters.get("farmer"),"full_name")
+
+		customer_args = {
+			"party_type": "Customer",
+			"naming_by": ["Selling Settings", "cust_master_name"],
 		}
-		customer_recv_list.append(temp)
-	return_list = customer_recv_list
-	
-	for ele in sup_payable_list:
-		name = ele.get('name')
-		amt =ele.get('amt')
-		payable =ele.get('payable')
-		for item in return_list:
-			if item.get('name') == name:
-				item['amt'] = amt - item['amt']
-				item['payable'] =payable
+
+		filters["supplier"] = ""
+		filters["customer"] = frappe.db.get_value("Farmer",filters.get("farmer"),"full_name")
+
+		Payable = ReceivablePayableReport(filters).run(supplier_args)
+		Receivable = ReceivablePayableReport(filters).run(customer_args)
+
+		sup_payable = []
+		customer_recv = []
+		sup_payable = get_payable_data(Payable)
+		customer_recv = get_receivable_data(Receivable)
+		sup_payable_list = []
+		customer_recv_list = []
+		return_list =[]
+		data = []
+		
+		for ele in sup_payable:
+			temp ={
+				'name':ele[0],
+				'amt':ele[1],
+				'payable':ele[1]
+			}
+			sup_payable_list.append(temp)
+		
+		for ele in customer_recv:
+			temp ={
+				'name':ele[0],
+				'amt':ele[1],
+				"receivable":ele[1]
+			}
+			customer_recv_list.append(temp)
+		return_list = customer_recv_list
+		
+		for ele in sup_payable_list:
+			name = ele.get('name')
+			amt =ele.get('amt')
+			payable =ele.get('payable')
+			for item in return_list:
+				if item.get('name') == name:
+					item['amt'] = amt - item['amt']
+					item['payable'] =payable
 
 
-	if return_list and sup_payable:
-		for ele in return_list:
-			farmer_fullname = ele.get('name')
-			farmer_id = frappe.db.get_values("Farmer", {"full_name":farmer_fullname} ,"farmer_id",as_dict=1)
-			Payable = receivable = 0
-			Payable = ele.get('payable') if ele.get('payable') else 0
-			receivable = ele.get('receivable') if ele.get('receivable') else 0
-			net_pay_off = ele.get('amt')
-			if not Payable:
-				# receivable = -(receivable)
-				net_pay_off = -(net_pay_off)
-
-			temp =[farmer_id[0].get('farmer_id'),ele.get('name'),Payable,receivable,net_pay_off]
-			data.append(temp)	
-	else:
-		# print "\n Data",data
-		# if len(return_list)>1:
-		# 	temp_list = return_list
-		# 	for ele in temp_list:
-		# 		farmer_fullname = ele.get('name')
-		# 		farmer_id = frappe.db.get_values("Farmer", {"full_name":farmer_fullname} ,"farmer_id",as_dict=1)
-		# 		Payable = receivable = 0
-		# 		Payable = ele.get('payable') if ele.get('payable') else 0
-		# 		receivable = ele.get('receivable') if ele.get('receivable') else 0
-		# 		net_pay_off = ele.get('amt')
-		# 		if not Payable:
-		# 			# receivable = -(receivable)
-		# 			net_pay_off = -(net_pay_off)
-
-		# 		temp =[farmer_id[0].get('farmer_id'),ele.get('name'),Payable,receivable,net_pay_off]
-		# 		data.append(temp)
-
-		# 	print "\n Data",data
-		if len(sup_payable_list)>1:
-			temp_list = sup_payable_list
-			for ele in temp_list:
+		if return_list and sup_payable_list:
+			for ele in return_list:
 				farmer_fullname = ele.get('name')
 				farmer_id = frappe.db.get_values("Farmer", {"full_name":farmer_fullname} ,"farmer_id",as_dict=1)
-				Payable = receivable = 0
-				Payable = ele.get('payable') if ele.get('payable') else 0
+				payable = receivable = 0
+				payable = ele.get('payable') if ele.get('payable') else 0
 				receivable = ele.get('receivable') if ele.get('receivable') else 0
 				net_pay_off = ele.get('amt')
-				if not Payable:
+				if not payable:
 					# receivable = -(receivable)
 					net_pay_off = -(net_pay_off)
 
-				temp =[farmer_id[0].get('farmer_id'),ele.get('name'),Payable,receivable,net_pay_off]
-				data.append(temp)
-
+				temp =[farmer_id[0].get('farmer_id'),ele.get('name'),payable,receivable,net_pay_off]
+				data.append(temp)	
 		else:
-			data =[]
+			# print "\n Data",data
+			# if len(return_list)>1:
+			# 	temp_list = return_list
+			# 	for ele in temp_list:
+			# 		farmer_fullname = ele.get('name')
+			# 		farmer_id = frappe.db.get_values("Farmer", {"full_name":farmer_fullname} ,"farmer_id",as_dict=1)
+			# 		Payable = receivable = 0
+			# 		Payable = ele.get('payable') if ele.get('payable') else 0
+			# 		receivable = ele.get('receivable') if ele.get('receivable') else 0
+			# 		net_pay_off = ele.get('amt')
+			# 		if not Payable:
+			# 			# receivable = -(receivable)
+			# 			net_pay_off = -(net_pay_off)
+
+			# 		temp =[farmer_id[0].get('farmer_id'),ele.get('name'),Payable,receivable,net_pay_off]
+			# 		data.append(temp)
+
+			# 	print "\n Data",data
+			if len(sup_payable_list)>1 and len(return_list)==0:
+				temp_list = sup_payable_list
+				for ele in temp_list:
+					farmer_fullname = ele.get('name')
+					farmer_id = frappe.db.get_values("Farmer", {"full_name":farmer_fullname} ,"farmer_id",as_dict=1)
+					payable = receivable = 0
+					payable = ele.get('payable') if ele.get('payable') else 0
+					# receivable = ele.get('receivable') if ele.get('receivable') else 0
+					net_pay_off = ele.get('amt')
+					# if not payable:
+					# 	# receivable = -(receivable)
+					# 	net_pay_off = -(net_pay_off)
+
+					temp =[farmer_id[0].get('farmer_id'),ele.get('name'),payable,0,net_pay_off]
+					data.append(temp)
+			if len(sup_payable_list)==1 and len(return_list)==1:
+				data =[]
+
+			else:
+				data =[]
+	else:
+		data =[]
 	return data
 
 def get_payable_data(Payable):

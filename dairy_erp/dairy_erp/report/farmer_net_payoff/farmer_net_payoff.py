@@ -126,7 +126,7 @@ def get_data(filters):
 				item['payable'] =payable
 	print "\nReturn List",return_list
 
-	
+
 	if return_list and sup_payable:
 		for ele in return_list:
 			farmer_fullname = ele.get('name')
@@ -216,3 +216,10 @@ def get_receivable_data(Receivable):
 	    temp2 = [key,value]
 	    dictList2.append(temp2)
 	return dictList2
+
+
+@frappe.whitelist()
+def get_user_company():
+	user_name = frappe.session.user
+	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
+	return company_name

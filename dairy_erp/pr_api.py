@@ -49,7 +49,7 @@ def get_po_attr(supplier):
 		if frappe.db.exists('Supplier',supplier):
 			po_list = frappe.db.sql("""select name from `tabPurchase Order` where supplier = '{0}' and status in ('To Receive and Bill')""".format(supplier),as_dict=1)
 			for row in po_list:
-				row.update({"items": frappe.db.sql("select item_code,rate,qty,uom from `tabPurchase Order Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
+				row.update({"items": frappe.db.sql("select item_code,rate,qty,uom, schedule_date from `tabPurchase Order Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
 			response_dict.update({"status":"success", "data": po_list})
 		else:
 			frappe.throw("Supplier does not exist")
@@ -64,7 +64,7 @@ def get_mi_attr():
 	try:
 		mr_list = frappe.db.sql("select name from `tabMaterial Request` where company = '{0}' and status = 'Ordered'".format(get_seesion_company_datails().get('company')),as_dict=1)
 		for row in mr_list:
-			row.update({"items": frappe.db.sql("select item_code,qty,uom from `tabMaterial Request Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
+			row.update({"items": frappe.db.sql("select item_code,qty,uom,schedule_date from `tabMaterial Request Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
 		response_dict.update({"status":"success","data": mr_list})
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})

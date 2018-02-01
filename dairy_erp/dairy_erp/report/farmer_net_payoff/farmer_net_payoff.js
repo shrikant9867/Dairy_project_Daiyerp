@@ -9,7 +9,12 @@ frappe.query_reports["Farmer Net Payoff"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_user_default("Company")
+			"get_query": function (query_report) {
+				return {
+					query:"dairy_erp.dairy_erp.report.farmer_net_payoff.farmer_net_payoff.get_filtered_company"
+					
+				}
+			}
 		},
 		{
 			"fieldname":"farmer",
@@ -38,4 +43,4 @@ frappe.query_reports["Farmer Net Payoff"] = {
 		}
 	]
 }
-,
+

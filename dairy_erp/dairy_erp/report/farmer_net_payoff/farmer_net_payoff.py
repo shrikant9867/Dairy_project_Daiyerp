@@ -80,3 +80,10 @@ def get_filtered_farmers(doctype,text,searchfields,start,pagelen,filters):
 	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
 	farmers = frappe.db.sql(""" select name,full_name from `tabFarmer` where vlcc_name ='{0}'""".format(company_name[0][0]),as_list=1)
 	return farmers
+
+
+@frappe.whitelist()
+def get_filtered_company(doctype,text,searchfields,start,pagelen,filters):
+	user_name = frappe.session.user
+	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
+	return company_name

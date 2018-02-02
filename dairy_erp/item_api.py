@@ -56,7 +56,8 @@ def get_masters():
 				"suppliers": get_supplier(),
 				"terms_and_condition": terms_condition(),
 				"sales_taxes": taxes_templates(),
-				"purchase_taxes":pr_taxes_templates()
+				"purchase_taxes":pr_taxes_templates(),
+				"diseases": get_diseases()
 			})
 		else:
 			frappe.throw(_("User cannot be administrator"))
@@ -125,3 +126,6 @@ def update_supplier_value(row):
 			)
 	else:
 		row.update({"items":[]})
+
+def get_diseases():
+	return frappe.db.sql("""select name, description from `tabDisease`""",as_dict=1)

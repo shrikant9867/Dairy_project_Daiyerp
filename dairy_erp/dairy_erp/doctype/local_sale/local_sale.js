@@ -11,6 +11,12 @@ cur_frm.add_fetch('item_code','stock_uom','uom');
 cur_frm.add_fetch('item_code','image','image');
 
 frappe.ui.form.on('Local Sale', {
+	validate: function(frm) {
+		 if(cur_frm.doc.local_customer_or_farmer == "Farmer" && !cur_frm.doc.farmer){
+		 	frappe.throw(__("Please enter Farmer"))
+		 }
+	},
+
 	refresh: function(frm) {
 
 	},

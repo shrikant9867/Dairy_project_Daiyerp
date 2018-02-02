@@ -8,7 +8,13 @@ frappe.query_reports["Farmer Net Payoff"] = {
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",
-			"options": "Company"
+			"options": "Company",
+			"get_query": function (query_report) {
+				return {
+					query:"dairy_erp.dairy_erp.report.farmer_net_payoff.farmer_net_payoff.get_filtered_company"
+					
+				}
+			}
 		},
 		{
 			"fieldname":"farmer",
@@ -17,7 +23,7 @@ frappe.query_reports["Farmer Net Payoff"] = {
 			"options": "Farmer"
 			/*"get_query": function (query_report) {
 				return {
-					query:"dairy_erp.dairy_erp.report.farmer_net_payoff.farmer_net_payoff.get_farmers"
+					query:"dairy_erp.dairy_erp.report.farmer_net_payoff.farmer_net_payoff.get_filtered_farmers"
 					
 				}
 			}*/
@@ -37,3 +43,4 @@ frappe.query_reports["Farmer Net Payoff"] = {
 		}
 	]
 }
+

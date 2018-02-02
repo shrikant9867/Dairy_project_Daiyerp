@@ -49,10 +49,12 @@ class LocalSale(Document):
 				frappe.throw(_("Cannot make <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>"))
 
 	def total_weight(self):
-		total = 0
-		for i in self.items:
-			total += i.get('amount')
-		self.total = total
+		pass
+		# total = 0
+		# for i in self.items:
+		# 	print "##############",type(i.get('amount'))
+		# 	total += i.get('amount')
+		# self.total = total
 
 	def on_submit(self):
 		self.create_delivery_note_for_vlcc()

@@ -24,8 +24,9 @@ def get_column():
 def get_data(filters):
 	receivable_data = get_receivable_data(filters)[1] if len(get_receivable_data(filters)) > 1 else []
 	payable_data = get_payable_data(filters)[1] if len(get_payable_data(filters)) > 1 else []
-	print "_________________Receivable_____________________\n\n", receivable_data, "\n\n"
-	print "_________________Payable_____________________\n\n", payable_data, "\n\n"
+	filter_farmer_data(receivable_data, "Customer")
+	# print "_________________Receivable_____________________\n\n", receivable_data, "\n\n"
+	# print "_________________Payable_____________________\n\n", payable_data, "\n\n"
 	return []
 
 def get_receivable_data(filters):
@@ -43,7 +44,10 @@ def get_payable_data(filters):
 	}
 	filters["supplier"] = frappe.db.get_value("Farmer",filters.get("farmer"),"full_name")
 	return ReceivablePayableReport(filters).run(supplier_args)
-	
+
+def filter_farmer_data(data, party_type):
+	for d in data:
+		print "\n\ndd",d	,"\n\n"
 # def get_data_old(filters):
 # 	supplier_args = {
 # 		"party_type": "Supplier",

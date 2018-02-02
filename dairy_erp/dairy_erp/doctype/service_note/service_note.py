@@ -13,9 +13,20 @@ from frappe import _
 class ServiceNote(Document):
 	def validate(self):
 		self.total_weight()
+		self.check_effective_credit()
 
 	def on_submit(self):
 		self.sales_invoice_against_dairy()
+
+	def check_effective_credit(self):
+		print "________________ {0} and {1} and {2}______________".format(self.effective_credit,self.customer,self.farmer)
+		effective_credit = self.effective_credit
+		if self.customer and effective_credit == 0:
+			frappe.throw(_("Cannot create <b>'Service Note'</b> if <b>'Effective Credit'</b> is 0.0"))
+		elif self.customer == None:
+			frappe.throw(_("Please select Farmer"))
+		elif self.customer and effective_credit < self.total:
+			frappe.throw(_("Cannot make <b>'Service Note'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>"))
 
 	def sales_invoice_against_dairy(self):
 		customer = frappe.db.get_value("Farmer",self.customer,"full_name")
@@ -57,12 +68,12 @@ def get_farmer(farmer):
 	# print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",farmer_name
 	return farmer_name
 
-@frappe.whitelist()
-def get_farmer_details(customer):
-	address = frappe.db.get_value("Farmer", {"farmer_id":customer}, "address",debug=1)
-	address_details = frappe.db.get_value("Farmer", {"farmer_id":customer}, "address_details",debug=1)
-	# print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",farmer_name
-	return {"address":address,"address_details":address_details}
+# @frappe.whitelist()
+# def get_farmer_details(customer):
+# 	address = frappe.db.get_value("Farmer", {"farmer_id":customer}, "address",debug=1)
+# 	address_details = frappe.db.get_value("Farmer", {"farmer_id":customer}, "address_details",debug=1)
+# 	# print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",farmer_name
+# 	return {"address":address,"address_details":address_details}
 
 @frappe.whitelist()
 def get_vet_ai_company(user):
@@ -94,38 +105,34 @@ def get_price_list_rate(item):
 			return 0
 
 
-# @frappe.whitelist()
-# def get_effective_credit(customer):
-# 	company = frappe.db.get_value("User", frappe.session.user, "company")
-# 	purchase = frappe.db.get_value("Purchase Invoice", {"title":customer,"company":company}, "sum(grand_total)")
-# 	sales = frappe.db.get_value("Sales Invoice", {"title":customer,"company":company}, "sum(grand_total)")
-# 	print "----------------------sales",sales
-# 	print "======================purchase",purchase
-# 	purchase_total = frappe.db.sql("""select name,sum(grand_total) as purchase_total from `tabPurchase Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True) 
-# 	sales_total = frappe.db.sql("""select name,sum(grand_total) as sales_total from `tabSales Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True)
-# 	if purchase and sales:
-# 		eff_amt = purchase - sales
-# 		return eff_amt
-# 	# elif None in purchase_total[0].get('purchase_total') and sales_total[0].get('sales_total'):
-# 	# 	eff_amt = 0.0
-# 	# 	return eff_amt
-# 	# elif purchase_total[0].get('purchase_total') and None in sales_total[0].get('sales_total'):
-# 	# 	eff_amt = purchase_total[0].get('purchase_total')
-# 	# 	return eff_amt
+@frappe.whitelist()
+def get_effective_credit(customer):
+	print "---------------customer----------------",customer
+	company = frappe.db.get_value("User", frappe.session.user, "company")
+	purchase = frappe.db.get_value("Purchase Invoice", {"title":customer,"company":company}, "sum(grand_total)")
+	sales = frappe.db.get_value("Sales Invoice", {"title":customer,"company":company}, "sum(grand_total)")
+	print "----------------------sales",sales
+	print "======================purchase",purchase
+	# purchase_total = frappe.db.sql("""select name,sum(grand_total) as purchase_total from `tabPurchase Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True) 
+	# sales_total = frappe.db.sql("""select name,sum(grand_total) as sales_total from `tabSales Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True)
+	
+	if purchase == None:
+		eff_amt = 0.0
+		return eff_amt
 
-# 	# elif any(x is None for x in purchase) and sales:
-# 	# 	eff_amt = 0.0
-# 	# 	return eff_amt
-# 	# elif purchase and any(x is None for x in sales):
-# 	# 	eff_amt = purchase
-# 	# 	return eff_amt
+	if purchase and sales:
+		eff_amt = purchase - sales
+		return eff_amt
 
-# 	elif purchase == None and sales:
-# 		eff_amt = 0.0
-# 		return eff_amt
-# 	elif purchase and sales == None:
-# 		eff_amt = purchase
-# 		return eff_amt
-# 	else:
-# 		eff_amt = 0.0
-# 		return eff_amt
+	elif purchase == None and sales:
+		print "____________________ {0} _______________".format(sales)
+
+		eff_amt = 0.0
+		return eff_amt
+	elif purchase and sales == None:
+		print "____________________ {0} _______________".format(purchase)
+		eff_amt = purchase
+		return eff_amt
+	else:
+		eff_amt = 0.0
+		return eff_amt

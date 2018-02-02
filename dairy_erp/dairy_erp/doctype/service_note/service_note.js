@@ -31,34 +31,130 @@ frappe.ui.form.on('Service Note', {
 			}
 		});
 	},
-	customer: function(frm) {
-		// frm.set_query("farmer_address", function () {
-		// 	return {
-		// 		"filters": {
-		// 			"address_type": "Farmer",
-		// 			"name": frm.doc.customer_name + "-Farmer"
-		// 		}
-		// 	};
-		// });
-		// erpnext.utils.get_address_display(cur_frm, "farmer_address");
 
-		frappe.call({
-			method:"dairy_erp.dairy_erp.doctype.service_note.service_note.get_farmer_details",
-			args:{
-				"customer": frm.doc.customer
-			},
-			callback: function(r) {
-				if(r.message) {
-					console.log(r.message)
-					frm.set_value("customer_address",r.message.address);
-					frm.set_value("address_details",r.message.address_details);
+	taxes_and_charges: function(frm) {
+		if (frm.doc.taxes_and_charges) {
+			console.log("1")
+			frappe.call({
+				method: "dairy_erp.dairy_erp.doctype.local_sale.local_sale.fetch_taxes",
+				args: {
+					"tax": frm.doc.taxes_and_charges
+				},
+				callback: function(r) {
+					// console.log(r.message)
+					frm.set_value("taxes" ,"");
+					if (r.message) {
+						$.each(r.message, function(i, d) {
+							// console.log(d)
+							var row = frappe.model.add_child(cur_frm.doc, "Sales Taxes and Charges Template", "taxes");
+							row.charge_type = d.charge_type;
+							row.account_head = d.account_head;
+							row.cost_center = d.cost_center;
+							row.description = d.description;
+							row.rate = d.rate;
+							row.tax_amount = d.tax_amount;
+							// row.total = row.rate * row.tax_amount;
+						});
+					}
+					refresh_field("taxes");
 				}
-			}
-		});
+			});
+		};
+	},
+
+	additional_discount_percentage: function(frm) {
+		if (frm.doc.apply_discount_on == 'Grand Total') {
+			if (frm.doc.additional_discount_percentage) {
+				frm.events.get_discount_amt(frm)
+				frm.events.get_grand_total(frm)
+			};
+		};
+		if (frm.doc.apply_discount_on == 'Net Total') {
+			if (frm.doc.additional_discount_percentage) {
+				frm.events.get_discount_amt(frm)
+				frm.events.get_grand_total(frm)
+			};
+		};
+	},
+
+	discount_amount: function(frm) {
+		if (frm.doc.apply_discount_on == 'Grand Total') {
+			if (frm.doc.discount_amount) {
+				frm.events.get_discount_percent(frm)
+				frm.events.get_grand_total(frm)
+			};
+		};
+		if (frm.doc.apply_discount_on == 'Net Total') {
+			if (frm.doc.discount_amount) {
+				frm.events.get_discount_percent(frm)
+				frm.events.get_grand_total(frm)
+			};
+		};
+	},
+
+	customer: function(frm) {
+		if (cur_frm.doc.customer) {
+			frappe.call({
+				method:"dairy_erp.dairy_erp.doctype.service_note.service_note.get_effective_credit",
+				args:{
+					"customer": cur_frm.doc.customer_name
+				},
+				callback: function(r) {
+					frm.set_value("effective_credit" ,0);
+					if(r.message) {
+						frm.set_value("effective_credit", r.message);			
+					}
+					else
+						frappe.msgprint(__("Cannot create <b>'Service Note'</b> if <b>'Effective Credit'</b> is 0.0")); 
+				}
+			});
+		}
+
+		// frappe.call({
+		// 	method:"dairy_erp.dairy_erp.doctype.service_note.service_note.get_farmer_details",
+		// 	args:{
+		// 		"customer": frm.doc.customer
+		// 	},
+		// 	callback: function(r) {
+		// 		if(r.message) {
+		// 			console.log(r.message)
+		// 			frm.set_value("customer_address",r.message.address);
+		// 			frm.set_value("address_details",r.message.address_details);
+		// 		}
+		// 	}
+		// });
+	},
+	get_total_on_qty:function(frm) {
+		total_amt = 0
+		$.each(frm.doc.items, function(idx, row){
+			total_amt += row.amount
+		})
+		console.log(total_amt)
+		frm.set_value("total", total_amt);
+		frm.refresh_field("total")
+	},
+	get_discount_amt:function(frm) {
+		discount_amount = (frm.doc.total * frm.doc.additional_discount_percentage)/100
+		frm.set_value("discount_amount", discount_amount);
+		frm.refresh_field("discount_amount")
+	},
+	get_discount_percent:function(frm) {
+		discount_percent = (100 * frm.doc.discount_amount)/frm.doc.total
+		frm.set_value("additional_discount_percentage", discount_percent);
+		frm.refresh_field("additional_discount_percentage")
+	},
+	get_grand_total:function(frm) {
+		grand_total = frm.doc.total - frm.doc.discount_amount
+		rounded_total = Math.round(frm.doc.grand_total);
+		frm.set_value("grand_total", grand_total);
+		frm.set_value("net_total", grand_total);
+		frm.set_value("rounded_total", rounded_total);
+		frm.set_value("outstanding_amount", grand_total);
+		frm.refresh_field("grand_total")
+		frm.refresh_field("net_total")
+		frm.refresh_field("rounded_total")
+		frm.refresh_field("outstanding_amount")
 	}
-	// farmer_address: function(frm) {
-	// 	erpnext.utils.get_address_display(frm, "farmer_address", "address_details");
-	// }
 });
 
 frappe.ui.form.on('Delivery Note Item', {
@@ -129,6 +225,10 @@ frappe.ui.form.on('Delivery Note Item', {
 		if (child.item_code){
 			var amount = parseFloat(child.rate) * parseFloat(child.qty);
 			frappe.model.set_value(cdt, cdn, "amount",amount);
+			frm.events.get_total_on_qty(frm)
+			if (cur_frm.doc.effective_credit < cur_frm.doc.total) {
+				frappe.throw(__("Cannot create <b>'Service Note'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>")); 
+			};
 		}
 		
 		refresh_field("items");
@@ -138,6 +238,10 @@ frappe.ui.form.on('Delivery Note Item', {
 		if (child.item_code){
 			var amount = parseFloat(child.rate) * parseFloat(child.qty);
 			frappe.model.set_value(cdt, cdn, "amount",amount);
+			frm.events.get_total_on_qty(frm)
+			if (cur_frm.doc.effective_credit < cur_frm.doc.total) {
+				frappe.throw(__("Cannot create <b>'Service Note'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>")); 
+			};
 		}
 		
 		refresh_field("items");

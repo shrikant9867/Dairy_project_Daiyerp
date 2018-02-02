@@ -46,22 +46,112 @@ frappe.ui.form.on('Local Sale', {
 			});
 		}
 	},
+
+	taxes_and_charges: function(frm) {
+		if (frm.doc.taxes_and_charges) {
+			frappe.call({
+				method: "dairy_erp.dairy_erp.doctype.local_sale.local_sale.fetch_taxes",
+				args: {
+					"tax": frm.doc.taxes_and_charges
+				},
+				callback: function(r) {
+					// console.log(r.message)
+					frm.set_value("taxe_charge_template" ,"");
+					if (r.message) {
+						$.each(r.message, function(i, d) {
+							// console.log(d)
+							var row = frappe.model.add_child(cur_frm.doc, "Sales Taxes and Charges Template", "taxe_charge_template");
+							row.charge_type = d.charge_type;
+							row.account_head = d.account_head;
+							row.cost_center = d.cost_center;
+							row.description = d.description;
+							row.rate = d.rate;
+							row.tax_amount = d.tax_amount;
+							// row.total = row.rate * row.tax_amount;
+						});
+					}
+					refresh_field("taxe_charge_template");
+				}
+			});
+		};
+	},
+
+	additional_discount_percentage: function(frm) {
+		if (frm.doc.apply_discount_on == 'Grand Total') {
+			if (frm.doc.additional_discount_percentage) {
+				frm.events.get_discount_amt(frm)
+				frm.events.get_grand_total(frm)
+			};
+		};
+		if (frm.doc.apply_discount_on == 'Net Total') {
+			if (frm.doc.additional_discount_percentage) {
+				frm.events.get_discount_amt(frm)
+				frm.events.get_grand_total(frm)
+			};
+		};
+	},
+
+	discount_amount: function(frm) {
+		if (frm.doc.apply_discount_on == 'Grand Total') {
+			if (frm.doc.discount_amount) {
+				frm.events.get_discount_percent(frm)
+				frm.events.get_grand_total(frm)
+			};
+		};
+		if (frm.doc.apply_discount_on == 'Net Total') {
+			if (frm.doc.discount_amount) {
+				frm.events.get_discount_percent(frm)
+				frm.events.get_grand_total(frm)
+			};
+		};
+	},
+
 	farmer: function(frm){
 		if (cur_frm.doc.farmer) {
-			frappe.session.user
 			frappe.call({
 				method:"dairy_erp.dairy_erp.doctype.service_note.service_note.get_effective_credit",
 				args:{
 					"customer": cur_frm.doc.farmer_name
 				},
 				callback: function(r) {
+					frm.set_value("effective_credit" ,0);
 					if(r.message) {
 						frm.set_value("effective_credit", r.message);			
 					}
+					else
+						frappe.msgprint(__("Cannot create <b>'Local Sale'</b> if <b>'Effective Credit'</b> is 0.0")); 
 				}
 			});
 		}
-	} 
+	},
+	get_total_on_qty:function(frm) {
+		total_amt = 0
+		$.each(frm.doc.items, function(idx, row){
+			total_amt += row.amount
+		})
+		frm.set_value("total", total_amt);
+		frm.refresh_field("total")
+	},
+	get_discount_amt:function(frm) {
+		discount_amount = (frm.doc.total * frm.doc.additional_discount_percentage)/100
+		frm.set_value("discount_amount", discount_amount);
+		frm.refresh_field("discount_amount")
+	},
+	get_discount_percent:function(frm) {
+		discount_percent = (100 * frm.doc.discount_amount)/frm.doc.total
+		frm.set_value("additional_discount_percentage", discount_percent);
+		frm.refresh_field("additional_discount_percentage")
+	},
+	get_grand_total:function(frm) {
+		grand_total = frm.doc.total - frm.doc.discount_amount
+		rounded_total = Math.round(frm.doc.grand_total);
+		frm.set_value("grand_total", grand_total);
+		frm.set_value("rounded_total", rounded_total);
+		frm.set_value("outstanding_amount", grand_total);
+		frm.refresh_field("grand_total")
+		frm.refresh_field("rounded_total")
+		frm.refresh_field("outstanding_amount")
+	}
 });
 
 
@@ -88,7 +178,8 @@ frappe.ui.form.on('Sales Order Item', {
 							 		frappe.model.set_value(cdt, cdn, "base_rate",amount);
 							 		frappe.model.set_value(cdt, cdn, "base_net_rate",amount);
 							 		frappe.model.set_value(cdt, cdn, "base_amount",amount);
-							 		frappe.model.set_value(cdt, cdn, "base_net_amount",amount);			
+							 		frappe.model.set_value(cdt, cdn, "base_net_amount",amount);
+							 		// frm.set_value("total", amount);			
 								}
 							}
 						});
@@ -134,6 +225,10 @@ frappe.ui.form.on('Sales Order Item', {
 		if (child.item_code){
 			var amount = parseFloat(child.rate) * parseFloat(child.qty);
 			frappe.model.set_value(cdt, cdn, "amount",amount);
+			frm.events.get_total_on_qty(frm)
+			if (cur_frm.doc.effective_credit < cur_frm.doc.total) {
+				frappe.msgprint(__("Cannot create <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>")); 
+			};
 		}
 		
 		refresh_field("items");
@@ -143,8 +238,14 @@ frappe.ui.form.on('Sales Order Item', {
 		if (child.item_code){
 			var amount = parseFloat(child.rate) * parseFloat(child.qty);
 			frappe.model.set_value(cdt, cdn, "amount",amount);
+			frm.events.get_total_on_qty(frm)
+			if (cur_frm.doc.effective_credit < cur_frm.doc.total) {
+				frappe.msgprint(__("Cannot create <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>")); 
+			};
 		}
 		
 		refresh_field("items");
-	},
-	});
+	}
+
+	
+});

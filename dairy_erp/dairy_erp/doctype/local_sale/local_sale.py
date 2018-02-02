@@ -15,12 +15,38 @@ from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
 import re, urllib, datetime, math, time
 from erpnext.selling.doctype.sales_order.sales_order import SalesOrder
+from frappe import _
 
 # Sid Customization
 
 class LocalSale(Document):
 	def validate(self):
 		self.total_weight()
+		self.check_effective_credit()
+		# self.additional_discount()
+		# self.rounded_total()
+
+	def additional_discount(self):
+		print "________________ {0} ______________", self.additional_discount_percentage
+		if self.additional_discount_percentage:
+			additional_discount = 0
+			for i in self.items:
+				additional_discount += (i.get('amount')* self.additional_discount_percentage)/100
+				self.discount_amount = additional_discount
+
+	def check_effective_credit(self):
+		print "________________ {0} and {1} and {2}______________".format(self.effective_credit,self.customer,self.farmer)
+		effective_credit = self.effective_credit
+		if self.local_customer_or_farmer == 'Vlcc Local Customer':
+			if self.customer == None:
+				frappe.throw(_("Please select Customer"))
+		if self.local_customer_or_farmer == 'Farmer':
+			if self.farmer and effective_credit == 0:
+				frappe.throw(_("Cannot create <b>'Local Sale'</b> if <b>'Effective Credit'</b> is 0.0"))
+			elif self.farmer == None:
+				frappe.throw(_("Please select Farmer"))
+			elif self.farmer and effective_credit < self.total:
+				frappe.throw(_("Cannot make <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>"))
 
 	def total_weight(self):
 		pass
@@ -92,16 +118,21 @@ class LocalSale(Document):
 		# 	make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
 		# 	data = "", message=e, traceback=frappe.get_traceback())
 
-# @frappe.whitelist()
-# def get_price_list_rate(item):
-# 	if item:
-# 		rate = frappe.db.sql("""select price_list_rate from `tabItem Price`
-# 						 		where item_name = '{0}' and 
-# 						 		price_list ='Standard Selling'""".format(item),as_list=1)
-# 		if rate:
-# 			return rate[0][0]
-# 		else:
-# 			return 0
+@frappe.whitelist()
+def get_price_list_rate(item):
+	if item:
+		rate = frappe.db.sql("""select price_list_rate from `tabItem Price`
+						 		where item_name = '{0}' and 
+						 		price_list ='Standard Selling'""".format(item),as_list=1)
+		if rate:
+			return rate[0][0]
+		else:
+			return 0
+
+@frappe.whitelist()
+def fetch_taxes(tax):
+	taxes = frappe.get_doc("Sales Taxes and Charges Template",tax)
+	return taxes
 
 @frappe.whitelist()
 def get_milk_qty_local():
@@ -132,7 +163,7 @@ def fetch_balance_qty():
 
 	return items_dict
 
-# @frappe.whitelist()
-# def get_vlcc_warehouse():
-# 	warehouse = frappe.db.get_value("Village Level Collection Centre", {"email_id": frappe.session.user}, 'warehouse')
-# 	return warehouse
+@frappe.whitelist()
+def get_vlcc_warehouse():
+	warehouse = frappe.db.get_value("Village Level Collection Centre", {"email_id": frappe.session.user}, 'warehouse')
+	return warehouse

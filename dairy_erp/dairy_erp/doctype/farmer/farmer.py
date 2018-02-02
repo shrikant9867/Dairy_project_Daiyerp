@@ -24,6 +24,7 @@ class Farmer(Document):
 			"company": self.vlcc_name,
 			"account": frappe.db.get_value("Company",self.vlcc_name, "default_payable_account")
 			})
+		supl_doc.farmer = self.name
 		supl_doc.insert()
 
 	def create_customer(self):
@@ -37,4 +38,5 @@ class Farmer(Document):
 			"company": self.vlcc_name,
 			"account": frappe.db.get_value("Company",self.vlcc_name, "default_receivable_account")
 			})
+		custmer_doc.farmer = self.name
 		custmer_doc.insert()

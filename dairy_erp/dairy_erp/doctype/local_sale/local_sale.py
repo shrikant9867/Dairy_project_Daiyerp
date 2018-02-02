@@ -132,7 +132,7 @@ def get_price_list_rate(item):
 @frappe.whitelist()
 def fetch_taxes(tax):
 	taxes = frappe.get_doc("Sales Taxes and Charges Template",tax)
-	return taxes.get('taxes')
+	return taxes
 
 @frappe.whitelist()
 def get_milk_qty_local():

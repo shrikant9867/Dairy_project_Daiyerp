@@ -14,24 +14,27 @@ class ServiceNote(Document):
 	def validate(self):
 		self.total_weight()
 		self.check_effective_credit()
+		self.get_in_words()
 
 	def on_submit(self):
 		self.sales_invoice_against_dairy()
 
+	def get_in_words(self):
+		print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
+
 	def check_effective_credit(self):
-		print "________________ {0} and {1} and {2}______________".format(self.effective_credit,self.customer,self.farmer)
 		effective_credit = self.effective_credit
-		if self.customer and effective_credit == 0:
+		if self.farmer_id and effective_credit == 0:
 			frappe.throw(_("Cannot create <b>'Service Note'</b> if <b>'Effective Credit'</b> is 0.0"))
-		elif self.customer == None:
+		elif self.farmer_id == None:
 			frappe.throw(_("Please select Farmer"))
-		elif self.customer and effective_credit < self.total:
+		elif self.farmer_id and effective_credit < self.total:
 			frappe.throw(_("Cannot make <b>'Service Note'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>"))
 
 	def sales_invoice_against_dairy(self):
-		customer = frappe.db.get_value("Farmer",self.customer,"full_name")
+		farmer_id = frappe.db.get_value("Farmer",self.farmer_id,"full_name")
 		si_obj = frappe.new_doc("Sales Invoice")
-		si_obj.customer = frappe.db.get_value("Farmer",self.customer,"full_name")
+		si_obj.farmer_id = frappe.db.get_value("Farmer",self.farmer_id,"full_name")
 		si_obj.company = self.company
 		si_obj_cost_center = frappe.db.get_value("Company",si_obj.company,'cost_center')
 		for row in self.items:
@@ -106,11 +109,11 @@ def get_price_list_rate(item):
 
 
 @frappe.whitelist()
-def get_effective_credit(customer):
-	print "---------------customer----------------",customer
+def get_effective_credit(farmer_name):
+	print "---------------farmer_name----------------",farmer_name
 	company = frappe.db.get_value("User", frappe.session.user, "company")
-	purchase = frappe.db.get_value("Purchase Invoice", {"title":customer,"company":company}, "sum(grand_total)")
-	sales = frappe.db.get_value("Sales Invoice", {"title":customer,"company":company}, "sum(grand_total)")
+	purchase = frappe.db.get_value("Purchase Invoice", {"title":farmer_name,"company":company}, "sum(grand_total)")
+	sales = frappe.db.get_value("Sales Invoice", {"title":farmer_name,"company":company}, "sum(grand_total)")
 	print "----------------------sales",sales
 	print "======================purchase",purchase
 	# purchase_total = frappe.db.sql("""select name,sum(grand_total) as purchase_total from `tabPurchase Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True) 

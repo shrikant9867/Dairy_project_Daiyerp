@@ -64,16 +64,17 @@ frappe.ui.form.on('Local Sale', {
 					// console.log(r.message)
 					frm.set_value("taxe_charge_template" ,"");
 					if (r.message) {
-						$.each(r.message, function(i, d) {
+						$.each(r.message.taxes, function(i, d) {
 							// console.log(d)
-							var row = frappe.model.add_child(cur_frm.doc, "Sales Taxes and Charges Template", "taxe_charge_template");
-							row.charge_type = d.charge_type;
-							row.account_head = d.account_head;
-							row.cost_center = d.cost_center;
-							row.description = d.description;
-							row.rate = d.rate;
-							row.tax_amount = d.tax_amount;
-							// row.total = row.rate * row.tax_amount;
+							// var row = frappe.model.add_child(cur_frm.doc, "Sales Taxes and Charges Template", "taxe_charge_template");
+							// row.charge_type = d.charge_type;
+							// row.account_head = d.account_head;
+							// row.cost_center = d.cost_center;
+							// row.description = d.description;
+							// row.rate = d.rate;
+							// row.tax_amount = d.tax_amount;
+							// row.title = r.message.name
+							// row.company = r.message.company
 						});
 					}
 					refresh_field("taxe_charge_template");

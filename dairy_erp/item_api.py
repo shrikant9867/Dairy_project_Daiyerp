@@ -98,7 +98,7 @@ def taxes_templates():
 def get_seesion_company_datails():
 
 	user_doc = frappe.get_doc("User",frappe.session.user)
-	return {"company" : user_doc.company}
+	return {"company" : user_doc.company,"branch_office":user_doc.branch_office,"operator_type":user_doc.operator_type}
 
 def pr_taxes_templates():
 	taxes_ =  frappe.db.sql(""" select name from `tabPurchase Taxes and Charges Template` where disabled =0 and company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)

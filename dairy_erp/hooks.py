@@ -147,6 +147,20 @@ doc_events = {
 # 	]
 # }
 fixtures=['Property Setter','Custom Field','Print Format','Role','Custom DocPerm','Custom Role']
+
+
+permission_query_conditions = {
+    "Material Request": "dairy_erp.customization.customization.mr_permission",
+    "Purchase Receipt": "dairy_erp.customization.customization.pr_permission",
+    "Purchase Order": "dairy_erp.customization.customization.po_permission",
+    "Purchase Invoice": "dairy_erp.customization.customization.pi_permission",
+    "Delivery Note": "dairy_erp.customization.customization.dn_permission",
+    "Sales Invoice": "dairy_erp.customization.customization.si_permission",
+    "Farmer": "dairy_erp.customization.customization.farmer_permission",
+    "Village Level Collection Centre": "dairy_erp.customization.customization.vlcc_permission",
+    "Farmer Milk Collection Record": "dairy_erp.customization.customization.fmrc_permission",
+    "Vlcc Milk Collection Record": "dairy_erp.customization.customization.vmcr_permission",
+}
 # Testing
 # -------
 

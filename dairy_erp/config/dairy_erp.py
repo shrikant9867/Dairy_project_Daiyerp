@@ -196,13 +196,19 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Village Level Collection Centre Reports"),
+			"label": _("Reports"),
 			"icon": "icon-star",
 			"items": [
 				{
 					"type": "report",
 					"name": "Farmer Net Payoff",
 					"doctype": "Farmer",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Milk Passbook",
+					"doctype": "Farmer Milk Collection Record",
 					"is_query_report": True
 				}
 			]

@@ -10,8 +10,9 @@ import re
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
-from frappe.model.mapper import get_mapped_doc
+from dairy_erp.item_api import get_seesion_company_datails
 
+company = get_seesion_company_datails()
 
 def set_warehouse(doc, method=None):
 	"""configure w/h for dairy components"""
@@ -207,10 +208,13 @@ def submit_dn(doc):
 
 def make_si(dn):
 	"""Make auto sales invoice on submit of DN @Camp (DN gets submit on submit of PR)"""
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 
 	si = frappe.new_doc("Sales Invoice")
 	si.customer = dn.customer
 	si.company = dn.company
+	si.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+
 	for item in dn.items:
 		si.append("items",
 			{
@@ -229,10 +233,14 @@ def make_si(dn):
 def make_pi(doc):
 	"""Make auto PI on submit of PR @VLCC"""
 
-	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+
+	if user_doc.get('operator_type') == 'VLCC':
 		pi = frappe.new_doc("Purchase Invoice")
 		pi.supplier = doc.supplier
 		pi.company = doc.company
+		pi.camp_office = co
 		for item in doc.items:
 			pi.append("items",
 				{
@@ -253,9 +261,12 @@ def make_pi(doc):
 def make_pi_against_localsupp(po_doc,pr_doc):
 	"""Make PI for CO(dairy) local supplier @CO Use case 2"""
 
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+
 	pi = frappe.new_doc("Purchase Invoice")
 	pi.supplier = po_doc.supplier
 	pi.company = po_doc.company
+	pi.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 
 	for row_ in pr_doc.items:
 		pi.append("items",
@@ -307,8 +318,9 @@ def check_if_dropship(doc):
 	mr_list = []
 	conditions = ""
 	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 
-	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+	if user_doc.get("operator_type") == 'VLCC':
 		for item in doc.items:
 			if item.material_request:
 				mr_list.append(str(item.material_request))
@@ -332,6 +344,7 @@ def check_if_dropship(doc):
 						si = frappe.new_doc("Sales Invoice")
 						si.customer = doc.company
 						si.company = frappe.db.get_value("Company",{"is_dairy":1},"name")
+						si.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 
 						for item in doc.items:
 							si.append("items",
@@ -544,3 +557,95 @@ def set_company(doc, method):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 	if user_doc.get('operator_type') == "VLCC" and doc.supplier_type == "VLCC Local":
 		doc.company = user_doc.get('company')
+
+def mr_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	vlcc = frappe.db.get_values("Village Level Collection Centre",{"camp_office":user_doc.get('branch_office')},"name",as_dict=1)
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabMaterial Request`.company = '{0}')""".format(user_doc.get('company'))
+
+	if user_doc.get('operator_type') == "Camp Office":
+		company = ['"%s"'%comp.get('name') for comp in vlcc]
+		return """`tabMaterial Request`.company in  ({company})""".format(company=','.join(company))
+
+def pr_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabPurchase Receipt`.company = '{0}')""".format(user_doc.get('company'))
+
+	if user_doc.get('operator_type') == "Camp Office":
+		return """(`tabPurchase Receipt`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+def po_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabPurchase Order`.company = '{0}')""".format(user_doc.get('company'))
+
+	if user_doc.get('operator_type') == "Camp Office":
+		return """(`tabPurchase Order`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+def pi_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabPurchase Invoice`.company = '{0}')""".format(user_doc.get('company'))
+
+	if user_doc.get('operator_type') == "Camp Office":
+		return """(`tabPurchase Invoice`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+def dn_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user_doc.get('operator_type') == "Camp Office":
+		return """(`tabDelivery Note`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabDelivery Note`.company = '{0}')""".format(user_doc.get('company'))
+
+def si_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user_doc.get('operator_type') == "Camp Office":
+		return """(`tabSales Invoice`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabSales Invoice`.company = '{0}')""".format(user_doc.get('company'))
+
+def farmer_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabFarmer`.vlcc_name = '{0}')""".format(user_doc.get('company'))
+
+def vlcc_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user_doc.get('operator_type') == "Camp Office":
+		return """(`tabVillage Level Collection Centre`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+def fmrc_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabFarmer Milk Collection Record`.associated_vlcc = '{0}')""".format(user_doc.get('company'))
+
+def vmcr_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	vlcc = frappe.db.get_values("Village Level Collection Centre",{"camp_office":user_doc.get('branch_office')},"name",as_dict=1)
+
+	if user_doc.get('operator_type') == "Camp Office":
+		company = ['"%s"'%comp.get('name') for comp in vlcc]
+		return """`tabVlcc Milk Collection Record`.associated_vlcc in  ({company})""".format(company=','.join(company))		
+	

@@ -12,12 +12,13 @@ from frappe import _
 
 class ServiceNote(Document):
 	def validate(self):
-		self.total_weight()
-		self.check_effective_credit()
+		# self.total_weight()
+		# self.check_effective_credit()
 		self.get_in_words()
 
 	def on_submit(self):
-		self.sales_invoice_against_dairy()
+		pass
+		# self.sales_invoice_against_dairy()
 
 	def get_in_words(self):
 		print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)

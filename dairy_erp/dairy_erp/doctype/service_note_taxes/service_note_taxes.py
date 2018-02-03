@@ -4,9 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.model.document import Document
 
-class SupplierItemPrice(Document):
-	def after_insert(self):
-		pass
+class ServiceNoteTaxes(Document):
+	pass

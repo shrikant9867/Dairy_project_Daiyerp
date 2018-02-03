@@ -36,22 +36,22 @@ frappe.ui.form.on('Service Note', {
 					"tax": frm.doc.taxes_and_charges
 				},
 				callback: function(r) {
-					frm.set_value("taxes" ,"");
+					frm.set_value("taxes_tab" ,"");
 					console.log("###",r.message)
 					if (r.message) {
-						// $.each(r.message.taxes, function(i, d) {
-						// 	var row = frappe.model.add_child(cur_frm.doc, "Sales Taxes and Charges Template", "taxes");
-						// 	row.charge_type = d.charge_type;
-						// 	row.account_head = d.account_head;
-						// 	row.cost_center = d.cost_center;
-						// 	row.description = d.description;
-						// 	row.rate = d.rate;
-						// 	row.tax_amount = d.tax_amount;
-						// 	row.title = r.message.name
-						// 	row.company = r.message.company
-						// });
+						$.each(r.message.taxes, function(i, d) {
+							var row = frappe.model.add_child(cur_frm.doc, "Service Note Taxes", "taxes_tab");
+							row.charge_type = d.charge_type;
+							row.account_head = d.account_head;
+							row.cost_center = d.cost_center;
+							row.description = d.description;
+							row.rate = d.rate;
+							row.tax_amount = d.tax_amount;
+							// row.title = r.message.name
+							// row.company = r.message.company
+						});
 					}
-					refresh_field("taxes");
+					refresh_field("taxes_tab");
 				}
 			});
 		};

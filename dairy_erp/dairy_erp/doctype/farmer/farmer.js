@@ -33,7 +33,6 @@ get_session_user_type = function() {
 		async:false,
 		callback: function(r){
 			if(r.message){
-			console.log(r.message)	
 			user = r.message.company			
 			}
 		}

@@ -1,0 +1,32 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2018-02-03 14:41:52.818483", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2018-02-03 14:42:47.261219", 
+ "modified_by": "Administrator", 
+ "module": "Dairy Erp", 
+ "name": "Vlcc Net Pay Off", 
+ "owner": "Administrator", 
+ "ref_doctype": "Village Level Collection Centre", 
+ "report_name": "Vlcc Net Pay Off", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Vlcc Operator"
+  }, 
+  {
+   "role": "Dairy Operator"
+  }, 
+  {
+   "role": "Vet/AI Technician"
+  }, 
+  {
+   "role": "Camp Operator"
+  }
+ ]
+}

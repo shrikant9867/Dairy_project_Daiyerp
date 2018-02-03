@@ -18,11 +18,13 @@ class Farmer(Document):
 		supl_doc.supplier_name = self.full_name
 		supl_doc.supplier_type = "Distributor"
 		supl_doc.company = self.vlcc_name
+		supl_doc.farmer = self.name
 		supl_doc.append("accounts",
 			{
 			"company": self.vlcc_name,
 			"account": frappe.db.get_value("Company",self.vlcc_name, "default_payable_account")
 			})
+		supl_doc.farmer = self.name
 		supl_doc.insert()
 
 	def create_customer(self):
@@ -30,9 +32,11 @@ class Farmer(Document):
 		custmer_doc.customer_name = self.full_name
 		custmer_doc.customer_group = "Farmer"
 		custmer_doc.company = self.vlcc_name
+		custmer_doc.farmer = self.name
 		custmer_doc.append("accounts",
 			{
 			"company": self.vlcc_name,
 			"account": frappe.db.get_value("Company",self.vlcc_name, "default_receivable_account")
 			})
+		custmer_doc.farmer = self.name
 		custmer_doc.insert()

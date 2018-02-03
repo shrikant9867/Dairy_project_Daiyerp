@@ -1,7 +1,6 @@
 frappe.listview_settings['Farmer Milk Collection Record'] = {
 	onload:function(){
 		var a = get_session_user_type()
-		frappe.msgprint(a)		
 	}
 }
 

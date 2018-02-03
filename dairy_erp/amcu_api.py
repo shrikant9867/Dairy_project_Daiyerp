@@ -73,6 +73,7 @@ def make_fmrc(data, response_dict):
 												}
 											)
 											fmrc_doc = frappe.new_doc("Farmer Milk Collection Record")
+											fmrc_doc.farmer = farmer_supplier
 											fmrc_doc.id = data.get('id')
 											fmrc_doc.associated_vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
 											fmrc_doc.imeinumber = data.get('imeinumber')

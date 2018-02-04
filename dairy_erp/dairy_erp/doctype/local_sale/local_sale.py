@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, cstr, cint
 import time
-from frappe import _
+from frappe.utils import money_in_words
 from dairy_erp.api_utils import make_mobile_log
 import requests
 import json
@@ -23,8 +23,12 @@ class LocalSale(Document):
 	def validate(self):
 		self.total_weight()
 		self.check_effective_credit()
-		# self.additional_discount()
-		# self.rounded_total()
+		self.get_in_words()
+
+	def get_in_words(self):
+		print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
+		self.base_in_words = money_in_words(self.total,self.currency)
+		self.in_words = money_in_words(self.total,self.currency)
 
 	def additional_discount(self):
 		print "________________ {0} ______________", self.additional_discount_percentage

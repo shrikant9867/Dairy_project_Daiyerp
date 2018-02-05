@@ -648,4 +648,8 @@ def vmcr_permission(user):
 	if user_doc.get('operator_type') == "Camp Office":
 		company = ['"%s"'%comp.get('name') for comp in vlcc]
 		return """`tabVlcc Milk Collection Record`.associated_vlcc in  ({company})""".format(company=','.join(company))		
-	
+
+def set_camp(doc, method):
+	camp = frappe.db.get_value("Sales Invoice",doc.voucher_no,'camp_office')
+	doc.camp_office = camp
+	doc.flags.ignore_permissions = True

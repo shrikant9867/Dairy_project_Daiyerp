@@ -67,21 +67,29 @@ def get_masters():
 			response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
 	return response_dict	
 
+
 def get_uom():
 	#deprecated current requirement may be future aspect handy
 	return frappe.db.sql("select name from `tabUOM`",as_dict=1)
+
 
 def get_camp_office():
 	user_doc = frappe.get_doc("User",frappe.session.user)
 	camp_office = frappe.db.get_value("Village Level Collection Centre",user_doc.company,['camp_office','name'],as_dict=1)
 	return camp_office
 
+
 def get_farmer():
 	company = get_seesion_company_datails()
-	return frappe.db.sql("""select name as id,full_name ,vlcc_name from `tabFarmer` where vlcc_name ='{0}'""".format(company.get('company')),as_dict =1)
+	farmer = frappe.db.sql("""select name as id,full_name ,vlcc_name from `tabFarmer` where vlcc_name ='{0}'""".format(company.get('company')),as_dict =1)
+	for row in farmer:
+		row.update({"effective_credit": 400})
+	return farmer
+
 
 def terms_condition():
 	return frappe.db.sql("""select name,terms from `tabTerms and Conditions` where vlcc ='{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
+
 
 def get_supplier():
 	supplier = frappe.db.sql("""select name from `tabSupplier` where supplier_type in ('VLCC Local','Dairy Type')""",as_dict=1)
@@ -89,22 +97,26 @@ def get_supplier():
 		update_supplier_value(row)
 	return supplier
 
+
 def taxes_templates():
 	taxes_ =  frappe.db.sql(""" select name from `tabSales Taxes and Charges Template` where disabled =0 and company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
 	for row in taxes_:
 		row.update({"template":frappe.db.sql("""select charge_type,description,rate from `tabSales Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
 	return taxes_
 
+
 def get_seesion_company_datails():
 
 	user_doc = frappe.get_doc("User",frappe.session.user)
 	return {"company" : user_doc.company,"branch_office":user_doc.branch_office,"operator_type":user_doc.operator_type}
+
 
 def pr_taxes_templates():
 	taxes_ =  frappe.db.sql(""" select name from `tabPurchase Taxes and Charges Template` where disabled =0 and company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
 	for row in taxes_:
 		row.update({"template":frappe.db.sql("""select charge_type,description,rate from `tabPurchase Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
 	return taxes_
+
 
 def update_supplier_value(row):
 	"""supplier item price for different UOM per object """
@@ -126,6 +138,7 @@ def update_supplier_value(row):
 			)
 	else:
 		row.update({"items":[]})
+
 
 def get_diseases():
 	return frappe.db.sql("""select name, description from `tabDisease`""",as_dict=1)

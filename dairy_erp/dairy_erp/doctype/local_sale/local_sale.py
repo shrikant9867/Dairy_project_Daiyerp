@@ -21,9 +21,9 @@ from frappe import _
 
 class LocalSale(Document):
 	def validate(self):
-		self.total_weight()
+		# self.total_weight()
 		self.check_effective_credit()
-		self.get_in_words()
+		# self.get_in_words()
 
 	def get_in_words(self):
 		# print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
@@ -53,11 +53,13 @@ class LocalSale(Document):
 				frappe.throw(_("Cannot make <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>"))
 
 	def total_weight(self):
-		total = 0
-		for i in self.items:
-			# print "##############",type(i.get('amount'))
-			total += i.get('amount')
-		self.total = total
+		pass
+		# total_ = 0
+		# for i in self.items:
+		# 	# print "##############",type(i.get('amount'))
+		# 	print type(i.get('amount')),i.get('amount')
+		# 	total_ += i.get('amount')
+		# self.total = total
 
 	def on_submit(self):
 		self.create_delivery_note_for_vlcc()

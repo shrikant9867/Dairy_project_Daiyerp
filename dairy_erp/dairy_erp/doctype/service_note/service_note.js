@@ -37,7 +37,7 @@ frappe.ui.form.on('Service Note', {
 				},
 				callback: function(r) {
 					frm.set_value("taxes_tab" ,"");
-					console.log("###",r.message)
+					// console.log("###",r.message)
 					if (r.message) {
 						$.each(r.message.taxes, function(i, d) {
 							var row = frappe.model.add_child(cur_frm.doc, "Service Note Taxes", "taxes_tab");
@@ -47,6 +47,7 @@ frappe.ui.form.on('Service Note', {
 							row.description = d.description;
 							row.rate = d.rate;
 							row.tax_amount = d.tax_amount;
+							frm.events.get_total_taxes(frm)
 							// row.title = r.message.name
 							// row.company = r.message.company
 						});
@@ -124,9 +125,26 @@ frappe.ui.form.on('Service Note', {
 		$.each(frm.doc.items, function(idx, row){
 			total_amt += row.amount
 		})
-		console.log(total_amt)
+		// console.log(total_amt)
 		frm.set_value("total", total_amt);
 		frm.refresh_field("total")
+	},
+	get_total_taxes:function(frm) {
+		total_rate = 0
+		total_tax = 0
+		$.each(frm.doc.taxes_tab, function(idx, row){
+			total_rate += row.rate
+			row.tax_amount = (row.rate * frm.doc.total)/100
+			total_tax += row.tax_amount
+			row.total = total_tax
+		})
+
+		console.log(total_rate)
+		console.log(total_tax)
+		frm.set_value("total_taxes_and_charges", total_tax);
+		frm.set_value("grand_total", frm.doc.total + total_tax);
+		frm.refresh_field("total_taxes_and_charges")
+		frm.refresh_field("grand_total")
 	},
 	get_discount_amt:function(frm) {
 		discount_amount = (frm.doc.total * frm.doc.additional_discount_percentage)/100
@@ -139,7 +157,7 @@ frappe.ui.form.on('Service Note', {
 		frm.refresh_field("additional_discount_percentage")
 	},
 	get_grand_total:function(frm) {
-		grand_total = frm.doc.total - frm.doc.discount_amount
+		grand_total = frm.doc.grand_total - frm.doc.discount_amount
 		rounded_total = Math.round(frm.doc.grand_total);
 		frm.set_value("grand_total", grand_total);
 		frm.set_value("net_total", grand_total);
@@ -241,6 +259,7 @@ frappe.ui.form.on('Service Note Item', {
 		refresh_field("items");
 	},
 	});
+
 cur_frm.fields_dict.farmer_name.get_query = function(doc) {
 	return {filters: { vlcc_name: doc.vlcc_name}}
 }

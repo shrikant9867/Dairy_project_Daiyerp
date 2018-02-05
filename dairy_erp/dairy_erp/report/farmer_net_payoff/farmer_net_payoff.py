@@ -87,3 +87,7 @@ def get_filtered_company(doctype,text,searchfields,start,pagelen,filters):
 	user_name = frappe.session.user
 	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
 	return company_name
+
+@frappe.whitelist()
+def get_filtered_company_(doctype,text,searchfields,start,pagelen,filters):
+	print "#################################"

@@ -56,7 +56,7 @@ def make_mr(row):
 	mr_doc = frappe.new_doc("Material Request")
 	mr_doc.update(row)
 	mr_doc.flags.ignore_permissions = True
-	mr_doc.insert()
+	mr_doc.save()
 	mr_doc.submit()
 
 	return mr_doc.name

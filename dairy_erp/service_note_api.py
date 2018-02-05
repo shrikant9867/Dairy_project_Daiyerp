@@ -20,14 +20,14 @@ def create_sv_nt(data):
 	response_dict = {}
 	data = json.loads(data)
 	try:
-		if data.get('diseases') and data.get('items') and data.get('client_id'):
+		if data.get('diagnosis') and data.get('items') and data.get('client_id'):
 			sn_exist = frappe.db.get_value("Service Note", {"client_id": data.get('client_id')}, 'name')
 			if not sn_exist:
 				response_dict.update({"status": "success", "name": create_sn(data)})
 			else:
 				response_dict.update({"status": "success", "name": sn_exist})
 		else:
-			frappe.throw(__("Invalid Data, Please check data !"))
+			frappe.throw(_("Invalid Data, Please check data !"))
 
 	
 	except Exception,e:

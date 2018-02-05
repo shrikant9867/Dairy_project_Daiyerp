@@ -123,6 +123,9 @@ doc_events = {
     },
     "Supplier":{
         "validate": "dairy_erp.customization.customization.set_company"
+    },
+    "GL Entry":{
+        "before_submit": "dairy_erp.customization.customization.set_camp"
     }
 }
 
@@ -160,6 +163,7 @@ permission_query_conditions = {
     "Village Level Collection Centre": "dairy_erp.customization.customization.vlcc_permission",
     "Farmer Milk Collection Record": "dairy_erp.customization.customization.fmrc_permission",
     "Vlcc Milk Collection Record": "dairy_erp.customization.customization.vmcr_permission",
+    "Payment Entry": "dairy_erp.customization.customization.pe_permission"
 }
 # Testing
 # -------

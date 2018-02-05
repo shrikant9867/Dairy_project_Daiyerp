@@ -141,7 +141,17 @@ def update_warehouse(doc, method):
 @frappe.whitelist()
 def after_install():
 	create_supplier_type()
+	create_translation()
 	# create_local_customer()
+
+def create_translation():
+
+	if not frappe.db.sql("select name from `tabTranslation` where source_name='Material Request'"):
+		mr_translation = frappe.new_doc("Translation")
+		mr_translation.language = "en"
+		mr_translation.source_name = "Material Request"
+		mr_translation.target_name = "Material Indent"
+		mr_translation.save()
 
 def create_supplier_type():
 
@@ -647,5 +657,21 @@ def vmcr_permission(user):
 
 	if user_doc.get('operator_type') == "Camp Office":
 		company = ['"%s"'%comp.get('name') for comp in vlcc]
-		return """`tabVlcc Milk Collection Record`.associated_vlcc in  ({company})""".format(company=','.join(company))		
-	
+		return """`tabVlcc Milk Collection Record`.associated_vlcc in  ({company})""".format(company=','.join(company))
+
+def pe_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	vlcc = frappe.db.get_values("Village Level Collection Centre",{"camp_office":user_doc.get('branch_office')},"name",as_dict=1)
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabPayment Entry`.company = '{0}')""".format(user_doc.get('company'))
+
+	if user_doc.get('operator_type') == "Camp Office":
+		return """(`tabPayment Entry`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+
+def set_camp(doc, method):
+	camp = frappe.db.get_value("Sales Invoice",doc.voucher_no,'camp_office')
+	doc.camp_office = camp
+	doc.flags.ignore_permissions = True

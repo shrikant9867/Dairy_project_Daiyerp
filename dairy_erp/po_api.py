@@ -32,7 +32,7 @@ def make_po(data):
 	po_obj = frappe.new_doc("Purchase Order")
 	po_obj.update(data)
 	po_obj.flags.ignore_permissions = True
-	po_obj.insert()
+	po_obj.save()
 	po_obj.submit()
 
 	return po_obj.name

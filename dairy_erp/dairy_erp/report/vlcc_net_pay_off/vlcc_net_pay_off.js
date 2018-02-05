@@ -8,7 +8,8 @@ frappe.query_reports["Vlcc Net Pay Off"] = {
 			"fieldname":"camp",
 			"label": __("Camp Operator"),
 			"fieldtype": "Data",
-			"default": frappe.session.user
+			"default": frappe.session.user_fullname,
+			"read_only": 1
 			/*"get_query": function (query_report) {
 				return {
 					query:"dairy_erp.dairy_erp.report.farmer_net_payoff.farmer_net_payoff.get_filtered_camp_operator"

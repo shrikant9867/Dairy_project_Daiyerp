@@ -14,7 +14,7 @@ def execute(filters=None):
 def get_column():
 	columns =[
 		("Village Level Collection Centre") + ":Link/Village Level Collection Centre:200",
-		("Net Payable to Camp Operator") + ":Currency:200",
+		("Net Payable to Vlcc") + ":Currency:200",
 		("Net Receivable from Vlcc") + ":Currency:200",
 		("Net Pay Off to Vlcc")+ ":Currency:200",
 	]

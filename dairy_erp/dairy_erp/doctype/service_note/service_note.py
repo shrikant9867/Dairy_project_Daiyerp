@@ -9,6 +9,7 @@ from erpnext.accounts.report.accounts_receivable.accounts_receivable import Rece
 from frappe.utils import getdate, nowdate, flt, cint
 from datetime import datetime, timedelta,date
 from frappe import _
+from frappe.utils import money_in_words
 
 class ServiceNote(Document):
 	def validate(self):
@@ -22,6 +23,8 @@ class ServiceNote(Document):
 
 	def get_in_words(self):
 		print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
+		self.base_in_words = money_in_words(self.total,self.currency)
+		self.in_words = money_in_words(self.total,self.currency)
 
 	def check_effective_credit(self):
 		effective_credit = self.effective_credit

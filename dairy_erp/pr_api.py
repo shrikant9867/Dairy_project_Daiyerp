@@ -35,7 +35,7 @@ def make_pr(data):
 	pr_obj = frappe.new_doc("Purchase Receipt")
 	pr_obj.update(data)
 	pr_obj.flags.ignore_permissions = True
-	pr_obj.insert()
+	pr_obj.save()
 	pr_obj.submit()
 
 	return pr_obj.name

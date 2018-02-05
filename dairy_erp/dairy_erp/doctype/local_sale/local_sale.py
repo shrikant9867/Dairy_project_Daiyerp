@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, cstr, cint
 import time
-from frappe import _
+from frappe.utils import money_in_words
 from dairy_erp.api_utils import make_mobile_log
 import requests
 import json
@@ -23,11 +23,15 @@ class LocalSale(Document):
 	def validate(self):
 		self.total_weight()
 		self.check_effective_credit()
-		# self.additional_discount()
-		# self.rounded_total()
+		self.get_in_words()
+
+	def get_in_words(self):
+		# print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
+		self.base_in_words = money_in_words(self.total,self.currency)
+		self.in_words = money_in_words(self.total,self.currency)
 
 	def additional_discount(self):
-		print "________________ {0} ______________", self.additional_discount_percentage
+		# print "________________ {0} ______________", self.additional_discount_percentage
 		if self.additional_discount_percentage:
 			additional_discount = 0
 			for i in self.items:
@@ -35,7 +39,7 @@ class LocalSale(Document):
 				self.discount_amount = additional_discount
 
 	def check_effective_credit(self):
-		print "________________ {0} and {1} and {2}______________".format(self.effective_credit,self.customer,self.farmer)
+		# print "________________ {0} and {1} and {2}______________".format(self.effective_credit,self.customer,self.farmer)
 		effective_credit = self.effective_credit
 		if self.local_customer_or_farmer == 'Vlcc Local Customer':
 			if self.customer == None:
@@ -49,12 +53,11 @@ class LocalSale(Document):
 				frappe.throw(_("Cannot make <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>"))
 
 	def total_weight(self):
-		pass
-		# total = 0
-		# for i in self.items:
-		# 	print "##############",type(i.get('amount'))
-		# 	total += i.get('amount')
-		# self.total = total
+		total = 0
+		for i in self.items:
+			# print "##############",type(i.get('amount'))
+			total += i.get('amount')
+		self.total = total
 
 	def on_submit(self):
 		self.create_delivery_note_for_vlcc()
@@ -131,6 +134,7 @@ def get_price_list_rate(item):
 
 @frappe.whitelist()
 def fetch_taxes(tax):
+	# return frappe.db.sql("""select """)
 	taxes = frappe.get_doc("Sales Taxes and Charges Template",tax)
 	return taxes
 

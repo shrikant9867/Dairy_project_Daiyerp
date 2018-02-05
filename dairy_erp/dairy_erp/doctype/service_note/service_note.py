@@ -9,18 +9,22 @@ from erpnext.accounts.report.accounts_receivable.accounts_receivable import Rece
 from frappe.utils import getdate, nowdate, flt, cint
 from datetime import datetime, timedelta,date
 from frappe import _
+from frappe.utils import money_in_words
 
 class ServiceNote(Document):
 	def validate(self):
-		self.total_weight()
-		self.check_effective_credit()
+		# self.total_weight()
+		# self.check_effective_credit()
 		self.get_in_words()
 
 	def on_submit(self):
-		self.sales_invoice_against_dairy()
+		pass
+		# self.sales_invoice_against_dairy()
 
 	def get_in_words(self):
-		print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
+		# print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
+		self.base_in_words = money_in_words(self.total,self.currency)
+		self.in_words = money_in_words(self.total,self.currency)
 
 	def check_effective_credit(self):
 		effective_credit = self.effective_credit
@@ -110,12 +114,12 @@ def get_price_list_rate(item):
 
 @frappe.whitelist()
 def get_effective_credit(farmer_name):
-	print "---------------farmer_name----------------",farmer_name
+	# print "---------------farmer_name----------------",farmer_name
 	company = frappe.db.get_value("User", frappe.session.user, "company")
 	purchase = frappe.db.get_value("Purchase Invoice", {"title":farmer_name,"company":company}, "sum(grand_total)")
 	sales = frappe.db.get_value("Sales Invoice", {"title":farmer_name,"company":company}, "sum(grand_total)")
-	print "----------------------sales",sales
-	print "======================purchase",purchase
+	# print "----------------------sales",sales
+	# print "======================purchase",purchase
 	# purchase_total = frappe.db.sql("""select name,sum(grand_total) as purchase_total from `tabPurchase Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True) 
 	# sales_total = frappe.db.sql("""select name,sum(grand_total) as sales_total from `tabSales Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True)
 	
@@ -128,12 +132,11 @@ def get_effective_credit(farmer_name):
 		return eff_amt
 
 	elif purchase == None and sales:
-		print "____________________ {0} _______________".format(sales)
-
+		# print "____________________ {0} _______________".format(sales)
 		eff_amt = 0.0
 		return eff_amt
 	elif purchase and sales == None:
-		print "____________________ {0} _______________".format(purchase)
+		# print "____________________ {0} _______________".format(purchase)
 		eff_amt = purchase
 		return eff_amt
 	else:

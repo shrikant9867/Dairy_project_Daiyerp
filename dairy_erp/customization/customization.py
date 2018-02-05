@@ -671,4 +671,7 @@ def pe_permission(user):
 		return """(`tabPayment Entry`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
 
 
-	
+def set_camp(doc, method):
+	camp = frappe.db.get_value("Sales Invoice",doc.voucher_no,'camp_office')
+	doc.camp_office = camp
+	doc.flags.ignore_permissions = True

@@ -22,8 +22,8 @@ def create_local_sale(data):
 	try:
 		if data.get('local_customer_or_farmer') and data.get('farmer') and data.get('items'):
 			local_exist = frappe.db.get_value("Local Sale",{"client_id": data.get('client_id')}, 'name')
+			print local_exist
 			if not local_exist:
-				print local_exist
 				response_dict.update({"status": "success", "name": create_ls(data)})
 			else:
 				response_dict.update({"status": "success", "name": local_exist})
@@ -37,13 +37,23 @@ def create_local_sale(data):
 
 def create_ls(data):
 	ls_obj = frappe.new_doc("Local Sale")
-	#ls_obj.local_customer_or_farmer = data.get('local_customer_or_farmer')
-	ls_obj.update(data)
+	ls_obj.local_customer_or_farmer = data.get('local_customer_or_farmer')
+	ls_obj.farmer = data.get('farmer')
+	ls_obj.client_id = data.get('client_id')
+	for row in data.get('items'):
+		ls_obj.append("items",
+			{
+				"item_code": row.get('item_code'),
+				"uom": row.get('uom'),
+				"qty": row.get('qty'),
+				"rate": row.get('rate'),
+				"conversion_factor":4.000
+			}
+		)
 	ls_obj.flags.ignore_permissions = True
 	ls_obj.flags.ignore_mandatory = True
-	ls_obj.insert()
+	ls_obj.save()
 	ls_obj.submit()
-	
 	return ls_obj.name
 
 

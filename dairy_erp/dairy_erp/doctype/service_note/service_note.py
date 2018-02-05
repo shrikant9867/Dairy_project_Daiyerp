@@ -13,9 +13,10 @@ from frappe.utils import money_in_words
 
 class ServiceNote(Document):
 	def validate(self):
+		pass
 		# self.total_weight()
 		# self.check_effective_credit()
-		self.get_in_words()
+		# self.get_in_words()
 
 	def on_submit(self):
 		pass

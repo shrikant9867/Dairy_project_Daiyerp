@@ -16,7 +16,7 @@ class ServiceNote(Document):
 		pass
 		# self.total_weight()
 		# self.check_effective_credit()
-		# self.get_in_words()
+		self.get_in_words()
 
 	def on_submit(self):
 		pass
@@ -24,8 +24,8 @@ class ServiceNote(Document):
 
 	def get_in_words(self):
 		# print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
-		self.base_in_words = money_in_words(self.total,self.currency)
-		self.in_words = money_in_words(self.total,self.currency)
+		self.base_in_words = money_in_words(self.grand_total,self.currency)
+		self.in_words = money_in_words(self.grand_total,self.currency)
 
 	def check_effective_credit(self):
 		effective_credit = self.effective_credit

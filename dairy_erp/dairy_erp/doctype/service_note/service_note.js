@@ -105,20 +105,6 @@ frappe.ui.form.on('Service Note', {
 				}
 			});
 		}
-
-		// frappe.call({
-		// 	method:"dairy_erp.dairy_erp.doctype.service_note.service_note.get_farmer_details",
-		// 	args:{
-		// 		"customer": frm.doc.customer
-		// 	},
-		// 	callback: function(r) {
-		// 		if(r.message) {
-		// 			console.log(r.message)
-		// 			frm.set_value("customer_address",r.message.address);
-		// 			frm.set_value("address_details",r.message.address_details);
-		// 		}
-		// 	}
-		// });
 	},
 	get_total_on_qty:function(frm) {
 		total_amt = 0
@@ -127,7 +113,15 @@ frappe.ui.form.on('Service Note', {
 		})
 		// console.log(total_amt)
 		frm.set_value("total", total_amt);
+		frm.set_value("grand_total", total_amt);
+		frm.set_value("net_total", total_amt);
+		frm.set_value("rounded_total", total_amt);
+		frm.set_value("outstanding_amount", total_amt);
 		frm.refresh_field("total")
+		frm.refresh_field("grand_total")
+		frm.refresh_field("net_total")
+		frm.refresh_field("rounded_total")
+		frm.refresh_field("outstanding_amount")
 	},
 	get_total_taxes:function(frm) {
 		total_rate = 0
@@ -138,11 +132,9 @@ frappe.ui.form.on('Service Note', {
 			total_tax += row.tax_amount
 			row.total = total_tax
 		})
-
-		console.log(total_rate)
-		console.log(total_tax)
+		console.log("total_tax",total_tax)
 		frm.set_value("total_taxes_and_charges", total_tax);
-		frm.set_value("grand_total", frm.doc.total + total_tax);
+		frm.set_value("grand_total", frm.doc.grand_total + total_tax);
 		frm.refresh_field("total_taxes_and_charges")
 		frm.refresh_field("grand_total")
 	},
@@ -150,6 +142,7 @@ frappe.ui.form.on('Service Note', {
 		discount_amount = (frm.doc.total * frm.doc.additional_discount_percentage)/100
 		frm.set_value("discount_amount", discount_amount);
 		frm.refresh_field("discount_amount")
+		// frm.events.get_grand_total(frm)
 	},
 	get_discount_percent:function(frm) {
 		discount_percent = (100 * frm.doc.discount_amount)/frm.doc.total
@@ -157,7 +150,7 @@ frappe.ui.form.on('Service Note', {
 		frm.refresh_field("additional_discount_percentage")
 	},
 	get_grand_total:function(frm) {
-		grand_total = frm.doc.grand_total - frm.doc.discount_amount
+		grand_total = frm.doc.total - frm.doc.discount_amount + frm.doc.total_taxes_and_charges
 		rounded_total = Math.round(frm.doc.grand_total);
 		frm.set_value("grand_total", grand_total);
 		frm.set_value("net_total", grand_total);

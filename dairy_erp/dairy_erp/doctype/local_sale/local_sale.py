@@ -21,7 +21,7 @@ from frappe import _
 
 class LocalSale(Document):
 	def validate(self):
-		self.total_weight()
+		# self.total_weight()
 		self.check_effective_credit()
 		self.get_in_words()
 

@@ -14,7 +14,7 @@ from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 
 class ServiceNote(Document):
 	def validate(self):
-		self.total_weight()
+		# self.total_weight()
 		self.check_effective_credit()
 		self.get_in_words()
 

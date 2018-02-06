@@ -259,7 +259,15 @@ frappe.ui.form.on('Sales Order Item', {
 		if (child.item_code){
 			var amount = parseFloat(child.rate) * parseFloat(child.qty);
 			frappe.model.set_value(cdt, cdn, "amount",amount);
-			frm.events.get_total_on_qty(frm)
+			if (child.qty) {
+				frm.events.get_total_on_qty(frm)
+				frm.events.taxes_and_charges(frm)	
+			}
+			else {
+				frm.set_value("total", 0);
+				frm.set_value("grand_total", 0);
+				frm.set_value("outstanding_amount", 0);
+			}
 			if (cur_frm.doc.effective_credit < cur_frm.doc.total) {
 				frappe.msgprint(__("Cannot create <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>")); 
 			};
@@ -272,7 +280,15 @@ frappe.ui.form.on('Sales Order Item', {
 		if (child.item_code){
 			var amount = parseFloat(child.rate) * parseFloat(child.qty);
 			frappe.model.set_value(cdt, cdn, "amount",amount);
-			frm.events.get_total_on_qty(frm)
+			if (child.rate) {
+				frm.events.get_total_on_qty(frm)
+				frm.events.taxes_and_charges(frm)	
+			}
+			else {
+				frm.set_value("total", 0);
+				frm.set_value("grand_total", 0);
+				frm.set_value("outstanding_amount", 0);
+			}
 			if (cur_frm.doc.effective_credit < cur_frm.doc.total) {
 				frappe.msgprint(__("Cannot create <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>")); 
 			};

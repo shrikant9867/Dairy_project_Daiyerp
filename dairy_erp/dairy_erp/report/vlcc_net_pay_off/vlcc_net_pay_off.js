@@ -24,7 +24,7 @@ frappe.query_reports["Vlcc Net Pay Off"] = {
 			"options": "Village Level Collection Centre"
 			/*"get_query": function (query_report) {
 				return {
-					query:"dairy_erp.dairy_erp.report.farmer_net_payoff.farmer_net_payoff.get_filtered_farmers"
+					query:"dairy_erp.dairy_erp.report.vlcc_net_pay_off.vlcc_net_pay_off.get_filtered_vlccs"
 					
 				}
 			}*/

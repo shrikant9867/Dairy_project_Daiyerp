@@ -16,6 +16,7 @@ from erpnext.stock.stock_balance import get_balance_qty_from_sle
 import re, urllib, datetime, math, time
 from erpnext.selling.doctype.sales_order.sales_order import SalesOrder
 from frappe import _
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_entry
 
 # Sid Customization
 
@@ -27,8 +28,8 @@ class LocalSale(Document):
 
 	def get_in_words(self):
 		# print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
-		self.base_in_words = money_in_words(self.total,self.currency)
-		self.in_words = money_in_words(self.total,self.currency)
+		self.base_in_words = money_in_words(self.grand_total,self.currency)
+		self.in_words = money_in_words(self.grand_total,self.currency)
 
 	def additional_discount(self):
 		# print "________________ {0} ______________", self.additional_discount_percentage
@@ -66,62 +67,83 @@ class LocalSale(Document):
 	def create_delivery_note_for_vlcc(self):
 		if self.local_customer_or_farmer == "Vlcc Local Customer":
 			customer = self.customer
+
+			delivry_obj = frappe.new_doc("Delivery Note")
+			delivry_obj.customer = customer
+			delivry_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
+			cost_center = frappe.db.get_value("Company",delivry_obj.company,'cost_center')
+			for row in self.items:
+				delivry_obj.append("items",
+					{
+						"item_code": row.item_code,
+						"item_name": row.item_name,
+						"description": row.description,
+						"uom": "Litre",
+						"qty": row.get('qty'),
+						"rate": row.get('rate'),
+						"amount": row.get('amount'),
+						"warehouse": row.get("warehouse"),
+						"cost_center": cost_center
+					})
+			delivry_obj.flags.ignore_permissions = True
+			delivry_obj.submit()
+			si_obj = make_sales_invoice(delivry_obj.name)
+			si_obj.flags.ignore_permissions = True
+			si_obj.submit()
+			# make_payment_on_si(si_obj)
+			frappe.msgprint(_("Delivery Note :'{0}' Created".format("<a href='#Form/Delivery Note/{0}'>{0}</a>".format(delivry_obj.name))))
+			frappe.msgprint(_("Sales Invoice :'{0}' Created".format("<a href='#Form/Sales Invoice/{0}'>{0}</a>".format(si_obj.name))))
+		
 		elif self.local_customer_or_farmer == "Farmer":
 			customer = self.farmer_name
+			
+			delivry_obj = frappe.new_doc("Delivery Note")
+			delivry_obj.customer = customer
+			delivry_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
+			cost_center = frappe.db.get_value("Company",delivry_obj.company,'cost_center')
+			for row in self.items:
+				delivry_obj.append("items",
+					{
+						"item_code": row.item_code,
+						"item_name": row.item_name,
+						"description": row.description,
+						"uom": "Litre",
+						"qty": row.get('qty'),
+						"rate": row.get('rate'),
+						"amount": row.get('amount'),
+						"warehouse": row.get("warehouse"),
+						"cost_center": cost_center
+					})
+			delivry_obj.flags.ignore_permissions = True
+			delivry_obj.submit()
+			si_obj = make_sales_invoice(delivry_obj.name)
+			si_obj.flags.ignore_permissions = True
+			si_obj.submit()
+			frappe.msgprint(_("Delivery Note :'{0}' Created".format("<a href='#Form/Delivery Note/{0}'>{0}</a>".format(delivry_obj.name))))
+			frappe.msgprint(_("Sales Invoice :'{0}' Created".format("<a href='#Form/Sales Invoice/{0}'>{0}</a>".format(si_obj.name))))
 
-		delivry_obj = frappe.new_doc("Delivery Note")
-		delivry_obj.customer = customer
-		delivry_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
-		cost_center = frappe.db.get_value("Company",delivry_obj.company,'cost_center')
-		for row in self.items:
-			delivry_obj.append("items",
-				{
-					"item_code": row.item_code,
-					"item_name": row.item_name,
-					"description": row.description,
-					"uom": "Litre",
-					"qty": row.get('qty'),
-					"rate": row.get('rate'),
-					"amount": row.get('amount'),
-					"warehouse": row.get("warehouse"),
-					"cost_center": cost_center
-				})
-		delivry_obj.flags.ignore_permissions = True
-		delivry_obj.submit()
-		si_obj = make_sales_invoice(delivry_obj.name)
-		si_obj.flags.ignore_permissions = True
-		si_obj.submit()
-		frappe.msgprint(_("Delivery Note :'{0}' Created".format("<a href='#Form/Delivery Note/{0}'>{0}</a>".format(delivry_obj.name))))
-		frappe.msgprint(_("Sales Invoice :'{0}' Created".format("<a href='#Form/Sales Invoice/{0}'>{0}</a>".format(si_obj.name))))
 
-	# def create_sale_invoice_ls(self):
-	# 	print "____________",self.name
-	# 	try:
-	# 		si_obj = frappe.new_doc("Sales Invoice")
-	# 		si_obj.customer = self.customer
-	# 		si_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
-	# 		si_obj_cost_center = frappe.db.get_value("Company",si_obj.company,'cost_center')
-	# 		si_obj.due_date = self.posting_time
-	# 		for row in self.items:
-	# 			si_obj.append("items",
-	# 			{
-	# 				"item_code": row.get('item_code'),
-	# 				"item_name": row.get('item_code'),
-	# 				"description": row.get('item_code'),
-	# 				"uom": "Litre",
-	# 				"qty": row.get('qty'),
-	# 				"rate": row.get('rate'),
-	# 				"amount": row.get('amount'),
-	# 				"warehouse": row.get("warehouse"),
-	# 				"cost_center": si_obj_cost_center
-	# 			})
-	# 		si_obj.flags.ignore_permissions = True
-	# 		# si_obj.service_note = self.name
-	# 		si_obj.submit()
-	# 		frappe.msgprint(_("Sales Invoice: {0} Created!!!".format(self.name))
-		# except Exception,e:
-		# 	make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
-		# 	data = "", message=e, traceback=frappe.get_traceback())
+@frappe.whitelist()
+def make_payment_on_si(si_doc):
+	print "____________",si_doc.name
+	print "____________",si_doc.company
+	print "____________",si_doc.posting_date
+	print "____________",si_doc.customer
+	si_payment = frappe.new_doc("Payment Entry")
+	si_payment.account_type = 'Cash'
+	si_payment.posting_date = si_doc.posting_date
+	si_payment.company = si_doc.company
+	si_payment.mode_of_payment = "Cash"
+	si_payment.payment_type = "Receive"
+	si_payment.party_type = "Customer"
+	si_payment.party_name = si_doc.customer
+	si_payment.party = si_doc.customer
+	si_payment.party_balance = si_doc.grand_total
+	si_payment.flags.ignore_permissions = True
+	si_payment.flags.ignore_mandatory = True
+	si_payment.submit()
+	frappe.msgprint(_("Payment Entry Done against Sales Invoice: {0}!!!".format(si_doc.name)))
+
 
 @frappe.whitelist()
 def get_price_list_rate(item):

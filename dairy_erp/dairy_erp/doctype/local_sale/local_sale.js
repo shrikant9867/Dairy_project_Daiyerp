@@ -66,15 +66,16 @@ frappe.ui.form.on('Local Sale', {
 					if (r.message) {
 						$.each(r.message.taxes, function(i, d) {
 							console.log(d)
-							var row = frappe.model.add_child(cur_frm.doc, "Sales Taxes and Charges Template", "taxe_charge_template");
+							var row = frappe.model.add_child(cur_frm.doc, "Service Note Taxes", "taxe_charge_template");
 							row.charge_type = d.charge_type;
 							row.account_head = d.account_head;
 							row.cost_center = d.cost_center;
 							row.description = d.description;
 							row.rate = d.rate;
 							row.tax_amount = d.tax_amount;
-							row.title = r.message.name
-							row.company = r.message.company
+							frm.events.get_total_taxes(frm)
+							// row.title = r.message.name
+							// row.company = r.message.company
 						});
 					}
 					refresh_field("taxe_charge_template");
@@ -116,7 +117,7 @@ frappe.ui.form.on('Local Sale', {
 	farmer: function(frm){
 		if (cur_frm.doc.farmer) {
 			frappe.call({
-				method:"dairy_erp.dairy_erp.doctype.service_note.service_note.get_effective_credit",
+				method:"dairy_erp.dairy_erp.doctype.local_sale.local_sale.get_effective_credit",
 				args:{
 					"customer": cur_frm.doc.farmer_name
 				},
@@ -136,8 +137,32 @@ frappe.ui.form.on('Local Sale', {
 		$.each(frm.doc.items, function(idx, row){
 			total_amt += row.amount
 		})
+		// console.log(total_amt)
 		frm.set_value("total", total_amt);
+		frm.set_value("grand_total", total_amt);
+		// frm.set_value("net_total", total_amt);
+		frm.set_value("rounded_total", total_amt);
+		frm.set_value("outstanding_amount", total_amt);
 		frm.refresh_field("total")
+		frm.refresh_field("grand_total")
+		// frm.refresh_field("net_total")
+		frm.refresh_field("rounded_total")
+		frm.refresh_field("outstanding_amount")
+	},
+	get_total_taxes:function(frm) {
+		total_rate = 0
+		total_tax = 0
+		$.each(frm.doc.taxe_charge_template, function(idx, row){
+			total_rate += row.rate
+			row.tax_amount = (row.rate * frm.doc.total)/100
+			total_tax += row.tax_amount
+			row.total = total_tax
+		})
+		console.log("total_tax",total_tax)
+		frm.set_value("total_taxes_and_charges", total_tax);
+		frm.set_value("grand_total", frm.doc.grand_total + total_tax);
+		frm.refresh_field("total_taxes_and_charges")
+		frm.refresh_field("grand_total")
 	},
 	get_discount_amt:function(frm) {
 		discount_amount = (frm.doc.total * frm.doc.additional_discount_percentage)/100
@@ -150,12 +175,14 @@ frappe.ui.form.on('Local Sale', {
 		frm.refresh_field("additional_discount_percentage")
 	},
 	get_grand_total:function(frm) {
-		grand_total = frm.doc.total - frm.doc.discount_amount
+		grand_total = frm.doc.total - frm.doc.discount_amount + frm.doc.total_taxes_and_charges
 		rounded_total = Math.round(frm.doc.grand_total);
 		frm.set_value("grand_total", grand_total);
+		// frm.set_value("net_total", grand_total);
 		frm.set_value("rounded_total", rounded_total);
 		frm.set_value("outstanding_amount", grand_total);
 		frm.refresh_field("grand_total")
+		// frm.refresh_field("net_total")
 		frm.refresh_field("rounded_total")
 		frm.refresh_field("outstanding_amount")
 	}

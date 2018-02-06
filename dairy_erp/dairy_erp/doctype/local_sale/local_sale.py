@@ -21,9 +21,9 @@ from frappe import _
 
 class LocalSale(Document):
 	def validate(self):
-		# self.total_weight()
+		self.total_weight()
 		self.check_effective_credit()
-		# self.get_in_words()
+		self.get_in_words()
 
 	def get_in_words(self):
 		# print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
@@ -53,13 +53,12 @@ class LocalSale(Document):
 				frappe.throw(_("Cannot make <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>"))
 
 	def total_weight(self):
-		pass
-		# total_ = 0
-		# for i in self.items:
-		# 	# print "##############",type(i.get('amount'))
-		# 	print type(i.get('amount')),i.get('amount')
-		# 	total_ += i.get('amount')
-		# self.total = total
+		total_ = 0
+		for i in self.items:
+			# print "##############",type(i.get('amount'))
+			print type(i.get('amount')),i.get('amount')
+			total_ += i.get('amount')
+		self.total = total
 
 	def on_submit(self):
 		self.create_delivery_note_for_vlcc()
@@ -92,7 +91,8 @@ class LocalSale(Document):
 		si_obj = make_sales_invoice(delivry_obj.name)
 		si_obj.flags.ignore_permissions = True
 		si_obj.submit()
-		frappe.msgprint(_("Delivery Note: {0} Created!!! \n Sales Invoice: {1} Created!!!".format(delivry_obj.name,si_obj.name)))
+		frappe.msgprint(_("Delivery Note :'{0}' Created".format("<a href='#Form/Delivery Note/{0}'>{0}</a>".format(delivry_obj.name))))
+		frappe.msgprint(_("Sales Invoice :'{0}' Created".format("<a href='#Form/Sales Invoice/{0}'>{0}</a>".format(si_obj.name))))
 
 	# def create_sale_invoice_ls(self):
 	# 	print "____________",self.name
@@ -173,3 +173,34 @@ def fetch_balance_qty():
 def get_vlcc_warehouse():
 	warehouse = frappe.db.get_value("Village Level Collection Centre", {"email_id": frappe.session.user}, 'warehouse')
 	return warehouse
+
+@frappe.whitelist()
+def get_effective_credit(customer):
+	# print "---------------customer----------------",customer
+	company = frappe.db.get_value("User", frappe.session.user, "company")
+	purchase = frappe.db.get_value("Purchase Invoice", {"title":customer,"company":company}, "sum(grand_total)")
+	sales = frappe.db.get_value("Sales Invoice", {"title":customer,"company":company}, "sum(grand_total)")
+	# print "----------------------sales",sales
+	# print "======================purchase",purchase
+	# purchase_total = frappe.db.sql("""select name,sum(grand_total) as purchase_total from `tabPurchase Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True) 
+	# sales_total = frappe.db.sql("""select name,sum(grand_total) as sales_total from `tabSales Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True)
+	
+	if purchase == None:
+		eff_amt = 0.0
+		return eff_amt
+
+	if purchase and sales:
+		eff_amt = purchase - sales
+		return eff_amt
+
+	elif purchase == None and sales:
+		# print "____________________ {0} _______________".format(sales)
+		eff_amt = 0.0
+		return eff_amt
+	elif purchase and sales == None:
+		# print "____________________ {0} _______________".format(purchase)
+		eff_amt = purchase
+		return eff_amt
+	else:
+		eff_amt = 0.0
+		return eff_amt

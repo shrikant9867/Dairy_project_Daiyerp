@@ -1,0 +1,43 @@
+{
+    "message": {
+        "status": "success",
+        "data": [
+            {
+                "status": "Draft",
+                "name": "LS-0079",
+                "effective_credit": 0,
+                "taxes_and_charges": null,
+                "buffalo_milk_qty_farmer": "0",
+                "items": [
+                    {
+                        "item_name": "Type1",
+                        "item_code": "Type1",
+                        "qty": 3,
+                        "rate": 45,
+                        "delivery_date": "2018-02-28",
+                        "uom": "50kg bag"
+                    }
+                ],
+                "In State GST": [
+                    {
+                        "charge_type": "On Net Total",
+                        "rate": 0,
+                        "description": "Marketing Expenses"
+                    },
+                    {
+                        "charge_type": "On Net Total",
+                        "rate": 0,
+                        "description": "Marketing Expenses"
+                    }
+                ],
+                "discount": 0,
+                "local_customer_or_farmer": "Farmer",
+                "farmer": "328743287g",
+                "posting_date": "2018-02-07",
+                "cow_milk_quantity_farmer": "0",
+                "taxes_and_charges": "In State GST"
+
+            }
+        ]
+    }
+}

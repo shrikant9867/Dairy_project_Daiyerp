@@ -92,7 +92,7 @@ def terms_condition():
 
 
 def get_supplier():
-	supplier = frappe.db.sql("""select name from `tabSupplier` where supplier_type in ('VLCC Local','Dairy Type')""",as_dict=1)
+	supplier = frappe.db.sql("""select name,contact_no from `tabSupplier` where supplier_type in ('VLCC Local','Dairy Type')""",as_dict=1)
 	for row in supplier:
 		update_supplier_value(row)
 	return supplier
@@ -142,3 +142,32 @@ def update_supplier_value(row):
 
 def get_diseases():
 	return frappe.db.sql("""select name, description from `tabDisease`""",as_dict=1)
+
+
+@frappe.whitelist()
+def log_out():
+	try:
+		response_dict = {}
+		frappe.local.login_manager.logout()
+		frappe.db.commit()
+		response_dict.update({"status":"Success", "message":"Successfully Logged Out"})
+	except Exception, e:
+		response_dict.update({"status":"Error", "error":e, "traceback":frappe.get_traceback()})
+
+	return response_dict
+
+@frappe.whitelist(allow_guest=True)
+def forgot_password(user_id):
+	try:
+		response_dict = {}
+		user = frappe.get_doc("User", user_id)
+		user.validate_reset_password()
+		user.reset_password(send_email=True)
+		response_dict.update({"status":"Success", \
+			"message":_("Password reset instructions have been sent to your email")})
+	except frappe.DoesNotExistError:
+		response_dict.update({"status":"Error", "message":_("User {0} does not exist").format(user_id)})
+	except Exception, e:
+		response_dict.update({"status":"Error", "message":e, "traceback":frappe.get_traceback()})
+
+	return response_dict

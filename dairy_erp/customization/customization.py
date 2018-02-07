@@ -461,11 +461,16 @@ def set_co_warehouse_pr(doc,method=None):
 			for item in doc.items:
 				if not item.delivery_note:
 					item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
+					if item.rejected_qty:
+						item.rejected_warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
 	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
 			vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 			for item in doc.items:
 				item.warehouse = vlcc
+				if item.rejected_qty:
+					item.rejected_warehouse = vlcc
+
 
 
 def set_vlcc_warehouse(doc,method=None):
@@ -642,6 +647,9 @@ def vlcc_permission(user):
 
 	if user_doc.get('operator_type') == "Camp Office":
 		return """(`tabVillage Level Collection Centre`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabVillage Level Collection Centre`.name = '{0}')""".format(user_doc.get('company'))
 
 def fmrc_permission(user):
 

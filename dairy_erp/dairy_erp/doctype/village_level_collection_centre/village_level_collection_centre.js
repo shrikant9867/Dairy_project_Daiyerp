@@ -66,7 +66,6 @@ frappe.ui.form.on('Village Level Collection Centre', {
 	},
 	
 	chilling_centre: function(frm) {
-		console.log("EEE")
 		frappe.route_options = {
 			"address_type": "Chilling Centre"
 		}

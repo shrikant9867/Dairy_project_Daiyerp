@@ -216,7 +216,7 @@ def get_data():
 					"name": "Vlcc Net Pay Off",
 					"doctype": "Village Level Collection Centre",
 					"is_query_report": True
-				},
+				}
 			]
 		}				
 	]			

@@ -10,21 +10,20 @@ from frappe.utils import getdate, nowdate, flt, cint
 from datetime import datetime, timedelta,date
 from frappe import _
 from frappe.utils import money_in_words
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 
 class ServiceNote(Document):
 	def validate(self):
 		# self.total_weight()
-		# self.check_effective_credit()
+		self.check_effective_credit()
 		self.get_in_words()
 
 	def on_submit(self):
-		pass
-		# self.sales_invoice_against_dairy()
+		self.sales_invoice_against_dairy()
 
 	def get_in_words(self):
-		# print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
-		self.base_in_words = money_in_words(self.total,self.currency)
-		self.in_words = money_in_words(self.total,self.currency)
+		self.base_in_words = money_in_words(self.grand_total,self.currency)
+		self.in_words = money_in_words(self.grand_total,self.currency)
 
 	def check_effective_credit(self):
 		effective_credit = self.effective_credit
@@ -35,11 +34,14 @@ class ServiceNote(Document):
 		elif self.farmer_id and effective_credit < self.total:
 			frappe.throw(_("Cannot make <b>'Service Note'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>"))
 
+
 	def sales_invoice_against_dairy(self):
+
 		farmer_id = frappe.db.get_value("Farmer",self.farmer_id,"full_name")
 		si_obj = frappe.new_doc("Sales Invoice")
-		si_obj.farmer_id = frappe.db.get_value("Farmer",self.farmer_id,"full_name")
+		si_obj.customer = frappe.db.get_value("Farmer",self.farmer_id,"full_name")
 		si_obj.company = self.company
+		si_obj.due_date = self.posting_date
 		si_obj_cost_center = frappe.db.get_value("Company",si_obj.company,'cost_center')
 		for row in self.items:
 			si_obj.append("items",
@@ -72,24 +74,12 @@ class ServiceNote(Document):
 @frappe.whitelist()
 def get_farmer(farmer):
 	farmer_name = frappe.db.get_value("Farmer", {"farmer_id":farmer}, "full_name")
-	# print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",farmer_name
 	return farmer_name
-
-# @frappe.whitelist()
-# def get_farmer_details(customer):
-# 	address = frappe.db.get_value("Farmer", {"farmer_id":customer}, "address",debug=1)
-# 	address_details = frappe.db.get_value("Farmer", {"farmer_id":customer}, "address_details",debug=1)
-# 	# print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",farmer_name
-# 	return {"address":address,"address_details":address_details}
 
 @frappe.whitelist()
 def get_vet_ai_company(user):
 	company = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "vlcc")
-	first_name = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "vet_or_ai_name")
-	mobile_no = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "contact")
-	address = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "address")
-	address_details = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "address_details")
-	return {"company":company,"first_name":first_name,"mobile_no":mobile_no,"address":address,"address_details":address_details}
+	return {"company":company}
 
 @frappe.whitelist()
 def get_custom_item(doctype, txt, searchfield, start, page_len, filters):
@@ -105,7 +95,6 @@ def get_vlcc_warehouse():
 def get_price_list_rate(item):
 	if item:
 		rate = frappe.db.get_value("Item Price", {"item_name": item}, 'price_list_rate')
-		# rate = frappe.db.sql("""select price_list_rate from `tabItem Price` where item_name = '{0}' and price_list ='Standard Selling'""".format(item),as_list=1)
 		if rate:
 			return rate
 		else:
@@ -114,15 +103,9 @@ def get_price_list_rate(item):
 
 @frappe.whitelist()
 def get_effective_credit(farmer_name):
-	# print "---------------farmer_name----------------",farmer_name
 	company = frappe.db.get_value("User", frappe.session.user, "company")
 	purchase = frappe.db.get_value("Purchase Invoice", {"title":farmer_name,"company":company}, "sum(grand_total)")
 	sales = frappe.db.get_value("Sales Invoice", {"title":farmer_name,"company":company}, "sum(grand_total)")
-	# print "----------------------sales",sales
-	# print "======================purchase",purchase
-	# purchase_total = frappe.db.sql("""select name,sum(grand_total) as purchase_total from `tabPurchase Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True) 
-	# sales_total = frappe.db.sql("""select name,sum(grand_total) as sales_total from `tabSales Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True)
-	
 	if purchase == None:
 		eff_amt = 0.0
 		return eff_amt
@@ -132,11 +115,9 @@ def get_effective_credit(farmer_name):
 		return eff_amt
 
 	elif purchase == None and sales:
-		# print "____________________ {0} _______________".format(sales)
 		eff_amt = 0.0
 		return eff_amt
 	elif purchase and sales == None:
-		# print "____________________ {0} _______________".format(purchase)
 		eff_amt = purchase
 		return eff_amt
 	else:

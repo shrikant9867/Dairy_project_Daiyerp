@@ -210,6 +210,12 @@ def get_data():
 					"name": "Milk Passbook",
 					"doctype": "Farmer Milk Collection Record",
 					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Vlcc Net Pay Off",
+					"doctype": "Village Level Collection Centre",
+					"is_query_report": True
 				}
 			]
 		}				

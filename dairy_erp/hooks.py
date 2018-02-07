@@ -124,6 +124,9 @@ doc_events = {
     },
     "Supplier":{
         "validate": "dairy_erp.customization.customization.set_company"
+    },
+    "GL Entry":{
+        "before_submit": "dairy_erp.customization.customization.set_camp"
     }
 }
 

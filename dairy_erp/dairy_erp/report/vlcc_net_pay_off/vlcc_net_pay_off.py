@@ -81,8 +81,16 @@ def merge_data(payable, receivable):
 			data.append([f, pay, rec, net])
 	return data		  
 
+
 def get_vlccs():
-	return [ f.get('name')for f in frappe.get_all("Village Level Collection Centre", fields=["name"]) ]
+	camp = frappe.session.user.capitalize()
+	if camp:
+		camp = camp.split("@")[0]
+		camp_new = camp+"-Camp Office"
+	else:
+		camp_new = ""
+	# return [ f.get('name')for f in frappe.get_all("Village Level Collection Centre", fields=["name"]) ]
+	return [ f.get('name')for f in frappe.get_all("Village Level Collection Centre", filters={"camp_office":camp_new} , fields=["name"]) ]
 
 @frappe.whitelist()
 def get_filtered_farmers(doctype,text,searchfields,start,pagelen,filters):

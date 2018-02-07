@@ -79,11 +79,7 @@ def get_farmer(farmer):
 @frappe.whitelist()
 def get_vet_ai_company(user):
 	company = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "vlcc")
-	first_name = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "vet_or_ai_name")
-	mobile_no = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "contact")
-	address = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "address")
-	address_details = frappe.db.get_value("Veterinary AI Technician", {"email":user}, "address_details")
-	return {"company":company,"first_name":first_name,"mobile_no":mobile_no,"address":address,"address_details":address_details}
+	return {"company":company}
 
 @frappe.whitelist()
 def get_custom_item(doctype, txt, searchfield, start, page_len, filters):

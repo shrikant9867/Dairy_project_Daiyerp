@@ -160,9 +160,12 @@ frappe.ui.form.on('Local Sale', {
 		})
 		console.log("total_tax",total_tax)
 		frm.set_value("total_taxes_and_charges", total_tax);
-		frm.set_value("grand_total", frm.doc.grand_total + total_tax);
+		var grand_total = total_tax + frm.doc.total
+		frm.set_value("grand_total", grand_total);
+		frm.set_value("outstanding_amount", grand_total);
 		frm.refresh_field("total_taxes_and_charges")
 		frm.refresh_field("grand_total")
+		frm.refresh_field("outstanding_amount")
 	},
 	get_discount_amt:function(frm) {
 		discount_amount = (frm.doc.total * frm.doc.additional_discount_percentage)/100
@@ -187,7 +190,6 @@ frappe.ui.form.on('Local Sale', {
 		frm.refresh_field("outstanding_amount")
 	}
 });
-
 
 
 frappe.ui.form.on('Sales Order Item', {
@@ -259,7 +261,15 @@ frappe.ui.form.on('Sales Order Item', {
 		if (child.item_code){
 			var amount = parseFloat(child.rate) * parseFloat(child.qty);
 			frappe.model.set_value(cdt, cdn, "amount",amount);
-			frm.events.get_total_on_qty(frm)
+			if (child.qty) {
+				frm.events.get_total_on_qty(frm)
+				frm.events.taxes_and_charges(frm)	
+			}
+			else {
+				frm.set_value("total", 0);
+				frm.set_value("grand_total", 0);
+				frm.set_value("outstanding_amount", 0);
+			}
 			if (cur_frm.doc.effective_credit < cur_frm.doc.total) {
 				frappe.msgprint(__("Cannot create <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>")); 
 			};
@@ -272,7 +282,15 @@ frappe.ui.form.on('Sales Order Item', {
 		if (child.item_code){
 			var amount = parseFloat(child.rate) * parseFloat(child.qty);
 			frappe.model.set_value(cdt, cdn, "amount",amount);
-			frm.events.get_total_on_qty(frm)
+			if (child.rate) {
+				frm.events.get_total_on_qty(frm)
+				frm.events.taxes_and_charges(frm)	
+			}
+			else {
+				frm.set_value("total", 0);
+				frm.set_value("grand_total", 0);
+				frm.set_value("outstanding_amount", 0);
+			}
 			if (cur_frm.doc.effective_credit < cur_frm.doc.total) {
 				frappe.msgprint(__("Cannot create <b>'Local Sale'</b> if <b>'Effective Credit'</b> is less than <b>Total</b>")); 
 			};

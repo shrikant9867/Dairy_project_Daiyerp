@@ -27,12 +27,10 @@ class LocalSale(Document):
 		self.get_in_words()
 
 	def get_in_words(self):
-		# print "________________ {0} and {1}______________".format(self.rounded_total,self.currency)
 		self.base_in_words = money_in_words(self.grand_total,self.currency)
 		self.in_words = money_in_words(self.grand_total,self.currency)
 
 	def additional_discount(self):
-		# print "________________ {0} ______________", self.additional_discount_percentage
 		if self.additional_discount_percentage:
 			additional_discount = 0
 			for i in self.items:
@@ -40,7 +38,6 @@ class LocalSale(Document):
 				self.discount_amount = additional_discount
 
 	def check_effective_credit(self):
-		# print "________________ {0} and {1} and {2}______________".format(self.effective_credit,self.customer,self.farmer)
 		effective_credit = self.effective_credit
 		if self.local_customer_or_farmer == 'Vlcc Local Customer':
 			if self.customer == None:
@@ -56,7 +53,6 @@ class LocalSale(Document):
 	def total_weight(self):
 		total_ = 0
 		for i in self.items:
-			# print "##############",type(i.get('amount'))
 			print type(i.get('amount')),i.get('amount')
 			total_ += i.get('amount')
 		self.total = total
@@ -68,8 +64,13 @@ class LocalSale(Document):
 		if self.local_customer_or_farmer == "Vlcc Local Customer":
 			customer = self.customer
 
+			# print "\n Delivery Note Object {0} \n".format(self.__dict__)
+			# print "\n**********  Grand Total:{0} \n Total Taxes:{1}  ************\n".format(self.grand_total,self.total_taxes_and_charges)
+
 			delivry_obj = frappe.new_doc("Delivery Note")
 			delivry_obj.customer = customer
+			delivry_obj.grand_total = self.grand_total + self.total_taxes_and_charges
+			delivry_obj.total_taxes_and_charges = self.total_taxes_and_charges
 			delivry_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
 			cost_center = frappe.db.get_value("Company",delivry_obj.company,'cost_center')
 			for row in self.items:
@@ -90,7 +91,9 @@ class LocalSale(Document):
 			si_obj = make_sales_invoice(delivry_obj.name)
 			si_obj.flags.ignore_permissions = True
 			si_obj.submit()
-			# make_payment_on_si(si_obj)
+			si_obj.grand_total = delivry_obj.grand_total + delivry_obj.total_taxes_and_charges
+			si_obj.total_taxes_and_charges = delivry_obj.total_taxes_and_charges
+			make_payment_on_si(si_obj)
 			frappe.msgprint(_("Delivery Note :'{0}' Created".format("<a href='#Form/Delivery Note/{0}'>{0}</a>".format(delivry_obj.name))))
 			frappe.msgprint(_("Sales Invoice :'{0}' Created".format("<a href='#Form/Sales Invoice/{0}'>{0}</a>".format(si_obj.name))))
 		
@@ -99,6 +102,8 @@ class LocalSale(Document):
 			
 			delivry_obj = frappe.new_doc("Delivery Note")
 			delivry_obj.customer = customer
+			delivry_obj.grand_total = self.grand_total
+			delivry_obj.total_taxes_and_charges = self.total_taxes_and_charges
 			delivry_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
 			cost_center = frappe.db.get_value("Company",delivry_obj.company,'cost_center')
 			for row in self.items:
@@ -119,18 +124,16 @@ class LocalSale(Document):
 			si_obj = make_sales_invoice(delivry_obj.name)
 			si_obj.flags.ignore_permissions = True
 			si_obj.submit()
+			si_obj.grand_total = delivry_obj.grand_total + delivry_obj.total_taxes_and_charges
+			si_obj.total_taxes_and_charges = delivry_obj.total_taxes_and_charges
 			frappe.msgprint(_("Delivery Note :'{0}' Created".format("<a href='#Form/Delivery Note/{0}'>{0}</a>".format(delivry_obj.name))))
 			frappe.msgprint(_("Sales Invoice :'{0}' Created".format("<a href='#Form/Sales Invoice/{0}'>{0}</a>".format(si_obj.name))))
 
 
 @frappe.whitelist()
 def make_payment_on_si(si_doc):
-	print "____________",si_doc.name
-	print "____________",si_doc.company
-	print "____________",si_doc.posting_date
-	print "____________",si_doc.customer
 	si_payment = frappe.new_doc("Payment Entry")
-	si_payment.account_type = 'Cash'
+	si_payment.paid_to = frappe.db.get_value("Account",{"company":si_doc.company,"account_type":'Cash'},"name")
 	si_payment.posting_date = si_doc.posting_date
 	si_payment.company = si_doc.company
 	si_payment.mode_of_payment = "Cash"
@@ -138,11 +141,26 @@ def make_payment_on_si(si_doc):
 	si_payment.party_type = "Customer"
 	si_payment.party_name = si_doc.customer
 	si_payment.party = si_doc.customer
+
+	for row in si_doc.items:
+		si_payment.append("references",
+			{
+				"reference_doctype": si_doc.doctype,
+				"total_amount": si_doc.grand_total + si_doc.total_taxes_and_charges,
+				"reference_name": si_doc.name,
+				"outstanding_amount": si_doc.outstanding_amount,
+				"allocated_amount": si_doc.grand_total,
+				"due_date": si_doc.due_date
+			})
+
+	si_payment.paid_amount = si_doc.grand_total + si_doc.total_taxes_and_charges
+	si_payment.received_amount = si_doc.grand_total
 	si_payment.party_balance = si_doc.grand_total
+	si_payment.outstanding_amount = 0
 	si_payment.flags.ignore_permissions = True
 	si_payment.flags.ignore_mandatory = True
 	si_payment.submit()
-	frappe.msgprint(_("Payment Entry Done against Sales Invoice: {0}!!!".format(si_doc.name)))
+	frappe.msgprint(_("Payment Entry : {0} Created!!!".format("<a href='#Form/Payment Entry/{0}'>{0}</a>".format(si_payment.name))))
 
 
 @frappe.whitelist()

@@ -47,3 +47,19 @@ def create_sn(data):
 	sn_obj.submit()
 	
 	return sn_obj.name
+
+
+@frappe.whitelist()
+def service_note_list():
+	response_dict = {}
+	try:
+		sn_list = frappe.db.sql("""select name,status,posting_date,vlcc_name,farmer_id,case_details,discount_amount,grand_total,taxes_and_charges from `tabService Note` order by creation desc limit 10 """,as_dict=1)
+		for row in sn_list:
+			row.update({"items": frappe.db.sql("select item_code,item_name,qty,uom from `tabService Note Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
+			if row.get('taxes_and_charges'):
+				row.update({row.get('taxes_and_charges'): frappe.db.sql("""select charge_type,description,rate from `tabService Note Taxes` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
+			row.update({"diagnosis": frappe.db.sql("""select disease,description from `tabDisease Child` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
+		response_dict.update({"status":"success","data":sn_list})
+	except Exception,e:
+		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
+	return response_dict

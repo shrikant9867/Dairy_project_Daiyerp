@@ -36,7 +36,8 @@ doctype_js = {
     "Material Request":["customization/material_request/material_request.js"],
     "Purchase Order":["customization/purchase_order/purchase_order.js"],
     "User":["customization/user/user.js"],
-    "Sales Order":["customization/sales_order/sales_order.js"]
+    "Sales Order":["customization/sales_order/sales_order.js"],
+    "Purchase Receipt": ["customization/purchase_receipt/purchase_receipt.js"]
     }
 doctype_list_js = {
     "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"],

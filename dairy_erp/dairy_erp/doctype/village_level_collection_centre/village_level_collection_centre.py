@@ -45,6 +45,7 @@ class VillageLevelCollectionCentre(Document):
 		self.create_supplier()
 		self.create_customer()
 		self.create_user()
+		self.create_camp_permission()
 		
 		
 	def on_update(self):
@@ -139,6 +140,7 @@ class VillageLevelCollectionCentre(Document):
 		if not frappe.db.exists('Customer', self.plant_office):
 			custmer_doc_vlcc = frappe.new_doc("Customer")
 			custmer_doc_vlcc.customer_name = self.plant_office
+			custmer_doc.customer_group = "Dairy"
 			custmer_doc_vlcc.company = self.vlcc_name
 			custmer_doc_vlcc.append("accounts",{
 					"company": self.vlcc_name,
@@ -175,7 +177,7 @@ class VillageLevelCollectionCentre(Document):
 			operator.save()
 			# add_all_roles_to(operator.name)
 			operator.add_roles("Vlcc Operator")
-			create_user_permission(operator,self.name)
+			create_user_permission(operator.email,self.name)
 			
 		if self.operator_same_as_agent and not frappe.db.exists('User', self.email_id):
 			agent = frappe.new_doc("User")
@@ -190,13 +192,19 @@ class VillageLevelCollectionCentre(Document):
 			agent.save()
 			agent.add_roles("Vlcc Operator")
 			# add_all_roles_to(agent.name)
-			create_user_permission(agent,self.name)
+			create_user_permission(agent.email,self.name)
 
-def create_user_permission(user,name):
+	def create_camp_permission(self):
+		
+		camp_operator = frappe.db.get_value("Address",{"name":self.camp_office},"user")
+		create_user_permission(camp_operator,self.name)
+
+def create_user_permission(user_email,name):
 	perm_doc = frappe.new_doc("User Permission")
-	perm_doc.user = user.email
+	perm_doc.user = user_email
 	perm_doc.allow = "Company"
 	perm_doc.for_value = name
+	perm_doc.apply_for_all_roles = 0
 	perm_doc.flags.ignore_permissions = True
 	perm_doc.flags.ignore_mandatory = True
 	perm_doc.save()

@@ -164,7 +164,9 @@ permission_query_conditions = {
     "Village Level Collection Centre": "dairy_erp.customization.customization.vlcc_permission",
     "Farmer Milk Collection Record": "dairy_erp.customization.customization.fmrc_permission",
     "Vlcc Milk Collection Record": "dairy_erp.customization.customization.vmcr_permission",
-    "Payment Entry": "dairy_erp.customization.customization.pe_permission"
+    "Payment Entry": "dairy_erp.customization.customization.pe_permission",
+    "Supplier":"dairy_erp.customization.customization.supplier_permission",
+    "Customer": "dairy_erp.customization.customization.customer_permission"
 }
 # Testing
 # -------

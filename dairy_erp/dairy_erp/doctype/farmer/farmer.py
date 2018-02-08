@@ -16,7 +16,7 @@ class Farmer(Document):
 	def create_supplier(self):
 		supl_doc = frappe.new_doc("Supplier")
 		supl_doc.supplier_name = self.full_name
-		supl_doc.supplier_type = "Distributor"
+		supl_doc.supplier_type = "Farmer"
 		supl_doc.company = self.vlcc_name
 		supl_doc.farmer = self.name
 		supl_doc.append("accounts",

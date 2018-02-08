@@ -18,7 +18,7 @@ frappe.ui.form.on('Local Sale', {
 	},
 
 	refresh: function(frm) {
-
+		console.log("###dd	")
 	},
 
 	onload: function(frm) {
@@ -53,8 +53,14 @@ frappe.ui.form.on('Local Sale', {
 		}
 	},
 
+	taxe_charge_template: function(frm) {
+		if(! cur_frm.doc.taxe_charge_template) {
+			cur_frm.set_value("total_taxes_and_charges",0)
+		}
+	},
+
 	taxes_and_charges: function(frm) {
-		if (frm.doc.taxes_and_charges) {
+		if (frm.doc.taxes_and_charges) {	
 			frappe.call({
 				method: "dairy_erp.dairy_erp.doctype.local_sale.local_sale.fetch_taxes",
 				args: {
@@ -81,7 +87,10 @@ frappe.ui.form.on('Local Sale', {
 					refresh_field("taxe_charge_template");
 				}
 			});
-		};
+		}
+		else {
+			// cur_frm.set_value("total_taxes_and_charges",0.0)
+		}
 	},
 
 	additional_discount_percentage: function(frm) {
@@ -100,18 +109,31 @@ frappe.ui.form.on('Local Sale', {
 	},
 
 	discount_amount: function(frm) {
-		if (frm.doc.apply_discount_on == 'Grand Total') {
-			if (frm.doc.discount_amount) {
-				frm.events.get_discount_percent(frm)
-				frm.events.get_grand_total(frm)
-			};
-		};
-		if (frm.doc.apply_discount_on == 'Net Total') {
-			if (frm.doc.discount_amount) {
-				frm.events.get_discount_percent(frm)
-				frm.events.get_grand_total(frm)
-			};
-		};
+		console.log("----")
+		item_total = get_items_amount(frm)
+		tax_total = get_taxes_total(frm)
+		if (frm.doc.discount_amount) {
+			frm.set_value("grand_total",(item_total + tax_total) - cur_frm.doc.discount_amount)
+		}
+		
+		else if(cur_frm.doc.taxes_and_charges){
+			frm.set_value("grand_total",(item_total + tax_total))
+		}
+		else {
+			frm.set_value("grand_total",(item_total + tax_total))
+		}
+		// if (frm.doc.apply_discount_on == 'Grand Total') {
+		// 	if (frm.doc.discount_amount) {
+		// 		frm.events.get_discount_percent(frm)
+		// 		frm.events.get_grand_total(frm)
+		// 	};
+		// };
+		// if (frm.doc.apply_discount_on == 'Net Total') {
+		// 	if (frm.doc.discount_amount) {
+		// 		frm.events.get_discount_percent(frm)
+		// 		frm.events.get_grand_total(frm)
+		// 	};
+		// };
 	},
 
 	farmer: function(frm){
@@ -134,12 +156,13 @@ frappe.ui.form.on('Local Sale', {
 	},
 	get_total_on_qty:function(frm) {
 		total_amt = 0
+		tax_amount = get_taxes_total()
 		$.each(frm.doc.items, function(idx, row){
 			total_amt += row.amount
 		})
-		// console.log(total_amt)
+
 		frm.set_value("total", total_amt);
-		frm.set_value("grand_total", total_amt);
+		frm.set_value("grand_total", (total_amt + tax_amount) - cur_frm.doc.discount_amount);
 		// frm.set_value("net_total", total_amt);
 		frm.set_value("rounded_total", total_amt);
 		frm.set_value("outstanding_amount", total_amt);
@@ -158,9 +181,9 @@ frappe.ui.form.on('Local Sale', {
 			total_tax += row.tax_amount
 			row.total = total_tax
 		})
-		console.log("total_tax",total_tax)
+		// console.log("total_tax",total_tax)
 		frm.set_value("total_taxes_and_charges", total_tax);
-		var grand_total = total_tax + frm.doc.total
+		var grand_total = (total_tax + frm.doc.total) - cur_frm.doc.discount_amount
 		frm.set_value("grand_total", grand_total);
 		frm.set_value("outstanding_amount", grand_total);
 		frm.refresh_field("total_taxes_and_charges")
@@ -192,7 +215,11 @@ frappe.ui.form.on('Local Sale', {
 });
 
 
-frappe.ui.form.on('Sales Order Item', {
+frappe.ui.form.on('Local Sales Item', {
+	refresh: function(frm, cdt, cdn) {
+		console.log("$$$")
+	},
+
 	item_code: function(frm, cdt, cdn) {
 			if (cur_frm.doc.local_customer_or_farmer){
 				var child = locals[cdt][cdn];
@@ -301,3 +328,33 @@ frappe.ui.form.on('Sales Order Item', {
 
 	
 });
+
+frappe.ui.form.on("Local Sales Item", "items_remove", function(frm) {
+	total_ = get_items_amount()
+	taxes_ = get_taxes_total()
+	console.log(total_,taxes_)
+	cur_frm.set_value("total",total_,taxes_,cur_frm.doc.discount_amount)
+	cur_frm.set_value("grand_total",(total_ + taxes_) - cur_frm.doc.discount_amount)
+	
+});
+
+get_items_amount = function(frm) {
+	//getter setter item total
+	total = 0
+	$.each(cur_frm.doc.items, function(i,value){
+		console.log(value.amount)
+		total += value.amount
+	})
+	console.log("tt",total)
+	return total
+}
+
+get_taxes_total = function(frm) {
+	// getter setter taxes total
+	total = 0
+
+	$.each(cur_frm.doc.taxe_charge_template, function(index, value){
+		total += value.tax_amount
+	})
+	return total
+}

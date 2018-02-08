@@ -24,7 +24,7 @@ class LocalSale(Document):
 	def validate(self):
 		# self.total_weight()
 		self.check_effective_credit()
-		self.get_in_words()
+		# self.get_in_words()
 
 	def get_in_words(self):
 		self.base_in_words = money_in_words(self.grand_total,self.currency)
@@ -102,8 +102,8 @@ class LocalSale(Document):
 			
 			delivry_obj = frappe.new_doc("Delivery Note")
 			delivry_obj.customer = customer
-			delivry_obj.grand_total = self.grand_total
-			delivry_obj.total_taxes_and_charges = self.total_taxes_and_charges
+			# delivry_obj.grand_total = self.grand_total
+			# delivry_obj.total_taxes_and_charges = self.total_taxes_and_charges
 			delivry_obj.company = frappe.db.get_value("User",frappe.session.user,'company')
 			cost_center = frappe.db.get_value("Company",delivry_obj.company,'cost_center')
 			for row in self.items:
@@ -124,6 +124,8 @@ class LocalSale(Document):
 			si_obj = make_sales_invoice(delivry_obj.name)
 			si_obj.flags.ignore_permissions = True
 			si_obj.submit()
+			if self.cash:
+				make_payment_on_si(si_obj)
 			si_obj.grand_total = delivry_obj.grand_total + delivry_obj.total_taxes_and_charges
 			si_obj.total_taxes_and_charges = delivry_obj.total_taxes_and_charges
 			frappe.msgprint(_("Delivery Note :'{0}' Created".format("<a href='#Form/Delivery Note/{0}'>{0}</a>".format(delivry_obj.name))))

@@ -688,7 +688,7 @@ def supplier_permission(user):
 		return """(`tabSupplier`.camp_office = '{0}' and `tabSupplier`.supplier_type in ('Vlcc Type','Dairy Local'))""".format(user_doc.get('branch_office'))
 
 	if user_doc.get('operator_type') == "VLCC":
-		supplier_list = frappe.db.sql("""select s.name as supp,p.company from `tabSupplier` s, `tadairy_erp/customization/customization.pybParty Account` 
+		supplier_list = frappe.db.sql("""select s.name as supp,p.company from `tabSupplier` s, `tabParty Account` 
 						p where p.parent = s.name and p.company = '{0}' group by s.name""".format(user_doc.get('company')),as_dict=1)
 
 		supp = [ '"%s"'%sup.get("supp") for sup in supplier_list ]

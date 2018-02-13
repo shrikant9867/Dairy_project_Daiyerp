@@ -77,6 +77,7 @@ class VillageLevelCollectionCentre(Document):
 			comp = frappe.get_doc("Address", self.chilling_centre)
 			supl_doc = frappe.new_doc("Supplier")
 			supl_doc.supplier_name = self.vlcc_name
+			supl_doc.camp_office = self.camp_office
 			supl_doc.supplier_type = "Vlcc Type"
 			if comp.links:
 				# supl_doc.company = comp.links[0].link_name 
@@ -126,6 +127,7 @@ class VillageLevelCollectionCentre(Document):
 			comp = frappe.get_doc("Address", self.chilling_centre)
 			custmer_doc = frappe.new_doc("Customer")
 			custmer_doc.customer_name = self.vlcc_name
+			custmer_doc.camp_office = self.camp_office
 			custmer_doc.customer_group = "Vlcc"
 			if comp.links:
 				custmer_doc.company = comp.links[0].link_name

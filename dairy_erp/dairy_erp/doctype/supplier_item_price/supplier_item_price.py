@@ -75,3 +75,15 @@ class SupplierItemPrice(Document):
 			item_price.price_list_rate = row.price
 			item_price.flags.ignore_permissions = True
 			item_price.save()
+
+	def validate(self):
+		if self.type_ == 'Dairy' and self.party_type == 'Vlcc':
+			if frappe.db.sql("select name from `tabSupplier Item Price` where type_ = 'Dairy' and party_type = 'Vlcc'"):
+				frappe.throw("Pricing has been already created")
+		elif self.type == 'Dairy' and self.party_type == 'Local Supplier':
+			if frappe.db.sql("select name from `tabSupplier Item Price` where type_ = 'Dairy' and party_type = 'Local Supplier'"):
+				frappe.throw("Pricing has been already created")
+		elif self.type == 'Vlcc' and self.party_type == 'Local Supplier':
+			if frappe.db.sql("select name from `tabSupplier Item Price` where type_ = 'Dairy' and party_type = 'Local Supplier'"):
+				frappe.throw("Pricing has been already created")
+

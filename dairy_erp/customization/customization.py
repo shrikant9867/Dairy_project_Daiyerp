@@ -680,6 +680,39 @@ def pe_permission(user):
 	if user_doc.get('operator_type') == "Camp Office":
 		return """(`tabPayment Entry`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
 
+def supplier_permission(user):
+
+	pass
+
+	# user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	# if user_doc.get('operator_type') == "Camp Office":
+	# 	return """(`tabSupplier`.camp_office = '{0}' and `tabSupplier`.supplier_type in ('Vlcc Type','Dairy Local'))""".format(user_doc.get('branch_office'))
+
+	# if user_doc.get('operator_type') == "VLCC":
+	# 	supplier_list = frappe.db.sql("""select s.name as supp,p.company from `tabSupplier` s, `tabParty Account` 
+	# 					p where p.parent = s.name and p.company = '{0}' group by s.name""".format(user_doc.get('company')),as_dict=1)
+
+	# 	supp = [ '"%s"'%sup.get("supp") for sup in supplier_list ]
+	# 	return """tabSupplier.name in ({supp})"""\
+	# 		.format(supp=','.join(supp))
+
+def customer_permission(user):
+
+	pass
+
+	# user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	# if user_doc.get('operator_type') == "Camp Office":
+	# 	return """(`tabCustomer`.camp_office = '{0}' and `tabCustomer`.customer_group = 'Vlcc')""".format(user_doc.get('branch_office'))
+
+	# if user_doc.get('operator_type') == "VLCC":
+	# 	customer_list = frappe.db.sql("""select c.name as cust from `tabCustomer` c, `tabParty Account` p where p.parent = c.name and 
+	# 					p.company = '{0}' and customer_group in ('Farmer','Dairy') group by c.name""".format(user_doc.get('company')),as_dict=1)
+
+	# 	customer = [ '"%s"'%cust.get("cust") for cust in customer_list ]
+	# 	return """tabCustomer.name in ({customer})"""\
+	# 		.format(customer=','.join(customer))
+
 
 def supplier_permission(user):
 

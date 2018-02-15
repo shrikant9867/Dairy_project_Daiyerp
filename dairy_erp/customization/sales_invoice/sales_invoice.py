@@ -23,7 +23,6 @@ def get_farmer_config(farmer= None):
 	data = fetch_balance_qty()
 	eff_credit = get_effective_credit(frappe.db.get_value("Farmer",farmer,'full_name'))
 	data.update({'eff_credit': eff_credit, 'customer': frappe.db.get_value("Farmer",farmer,'full_name')})
-	print "________________________"
 	return data
 
 
@@ -45,17 +44,10 @@ def fetch_balance_qty():
 
 def get_effective_credit(customer):
 	# SIdhant code for effective credit
-	# print "---------------customer----------------",customer
 	company = frappe.db.get_value("User", frappe.session.user, "company")
 	purchase = frappe.db.sql("""select sum(grand_total) as pur_amnt from `tabPurchase Invoice` where company = '{0}' and supplier = '{1}' and status not in ('Paid')""".format(company, customer),as_dict=1)
-	# purchase = frappe.db.get_value("Purchase Invoice", {"title":customer,"company":company}, "sum(grand_total)")
-	# sales = frappe.db.get_value("Sales Invoice", {"title":customer,"company":company}, "sum(grand_total)")
 	sales = frappe.db.sql("""select sum(grand_total) as si_amnt from `tabSales Invoice` where company = '{0}' and customer = '{1}' and status not in ('Paid')""".format(company, customer),as_dict=1)
-	# print "----------------------sales",sales
-	# print "======================purchase",purchase
-	# purchase_total = frappe.db.sql("""select name,sum(grand_total) as purchase_total from `tabPurchase Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True) 
-	# sales_total = frappe.db.sql("""select name,sum(grand_total) as sales_total from `tabSales Invoice` where title = '{0}' and company = '{1}'""".format(customer,company),as_dict=True)
-	# print "$$$$$$$$$$$$$$$$$",purchase,sales
+	
 	if purchase[0].get('pur_amnt') == None:
 		eff_amt = 0.0
 		return round(eff_amt,2)
@@ -65,13 +57,13 @@ def get_effective_credit(customer):
 		return round(eff_amt,2)
 
 	elif purchase[0].get('pur_amnt') == None and sales[0].get('si_amnt'):
-		# print "____________________ {0} _______________".format(sales)
 		eff_amt = 0.0
 		return round(eff_amt,2)
+	
 	elif purchase[0].get('pur_amnt') and sales[0].get('si_amnt') == None:
-		# print "____________________ {0} _______________".format(purchase)
 		eff_amt = flt(purchase[0].get('pur_amnt'))
 		return round(eff_amt,2)
+	
 	else:
 		eff_amt = 0.0
 		return round(eff_amt,2)
@@ -106,16 +98,14 @@ def make_payment_entry(si_doc):
 	si_payment.append("references",
 		{
 			"reference_doctype": si_doc.doctype,
-			# "total_amount": si_doc.grand_total + si_doc.total_taxes_and_charges,
 			"reference_name": si_doc.name,
-			# "outstanding_amount": si_doc.outstanding_amount,
 			"allocated_amount": si_doc.grand_total,
 			"due_date": si_doc.due_date
 		})
 
-	si_payment.paid_amount = si_doc.grand_total + si_doc.total_taxes_and_charges
-	si_payment.received_amount = si_doc.grand_total
-	si_payment.party_balance = si_doc.grand_total
+	si_payment.paid_amount = si_payment.references[0].allocated_amount
+	si_payment.received_amount = si_payment.paid_amount
+	# si_payment.party_balance = si_doc.grand_total
 	si_payment.outstanding_amount = 0
 	si_payment.flags.ignore_permissions = True
 	si_payment.flags.ignore_mandatory = True

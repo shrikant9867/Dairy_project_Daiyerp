@@ -20,8 +20,8 @@ def create_local_sale(data):
 	print data
 	data = json.loads(data)
 	try:
-		if data.get('local_customer_or_farmer') and data.get('farmer') and data.get('items'):
-			local_exist = frappe.db.get_value("Local Sale",{"client_id": data.get('client_id')}, 'name')
+		if data.get('items'):
+			local_exist = frappe.db.get_value("Sales Invoice",{"client_id": data.get('client_id')}, 'name')
 			print local_exist
 			if not local_exist:
 				response_dict.update({"status": "success", "name": create_ls(data)})
@@ -36,22 +36,16 @@ def create_local_sale(data):
 	return response_dict
 
 def create_ls(data):
-	ls_obj = frappe.new_doc("Local Sale")
-	ls_obj.local_customer_or_farmer = data.get('local_customer_or_farmer')
-	ls_obj.farmer = data.get('farmer')
-	ls_obj.client_id = data.get('client_id')
-	for row in data.get('items'):
-		ls_obj.append("items",
-			{
-				"item_code": row.get('item_code'),
-				"uom": row.get('uom'),
-				"qty": row.get('qty'),
-				"rate": row.get('rate'),
-				"conversion_factor":4.000
-			}
-		)
+	ls_obj = frappe.new_doc("Sales Invoice")
+	print "#################",ls_obj.company
+	ls_obj.local_sale = 1
+	ls_obj.update_stock = 1
+	# ls_obj.effective_credit = 8
+	ls_obj.debit_to = frappe.db.get_value("Company",ls_obj.company, 'default_receivable_account')
+	ls_obj.update(data)
 	ls_obj.flags.ignore_permissions = True
 	ls_obj.flags.ignore_mandatory = True
+	# ls_obj.flags.ignore_validate = True
 	ls_obj.save()
 	ls_obj.submit()
 	return ls_obj.name

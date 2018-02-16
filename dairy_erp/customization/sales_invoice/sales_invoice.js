@@ -7,7 +7,7 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	refresh: function(frm) {
-		set_warehouse()
+		// set_warehouse()
 
 	},
 

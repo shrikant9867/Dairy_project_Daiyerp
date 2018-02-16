@@ -84,7 +84,10 @@ def validate_local_sale(doc, method):
 	# 	frappe.throw(_("update the stock"))
 
 def payment_entry(doc, method):
-	if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.effective_credit <= 0 :
+	print "************",doc.customer,get_effective_credit(doc.customer)
+	input_ = get_effective_credit(doc.customer)
+	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ <= 0 :
+		print doc.effective_credit,"_____________________"
 		frappe.throw(_("Not Permitted"))
 	if doc.local_sale and not doc.update_stock:
 		frappe.throw(_("update the stock"))

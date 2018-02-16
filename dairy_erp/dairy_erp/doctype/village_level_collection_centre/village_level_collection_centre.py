@@ -163,6 +163,7 @@ class VillageLevelCollectionCentre(Document):
 					})
 				custmer_doc_exist.flags.ignore_permissions = True		
 				custmer_doc_exist.save()
+		self.local_customer_vlcc()
 
 	def create_user(self):
 		from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
@@ -200,6 +201,20 @@ class VillageLevelCollectionCentre(Document):
 		
 		camp_operator = frappe.db.get_value("Address",{"name":self.camp_office},"user")
 		create_user_permission(camp_operator,self.name)
+
+	def local_customer_vlcc(self):
+		#local supplier specification for data analytics
+		if not frappe.db.exists('Customer', self.vlcc_name+"-"+"Local"):
+			custmer_doc_vlcc = frappe.new_doc("Customer")
+			custmer_doc_vlcc.customer_name = self.vlcc_name+"-"+"Local"
+			custmer_doc_vlcc.customer_group = "Vlcc Local Customer"
+			custmer_doc_vlcc.company = self.vlcc_name
+			custmer_doc_vlcc.append("accounts",{
+					"company": self.vlcc_name,
+					"account": frappe.db.get_value("Company", self.vlcc_name, "default_receivable_account")
+				})
+			custmer_doc_vlcc.flags.ignore_permissions = True		
+			custmer_doc_vlcc.save()
 
 def create_user_permission(user_email,name):
 	perm_doc = frappe.new_doc("User Permission")

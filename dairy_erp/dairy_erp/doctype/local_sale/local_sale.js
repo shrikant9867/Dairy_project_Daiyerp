@@ -330,10 +330,11 @@ frappe.ui.form.on('Local Sales Item', {
 });
 
 frappe.ui.form.on("Local Sales Item", "items_remove", function(frm) {
+	console.log("#####")
 	total_ = get_items_amount()
 	taxes_ = get_taxes_total()
-	console.log(total_,taxes_)
-	cur_frm.set_value("total",total_,taxes_,cur_frm.doc.discount_amount)
+	console.log(total_,taxes_,"11")
+	cur_frm.set_value("total",total_)
 	cur_frm.set_value("grand_total",(total_ + taxes_) - cur_frm.doc.discount_amount)
 	
 });

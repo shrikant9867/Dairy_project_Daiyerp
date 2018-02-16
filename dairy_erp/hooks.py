@@ -37,7 +37,8 @@ doctype_js = {
     "Purchase Order":["customization/purchase_order/purchase_order.js"],
     "User":["customization/user/user.js"],
     "Sales Order":["customization/sales_order/sales_order.js"],
-    "Purchase Receipt": ["customization/purchase_receipt/purchase_receipt.js"]
+    "Purchase Receipt": ["customization/purchase_receipt/purchase_receipt.js"],
+    "Sales Invoice": ["customization/sales_invoice/sales_invoice.js"]
     }
 doctype_list_js = {
     "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"],
@@ -128,6 +129,10 @@ doc_events = {
     },
     "GL Entry":{
         "before_submit": "dairy_erp.customization.customization.set_camp"
+    },
+    "Sales Invoice":{
+        "validate": "dairy_erp.customization.sales_invoice.sales_invoice.validate_local_sale",
+        "on_submit": "dairy_erp.customization.sales_invoice.sales_invoice.payment_entry"
     }
 }
 

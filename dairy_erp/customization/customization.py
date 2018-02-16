@@ -12,6 +12,28 @@ from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
 
 
+
+def validate_dairy_company(doc,method=None):
+
+	if doc.address_type == 'Head Office':
+		for link in doc.links:
+			if link.link_doctype == 'Company':
+				comp_doc = frappe.get_doc("Company",link.link_name)
+				comp_doc.is_dairy = 1
+				comp_doc.save()
+	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
+		make_user(doc)
+
+	if doc.address_type in ["Chilling Centre","Camp Office","Plant","Head Office"]:
+		doc.append("links",
+			{
+			"link_doctype": "Company",
+			"link_name": frappe.db.get_value("Company",{"is_dairy":1},"name")
+			})
+		doc.flags.ignore_permissions = True
+		doc.flags.ignore_mandatory = True
+		doc.save()
+
 def set_warehouse(doc, method=None):
 	"""configure w/h for dairy components"""
 
@@ -27,7 +49,9 @@ def set_warehouse(doc, method=None):
 	else:
 		frappe.throw("Please create Head Office first for Dairy")
 
+
 def set_co_warehouse_po(doc,method=None):
+
 	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
 	if branch_office.get('operator_type') == 'Camp Office':	
 		dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
@@ -47,22 +71,16 @@ def set_co_warehouse_po(doc,method=None):
 
 
 def set_page_break(doc,method=None):
+
 	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
 	if branch_office.get('operator_type') == 'Camp Office' and doc.is_dropship == 1:
 		for item in doc.items:
 			item.page_break = 1
 		doc.items[-1].page_break = 0
-def validate_dairy_company(doc,method=None):
-	if doc.address_type == 'Head Office':
-		for link in doc.links:
-			if link.link_doctype == 'Company':
-				comp_doc = frappe.get_doc("Company",link.link_name)
-				comp_doc.is_dairy = 1
-				comp_doc.save()
-	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
-		make_user(doc)
+
 
 def make_user(doc):
+
 	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
 	if not frappe.db.sql("select name from `tabUser` where name=%s", doc.user):
@@ -91,7 +109,9 @@ def make_user(doc):
 	else:
 		frappe.throw("User exists already") 
 
+
 def give_permission(user_doc,allowed_doctype,for_value):
+
 	perm_doc = frappe.new_doc("User Permission")
 	perm_doc.user = user_doc.email
 	perm_doc.allow = allowed_doctype
@@ -102,6 +122,7 @@ def give_permission(user_doc,allowed_doctype,for_value):
 	perm_doc.save()
 
 def validate_headoffice(doc, method):
+
 	count = 0
 	for row in doc.links:
 		count += 1
@@ -109,12 +130,12 @@ def validate_headoffice(doc, method):
 		frappe.throw(_("Id exist Already"))
 	if frappe.db.sql("select address_type from tabAddress where address_type = 'Head Office' and not name = '{0}'".format(doc.name)) and doc.address_type == "Head Office":
 		frappe.throw(_("Head Office exist already"))
-	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.links:
-		frappe.throw(_("Please Choose Company"))
+	# if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.links:
+	# 	frappe.throw(_("Please Choose Company"))
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.centre_id:
 		frappe.throw(_("Centre id needed"))
-	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and count!=1:
-		frappe.throw(_("Only one entry allowed row"))
+	# if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and count!=1:
+	# 	frappe.throw(_("Only one entry allowed row"))
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		for row in doc.links:
 			if row.get('link_doctype') != "Company":
@@ -124,7 +145,9 @@ def validate_headoffice(doc, method):
 
 	validate_user(doc)
 
+
 def validate_user(doc):
+
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.user and not doc.operator_name:
 		frappe.throw("Please add Operator Email ID and Name")
 	elif doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.user:
@@ -132,15 +155,17 @@ def validate_user(doc):
 	elif doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.operator_name:
 		frappe.throw("Please add Operator name")
 
+
 def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
 	set_warehouse(doc)
+	
 
 @frappe.whitelist()
 def after_install():
+
 	create_supplier_type()
 	create_translation()
-	# create_local_customer()
 
 def create_translation():
 
@@ -174,25 +199,16 @@ def create_supplier_type():
 		supp_doc.supplier_type = "Farmer"
 		supp_doc.save()
 
-def create_local_customer():
-
-	if not frappe.db.exists('Customer', "Vlcc Local Cust"):
-		loc_cust_doc = frappe.new_doc("Customer")
-		loc_cust_doc.name = "Vlcc Local Cust"
-		loc_cust_doc.customer_name = "Vlcc Local Cust"
-		loc_cust_doc.customer_group = "Vlcc Local Customer"
-		loc_cust_doc.territory = "All Territories"
-		loc_cust_doc.flags.ignore_permissions = True
-		loc_cust_doc.flags.ignore_mandatory = True
-		loc_cust_doc.save()
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
+
 	item_groups = [str('Cattle feed'), str('Mineral Mixtures'), str('Medicines'), str('Artificial Insemination Services'),
 		str('Veterinary Services'), str('Others/Miscellaneous'),str('Milk & Products')]
 	return frappe.db.sql("""select name from tabItem where item_group in {0}""".format(tuple(item_groups)))
 
 	
 def on_submit_pr(doc,method=None):
+
 	submit_dn(doc)
 	validate_qty_against_mi(doc)
 	check_if_dropship(doc) 
@@ -444,6 +460,7 @@ def make_so_against_vlcc(doc,method=None):
 		so.save()
 		so.submit()
 
+
 def validate_pr(doc,method=None):
 	
 	operator_type = frappe.db.get_value("User",frappe.session.user,"operator_type")
@@ -476,6 +493,7 @@ def set_co_warehouse_pr(doc,method=None):
 
 
 def set_vlcc_warehouse(doc,method=None):
+
 	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type","company"],as_dict=1)
 	if branch_office.get('operator_type') == 'Camp Office':
 		company_abbr = frappe.db.get_value("Company", branch_office.get('company'), "abbr")
@@ -493,7 +511,9 @@ def set_vlcc_warehouse(doc,method=None):
 					for item in doc.items:
 						item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 
+
 def set_mr_warehouse(doc,method=None):
+
 	branch_office = frappe.db.get_value("User",frappe.session.user,["operator_type","company"],as_dict=1)
 	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
@@ -503,6 +523,7 @@ def set_mr_warehouse(doc,method=None):
 	
 
 def create_item_group(args=None):
+
 	item_groups = ['Cattle feed', 'Mineral Mixtures', 'Medicines', 'Artificial Insemination Services',
 		'Veterinary Services', 'Others/Miscellaneous','Milk & Products']
 	for i in item_groups:
@@ -512,9 +533,10 @@ def create_item_group(args=None):
 			item_grp.item_group_name = i
 			item_grp.insert()
 	create_customer_group()
-	create_local_customer()
+
 
 def create_customer_group():
+
 	customer_groups = ['Farmer', 'Vlcc', 'Dairy','Vlcc Local Customer']
 	for i in customer_groups:
 		if not frappe.db.exists('Customer Group',i):
@@ -523,16 +545,20 @@ def create_customer_group():
 			cust_grp.customer_group_name = i
 			cust_grp.insert()
 
+
 def user_query_dn(doctype, txt, searchfield, start, page_len, filters):
+
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'Camp Office':
 		return frappe.db.sql("select name from tabCustomer where customer_group = 'Vlcc'")
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		return frappe.db.sql("select name from tabCustomer where customer_group = 'Farmer'")
 
 def user_query_po(doctype, txt, searchfield, start, page_len, filters):
+
 	return frappe.db.sql("select name from tabSupplier where supplier_type = 'Dairy Local'")
 
 def user_query(doctype, txt, searchfield, start, page_len, filters):
+
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		return frappe.db.sql("""select name from tabCustomer where customer_group = 'Farmer'""")
 
@@ -571,6 +597,7 @@ def make_purchase_receipt(doc,method=None):
 			doc.save()
 			
 def set_company(doc, method):
+
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 	if user_doc.get('operator_type') == "VLCC" and doc.supplier_type == "VLCC Local":
 		doc.company = user_doc.get('company')
@@ -679,43 +706,9 @@ def pe_permission(user):
 
 	if user_doc.get('operator_type') == "Camp Office":
 		return """(`tabPayment Entry`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+		
 
 def supplier_permission(user):
-
-	pass
-
-	# user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
-
-	# if user_doc.get('operator_type') == "Camp Office":
-	# 	return """(`tabSupplier`.camp_office = '{0}' and `tabSupplier`.supplier_type in ('Vlcc Type','Dairy Local'))""".format(user_doc.get('branch_office'))
-
-	# if user_doc.get('operator_type') == "VLCC":
-	# 	supplier_list = frappe.db.sql("""select s.name as supp,p.company from `tabSupplier` s, `tabParty Account` 
-	# 					p where p.parent = s.name and p.company = '{0}' group by s.name""".format(user_doc.get('company')),as_dict=1)
-
-	# 	supp = [ '"%s"'%sup.get("supp") for sup in supplier_list ]
-	# 	return """tabSupplier.name in ({supp})"""\
-	# 		.format(supp=','.join(supp))
-
-def customer_permission(user):
-
-	pass
-
-	# user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
-	# if user_doc.get('operator_type') == "Camp Office":
-	# 	return """(`tabCustomer`.camp_office = '{0}' and `tabCustomer`.customer_group = 'Vlcc')""".format(user_doc.get('branch_office'))
-
-	# if user_doc.get('operator_type') == "VLCC":
-	# 	customer_list = frappe.db.sql("""select c.name as cust from `tabCustomer` c, `tabParty Account` p where p.parent = c.name and 
-	# 					p.company = '{0}' and customer_group in ('Farmer','Dairy') group by c.name""".format(user_doc.get('company')),as_dict=1)
-
-	# 	customer = [ '"%s"'%cust.get("cust") for cust in customer_list ]
-	# 	return """tabCustomer.name in ({customer})"""\
-	# 		.format(customer=','.join(customer))
-
-
-def supplier_permission(user):
-
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 
@@ -776,6 +769,21 @@ def customer_permission(user):
 
 
 def set_camp(doc, method):
+
 	camp = frappe.db.get_value("Sales Invoice",doc.voucher_no,'camp_office')
 	doc.camp_office = camp
 	doc.flags.ignore_permissions = True
+
+
+def set_supp_company(doc,method):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+	if (user_doc.get('operator_type') == "Camp Office" and doc.supplier_type == "Dairy Local") or (user_doc.get('operator_type') == "VLCC" and doc.supplier_type == "VLCC Local"):
+		doc.append("accounts",
+			{
+			"company": user_doc.get('company'),
+			"account": frappe.db.get_value("Company",user_doc.get('company'), "default_payable_account")
+			})
+		doc.flags.ignore_permissions = True
+		doc.flags.ignore_mandatory = True
+		doc.save()

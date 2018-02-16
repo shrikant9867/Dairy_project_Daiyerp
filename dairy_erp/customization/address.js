@@ -11,9 +11,14 @@ frappe.ui.form.on("Address", {
 		frm.set_df_property("centre_id", "read_only", frm.doc.__islocal ? 0:1);
 	
 	},
+	onload: function(frm){
+		operator = get_session_user_type()
+		if (inList(["Camp Office","VLCC"],operator.operator_type)){
+			frm.set_df_property("linked_with", "hidden", 1);
+		}
+	},
 	validate: function(frm) {
 		var user_ = get_session_user_type()
-		console.log("***********",in_list(['Head Office','Camp Office','Chilling Centre','Plant'], frm.doc.address_type))
 		if(user_.operator_type == "VLCC" && in_list(['Head Office','Camp Office','Chilling Centre','Plant'], frm.doc.address_type)){
 		 	frappe.throw(__("Address Type must be vlcc"))
 		}

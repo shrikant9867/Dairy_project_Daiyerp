@@ -2,8 +2,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.328564", 
-  "name": "56d381f8ed", 
+  "modified": "2018-02-09 05:13:36.833155", 
+  "name": "0a22246029", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Sales Invoice", 
@@ -20,8 +20,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.335803", 
-  "name": "4e42a5ceb4", 
+  "modified": "2018-02-09 05:13:36.850016", 
+  "name": "334b227154", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Purchase Invoice", 
@@ -38,8 +38,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.345864", 
-  "name": "25dec16866", 
+  "modified": "2018-02-09 05:13:36.865288", 
+  "name": "5d9859431b", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Sales Invoice", 
@@ -56,8 +56,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.473634", 
-  "name": "b86fa71785", 
+  "modified": "2018-02-09 05:13:36.884300", 
+  "name": "0f94bf3b39", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Purchase Invoice", 
@@ -74,8 +74,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.483905", 
-  "name": "3882ac288c", 
+  "modified": "2018-02-16 13:28:51.142946", 
+  "name": "b2c7f15539", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
@@ -92,14 +92,23 @@
    }, 
    {
     "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
    }
   ]
  }, 
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.492752", 
-  "name": "58a2c75ad5", 
+  "modified": "2018-02-16 13:28:26.171452", 
+  "name": "04ab85c813", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
@@ -122,14 +131,23 @@
    }, 
    {
     "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
    }
   ]
  }, 
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.503192", 
-  "name": "c6d398f313", 
+  "modified": "2018-02-16 13:27:43.868488", 
+  "name": "9829e063b1", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Sales Invoice", 
@@ -152,14 +170,23 @@
    }, 
    {
     "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
    }
   ]
  }, 
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.514765", 
-  "name": "863e9c0a61", 
+  "modified": "2018-02-16 13:28:13.891183", 
+  "name": "5e9b91c8db", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Purchase Invoice", 
@@ -188,14 +215,23 @@
    }, 
    {
     "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
    }
   ]
  }, 
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.528802", 
-  "name": "09b9be68f8", 
+  "modified": "2018-02-16 13:28:34.531582", 
+  "name": "96a373ae62", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "GL Entry", 
@@ -221,14 +257,23 @@
    }, 
    {
     "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
    }
   ]
  }, 
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-08 16:51:04.541933", 
-  "name": "58eeb5c1b4", 
+  "modified": "2018-02-16 13:24:46.591511", 
+  "name": "3196af7efa", 
   "page": "dairy-dashboard", 
   "parent": null, 
   "ref_doctype": null, 
@@ -236,6 +281,147 @@
   "roles": [
    {
     "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 11:56:51.886348", 
+  "name": "8c0a0735c9", 
+  "page": null, 
+  "parent": null, 
+  "ref_doctype": "Village Level Collection Centre", 
+  "report": "Vlcc Net Pay Off", 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 11:57:04.927989", 
+  "name": "f96b707b4a", 
+  "page": null, 
+  "parent": null, 
+  "ref_doctype": "Farmer", 
+  "report": "Farmer Net Payoff", 
+  "roles": [
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-16 13:25:31.050589", 
+  "name": "0203389966", 
+  "page": null, 
+  "parent": null, 
+  "ref_doctype": "Farmer Milk Collection Record", 
+  "report": "Milk Passbook", 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
    }
   ]
  }

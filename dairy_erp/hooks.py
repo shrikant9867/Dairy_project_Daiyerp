@@ -100,7 +100,7 @@ after_install = "dairy_erp.customization.customization.after_install"
 
 doc_events = {
 	"Address": {
-		"after_insert": ["dairy_erp.customization.customization.set_warehouse","dairy_erp.customization.customization.validate_dairy_company"],
+		"after_insert": ["dairy_erp.customization.customization.validate_dairy_company","dairy_erp.customization.customization.set_warehouse"],
 		"on_update": "dairy_erp.customization.customization.update_warehouse",
 		"validate": "dairy_erp.customization.customization.validate_headoffice"
 	},
@@ -124,7 +124,8 @@ doc_events = {
         "validate": "dairy_erp.customization.customization.set_mr_warehouse"
     },
     "Supplier":{
-        "validate": "dairy_erp.customization.customization.set_company"
+        "validate": "dairy_erp.customization.customization.set_company",
+        "after_insert": "dairy_erp.customization.customization.set_supp_company"
     },
     "GL Entry":{
         "before_submit": "dairy_erp.customization.customization.set_camp"

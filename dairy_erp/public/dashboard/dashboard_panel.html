@@ -1,0 +1,31 @@
+<div>
+	<label class="_doctype" data-doctype="{%= data.doctype %}" data-add_type="{%= data.add_type %}">
+		<a>{%= data.label %}</a>
+	</label>
+	{% if (data.label == "Supplier" || data.label == "Farmer") { %}
+		<a class="fa fa-plus new_master" data-doctype="{%= data.doctype %}" 
+			title="New {%= data.doctype %}"></a>
+	{% } %}
+	{% $.each(data.records, function(idx, val){ %}
+		{% $.each(val, function(name,address){ %}
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<div class="panel_head">
+						{%= name %}
+					</div>
+				</div>
+				<div class="panel-body">
+					<div class="body_content">
+						{% if (address) { %}
+							{%= address %}
+						{% } else { %}
+							<div class="text-muted no_data">
+								No Data
+							</div>
+						{% } %}
+					</div>
+				</div>
+			</div>
+		{% }); %}
+	{% }); %}
+</div>

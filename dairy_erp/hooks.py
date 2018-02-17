@@ -15,8 +15,8 @@ app_license = "MIT"
 # ------------------
 setup_wizard_complete = "dairy_erp.customization.customization.create_item_group"
 # include js, css files in header of desk.html
-# app_include_css = "/assets/dairy_erp/css/dairy_erp.css"
-# app_include_js = "/assets/dairy_erp/js/dialog.min.js"
+app_include_css = "/assets/js/dairy.desk.min.css"
+app_include_js = "/assets/js/dairy.desk.min.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/dairy_erp/css/dairy_erp.css"

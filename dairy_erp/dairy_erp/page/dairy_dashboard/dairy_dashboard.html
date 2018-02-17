@@ -1,68 +1,8 @@
 <div class="container-fluid"> 
   <div class="row content">
-    <div class="col-sm-2 sidenav">
-      <ul class="nav nav-pills nav-stacked">
-        <li><a class="head-office-list nav-hover">Head Office</a></li>
-        <li><a class="camp-office nav-hover">Camp Office</a></li>
-        <li><a class="chilling-centre nav-hover">Chilling Center</a></li>
-        <li><a class="plant nav-hover">Plant Office</a></li>
-        <li><a class = "nav-hover" href="/desk#List/Village Level Collection Centre/List">VLCC</a></li>
-        <li><a class="supplier-list nav-hover">Supplier</a></li>
-      </ul><br>
-    </div>
 {% if(data.addr){ %}
-    <div class="col-sm-10">
-        <br>
-      <div class="col-sm-4 text-center">
-            <div class="panel panel-default">
-                <div class="panel-heading">Total Milk Procured</div>
-                <div class="panel-body">
-                    <div class="col-sm-6">
-                        <div class="span 2">Last Week</div>
-                        <span style="font-size:10px;">(in Ltrs.)</span>
-                        <div class="rounded-circle milk-procure"><div class="milk-panel"></div></div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="span 2">This Week</div>
-                        <span style="font-size:10px;">(in Ltrs.)</span>
-                        <div class="rounded-circle milk-procure"><div class="milk-panel"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-4 text-center">
-            <div class="panel panel-default">
-                <div class="panel-heading">Total Indents Pending</div>
-                <div class="panel-body">
-                    <div class="col-sm-12">
-                        <div class="span 2">Total VLCC Requests</div>
-                        <div style="margin-top:20px;"></div>
-                        <div class="row-centered vlcc-request" align="center"><div class="milk-panel"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-4 text-center">
-            <div class="panel panel-default">
-                <div class="panel-heading">Total Amount of Milk Procured</div>
-                <div class="panel-body">
-                    <div class="col-sm-6">
-                        <div class="span 2">Last Week</div>
-                        <span style="font-size:10px;">(in Rs.)</span>
-                        <div class="rounded-circle milk-procure"><div class="milk-panel"></div></div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="span 2">This Week</div>
-                        <span style="font-size:10px;">(in Rs.)</span>
-                        <div class="rounded-circle milk-procure"><div class="milk-panel"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <hr>
-    <br>
-    <div class="col-sm-5">
+<div class="row">
+    <div class="col-sm-6">
       <div class="text-left">
       <a class = "head-office-list" style="font-size: 15px;margin-left: 16px;"><b>Head Office </b></a>
     <a class="fa fa-plus" id = "head-office"></a>
@@ -188,7 +128,7 @@
         {% } %}
         {% } %}
     </div>
-    <div class="col-sm-5">
+    <div class="col-sm-6">
       <div class="text-left">
         <a href="/desk#List/Village Level Collection Centre/List" style="font-size: 15px;margin-left: 21px;"><b>VLCC</b></a>
         <a class="fa fa-plus" id= "new_vlcc"></a>
@@ -264,6 +204,7 @@
         </div>
         {% } %}
     </div>
+</div>
 </div>
 {% } else { %}
     <div class="row">

@@ -1,0 +1,12 @@
+{
+	"js/dairy.desk.min.css": [
+		"public/dashboard/dashboard.css"
+	],
+
+	"js/dairy.desk.min.js": [
+		"public/dashboard/dashboard_layout.html",
+		"public/dashboard/dashboard_sidebar.html",
+		"public/dashboard/total_summery.html",
+		"public/dashboard/dashboard_panel.html"
+	]
+}

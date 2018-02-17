@@ -1,0 +1,10 @@
+<ul id="nav">
+	{% $.each(side_menus, function(i, menu){ %}
+		<li class="_doctype" data-doctype="{%= menu.doctype %}" 
+			data-filter="{%= menu.filters %}" data-add_type="{%= menu.add_type %}">
+			<a class="">
+				<span>{%= menu.label %}</span>
+			</a>
+		</li>
+	{% }); %}
+</ul>

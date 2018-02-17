@@ -12,7 +12,7 @@ def get_vlcc_data():
 	if not vlcc:
 		return {}
 	data.addresses = get_address(vlcc);
-	data.total_summery = get_total_counts(vlcc);
+	data.total_summery = get_total_counts("Farmer Milk Collection Record", vlcc);
 	data.farmer = get_farmers(vlcc)
 	data.supplier = get_suppliers(vlcc)
 	return data
@@ -29,32 +29,33 @@ def get_address(vlcc):
 			"label": unscrub(addr_type),
 			"doctype": "Address",
 			"records": [{addr:get_address_display(addr)}],
-			"add_type": unscrub(addr_type),
+			"add_type": unscrub(addr_type) if addr_type != 'plant_office' else "Plant",
 		})
 	return addresses
 
-def get_total_counts(vlcc):
-	def _query(vlcc,start, end):
-		return """
+def get_total_counts(dt, vlcc=None):
+	def _query(dt,start, end, vlcc=None):
+		query = """
 			select 
 				ifnull(sum(milkquantity), 0) as milk_qty, 
 				ifnull(sum(amount), 0) as milk_amt 
 			from 
-				`tabFarmer Milk Collection Record` 
+				`tab%s`
 			where 
-				associated_vlcc = '%s' and 
 				date(rcvdtime) between '%s' and '%s'
-		"""%(vlcc, start, end)
-	
+		"""%(dt, start, end)
+		query += " and associated_vlcc = '%s'"%(vlcc) if vlcc else ""
+		return query
 	# Indents Pending
-	material_req = frappe.db.get_value("Material Request", {
-		"company": vlcc}, "count(name) as count")
+	filters = {"status": "Pending"}
+	if vlcc: filters['company'] = vlcc
+	material_req = frappe.db.get_value("Material Request", filters, "count(name) as count")
 
 	this_start, this_end, last_start, last_end = get_start_end_dates()
 
 	# Milk procured & amount
-	this_week_milk = frappe.db.sql(_query(vlcc, this_start, this_end),as_dict=True)
-	last_week_milk = frappe.db.sql(_query(vlcc, last_start, last_end),as_dict=True)
+	this_week_milk = frappe.db.sql(_query(dt,this_start, this_end, vlcc),as_dict=True)
+	last_week_milk = frappe.db.sql(_query(dt,last_start, last_end, vlcc),as_dict=True)
 
 	return {
 		"this_milk_qty": this_week_milk[0].get('milk_qty'), 
@@ -94,7 +95,9 @@ def get_suppliers(vlcc):
 def format_data(dt, data):
 	return {
 		"label": dt,
-		"records": [ { row.get('name'): get_address_display(row.get('address')) for row in data } ],
+		"records": [{
+			row.get('name'): get_address_display(row.get('address')) for row in data 
+		}],
 		"doctype": dt,
 		"add_type": ""
 	}

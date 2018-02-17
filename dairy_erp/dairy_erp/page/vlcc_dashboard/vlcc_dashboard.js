@@ -1,26 +1,4 @@
 frappe.pages['vlcc-dashboard'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
-		parent: wrapper,
-		title: 'VLCC Dashboard',
-		single_column: true
-	});
-	wrapper.vlcc_dashboard = new vlcc_dashboard(wrapper)
-}
-
-vlcc_dashboard =  Class.extend({
-	init: function(wrapper){
-		var me= this;
-		this.wrapper = wrapper;
-		this.page = wrapper.page
-		this.render_view();
-	},
-	render_view: function(){
-		var me = this;
-		$(frappe.render_template("dashboard_layout")).appendTo(me.page.main);
- 	},
-})
-
-frappe.pages['vlcc-dashboard'].on_page_load = function(wrapper) {
 	new frappe.vlcc_dashboard({
 		$wrapper: $(wrapper)
 	});
@@ -35,7 +13,7 @@ frappe.vlcc_dashboard = Class.extend({
 
 	render_layout: function() {
 		this.$wrapper.empty();
-		this.$wrapper.append(frappe.render_template("dashboard_layout"));
+		this.$wrapper.append(frappe.render_template("dashboard_layout", {"header": "VLCC"}));
 		this.$sidebar = this.$wrapper.find("#dairy_sidebar");
 		this.$content = this.$wrapper.find(".dairy_content");
 		this.$total_row = this.$wrapper.find('.total_summery');
@@ -52,11 +30,6 @@ frappe.vlcc_dashboard = Class.extend({
 
 	make_sidebar: function() {
 		side_menus = [{
-			"label": "VLCC",
-			"doctype": "Village Level Collection Centre",
-			"add_type": ""
-		},
-		{
 			"label": "Head Office",
 			"doctype": "Address",
 			"add_type": "Head Office"
@@ -77,6 +50,11 @@ frappe.vlcc_dashboard = Class.extend({
 			"add_type": "Plant"
 		},
 		{
+			"label": "VLCC",
+			"doctype": "Village Level Collection Centre",
+			"add_type": ""
+		},
+		{
 			"label": "Supplier",
 			"doctype": "Supplier",
 			"add_type": ""
@@ -94,8 +72,13 @@ frappe.vlcc_dashboard = Class.extend({
 		frappe.call({
 			method: "dairy_erp.dairy_erp.page.vlcc_dashboard.vlcc_dashboard.get_vlcc_data",
 			callback: function(r) {
-				me.render_content(r.message)
-				me.bind_event();
+				if(!r.exc && r.message){
+					me.render_content(r.message)
+					me.bind_event();
+				}
+				else {
+					me.$content.append('<div class="text-muted no_data">No Data Found</div>')
+				}
 			}
 		})
 	},

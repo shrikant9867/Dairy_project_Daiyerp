@@ -80,6 +80,8 @@ def get_pr_list():
 			row.update({"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabPurchase Receipt Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
 			if row.get('taxes_and_charges'):
 				row.update({row.get('taxes_and_charges'): frappe.db.sql("""select charge_type,description,rate from `tabPurchase Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
+			else:
+				del row['taxes_and_charges']
 		response_dict.update({"status":"success","data":pr_list})
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})

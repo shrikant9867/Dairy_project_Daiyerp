@@ -86,3 +86,14 @@ def get_pr_list():
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict
+
+
+
+@frappe.whitelist()
+def draft_pr(data):
+	response_dict = {}
+	try:
+		pass
+	except Exception,e:
+		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
+	return response_dict

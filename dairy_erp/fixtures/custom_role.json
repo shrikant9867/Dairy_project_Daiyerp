@@ -2,8 +2,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-09 05:13:36.833155", 
-  "name": "0a22246029", 
+  "modified": "2018-02-16 16:43:34.358722", 
+  "name": "2a0ce02808", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Sales Invoice", 
@@ -20,8 +20,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-09 05:13:36.850016", 
-  "name": "334b227154", 
+  "modified": "2018-02-16 16:43:34.377807", 
+  "name": "839c8efad3", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Purchase Invoice", 
@@ -38,8 +38,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-09 05:13:36.865288", 
-  "name": "5d9859431b", 
+  "modified": "2018-02-16 16:43:34.396744", 
+  "name": "e56f8c7358", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Sales Invoice", 
@@ -56,8 +56,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-09 05:13:36.884300", 
-  "name": "0f94bf3b39", 
+  "modified": "2018-02-16 16:43:34.409283", 
+  "name": "79ed7828e8", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Purchase Invoice", 
@@ -74,8 +74,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 13:28:51.142946", 
-  "name": "b2c7f15539", 
+  "modified": "2018-02-16 16:43:34.422964", 
+  "name": "0c491c5647", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
@@ -107,8 +107,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 13:28:26.171452", 
-  "name": "04ab85c813", 
+  "modified": "2018-02-16 16:43:34.441453", 
+  "name": "84c07a23b5", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
@@ -146,8 +146,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 13:27:43.868488", 
-  "name": "9829e063b1", 
+  "modified": "2018-02-16 16:43:34.460310", 
+  "name": "9c29e602f9", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Sales Invoice", 
@@ -185,8 +185,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 13:28:13.891183", 
-  "name": "5e9b91c8db", 
+  "modified": "2018-02-16 16:43:34.479379", 
+  "name": "9b961cea5c", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Purchase Invoice", 
@@ -230,8 +230,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 13:28:34.531582", 
-  "name": "96a373ae62", 
+  "modified": "2018-02-16 16:43:34.505282", 
+  "name": "e788897e5d", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "GL Entry", 
@@ -272,8 +272,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 13:24:46.591511", 
-  "name": "3196af7efa", 
+  "modified": "2018-02-16 16:43:34.523387", 
+  "name": "7244c52fef", 
   "page": "dairy-dashboard", 
   "parent": null, 
   "ref_doctype": null, 
@@ -290,8 +290,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-13 11:56:51.886348", 
-  "name": "8c0a0735c9", 
+  "modified": "2018-02-16 16:43:34.535319", 
+  "name": "fe41e61d77", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Village Level Collection Centre", 
@@ -311,8 +311,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-13 11:57:04.927989", 
-  "name": "f96b707b4a", 
+  "modified": "2018-02-16 16:43:34.561940", 
+  "name": "4fbfbd53f6", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Farmer", 
@@ -407,8 +407,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 13:25:31.050589", 
-  "name": "0203389966", 
+  "modified": "2018-02-16 16:43:34.599419", 
+  "name": "ba2e0e8aa8", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Farmer Milk Collection Record", 
@@ -422,6 +422,24 @@
    }, 
    {
     "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-17 12:21:53.614177", 
+  "name": "6e1b54b76b", 
+  "page": "vlcc-dashboard", 
+  "parent": null, 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
    }
   ]
  }

@@ -694,7 +694,10 @@ def vmcr_permission(user):
 
 	if user_doc.get('operator_type') == "Camp Office":
 		company = ['"%s"'%comp.get('name') for comp in vlcc]
-		return """`tabVlcc Milk Collection Record`.associated_vlcc in  ({company})""".format(company=','.join(company))
+		if company:
+			return """`tabVlcc Milk Collection Record`.associated_vlcc in  ({company})""".format(company=','.join(company))
+		else:
+			return """`tabVlcc Milk Collection Record`.associated_vlcc = 'Guest' """
 
 def pe_permission(user):
 

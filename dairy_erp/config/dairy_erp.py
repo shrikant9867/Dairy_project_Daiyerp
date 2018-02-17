@@ -166,7 +166,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Supplier Item Price",
+					"name": "Material Price List",
 					"description": _(" "),
 				}
 				

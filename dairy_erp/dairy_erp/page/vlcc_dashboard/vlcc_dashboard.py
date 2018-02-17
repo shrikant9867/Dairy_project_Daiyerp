@@ -52,6 +52,8 @@ def get_total_counts(dt, vlcc=None):
 	material_req = frappe.db.get_value("Material Request", filters, "count(name) as count")
 
 	this_start, this_end, last_start, last_end = get_start_end_dates()
+	this_week = str(this_start) +" To "+ str(this_end)
+	last_week = str(last_start) +" To "+ str(last_end)
 
 	# Milk procured & amount
 	this_week_milk = frappe.db.sql(_query(dt,this_start, this_end, vlcc),as_dict=True)
@@ -62,6 +64,7 @@ def get_total_counts(dt, vlcc=None):
 		"this_milk_amt": this_week_milk[0].get('milk_amt'), 
 		"last_milk_qty": last_week_milk[0].get('milk_qty'), 
 		"last_milk_amt": last_week_milk[0].get('milk_amt'), 
+		"this_week": this_week, "last_week": last_week,
 		"pending_indent": material_req
 	}
 

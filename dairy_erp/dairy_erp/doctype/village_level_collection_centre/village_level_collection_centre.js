@@ -3,11 +3,12 @@
 
 frappe.ui.form.on('Village Level Collection Centre', {
 	refresh: function(frm) {
-		if(!frm.doc.__islocal){
-			frm.add_custom_button(__("Dairy Dashboard"), function() {
-				frappe.set_route("dairy-dashboard");
-			})
-		}
+	
+			if(in_list(frappe.user_roles,"Dairy Manager") || in_list(frappe.user_roles,"Dairy Operator")){
+				frm.add_custom_button(__("Dairy Dashboard"), function() {
+					frappe.set_route("dairy-dashboard");
+				})
+			}	
 		frm.set_df_property("email_id", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("abbr", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("amcu_id", "read_only", frm.doc.__islocal ? 0:1);

@@ -10,8 +10,8 @@
 		{% $.each(val, function(name,address){ %}
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					<div class="panel_head">
-						{%= name %}
+					<div class="panel_head" title="{%= name %}">
+						<a href="/desk#Form/{%= data.doctype %}/{%= name %}">{%= name %}</a>
 					</div>
 				</div>
 				<div class="panel-body">

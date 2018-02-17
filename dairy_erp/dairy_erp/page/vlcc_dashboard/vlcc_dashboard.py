@@ -51,9 +51,8 @@ def get_total_counts(dt, vlcc=None):
 	if vlcc: filters['company'] = vlcc
 	material_req = frappe.db.get_value("Material Request", filters, "count(name) as count")
 
-	this_start, this_end, last_start, last_end = get_start_end_dates()
-	this_week = str(this_start) +" To "+ str(this_end)
-	last_week = str(last_start) +" To "+ str(last_end)
+	this_start, this_end, last_start, last_end, this_week, last_week = get_start_end_dates()
+
 
 	# Milk procured & amount
 	this_week_milk = frappe.db.sql(_query(dt,this_start, this_end, vlcc),as_dict=True)
@@ -69,13 +68,21 @@ def get_total_counts(dt, vlcc=None):
 	}
 
 def get_start_end_dates():
+	def format_date(date):
+		date = datetime.strptime(date, '%Y-%m-%d')
+		return date.strftime('%d %B')
+
 	# get last and this week start-end dates
 	dt = datetime.strptime(nowdate(), '%Y-%m-%d')
 	start = dt - timedelta(days=dt.weekday())
 	this_start = start.strftime('%Y-%m-%d')
 	this_end = add_days(this_start, 6)
 	last_start,last_end = add_days(this_start, -7), add_days(this_start, -1)
-	return this_start, this_end, last_start, last_end
+
+	#format dates for tooltip - e.g. 26 June to 30 June
+	this_week = str(format_date(this_start)) +" To "+ str(format_date(this_end))
+	last_week = str(format_date(last_start)) +" To "+ str(format_date(last_end))
+	return this_start, this_end, last_start, last_end, this_week, last_week
 
 def get_farmers(vlcc):
 	farmers = frappe.get_all('Farmer', 

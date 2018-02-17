@@ -43,6 +43,7 @@ def get_total_counts(dt, vlcc=None):
 				`tab%s`
 			where 
 				date(rcvdtime) between '%s' and '%s'
+				and status = 'Accept'
 		"""%(dt, start, end)
 		query += " and associated_vlcc = '%s'"%(vlcc) if vlcc else ""
 		return query

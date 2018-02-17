@@ -148,5 +148,10 @@ frappe.dairy_dashboard = Class.extend({
         $(".supplier-list").on("click",function(){
             frappe.set_route("List", "Supplier", {'supplier_type': "Dairy Local"});
         })
+
+        // Refresh Btn
+        $('.refresh_btn').on("click", function() {
+            window.location.reload();
+        })
     }
 })

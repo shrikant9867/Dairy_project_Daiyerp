@@ -8,11 +8,15 @@
 			<div class="row">
 				<div class="col-md-6">
 					<div class="body_head">Last Week <small>(In Ltrs.)</small></div>
-					<div class="circle_badge">{%= data.last_milk_qty %}</div>
+					<div class="circle_badge" title="{%= data.last_week %}">
+						{%= data.last_milk_qty %}
+					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="body_head">This Week<small>(In Ltrs.)</small></div>
-					<div class="circle_badge">{%= data.this_milk_qty %}</div>
+					<div class="circle_badge" title="{%= data.this_week %}">
+						{%= data.this_milk_qty %}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -38,11 +42,15 @@
 			<div class="row">
 				<div class="col-md-6">
 					<div class="body_head">Last Week <small>(In Rs.)</small></div>
-					<div class="circle_badge">{%= data.last_milk_amt %}</div>
+					<div class="circle_badge" title="{%= data.last_week %}">
+						{%= data.last_milk_amt %}
+					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="body_head">This Week<small>(In Rs.)</small></div>
-					<div class="circle_badge">{%= data.this_milk_amt %}</div>
+					<div class="circle_badge" title="{%= data.this_week %}">
+						{%= data.this_milk_amt %}
+					</div>
 				</div>
 			</div>
 		</div>

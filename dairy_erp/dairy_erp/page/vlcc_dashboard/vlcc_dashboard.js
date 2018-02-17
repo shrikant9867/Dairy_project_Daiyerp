@@ -123,5 +123,10 @@ frappe.vlcc_dashboard = Class.extend({
 			doctype = $(this).attr('data-doctype');
 			frappe.new_doc(doctype)
 		})
+
+		// Refresh Btn
+		$('.refresh_btn').on("click", function() {
+			window.location.reload();
+		})
 	}
 })

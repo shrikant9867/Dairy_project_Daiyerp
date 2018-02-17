@@ -71,12 +71,27 @@ def get_effective_credit(customer):
 
 
 def validate_local_sale(doc, method):
-	if doc.local_sale and doc.effective_credit <= 0:
-		frappe.throw(_("Not Permitted Effective Credit"))
-	if doc.local_sale and not doc.update_stock:
-		frappe.throw(_("update the stock"))
+	if doc.local_sale:
+		if doc.customer_or_farmer == "Farmer":
+			doc.customer = frappe.db.get_value('Farmer',doc.farmer,'full_name')
+		warehouse = frappe.db.get_value('Village Level Collection Centre',doc.company,'warehouse')
+		doc.debit_to = frappe.db.get_value("Company",doc.company, 'default_receivable_account')
+		print "@@@@@@@@@@@@@@@",doc.debit_to
+		for row in doc.items:
+			row.warehouse = warehouse
+			row.cost_center = frappe.db.get_value('Company',doc.company,'cost_center')
+	# 	frappe.throw(_("Not Permitted Effective Credit"))
+	# if doc.local_sale and not doc.update_stock:
+	# 	frappe.throw(_("update the stock"))
 
 def payment_entry(doc, method):
+	print "************",doc.customer,get_effective_credit(doc.customer)
+	input_ = get_effective_credit(doc.customer)
+	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ <= 0 :
+		print doc.effective_credit,"_____________________"
+		frappe.throw(_("Not Permitted"))
+	if doc.local_sale and not doc.update_stock:
+		frappe.throw(_("update the stock"))
 	if doc.local_sale and doc.customer_or_farmer == "Vlcc Local Customer":
 		make_payment_entry(doc)
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.cash_payment:

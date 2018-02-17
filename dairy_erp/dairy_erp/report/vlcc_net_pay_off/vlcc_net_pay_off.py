@@ -60,14 +60,15 @@ def get_payable_data(filters):
 def filter_vlcc_data(data, party_type):
 	#return only farmer's data
 	filtered_data = {}
-	if party_type == "Supplier": outstd_idx, naming_field = 10, "supplier_name"
-	else: outstd_idx, naming_field = 8, "customer_name"
+	if party_type == "Supplier": outstd_idx, naming_field, voucher_type = 10, "supplier_name", "Purchase Invoice"
+	else: outstd_idx, naming_field, voucher_type = 8, "customer_name", "Sales Invoice"
 	for d in data:
-		if not frappe.db.get_value(party_type, {naming_field: d[1]}, "farmer"):
-			if d[1] not in filtered_data:
-				filtered_data[d[1]] = d[outstd_idx]
-			else:
-				filtered_data[d[1]] += d[outstd_idx]
+		if d[2] == voucher_type:
+			if not frappe.db.get_value(party_type, {naming_field: d[1]}, "farmer"):
+				if d[1] not in filtered_data:
+					filtered_data[d[1]] = d[outstd_idx]
+				else:
+					filtered_data[d[1]] += d[outstd_idx]
 	return filtered_data
 
 def merge_data(payable, receivable):
@@ -83,14 +84,8 @@ def merge_data(payable, receivable):
 
 
 def get_vlccs():
-	camp = frappe.session.user.capitalize()
-	if camp:
-		camp = camp.split("@")[0]
-		camp_new = camp+"-Camp Office"
-	else:
-		camp_new = ""
-	# return [ f.get('name')for f in frappe.get_all("Village Level Collection Centre", fields=["name"]) ]
-	return [ f.get('name')for f in frappe.get_all("Village Level Collection Centre", filters={"camp_office":camp_new} , fields=["name"]) ]
+	camp_office = frappe.db.get_value("User", frappe.session.user, "branch_office")
+	return [ f.get('name')for f in frappe.get_all("Village Level Collection Centre", filters={"camp_office":camp_office} , fields=["name"]) ]
 
 @frappe.whitelist()
 def get_filtered_farmers(doctype,text,searchfields,start,pagelen,filters):

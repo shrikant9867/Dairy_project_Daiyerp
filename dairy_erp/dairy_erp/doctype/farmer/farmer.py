@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 class Farmer(Document):
@@ -40,3 +41,7 @@ class Farmer(Document):
 			})
 		custmer_doc.farmer = self.name
 		custmer_doc.insert()
+
+	def validate(self):
+		if len(self.farmer_id) > 4:
+			frappe.throw(_("Only <b>4</b> Digits Farmer ID Allowed"))

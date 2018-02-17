@@ -345,6 +345,9 @@ def validate_vlcc(row):
 
 def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
 	"""make Purchase receipt at Dairy Level if status accepted at VMCR"""
+
+	co = frappe.db.get_value("Village Level Collection Centre",{'name':vlcc},"camp_office")
+	print co,"vlccc....\n\n"
 	item_code = ""
 	
 	try:
@@ -359,8 +362,8 @@ def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
 		item_ = frappe.get_doc("Item",item_code)
 		company = frappe.db.get_value("Company",{"is_dairy":1},'name')
 		if vlcc and company:
-			pr_co = make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc)
-			purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc)
+			pr_co = make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co)
+			purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co)
 
 		else:
 			frappe.throw(_("Head Office does not exist"))
@@ -435,13 +438,14 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
 		data = data, message=e, traceback=frappe.get_traceback())
 
 
-def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc):
+def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co):
 	print "____________________________",frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
 	try:
 		purchase_rec = frappe.new_doc("Purchase Receipt")
 		purchase_rec.supplier =  vlcc
 		purchase_rec.vlcc_milk_collection_record = vmrc
 		purchase_rec.company = company
+		purchase_rec.camp_office = co
 		purchase_rec.append("items",
 			{
 				"item_code": item_.item_code,
@@ -479,12 +483,13 @@ def create_item(row):
 			item.insert()
 
 
-def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc):
+def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co):
 
 	try:
 		pi_obj = frappe.new_doc("Purchase Invoice")
 		pi_obj.supplier =  vlcc
 		pi_obj.vlcc_milk_collection_record = vmrc
+		pi_obj.camp_office = co
 		pi_obj.company = company
 		pi_obj.append("items",
 			{

@@ -98,6 +98,7 @@ def draft_pr(data):
 			pr_doc = frappe.get_doc("Purchase Receipt",data.get('name'))
 			pr_doc.update(data)
 			pr_doc.flags.ignore_permissions = True
+			pr_doc.flags.ignore_mandatory = True
 			pr_doc.save()
 			pr_doc.submit()
 			response_dict.update({"status": "success","name":pr_doc.name})

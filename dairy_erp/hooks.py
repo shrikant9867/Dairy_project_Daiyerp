@@ -30,6 +30,11 @@ app_include_js = "/assets/js/dairy.desk.min.js"
 # "Material Request":["customization/material_request/material_request_list.js"],
 # "Purchase Invoice":["customization/purchase_invoice/purchase_invoice_list.js"]
 # }
+website_context = {
+    "favicon":  "/assets/dairy_erp/images/stellapps_logo.png",
+    "splash_image": "/assets/dairy_erp/images/stellapps_logo.png"
+}
+
 doctype_js = {
     "Address":["customization/address.js"],
     "Supplier":["customization/supplier.js"],

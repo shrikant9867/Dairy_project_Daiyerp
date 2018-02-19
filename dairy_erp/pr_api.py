@@ -93,7 +93,17 @@ def get_pr_list():
 def draft_pr(data):
 	response_dict = {}
 	try:
-		pass
+		data = json.loads(data)
+		if data.get('name'):
+			pr_doc = frappe.get_doc("Purchase Receipt",data.get('name'))
+			pr_doc.update(data)
+			pr_doc.flags.ignore_permissions = True
+			pr_doc.save()
+			pr_doc.submit()
+			response_dict.update({"status": "success","name":pr_doc.name})
+		else:
+			frappe.throw(_("Name Parameter Missing"))
+
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict

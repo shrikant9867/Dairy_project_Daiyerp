@@ -74,6 +74,8 @@ def validate_local_sale(doc, method):
 	if doc.local_sale:
 		if doc.customer_or_farmer == "Farmer":
 			doc.customer = frappe.db.get_value('Farmer',doc.farmer,'full_name')
+		elif doc.customer_or_farmer == "Vlcc Local Customer":
+			doc.customer = frappe.db.get_value("Customer",doc.company+"-"+"Local",'name')
 		warehouse = frappe.db.get_value('Village Level Collection Centre',doc.company,'warehouse')
 		doc.debit_to = frappe.db.get_value("Company",doc.company, 'default_receivable_account')
 		print "@@@@@@@@@@@@@@@",doc.debit_to

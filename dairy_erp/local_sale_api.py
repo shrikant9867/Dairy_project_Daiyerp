@@ -22,7 +22,6 @@ def create_local_sale(data):
 	try:
 		if data.get('items'):
 			local_exist = frappe.db.get_value("Sales Invoice",{"client_id": data.get('client_id')}, 'name')
-			print local_exist
 			if not local_exist:
 				response_dict.update({"status": "success", "name": create_ls(data)})
 			else:
@@ -37,15 +36,12 @@ def create_local_sale(data):
 
 def create_ls(data):
 	ls_obj = frappe.new_doc("Sales Invoice")
-	print "#################",ls_obj.company
 	ls_obj.local_sale = 1
 	ls_obj.update_stock = 1
-	# ls_obj.effective_credit = 8
 	ls_obj.debit_to = frappe.db.get_value("Company",ls_obj.company, 'default_receivable_account')
 	ls_obj.update(data)
 	ls_obj.flags.ignore_permissions = True
 	ls_obj.flags.ignore_mandatory = True
-	# ls_obj.flags.ignore_validate = True
 	ls_obj.save()
 	ls_obj.submit()
 	return ls_obj.name

@@ -24,7 +24,8 @@ def get_items():
 		'Artificial Insemination Services','Milk & Products') and is_stock_item=1 and disabled =0""",as_dict = 1)
 	for row in response_dict:
 		try:
-			row.update({"qty": get_item_qty(row.get('name')),"uom":frappe.db.sql("select um.uom,um.conversion_factor * i.standard_rate as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = '{0}'".format(row.get('item_code')),as_dict=1)})
+			row.update({"qty": get_item_qty(row.get('item_code')),"uom":frappe.db.sql("select um.uom,um.conversion_factor * i.standard_rate as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = '{0}'".format(row.get('item_code')),as_dict=1)})
+			print row.get('name'),row
 			# row.get('uom').append({"uom": frappe.db.get_value('Item',row.get('item_code'),'stock_uom'),"rate": frappe.db.get_value('Item',row.get('item_code'), "standard_rate")})
 		
 		except Exception,e:
@@ -38,6 +39,7 @@ def get_item_qty(item):
 	
 	user_doc = frappe.get_doc("User",frappe.session.user)
 	warehouse = frappe.db.get_value("Village Level Collection Centre",user_doc.company,'warehouse')
+	print "##############",get_balance_qty_from_sle(item, warehouse),item
 	return get_balance_qty_from_sle(item, warehouse)
 
 

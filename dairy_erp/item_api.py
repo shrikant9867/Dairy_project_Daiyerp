@@ -13,6 +13,7 @@ import api_utils as utils
 import requests
 import json
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
+#from dairy_erp.customization.sales_invoice.sales_invoice import get_effective_credit
 
 @frappe.whitelist()
 def get_items():
@@ -25,7 +26,6 @@ def get_items():
 	for row in response_dict:
 		try:
 			row.update({"qty": get_item_qty(row.get('item_code')),"uom":frappe.db.sql("select um.uom,um.conversion_factor * i.standard_rate as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = '{0}'".format(row.get('item_code')),as_dict=1)})
-			print row.get('name'),row
 			# row.get('uom').append({"uom": frappe.db.get_value('Item',row.get('item_code'),'stock_uom'),"rate": frappe.db.get_value('Item',row.get('item_code'), "standard_rate")})
 		
 		except Exception,e:
@@ -39,7 +39,6 @@ def get_item_qty(item):
 	
 	user_doc = frappe.get_doc("User",frappe.session.user)
 	warehouse = frappe.db.get_value("Village Level Collection Centre",user_doc.company,'warehouse')
-	print "##############",get_balance_qty_from_sle(item, warehouse),item
 	return get_balance_qty_from_sle(item, warehouse)
 
 
@@ -59,7 +58,9 @@ def get_masters():
 				"terms_and_condition": terms_condition(),
 				"sales_taxes": taxes_templates(),
 				"purchase_taxes":pr_taxes_templates(),
-				"diseases": get_diseases()
+				"diseases": get_diseases(),
+				"total_cow_milk": get_milk_attr('COW Milk'),
+				"total_buffalo_milk": get_milk_attr('BUFFALO Milk')
 			})
 		else:
 			frappe.throw(_("User cannot be administrator"))
@@ -85,7 +86,7 @@ def get_farmer():
 	company = get_seesion_company_datails()
 	farmer = frappe.db.sql("""select name as id,full_name ,vlcc_name from `tabFarmer` where vlcc_name ='{0}'""".format(company.get('company')),as_dict =1)
 	for row in farmer:
-		row.update({"effective_credit": 400})
+		row.update({"effective_credit": calculate_effective_credit(row.get('id'))})
 	return farmer
 
 
@@ -173,3 +174,17 @@ def forgot_password(user_id):
 		response_dict.update({"status":"Error", "message":e, "traceback":frappe.get_traceback()})
 
 	return response_dict
+
+
+def calculate_effective_credit(id_):
+	from customization.sales_invoice.sales_invoice import get_effective_credit
+	farmer_name = frappe.db.get_value("Farmer",id_,'full_name')
+	return get_effective_credit(farmer_name)
+
+def get_milk_attr(item):
+	if item:
+		user_doc = frappe.get_doc("User",frappe.session.user)
+		warehouse = frappe.db.get_value("Village Level Collection Centre",user_doc.company,'warehouse')
+		return get_balance_qty_from_sle(item, warehouse)
+	else:
+		frappe.throw(_("Item Does Not Exist"))

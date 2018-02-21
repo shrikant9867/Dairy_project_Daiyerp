@@ -51,12 +51,33 @@ def create_ls(data):
 def local_sale_list():
 	response_dict = {}
 	try:
-		la_list = frappe.db.sql("""select status,local_customer_or_farmer,name,posting_date,farmer,effective_credit,cow_milk_quantity_farmer,buffalo_milk_qty_farmer,discount,taxes_and_charges from `tabLocal Sale` order by creation desc limit 10 """,as_dict=1)
+		la_list = frappe.db.sql("""select name,customer_or_farmer,posting_date,additional_discount_percentage,grand_total from `tabSales Invoice` where local_sale =1 order by creation desc limit 10 """,as_dict=1)
 		for row in la_list:
-			row.update({"items": frappe.db.sql("select item_code,item_name,delivery_date, qty, rate,uom from `tabLocal Sales Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
-			if row.get('taxes_and_charges'):
-				row.update({row.get('taxes_and_charges'): frappe.db.sql("""select charge_type,description,rate from `tabPurchase Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
+			if row.get('customer_or_farmer') == "Farmer":
+				row.update(
+					{
+						"farmer_name": frappe.db.get_value("Sales Invoice",row.get('name'),'customer'),
+						"effective_credit": frappe.db.get_value("Sales Invoice",row.get('name'),'effective_credit'),
+						"total_milk_cow": frappe.db.get_value("Sales Invoice",row.get('name'),'total_cow_milk_qty'),
+						"total_milk_buffalo": frappe.db.get_value("Sales Invoice",row.get('name'),'total_buffalo_milk_qty'),
+						"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabSales Invoice Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1)
+					}
+				)
+				if frappe.db.get_value("Sales Invoice",row.get('name'),'cash_payment'):
+					row.update({"cash_payment":1})
+		
+			if row.get('customer_or_farmer') == "Vlcc Local Customer":
+				row.update(
+					{
+						"total_milk_cow": frappe.db.get_value("Sales Invoice",row.get('name'),'total_cow_milk_qty'),
+						"total_milk_buffalo": frappe.db.get_value("Sales Invoice",row.get('name'),'total_buffalo_milk_qty'),
+						"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabSales Invoice Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1)
+					}
+				)
+
 		response_dict.update({"status":"success","data":la_list})
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict
+
+

@@ -20,6 +20,12 @@ frappe.ui.form.on("Sales Invoice", {
 			// cur_frm.set_df_property('due_date', 'hidden', 1);
 
 		}
+		//Prashant Code
+		if(user_.operator_type != "Vet AI Technician" ){
+			cur_frm.set_df_property('service_note', 'hidden', 1);
+			// cur_frm.set_df_property('due_date', 'hidden', 1);
+
+		}
 	},
 
 	local_sale: function(frm) {
@@ -37,6 +43,15 @@ frappe.ui.form.on("Sales Invoice", {
 			frm.set_value("update_stock",0)
 			frm.set_value("due_date","")
 		}
+	},
+
+	service_note: function(frm) {
+		if (frm.doc.service_note){
+			console.log("######service_note")
+			// frm.set_df_property("customer", "read_only", 1);
+			
+		}
+		
 	},
 
 	farmer: function(frm){
@@ -131,4 +146,8 @@ get_session_user_type = function() {
 	});
 
 	return user
+}
+
+cur_frm.fields_dict.customer.get_query = function(doc) {
+	return {filters: {company: doc.company}}
 }

@@ -78,6 +78,10 @@ def local_sale_list():
 					}
 				)
 
+				if frappe.db.get_value("Sales Invoice",row.get('name'),'taxes_and_charges'):
+					row.update({'taxes_and_charges':frappe.db.get_value("Sales Invoice",row.get('name'),'taxes_and_charges')})
+					row.update({row.get('taxes_and_charges'): frappe.db.sql("""select charge_type,description,rate from `tabSales Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
+
 		response_dict.update({"status":"success","data":la_list})
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})

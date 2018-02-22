@@ -92,11 +92,15 @@ def get_pr_list():
 @frappe.whitelist()
 def draft_pr(data):
 	response_dict = {}
+	dn_reference = ''
 	try:
 		data = json.loads(data)
 		if data.get('name'):
 			pr_doc = frappe.get_doc("Purchase Receipt",data.get('name'))
+			dn_reference =  pr_doc.items[0].get('delivery_note')
 			pr_doc.update(data)
+			for row in pr_doc.items:
+				row.delivery_note = dn_reference
 			pr_doc.flags.ignore_permissions = True
 			pr_doc.flags.ignore_mandatory = True
 			pr_doc.save()

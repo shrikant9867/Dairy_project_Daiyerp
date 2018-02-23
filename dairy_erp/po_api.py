@@ -42,7 +42,7 @@ def get_po_list():
 	response_dict = {}
 
 	try:
-		po_list = frappe.db.sql("""select status,name,schedule_date,supplier,tc_name,terms,status from `tabPurchase Order` where company = '{0}' and status in ('To Receive and Bill') order by creation desc limit 10""".format(get_seesion_company_datails().get('company')),as_dict=1)
+		po_list = frappe.db.sql("""select status,name,schedule_date,supplier,tc_name,terms,status,discount_amount,grand_total from `tabPurchase Order` where company = '{0}' and status in ('To Receive and Bill') order by creation desc limit 10""".format(get_seesion_company_datails().get('company')),as_dict=1)
 		for row in po_list:
 			row.update({"items": frappe.db.sql("select item_code,item_name,uom,qty,rate from `tabPurchase Order Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
 		response_dict.update({"status":"success","data":po_list})

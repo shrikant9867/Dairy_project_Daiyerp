@@ -7,11 +7,21 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	refresh: function(frm) {
-		// set_warehouse()
-
+		// Service Note
+		
+		
 	},
 
-	onload: function(frm) {
+	onload: function(frm) {	
+		
+		frm.set_query("farmer", function () {
+			return {
+				"filters": {
+					"vlcc_name": frm.doc.company,
+				}
+			};
+		})
+
 		frm.set_value("effective_credit","")
 		user_ = get_session_user_type()
 		console.log("#########",user_)
@@ -20,8 +30,7 @@ frappe.ui.form.on("Sales Invoice", {
 			// cur_frm.set_df_property('due_date', 'hidden', 1);
 
 		}
-		//Prashant Code
-		if(user_.operator_type != "Vet AI Technician" ){
+		if(user_.operator_type != "Vet AI Technician"){
 			cur_frm.set_df_property('service_note', 'hidden', 1);
 			// cur_frm.set_df_property('due_date', 'hidden', 1);
 
@@ -29,6 +38,7 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	local_sale: function(frm) {
+		
 		if (frm.doc.local_sale){
 			frm.set_df_property("customer", "read_only", 1);
 			frm.set_df_property("due_date", "read_only", 1);
@@ -44,14 +54,45 @@ frappe.ui.form.on("Sales Invoice", {
 			frm.set_value("due_date","")
 		}
 	},
-
 	service_note: function(frm) {
 		if (frm.doc.service_note){
-			console.log("######service_note")
-			// frm.set_df_property("customer", "read_only", 1);
-			
+
+			frm.events.refresh(frm)
+			frm.set_value("customer_or_farmer","Farmer")
+			frm.set_df_property("customer_or_farmer", "hidden", 1);
+			frm.set_df_property("customer", "read_only", 1);
+			frm.set_df_property("cash_payment", "hidden", 1);
+			// Tring Item-code filter  for service note using set_query
+			// item_names = []
+			// frappe.call({
+			// 		method:"dairy_erp.customization.sales_invoice.sales_invoice.get_servicenote_item",
+			// 		callback: function(r) {
+			// 			if(r.message) {
+			// 				for (i = 0;i < r.message.length ;i++){
+			// 					item_names.push(r.message[i][0])
+			// 				}
+			// 				console.log("item_names",item_names);
+			// 				cur_frm.fields_dict['items'].grid.get_field("item_code").set_query = function(){
+			// 					return {
+			// 							filters: [
+			// 									['Item', 'item_code', 'in', item_names],
+			// 							]
+			// 					}
+			// 				}
+
+			// 			}
+			// 		}		
+			// })
+
 		}
-		
+		else{
+			console.log("rerererere")
+			frm.set_df_property("customer", "read_only", 0);
+			frm.set_value("customer","")
+			frm.set_df_property("farmer", "hidden", 1);
+			frm.set_df_property("effective_credit", "hidden", 1);
+			frm.set_df_property("cash_payment", "hidden", 1);
+		}
 	},
 
 	farmer: function(frm){
@@ -59,6 +100,7 @@ frappe.ui.form.on("Sales Invoice", {
 			set_farmer_config(frm)
 		}
 	},
+
 	customer_or_farmer: function(frm) {
 		if(frm.doc.customer_or_farmer == "Vlcc Local Customer"){
 			console.log("#######")
@@ -94,22 +136,24 @@ local_sale_operations = function(frm){
 
 set_farmer_config = function(frm) {
 	console.log("$$")
-	frappe.call({
-			args: {
-				"farmer": frm.doc.farmer
-			},
-			method: "dairy_erp.customization.sales_invoice.sales_invoice.get_farmer_config",
-			callback: function(r) {
-				if(r.message){
-					console.log("###ff",r.message)
-					frm.set_value("customer",r.message.customer)
-					frm.set_value("total_cow_milk_qty",r.message.cow_milk)
-					frm.set_value("total_buffalo_milk_qty",r.message.buff_milk)
-					frm.set_value("effective_credit",r.message.eff_credit)
+	if(frm.doc.farmer){
+		frappe.call({
+				args: {
+					"farmer": frm.doc.farmer
+				},
+				method: "dairy_erp.customization.sales_invoice.sales_invoice.get_farmer_config",
+				callback: function(r) {
+					if(r.message){
+						console.log("###ff",r.message)
+						frm.set_value("customer",r.message.customer)
+						frm.set_value("total_cow_milk_qty",r.message.cow_milk)
+						frm.set_value("total_buffalo_milk_qty",r.message.buff_milk)
+						frm.set_value("effective_credit",r.message.eff_credit)
+					}
+					// cur_frm.reload_doc();
 				}
-				// cur_frm.reload_doc();
-			}
-		})
+			})
+	}
 }
 	
 	set_warehouse= function() {
@@ -148,6 +192,15 @@ get_session_user_type = function() {
 	return user
 }
 
-cur_frm.fields_dict.customer.get_query = function(doc) {
-	return {filters: {company: doc.company}}
-}
+
+// // Tring Item-code filter  for service note using get_query
+// cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
+// 	return {
+// 		query: "dairy_erp.customization.sales_invoice.sales_invoice.get_service_note_item",
+// 		filters:{
+// 				"service_note": cur_frm.doc.service_note,
+// 		}
+// 	}
+
+// }
+

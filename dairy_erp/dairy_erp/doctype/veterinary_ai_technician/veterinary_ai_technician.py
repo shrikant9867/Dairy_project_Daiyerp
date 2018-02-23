@@ -36,6 +36,17 @@ class VeterinaryAITechnician(Document):
 			ai_tech_obj.flags.ignore_mandatory = True
 			ai_tech_obj.save()
 			ai_tech_obj.add_roles("Vet/AI Technician")
+			self.create_user_permission()
 			frappe.msgprint(_("User Created!!!",ai_tech_obj.first_name))
 		else:
 			frappe.msgprint(_("User not Created!!!"))
+
+	def create_user_permission(self):
+		perm_doc = frappe.new_doc("User Permission")
+		perm_doc.user = self.email
+		perm_doc.allow = "Company"
+		perm_doc.for_value = self.vlcc
+		perm_doc.apply_for_all_roles = 0
+		perm_doc.flags.ignore_permissions = True
+		perm_doc.flags.ignore_mandatory = True
+		perm_doc.save()

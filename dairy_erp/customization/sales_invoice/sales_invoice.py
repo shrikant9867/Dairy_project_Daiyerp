@@ -26,6 +26,7 @@ def get_farmer_config(farmer= None):
 	return data
 
 
+@frappe.whitelist()
 def fetch_balance_qty():
 	row_ =""
 	items_dict = {}
@@ -42,6 +43,7 @@ def fetch_balance_qty():
 
 	return items_dict
 
+@frappe.whitelist()
 def get_effective_credit(customer):
 	# SIdhant code for effective credit
 	company = frappe.db.get_value("User", frappe.session.user, "company")
@@ -68,8 +70,7 @@ def get_effective_credit(customer):
 		eff_amt = 0.0
 		return round(eff_amt,2)
 
-
-
+@frappe.whitelist()
 def validate_local_sale(doc, method):
 	if doc.local_sale:
 		if doc.customer_or_farmer == "Farmer":
@@ -86,6 +87,7 @@ def validate_local_sale(doc, method):
 	# if doc.local_sale and not doc.update_stock:
 	# 	frappe.throw(_("update the stock"))
 
+@frappe.whitelist()
 def payment_entry(doc, method):
 	print "************",doc.customer,get_effective_credit(doc.customer)
 	input_ = get_effective_credit(doc.customer)
@@ -99,8 +101,7 @@ def payment_entry(doc, method):
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.cash_payment:
 		make_payment_entry(doc)
 
-
-
+@frappe.whitelist()
 def make_payment_entry(si_doc):
 	si_payment = frappe.new_doc("Payment Entry")
 	si_payment.paid_to = frappe.db.get_value("Account",{"company":si_doc.company,"account_type":'Cash'},"name")
@@ -134,3 +135,20 @@ def make_payment_entry(si_doc):
 def get_wrhous():
 	warehouse = frappe.db.get_value("Village Level Collection Centre", {"email_id": frappe.session.user}, 'warehouse')
 	return warehouse
+
+
+@frappe.whitelist()
+def get_service_note_item(doctype, txt, searchfield, start, page_len, filters):
+	print "\n\nfilters",filters
+	if filters.service_note:
+		query_item = frappe.db.sql(""" select item_code from `tabItem` where item_group in ('Medicines', 'Services')""")
+		return query_item
+	else:
+		query_item = frappe.db.sql("""select item_code from `tabItem`""")
+		return query_item
+
+@frappe.whitelist()
+def get_servicenote_item():
+	query_item = frappe.db.sql(""" select item_code from `tabItem` where item_group in ('Medicines', 'Services')""",as_list=1)
+	return query_item
+	

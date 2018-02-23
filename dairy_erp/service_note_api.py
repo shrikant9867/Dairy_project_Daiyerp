@@ -32,12 +32,13 @@ def create_service_note(data):
 		response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
 	return response_dict
 
-@frappe.whitelist()
+
 def create_sn(data):
 	company = frappe.get_value("User",frappe.session.user,"company")
 	sn_obj = frappe.new_doc("Sales Invoice")
 	sn_obj.service_note = 1
 	sn_obj.debit_to = frappe.db.get_value("Company",sn_obj.company, 'default_receivable_account')
+	print "###############",data.get('client_id')
 	customer = frappe.db.get_value("Farmer",data.get('farmer_id'), 'full_name')
 	if frappe.db.exists("Customer", customer):
 		sn_obj.customer = customer

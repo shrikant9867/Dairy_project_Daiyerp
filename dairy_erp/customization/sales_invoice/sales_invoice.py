@@ -72,6 +72,9 @@ def get_effective_credit(customer):
 
 @frappe.whitelist()
 def validate_local_sale(doc, method):
+	if doc.effective_credit <= 0.000:
+		frappe.throw(_("Service Note cannot be created if <b>'Effective Credit' </b> is zero"))
+
 	if doc.local_sale:
 		if doc.customer_or_farmer == "Farmer":
 			doc.customer = frappe.db.get_value('Farmer',doc.farmer,'full_name')
@@ -89,6 +92,12 @@ def validate_local_sale(doc, method):
 
 @frappe.whitelist()
 def payment_entry(doc, method):
+
+	if doc.grand_total > doc.effective_credit:
+		frappe.throw(_("Service note cannot be created if Grand Total  greater than Effective Credit "))
+
+	print "*********grand total",doc.effective_credit
+	print "*********effective credit",doc.grand_total
 	print "************",doc.customer,get_effective_credit(doc.customer)
 	input_ = get_effective_credit(doc.customer)
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ <= 0 :

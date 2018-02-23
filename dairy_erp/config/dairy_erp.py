@@ -159,11 +159,7 @@ def get_data():
 					"name": "Veterinary AI Technician",
 					"description": _(" "),
 				},
-				{
-					"type": "doctype",
-					"name": "Service Note",
-					"description": _(" "),
-				},
+				
 				{
 					"type": "doctype",
 					"name": "Material Price List",

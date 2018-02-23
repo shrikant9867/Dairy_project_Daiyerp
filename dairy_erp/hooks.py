@@ -63,7 +63,7 @@ doctype_list_js = {
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+#   "Role": "home_page"
 # }
 
 # Website user home page (by function)
@@ -92,11 +92,11 @@ after_install = "dairy_erp.customization.customization.after_install"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+#   "Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
+#   "Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # Document Events
@@ -104,11 +104,11 @@ after_install = "dairy_erp.customization.customization.after_install"
 # Hook on document methods and events
 
 doc_events = {
-	"Address": {
-		"after_insert": ["dairy_erp.customization.customization.validate_dairy_company","dairy_erp.customization.customization.set_warehouse"],
-		"on_update": "dairy_erp.customization.customization.update_warehouse",
-		"validate": "dairy_erp.customization.customization.validate_headoffice"
-	},
+    "Address": {
+        "after_insert": ["dairy_erp.customization.customization.validate_dairy_company","dairy_erp.customization.customization.set_warehouse"],
+        "on_update": "dairy_erp.customization.customization.update_warehouse",
+        "validate": "dairy_erp.customization.customization.validate_headoffice"
+    },
     "Purchase Order":{
         "validate":["dairy_erp.customization.customization.set_co_warehouse_po","dairy_erp.customization.customization.set_page_break"]
     },
@@ -145,21 +145,21 @@ doc_events = {
 # ---------------
 
 # scheduler_events = {
-# 	"all": [
-# 		"dairy_erp.tasks.all"
-# 	],
-# 	"daily": [
-# 		"dairy_erp.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"dairy_erp.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"dairy_erp.tasks.weekly"
-# 	]
-# 	"monthly": [
-# 		"dairy_erp.tasks.monthly"
-# 	]
+#   "all": [
+#       "dairy_erp.tasks.all"
+#   ],
+#   "daily": [
+#       "dairy_erp.tasks.daily"
+#   ],
+#   "hourly": [
+#       "dairy_erp.tasks.hourly"
+#   ],
+#   "weekly": [
+#       "dairy_erp.tasks.weekly"
+#   ]
+#   "monthly": [
+#       "dairy_erp.tasks.monthly"
+#   ]
 # }
 fixtures=['Property Setter','Custom Field','Print Format','Role','Custom DocPerm','Custom Role']
 
@@ -177,7 +177,9 @@ permission_query_conditions = {
     "Vlcc Milk Collection Record": "dairy_erp.customization.customization.vmcr_permission",
     "Payment Entry": "dairy_erp.customization.customization.pe_permission",
     "Supplier":"dairy_erp.customization.customization.supplier_permission",
-    "Customer": "dairy_erp.customization.customization.customer_permission"
+    "Customer": "dairy_erp.customization.customization.customer_permission",
+    "Company": "dairy_erp.customization.customization.company_permission",
+    "Warehouse": "dairy_erp.customization.customization.warehouse_permission"
 }
 # Testing
 # -------
@@ -188,6 +190,6 @@ permission_query_conditions = {
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "dairy_erp.event.get_events"
+#   "frappe.desk.doctype.event.event.get_events": "dairy_erp.event.get_events"
 # }
 

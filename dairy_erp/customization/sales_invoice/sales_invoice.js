@@ -1,5 +1,9 @@
 console.log("jai hind")
 frappe.ui.form.on("Sales Invoice", {
+	setup: function(frm){
+
+
+	},
 	validate: function(frm) {
 		// if (frm.doc.local_sale && cint(frm.doc.effective_credit) == 0){
 		// 	frappe.throw(_("Not permitted"))
@@ -13,7 +17,10 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	onload: function(frm) {	
-		
+		if (get_session_user_type().operator_type == "Vet AI Technician")
+		{
+			frm.set_value("service_note",1)
+		}
 		frm.set_query("farmer", function () {
 			return {
 				"filters": {
@@ -24,7 +31,6 @@ frappe.ui.form.on("Sales Invoice", {
 
 		frm.set_value("effective_credit","")
 		user_ = get_session_user_type()
-		console.log("#########",user_)
 		if(user_.operator_type != "VLCC"){
 			cur_frm.set_df_property('local_sale', 'hidden', 1);
 			// cur_frm.set_df_property('due_date', 'hidden', 1);
@@ -56,12 +62,15 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 	service_note: function(frm) {
 		if (frm.doc.service_note){
-
-			frm.events.refresh(frm)
+			// frm.events.refresh(frm)
+			frm.set_df_property("farmer", "hidden", 0);
 			frm.set_value("customer_or_farmer","Farmer")
 			frm.set_df_property("customer_or_farmer", "hidden", 1);
 			frm.set_df_property("customer", "read_only", 1);
 			frm.set_df_property("cash_payment", "hidden", 1);
+			refresh_field("customer_or_farmer");
+			refresh_field("farmer");
+
 			// Tring Item-code filter  for service note using set_query
 			// item_names = []
 			// frappe.call({
@@ -86,7 +95,7 @@ frappe.ui.form.on("Sales Invoice", {
 
 		}
 		else{
-			console.log("rerererere")
+
 			frm.set_df_property("customer", "read_only", 0);
 			frm.set_value("customer","")
 			frm.set_df_property("farmer", "hidden", 1);
@@ -103,11 +112,11 @@ frappe.ui.form.on("Sales Invoice", {
 
 	customer_or_farmer: function(frm) {
 		if(frm.doc.customer_or_farmer == "Vlcc Local Customer"){
-			console.log("#######")
 			frm.set_value("effective_credit","")
 			local_sale_operations(frm)		
 		}else if (frm.doc.customer_or_farmer == "Farmer"){
 			set_farmer_config(frm)
+			
 			
 		}
 	}
@@ -122,7 +131,6 @@ local_sale_operations = function(frm){
 			method: "dairy_erp.customization.sales_invoice.sales_invoice.get_local_customer",
 			callback: function(r) {
 				if(r.message){
-					console.log("###",r.message)
 					frm.set_value("customer",r.message.customer)
 					frm.set_value("total_cow_milk_qty",r.message.cow_milk)
 					frm.set_value("total_buffalo_milk_qty",r.message.buff_milk)
@@ -135,7 +143,6 @@ local_sale_operations = function(frm){
 }
 
 set_farmer_config = function(frm) {
-	console.log("$$")
 	if(frm.doc.farmer){
 		frappe.call({
 				args: {
@@ -144,7 +151,6 @@ set_farmer_config = function(frm) {
 				method: "dairy_erp.customization.sales_invoice.sales_invoice.get_farmer_config",
 				callback: function(r) {
 					if(r.message){
-						console.log("###ff",r.message)
 						frm.set_value("customer",r.message.customer)
 						frm.set_value("total_cow_milk_qty",r.message.cow_milk)
 						frm.set_value("total_buffalo_milk_qty",r.message.buff_milk)
@@ -204,3 +210,26 @@ get_session_user_type = function() {
 
 // }
 
+get_session_user_type = function() {
+	var user;
+	frappe.call({
+		method: "frappe.client.get_value",
+		args: {
+			doctype: "User",
+			filters: {"name": frappe.session.user},
+			fieldname: ["operator_type","company"]
+		},
+		async:false,
+		callback: function(r){
+			if(r.message){	
+	
+				user = {
+					"operator_type": r.message.operator_type,
+					"company": r.message.company
+				}		
+			}
+		}
+	});
+
+	return user
+}

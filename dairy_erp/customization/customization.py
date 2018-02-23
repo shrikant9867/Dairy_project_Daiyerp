@@ -663,12 +663,21 @@ def si_permission(user):
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabSales Invoice`.company = '{0}')""".format(user_doc.get('company'))
 
+	if user_doc.get('operator_type') == "Vet AI Technician":
+		return """(`tabSales Invoice`.owner = '{0}')""".format(frappe.session.user)
+
+''' 
+	Farmer Permission query condition 
+'''
 def farmer_permission(user):
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabFarmer`.vlcc_name = '{0}')""".format(user_doc.get('company'))
+	elif user_doc.get('operator_type') == "Vet AI Technician":
+		return """(`tabFarmer`.vlcc_name = '{0}')""".format(user_doc.get('company'))
+
 
 def vlcc_permission(user):
 
@@ -679,6 +688,10 @@ def vlcc_permission(user):
 
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabVillage Level Collection Centre`.name = '{0}')""".format(user_doc.get('company'))
+
+	if user_doc.get('operator_type') == "Vet AI Technician":
+		return """(`tabVillage Level Collection Centre`.name = '{0}')""".format(user_doc.get('company'))
+
 
 def fmrc_permission(user):
 
@@ -790,3 +803,22 @@ def set_supp_company(doc,method):
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True
 		doc.save()
+
+
+def company_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabCompany`.name = '{0}')""".format(user_doc.get('company'))
+	elif user_doc.get('operator_type') == "Vet AI Technician":
+		return """(`tabCompany`.name = '{0}')""".format(user_doc.get('company'))
+
+def warehouse_permission(user):
+
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user_doc.get('operator_type') == "VLCC":
+		return """(`tabWarehouse`.company = '{0}')""".format(user_doc.get('company'))
+	elif user_doc.get('operator_type') == "Vet AI Technician":
+		return """(`tabWarehouse`.company = '{0}')""".format(user_doc.get('company'))

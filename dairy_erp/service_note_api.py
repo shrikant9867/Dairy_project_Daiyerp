@@ -37,8 +37,8 @@ def create_sn(data):
 	company = frappe.get_value("User",frappe.session.user,"company")
 	sn_obj = frappe.new_doc("Sales Invoice")
 	sn_obj.service_note = 1
+	sn_obj.company = company
 	sn_obj.debit_to = frappe.db.get_value("Company",sn_obj.company, 'default_receivable_account')
-	print "###############",data.get('client_id')
 	customer = frappe.db.get_value("Farmer",data.get('farmer_id'), 'full_name')
 	if frappe.db.exists("Customer", customer):
 		sn_obj.customer = customer
@@ -49,5 +49,5 @@ def create_sn(data):
 		sn_obj.flags.ignore_mandatory = True
 		sn_obj.save()
 		sn_obj.submit()
-		return sn_obj.name
+		return sn_obj
 	

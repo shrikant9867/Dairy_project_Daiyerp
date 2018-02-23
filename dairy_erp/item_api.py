@@ -95,7 +95,7 @@ def terms_condition():
 
 
 def get_supplier():
-	supplier = frappe.db.sql("""select su.name,su.contact_no from `tabSupplier` as su where supplier_type in ('VLCC Local','Dairy Type')""",as_dict=1)
+	supplier = frappe.db.sql("""select su.name,su.contact_no from `tabSupplier` as su join `tabParty Account` as pa on  pa.parent = su.name where supplier_type in ('VLCC Local','Dairy Type') and pa.company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
 	for row in supplier:
 		update_supplier_value(row)
 	return supplier

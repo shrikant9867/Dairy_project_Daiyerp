@@ -49,5 +49,5 @@ def create_sn(data):
 		sn_obj.flags.ignore_mandatory = True
 		sn_obj.save()
 		sn_obj.submit()
-		return sn_obj
+		return sn_obj.name
 	

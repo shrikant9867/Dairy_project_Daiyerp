@@ -56,8 +56,11 @@ def create_sn(data):
 def sn_list():
 	response_dict = {}
 	try:
-		pr_list = frappe.db.sql("""select status,company as vlcc,name,posting_date,additional_discount_percentage,customer as farmer,discount_amount,grand_total,effective_credit,case_details taxes_and_charges,grand_total from `tabSales Invoice` where company = '{0}' and service_note = 1 order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
+		print "@@@@@@@@"
+		pr_list = frappe.db.sql("""select status,company as vlcc,name,posting_date,additional_discount_percentage,customer as farmer,discount_amount,grand_total,effective_credit,case_details,taxes_and_charges,grand_total from `tabSales Invoice` where company = '{0}' and service_note = 1 order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
+		print pr_list
 		if pr_list:
+			print "#########",pr_list
 			for row in pr_list:
 				row.update({"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabSales Invoice Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1)})
 				row.update({"diagnosis": frappe.db.sql("""select disease,description from `tabDisease Child` where parent = '{0}'""".format(row.get('name')),as_dict=1)})

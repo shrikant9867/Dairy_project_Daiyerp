@@ -37,7 +37,7 @@ def make_pr(data):
 	pr_obj.flags.ignore_permissions = True
 	pr_obj.save()
 	pr_obj.submit()
-
+	update_po(pr_obj)
 	return pr_obj.name
 
 
@@ -112,3 +112,9 @@ def draft_pr(data):
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict
+
+
+def update_po(pr_obj):
+	po_no = frappe.db.sql("""select purchase_order from `tabPurchase Receipt Item` where parent =%s""",(pr_obj.name),as_dict=1)
+	if po_no:
+		frappe.db.sql("""update `tabPurchase Order` set status = 'To Bill' where name =%s""",(po_no[0].get('purchase_order')))

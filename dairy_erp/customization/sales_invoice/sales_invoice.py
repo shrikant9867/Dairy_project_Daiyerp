@@ -93,8 +93,8 @@ def validate_local_sale(doc, method):
 @frappe.whitelist()
 def payment_entry(doc, method):
 
-	if doc.grand_total > doc.effective_credit:
-		frappe.throw(_("Service note cannot be created if Grand Total  greater than Effective Credit "))
+	# if doc.grand_total > doc.effective_credit:
+	# 	frappe.throw(_("Service note cannot be created if Grand Total  greater than Effective Credit "))
 
 	print "*********grand total",doc.effective_credit
 	print "*********effective credit",doc.grand_total

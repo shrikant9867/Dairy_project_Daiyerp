@@ -124,23 +124,17 @@ def pr_taxes_templates():
 def update_supplier_value(row):
 	"""supplier item price for different UOM per object """
 	
-	supplier_item_price = frappe.db.sql("select name from `tabSupplier Item Price` where branch_office = '{0}' and customer = '{1}'".format(row.get('name'),get_seesion_company_datails().get('company')),as_dict=1)
-	if supplier_item_price:
-		row.update({"items": frappe.db.sql("select item as item_code,item_name,price as standard_rate from `tabSupplier Item Price Child` where parent = '{0}'".format(supplier_item_price[0].get('name')),as_dict=1)})
-		for row in row.get('items'):
-			#needful UOM respective supplier
-			item_ = frappe.db.get_value("Item",row.get('item_code'),['stock_uom','standard_rate','description'],as_dict=1)
-			row.update(
-				{
-					"uom": frappe.db.sql("select um.uom,um.conversion_factor * {0} as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = '{1}'".format(row.get('standard_rate'),row.get('item_code')),as_dict=1),
-					"stock_uom": item_.get('stock_uom'),
-					"description": item_.get('description'),
-					"standard_rate": item_.get('standard_rate')
-					
-				}
-			)
-	else:
-		row.update({"items":[]})
+	row.update({"items": frappe.db.sql("select  item_code,item_name,standard_rate,stock_uom from `tabItem`",as_dict=1)})
+	for row in row.get('items'):
+		#needful UOM respective supplier
+		item_ = frappe.db.get_value("Item",row.get('item_code'),['stock_uom','standard_rate','description'],as_dict=1)
+		row.update(
+			{
+				"uom": frappe.db.sql("select um.uom,um.conversion_factor * {0} as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = '{1}'".format(row.get('standard_rate'),row.get('item_code')),as_dict=1),
+				
+			}
+		)
+	
 
 
 def get_diseases():

@@ -43,7 +43,8 @@ doctype_js = {
     "User":["customization/user/user.js"],
     "Sales Order":["customization/sales_order/sales_order.js"],
     "Purchase Receipt": ["customization/purchase_receipt/purchase_receipt.js"],
-    "Sales Invoice": ["customization/sales_invoice/sales_invoice.js"]
+    "Sales Invoice": ["customization/sales_invoice/sales_invoice.js"],
+    "Stock Entry":["customization/stock_entry/stock_entry.js"]
     }
 doctype_list_js = {
     "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"],
@@ -122,11 +123,11 @@ doc_events = {
     },
     "Delivery Note":{
         "on_submit": "dairy_erp.customization.customization.validate_pr",
-        "validate":"dairy_erp.customization.customization.set_vlcc_warehouse",
+        "validate":["dairy_erp.customization.customization.set_vlcc_warehouse","dairy_erp.customization.customization.validate_dn"],
         "after_insert":"dairy_erp.customization.customization.make_purchase_receipt"
     },
     "Material Request":{
-        "validate": "dairy_erp.customization.customization.set_mr_warehouse"
+        "validate": ["dairy_erp.customization.customization.set_mr_warehouse","dairy_erp.customization.customization.set_chilling_wrhouse","dairy_erp.customization.material_request.material_request.validate"]
     },
     "Supplier":{
         "validate": "dairy_erp.customization.customization.set_company",

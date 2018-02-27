@@ -612,7 +612,10 @@ def mr_permission(user):
 
 	if user_doc.get('operator_type') == "Camp Office":
 		company = ['"%s"'%comp.get('name') for comp in vlcc]
-		return """`tabMaterial Request`.company in  ({company})""".format(company=','.join(company))
+		if company:
+			return """`tabMaterial Request`.company in  ({company})""".format(company=','.join(company))
+		else:
+			return """`tabMaterial Request`.company = 'Guest' """
 
 def pr_permission(user):
 
@@ -726,6 +729,7 @@ def pe_permission(user):
 
 def supplier_permission(user):
 
+
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 
 	if user_doc.get('operator_type') == "Camp Office":
@@ -755,6 +759,7 @@ def supplier_permission(user):
 
 
 def customer_permission(user):
+	
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 

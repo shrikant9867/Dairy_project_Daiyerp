@@ -6,13 +6,25 @@ frappe.ui.form.on('Material Price List', {
 
 	},
 	party_type: function(frm) {
-	if(cur_frm.doc.party_type == "VLCC"){
+	if(cur_frm.doc.party_type == "VLCC (CO)"){
 		frm.set_value("selling",1)
 		frm.set_value("buying",0)
 	}
-	if(cur_frm.doc.party_type == "Local Supplier"){
+	else if(cur_frm.doc.party_type == "Dairy Supplier (CO)"){
 		frm.set_value("buying",1)
 		frm.set_value("selling",0)
+	}
+	else if(cur_frm.doc.party_type == "VLCC Supplier (VLCC)"){
+		frm.set_value("buying",1)
+		frm.set_value("selling",0)
+	}
+	else if(cur_frm.doc.party_type == "Farmer (VLCC)"){
+		frm.set_value("buying",0)
+		frm.set_value("selling",1)
+	}
+	else if(cur_frm.doc.party_type == "VLCC Local Customer (VLCC)"){
+		frm.set_value("buying",0)
+		frm.set_value("selling",1)
 	}
 }
 });

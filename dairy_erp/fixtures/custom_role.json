@@ -2,8 +2,89 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.358722", 
-  "name": "2a0ce02808", 
+  "modified": "2018-02-22 14:33:47.426762", 
+  "name": "0ce5882c95", 
+  "page": null, 
+  "parent": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Balance Sheet", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-22 14:34:23.045974", 
+  "name": "4df85c98b0", 
+  "page": null, 
+  "parent": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Trial Balance", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-22 14:35:07.355490", 
+  "name": "0ff3c79809", 
+  "page": null, 
+  "parent": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Profit and Loss Statement", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-26 13:05:42.474443", 
+  "name": "9c7c7fab1f", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Sales Invoice", 
@@ -20,8 +101,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.377807", 
-  "name": "839c8efad3", 
+  "modified": "2018-02-26 13:05:42.642331", 
+  "name": "aefae0fee5", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Purchase Invoice", 
@@ -38,8 +119,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.396744", 
-  "name": "e56f8c7358", 
+  "modified": "2018-02-26 13:05:42.726803", 
+  "name": "f623dcd6e7", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Sales Invoice", 
@@ -56,8 +137,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.409283", 
-  "name": "79ed7828e8", 
+  "modified": "2018-02-26 13:05:42.743083", 
+  "name": "e10ef4cea7", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Purchase Invoice", 
@@ -74,8 +155,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.422964", 
-  "name": "0c491c5647", 
+  "modified": "2018-02-26 13:05:42.786464", 
+  "name": "d52cd34e22", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
@@ -107,8 +188,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.441453", 
-  "name": "84c07a23b5", 
+  "modified": "2018-02-26 13:05:42.827357", 
+  "name": "9fc4aa7e9d", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
@@ -146,8 +227,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.460310", 
-  "name": "9c29e602f9", 
+  "modified": "2018-02-26 13:05:42.873236", 
+  "name": "9b55a028d6", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Sales Invoice", 
@@ -185,8 +266,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.479379", 
-  "name": "9b961cea5c", 
+  "modified": "2018-02-26 13:05:42.905333", 
+  "name": "220c2c5567", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Purchase Invoice", 
@@ -230,8 +311,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.505282", 
-  "name": "e788897e5d", 
+  "modified": "2018-02-26 13:05:42.935725", 
+  "name": "e2fba650e9", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "GL Entry", 
@@ -272,8 +353,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.523387", 
-  "name": "7244c52fef", 
+  "modified": "2018-02-26 13:05:42.959390", 
+  "name": "553dedd8d7", 
   "page": "dairy-dashboard", 
   "parent": null, 
   "ref_doctype": null, 
@@ -290,8 +371,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.535319", 
-  "name": "fe41e61d77", 
+  "modified": "2018-02-26 13:05:42.976479", 
+  "name": "1861542c78", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Village Level Collection Centre", 
@@ -311,8 +392,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.561940", 
-  "name": "4fbfbd53f6", 
+  "modified": "2018-02-26 13:05:42.997620", 
+  "name": "c1c6e35422", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Farmer", 
@@ -407,8 +488,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-16 16:43:34.599419", 
-  "name": "ba2e0e8aa8", 
+  "modified": "2018-02-26 13:05:43.029910", 
+  "name": "ecd4089a08", 
   "page": null, 
   "parent": null, 
   "ref_doctype": "Farmer Milk Collection Record", 
@@ -428,8 +509,8 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-17 12:21:53.614177", 
-  "name": "6e1b54b76b", 
+  "modified": "2018-02-26 13:05:43.055810", 
+  "name": "408e6724fd", 
   "page": "vlcc-dashboard", 
   "parent": null, 
   "ref_doctype": null, 

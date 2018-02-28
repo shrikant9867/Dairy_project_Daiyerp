@@ -12,6 +12,7 @@ from item_api import get_seesion_company_datails
 from frappe import _
 import api_utils as utils
 import json
+from customization.sales_invoice.sales_invoice import get_effective_credit
 
 @frappe.whitelist()
 def create_service_note(data):
@@ -41,7 +42,9 @@ def create_sn(data):
 	sn_obj.debit_to = frappe.db.get_value("Company",sn_obj.company, 'default_receivable_account')
 	customer = frappe.db.get_value("Farmer",data.get('farmer_id'), 'full_name')
 	if frappe.db.exists("Customer", customer):
+		sn_obj.farmer = data.get('farmer_id')
 		sn_obj.customer = customer
+		sn_obj.effective_credit = get_effective_credit(customer)
 		sn_obj.update(data)
 		for row in sn_obj.items:
 			row.cost_center = frappe.db.get_value("Company",company, 'cost_center')
@@ -56,11 +59,9 @@ def create_sn(data):
 def sn_list():
 	response_dict = {}
 	try:
-		print "@@@@@@@@"
 		pr_list = frappe.db.sql("""select status,company as vlcc,name,posting_date,additional_discount_percentage,customer as farmer,discount_amount,grand_total,effective_credit,case_details,taxes_and_charges,grand_total from `tabSales Invoice` where company = '{0}' and service_note = 1 order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
 		print pr_list
 		if pr_list:
-			print "#########",pr_list
 			for row in pr_list:
 				row.update({"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabSales Invoice Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1)})
 				row.update({"diagnosis": frappe.db.sql("""select disease,description from `tabDisease Child` where parent = '{0}'""".format(row.get('name')),as_dict=1)})

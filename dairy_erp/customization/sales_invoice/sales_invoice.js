@@ -54,6 +54,8 @@ frappe.ui.form.on("Sales Invoice", {
 
 		}
 		else{
+			console.log("****")
+			frm.set_value("customer_or_farmer","Vlcc Local Customer")
 			frm.set_df_property("customer", "read_only", 0);
 			frm.set_df_property("due_date", "read_only", 0);
 			frm.set_value("update_stock",0)
@@ -233,3 +235,5 @@ get_session_user_type = function() {
 
 	return user
 }
+
+$.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));

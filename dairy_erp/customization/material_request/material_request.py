@@ -28,3 +28,9 @@ def make_po(data,doc):
 	po_doc.flags.ignore_mandatory = True
 	po_doc.save()
 	po_doc.submit()
+
+@frappe.whitelist()
+def validate(doc,method):
+	for item in doc.items:
+		if item.qty < 0.00:
+			frappe.throw(_("Quantity should not be negative"))

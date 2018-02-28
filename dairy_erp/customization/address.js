@@ -12,6 +12,14 @@ frappe.ui.form.on("Address", {
 	
 	},
 	onload: function(frm){
+		frm.set_query("associated_camp_office", function () {
+			return {
+				"filters": {
+					"address_type": "Camp Office",
+				}
+			};
+		});
+
 		operator = get_session_user_type()
 		if (inList(["Camp Office","VLCC"],operator.operator_type)){
 			frm.set_df_property("linked_with", "hidden", 1);

@@ -179,7 +179,8 @@ permission_query_conditions = {
     "Supplier":"dairy_erp.customization.customization.supplier_permission",
     "Customer": "dairy_erp.customization.customization.customer_permission",
     "Company": "dairy_erp.customization.customization.company_permission",
-    "Warehouse": "dairy_erp.customization.customization.warehouse_permission"
+    "Warehouse": "dairy_erp.customization.customization.warehouse_permission",
+    "Material Price List" : "dairy_erp.dairy_erp.doctype.material_price_list.material_price_list.permission_query_condition"
 }
 # Testing
 # -------

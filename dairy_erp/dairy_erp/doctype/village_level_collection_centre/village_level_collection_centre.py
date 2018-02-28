@@ -179,7 +179,7 @@ class VillageLevelCollectionCentre(Document):
 			operator.flags.ignore_mandatory = True
 			operator.save()
 			# add_all_roles_to(operator.name)
-			operator.add_roles("Vlcc Operator")
+			operator.add_roles("Vlcc Manager")
 			create_user_permission(operator.email,self.name)
 			
 		if self.operator_same_as_agent and not frappe.db.exists('User', self.email_id):

@@ -57,6 +57,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Territory",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Material Price List",
+					"description": _(" "),
 				}							
 			]
 		},
@@ -157,12 +162,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Veterinary AI Technician",
-					"description": _(" "),
-				},
-				
-				{
-					"type": "doctype",
-					"name": "Material Price List",
 					"description": _(" "),
 				}
 				

@@ -45,7 +45,9 @@ doctype_js = {
     "Purchase Receipt": ["customization/purchase_receipt/purchase_receipt.js"],
     "Sales Invoice": ["customization/sales_invoice/sales_invoice.js"],
     "Stock Entry":["customization/stock_entry/stock_entry.js"]
-    }
+    "Purchase Invoice": "customization/purchase_invoice/purchase_invoice.js",
+    "Delivery Note": "customization/delivery_note/delivery_note.js"
+}
 doctype_list_js = {
     "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"],
     "Material Request" :["customization/material_request/material_request_list.js"],

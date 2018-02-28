@@ -7,6 +7,7 @@
 		"public/dashboard/dashboard_layout.html",
 		"public/dashboard/dashboard_sidebar.html",
 		"public/dashboard/total_summery.html",
-		"public/dashboard/dashboard_panel.html"
+		"public/dashboard/dashboard_panel.html",
+		"public/price_list/price_list_customization.js"
 	]
 }

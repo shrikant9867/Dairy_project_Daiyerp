@@ -235,3 +235,5 @@ get_session_user_type = function() {
 
 	return user
 }
+
+$.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));

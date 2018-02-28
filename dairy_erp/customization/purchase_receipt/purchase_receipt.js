@@ -22,3 +22,4 @@ frappe.ui.form.on("Purchase Receipt Item", {
 	}
 
 })
+$.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));

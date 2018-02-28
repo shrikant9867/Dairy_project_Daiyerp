@@ -25,7 +25,8 @@ def get_selling_price_list(doc, is_vlcc=False, is_camp_office=False):
 	# 	else:
 	# 		LVLCCS-{name} or GTVLCCS
 	roles = frappe.get_roles()
-	
+	if not isinstance(doc, dict):
+		doc = doc.as_dict()
 	# camp-office user
 	if has_common(["Camp Manager", "Camp Operator"], roles or is_camp_office):
 		camp_office = doc.get('camp_office')
@@ -60,7 +61,7 @@ def get_selling_price_list(doc, is_vlcc=False, is_camp_office=False):
 
 def get_buying_price_list(doc, is_vlcc=False, is_camp_office=False):
 	# co operator/ co manger - 
-	# 		- LCOB-{name} OR GTCOB
+	# 	- LCOB-{name} OR GTCOB
 
 	# vlcc operator/ vlcc manger - 
 	# 	- if supplier dairy (camp office)

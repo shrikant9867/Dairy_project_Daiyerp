@@ -10,6 +10,8 @@ import re
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
+from dairy_erp.customization.price_list.price_list_customization \
+	import get_selling_price_list, get_buying_price_list
 
 
 
@@ -254,6 +256,7 @@ def make_si(dn):
 				"cost_center": item.cost_center,
 				"delivery_note": dn.name
 			})
+	si.selling_price_list = get_selling_price_list(si, is_camp_office=True)
 	si.flags.ignore_permissions = True
 	si.save()
 	si.submit()
@@ -280,7 +283,7 @@ def make_pi(doc):
 					"cost_center": item.cost_center,
 					"purchase_receipt": doc.name
 				})
-
+		pi.buying_price_list = get_buying_price_list(pi, is_vlcc=True)
 		pi.flags.ignore_permissions = True
 		pi.save()
 		pi.submit()
@@ -304,7 +307,7 @@ def make_pi_against_localsupp(po_doc,pr_doc):
 				"rate": frappe.db.get('Item Price',{'name':row_.item_code,'buying':'1','company':po_doc.company,'price_list':po_doc.buying_price_list},'rate'),
 				"purchase_order": po_doc.name
 			})
-
+	pi.buying_price_list = get_buying_price_list(pi, is_camp_office=True)
 	return pi
 
 def validate_qty_against_mi(doc):
@@ -386,7 +389,7 @@ def check_if_dropship(doc):
 									"amount": item.amount,
 									"warehouse": frappe.db.get_value("Address",{"name":po_doc.camp_office},"warehouse")
 								})
-
+				si.selling_price_list = get_selling_price_list(si, is_camp_office=True)
 				si.flags.ignore_permissions = True  		#Sales Invoice @CO in use case 2
 				si.save()
 				si.submit()

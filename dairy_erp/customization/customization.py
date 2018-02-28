@@ -827,3 +827,15 @@ def warehouse_permission(user):
 		return """(`tabWarehouse`.company = '{0}')""".format(user_doc.get('company'))
 	elif user_doc.get('operator_type') == "Vet AI Technician":
 		return """(`tabWarehouse`.company = '{0}')""".format(user_doc.get('company'))
+
+def set_chilling_wrhouse(doc, method):
+	branch_office = frappe.db.get_value("User",frappe.session.user,["operator_type","company","branch_office"],as_dict=1)
+	if branch_office.get('operator_type') == 'Chilling Centre':
+		if doc.items:
+			for item in doc.items:
+				item.warehouse = frappe.db.get_value("Address",{"name":branch_office.get('branch_office')},"warehouse")
+
+
+def validate_dn(doc,method):
+	print "\n\n\n\n\n\n\n###########validate_dn######################"
+	print "#####validate_dn#doc"

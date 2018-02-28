@@ -44,7 +44,7 @@ doctype_js = {
     "Sales Order":["customization/sales_order/sales_order.js"],
     "Purchase Receipt": ["customization/purchase_receipt/purchase_receipt.js"],
     "Sales Invoice": ["customization/sales_invoice/sales_invoice.js"],
-    "Stock Entry":["customization/stock_entry/stock_entry.js"]
+    "Stock Entry":["customization/stock_entry/stock_entry.js"],
     "Purchase Invoice": "customization/purchase_invoice/purchase_invoice.js",
     "Delivery Note": "customization/delivery_note/delivery_note.js"
 }

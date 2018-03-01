@@ -606,7 +606,7 @@ def mr_permission(user):
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 	vlcc = frappe.db.get_values("Village Level Collection Centre",{"camp_office":user_doc.get('branch_office')},"name",as_dict=1)
-
+	vlcc.append({'name':frappe.db.get_value("Company",{'is_dairy':1},'name')})
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabMaterial Request`.company = '{0}')""".format(user_doc.get('company'))
 
@@ -616,6 +616,8 @@ def mr_permission(user):
 			return """`tabMaterial Request`.company in  ({company})""".format(company=','.join(company))
 		else:
 			return """`tabMaterial Request`.company = 'Guest' """
+
+
 
 def pr_permission(user):
 

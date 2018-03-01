@@ -73,8 +73,8 @@ class MaterialPriceList(Document):
 		self.create_price_list()
 
 	def on_update(self):
-		pass
-		# self.update_item_price()
+		# pass
+		self.update_item_price()
 
 	def create_price_list(self):
 
@@ -156,11 +156,6 @@ class MaterialPriceList(Document):
 		roles = frappe.get_roles()
 
 		price_doc = frappe.new_doc("Price List")
-		# if self.camp_office:
-		# 	price_doc.price_list_name = template_name + '-' +self.camp_office
-		# elif self.company and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
-		# 	price_doc.price_list_name = template_name + '-' +self.company
-		# else:
 		price_doc.price_list_name = template_name
 		price_doc.currency = "INR"
 		price_doc.buying = buying

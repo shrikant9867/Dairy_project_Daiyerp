@@ -31,7 +31,7 @@ def get_selling_price_list(doc, is_vlcc=False, is_camp_office=False):
 	if has_common(["Camp Manager", "Camp Operator"], roles or is_camp_office):
 		camp_office = doc.get('camp_office')
 		local_price = "LCOS-"+camp_office
-		if validate_price_list(price_list):
+		if validate_price_list(local_price):
 			return local_price
 		elif validate_price_list("GTCOS"):
 			return "GTCOS"

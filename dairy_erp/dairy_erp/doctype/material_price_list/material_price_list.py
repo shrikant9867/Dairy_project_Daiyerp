@@ -55,8 +55,8 @@ class MaterialPriceList(Document):
 		self.create_price_list()
 
 	def on_update(self):
-		pass
-		# self.update_item_price()
+		# pass
+		self.update_item_price()
 
 	def create_price_list(self):
 
@@ -80,7 +80,7 @@ class MaterialPriceList(Document):
 
 		#####Local Prices
 
-		elif self.price_template_type == "Dairy Supplier" and not frappe.db.exists('Price List', "LCOB"):
+		elif self.price_template_type == "Dairy Supplier" and not frappe.db.exists('Price List', "LCOB") and 'Camp Manager' in roles:
 			self.price_list_doc(template_name='LCOB',buying=1,selling=0)
 
 		elif self.price_template_type == "VLCC Local Supplier" and not frappe.db.exists('Price List', "GTVLCCB"):
@@ -115,8 +115,9 @@ class MaterialPriceList(Document):
 			else:
 				item = frappe.db.get_value("Item Price",{'price_list':self.price_list, 'item_code':row.item},'name')
 				item_pric_= frappe.get_doc("Item Price",item)
-				item_pric_.price_list_rate = row.price
-				item_pric_.save()
+				if item_pric_.price_list_rate != row.price:
+					item_pric_.price_list_rate = row.price
+					item_pric_.save()
 
 	def create_item_price(self,price_doc_name):
 

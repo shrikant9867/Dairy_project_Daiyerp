@@ -1,13 +1,13 @@
 frappe.ui.form.on('Stock Entry', {
 	onload:function(frm){
-		if (get_session_user_type().operator_type == "Chilling Centre"){
-			camp = address_attr(get_session_user_type().branch_office)
-			console.log(camp.camp_office,"##")
-			frm.set_value("camp_office",camp.camp_office)
-		}
-		if (get_session_user_type().operator_type == "Camp Office"){
-			load_attr(frm)
-		}
+		// if (get_session_user_type().operator_type == "Chilling Centre"){
+		// 	camp = address_attr(get_session_user_type().branch_office)
+		// 	console.log(camp.camp_office,"##")
+		// 	frm.set_value("camp_office",camp.camp_office)
+		// }
+		// if (get_session_user_type().operator_type == "Camp Office"){
+		// 	load_attr(frm)
+		// }
 	},
 	refresh: function(frm){
 		// if (get_session_user_type().operator_type == "Chilling Centre"){

@@ -10,6 +10,8 @@ import re
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
+from dairy_erp.customization.price_list.price_list_customization \
+	import get_selling_price_list, get_buying_price_list
 
 
 
@@ -241,6 +243,7 @@ def make_si(dn):
 	si = frappe.new_doc("Sales Invoice")
 	si.customer = dn.customer
 	si.company = dn.company
+	si.selling_price_list = "LCOS" if frappe.db.get_value("Price List","LCOS") else "GTCOS"
 	si.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 
 	for item in dn.items:
@@ -254,6 +257,7 @@ def make_si(dn):
 				"cost_center": item.cost_center,
 				"delivery_note": dn.name
 			})
+	si.selling_price_list = get_selling_price_list(si, is_camp_office=True)
 	si.flags.ignore_permissions = True
 	si.save()
 	si.submit()
@@ -269,6 +273,7 @@ def make_pi(doc):
 		pi.supplier = doc.supplier
 		pi.company = doc.company
 		pi.camp_office = co
+		# pi.buying_price_list = "LCOB" if frappe.db.get_value("Price List","LCOB") else "GTCOB"
 		for item in doc.items:
 			pi.append("items",
 				{
@@ -280,7 +285,7 @@ def make_pi(doc):
 					"cost_center": item.cost_center,
 					"purchase_receipt": doc.name
 				})
-
+		pi.buying_price_list = get_buying_price_list(pi, is_vlcc=True)
 		pi.flags.ignore_permissions = True
 		pi.save()
 		pi.submit()
@@ -304,7 +309,7 @@ def make_pi_against_localsupp(po_doc,pr_doc):
 				"rate": frappe.db.get('Item Price',{'name':row_.item_code,'buying':'1','company':po_doc.company,'price_list':po_doc.buying_price_list},'rate'),
 				"purchase_order": po_doc.name
 			})
-
+	pi.buying_price_list = "LCOB" if frappe.db.get_value("Price List","LCOB") else "GTCOB"#get_buying_price_list(pi, is_camp_office=True)
 	return pi
 
 def validate_qty_against_mi(doc):
@@ -386,7 +391,7 @@ def check_if_dropship(doc):
 									"amount": item.amount,
 									"warehouse": frappe.db.get_value("Address",{"name":po_doc.camp_office},"warehouse")
 								})
-
+				si.selling_price_list = get_selling_price_list(si, is_camp_office=True)
 				si.flags.ignore_permissions = True  		#Sales Invoice @CO in use case 2
 				si.save()
 				si.submit()
@@ -489,6 +494,9 @@ def set_co_warehouse_pr(doc,method=None):
 				item.warehouse = vlcc
 				if item.rejected_qty:
 					item.rejected_warehouse = vlcc
+		doc.buying_price_list = "LCOVLCCB" if frappe.db.get_value("Price List","LVLCCB") else "GTCOVLCCB"
+
+
 
 
 
@@ -576,6 +584,7 @@ def make_purchase_receipt(doc,method=None):
 			purchase_rec.supplier =  branch_office.get('branch_office')
 			purchase_rec.company = doc.customer
 			purchase_rec.base_in_words = money_in_words(doc.base_rounded_total,doc.currency)
+			purchase_rec.buying_price_list = "LCOVLCCB" if frappe.db.get_value("Price List","LVLCCB") else "GTCOVLCCB"
 			for item in doc.items:
 				purchase_rec.append("items",
 					{
@@ -761,7 +770,6 @@ def supplier_permission(user):
 
 
 def customer_permission(user):
-	
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 
@@ -839,5 +847,11 @@ def set_chilling_wrhouse(doc, method):
 
 
 def validate_dn(doc,method):
-	print "\n\n\n\n\n\n\n###########validate_dn######################"
-	print "#####validate_dn#doc"
+	for item in doc.items:
+		if item.material_request:
+			mi=frappe.get_doc("Material Request",item.material_request)
+
+			for mi_items in mi.items:
+				if item.item_code == mi_items.item_code:
+					if item.qty > mi_items.qty:
+						frappe.throw(_("Accepted quantity should not greater Requested quantity"))

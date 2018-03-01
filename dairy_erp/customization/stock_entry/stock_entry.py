@@ -11,18 +11,22 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
 
+
 def set_target_warehouse(doc,method):
 	chilling_centre = ""
-	for row in doc.items:
-		chilling_centre = row.chilling_centre
-		row.s_warehouse = doc.from_warehouse
-		row.t_warehouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
-	target_warhouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
+	doc.purpose = "Material Transfer"
+	user_ = frappe.db.get_value("User", frappe.session.user, ['branch_office','operator_type'],as_dict=1)
+	if user_.get('operator_type') == "Camp Office":
+		for row in doc.items:
+			chilling_centre = row.chilling_centre
+			row.s_warehouse = frappe.db.get_value("Address",user_,'warehouse')
+			row.t_warehouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
+		target_warhouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
 	
 	if target_warhouse:
 		doc.to_warehouse = target_warhouse  
 
+
 def validate_camp_submission(doc, method):
-	print "#############",frappe.db.get_value("User",frappe.session.user,'operator_type') == "Camp Office"
 	if frappe.db.get_value("User",frappe.session.user,'operator_type') == "Camp Office":
 		frappe.throw(_("Not allowed to Submit"))

@@ -80,6 +80,7 @@
   "field_name": "project", 
   "modified": "2018-02-15 13:26:57.248171", 
   "name": "Sales Invoice-project-read_only", 
+  "parent": null, 
   "property": "read_only", 
   "property_type": "Check", 
   "value": "1"
@@ -97,6 +98,7 @@
   "field_name": "set_posting_time", 
   "modified": "2018-02-15 13:43:29.105402", 
   "name": "Sales Invoice-set_posting_time-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -114,6 +116,7 @@
   "field_name": "is_pos", 
   "modified": "2018-02-16 17:47:34.483682", 
   "name": "Sales Invoice-is_pos-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -131,6 +134,7 @@
   "field_name": "received_qty", 
   "modified": "2018-02-05 23:43:48.012145", 
   "name": "Purchase Receipt Item-received_qty-read_only", 
+  "parent": null, 
   "property": "read_only", 
   "property_type": "Check", 
   "value": "1"
@@ -148,6 +152,7 @@
   "field_name": "get_items_from_open_material_requests", 
   "modified": "2018-02-07 15:44:36.230164", 
   "name": "Purchase Order-get_items_from_open_material_requests-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -165,6 +170,7 @@
   "field_name": "naming_series", 
   "modified": "2018-02-02 19:13:01.159013", 
   "name": "Service Note-naming_series-options", 
+  "parent": null, 
   "property": "options", 
   "property_type": "Text", 
   "value": "SN-\nSN-RET-"
@@ -182,6 +188,7 @@
   "field_name": "naming_series", 
   "modified": "2018-02-03 17:52:56.206888", 
   "name": "Item-naming_series-options", 
+  "parent": null, 
   "property": "options", 
   "property_type": "Text", 
   "value": "ITEM-"
@@ -199,6 +206,7 @@
   "field_name": null, 
   "modified": "2018-02-05 16:05:10.347431", 
   "name": "GL Entry-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -216,6 +224,7 @@
   "field_name": null, 
   "modified": "2018-01-23 11:32:44.001448", 
   "name": "Price List-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -233,6 +242,7 @@
   "field_name": null, 
   "modified": "2018-01-09 15:18:28.201961", 
   "name": "Item-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -250,6 +260,7 @@
   "field_name": "weight_uom", 
   "modified": "2018-01-09 15:18:28.482322", 
   "name": "Item-weight_uom-reqd", 
+  "parent": null, 
   "property": "reqd", 
   "property_type": "Check", 
   "value": "1"
@@ -267,6 +278,7 @@
   "field_name": null, 
   "modified": "2017-12-27 12:14:22.389418", 
   "name": "Sales Order-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -284,6 +296,7 @@
   "field_name": "order_type", 
   "modified": "2017-12-27 12:14:22.495918", 
   "name": "Sales Order-order_type-options", 
+  "parent": null, 
   "property": "options", 
   "property_type": "Text", 
   "value": "\nSales"
@@ -301,6 +314,7 @@
   "field_name": null, 
   "modified": "2017-12-20 18:18:07.988062", 
   "name": "Company-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -318,6 +332,7 @@
   "field_name": null, 
   "modified": "2017-12-18 15:36:22.550075", 
   "name": "Supplier-quick_entry", 
+  "parent": null, 
   "property": "quick_entry", 
   "property_type": "Check", 
   "value": "0"
@@ -335,6 +350,7 @@
   "field_name": "address_title", 
   "modified": "2017-12-11 12:15:31.365991", 
   "name": "Address-address_title-reqd", 
+  "parent": null, 
   "property": "reqd", 
   "property_type": "Check", 
   "value": "1"
@@ -352,6 +368,7 @@
   "field_name": "warehouse", 
   "modified": "2018-01-03 19:36:35.021494", 
   "name": "Material Request Item-warehouse-read_only", 
+  "parent": null, 
   "property": "read_only", 
   "property_type": "Check", 
   "value": "1"
@@ -369,6 +386,7 @@
   "field_name": null, 
   "modified": "2018-01-09 15:22:14.330556", 
   "name": "Material Request Item-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -386,6 +404,7 @@
   "field_name": "warehouse", 
   "modified": "2018-01-09 15:22:14.669958", 
   "name": "Material Request Item-warehouse-in_list_view", 
+  "parent": null, 
   "property": "in_list_view", 
   "property_type": "Check", 
   "value": "0"
@@ -403,6 +422,7 @@
   "field_name": null, 
   "modified": "2018-01-09 16:51:56.898394", 
   "name": "Purchase Order-default_print_format", 
+  "parent": null, 
   "property": "default_print_format", 
   "property_type": "Data", 
   "value": "Direct Delivery Note"
@@ -420,6 +440,7 @@
   "field_name": "status", 
   "modified": "2018-01-10 17:09:52.156972", 
   "name": "Material Request-status-options", 
+  "parent": null, 
   "property": "options", 
   "property_type": "Text", 
   "value": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nOrdered\nIssued\nTransferred\nDelivered\nPartially Delivered\nClosed"
@@ -437,6 +458,7 @@
   "field_name": null, 
   "modified": "2018-01-10 17:16:01.543463", 
   "name": "Purchase Receipt Item-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -454,6 +476,7 @@
   "field_name": null, 
   "modified": "2018-01-11 11:37:53.285171", 
   "name": "Item Price-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -471,6 +494,7 @@
   "field_name": "base_rounded_total", 
   "modified": "2018-01-11 14:21:01.363441", 
   "name": "Quotation-base_rounded_total-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -488,6 +512,7 @@
   "field_name": "base_rounded_total", 
   "modified": "2018-01-11 14:21:01.417859", 
   "name": "Quotation-base_rounded_total-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "1"
@@ -505,6 +530,7 @@
   "field_name": "rounded_total", 
   "modified": "2018-01-11 14:21:01.465084", 
   "name": "Quotation-rounded_total-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -522,6 +548,7 @@
   "field_name": "rounded_total", 
   "modified": "2018-01-11 14:21:01.512789", 
   "name": "Quotation-rounded_total-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -539,6 +566,7 @@
   "field_name": "base_rounded_total", 
   "modified": "2018-01-11 14:21:01.562195", 
   "name": "Sales Order-base_rounded_total-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -556,6 +584,7 @@
   "field_name": "base_rounded_total", 
   "modified": "2018-01-11 14:21:01.738601", 
   "name": "Sales Order-base_rounded_total-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "1"
@@ -573,6 +602,7 @@
   "field_name": "rounded_total", 
   "modified": "2018-01-11 14:21:01.794680", 
   "name": "Sales Order-rounded_total-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -590,6 +620,7 @@
   "field_name": "rounded_total", 
   "modified": "2018-01-11 14:21:01.871661", 
   "name": "Sales Order-rounded_total-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -607,6 +638,7 @@
   "field_name": "base_rounded_total", 
   "modified": "2018-01-11 14:21:01.950088", 
   "name": "Sales Invoice-base_rounded_total-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -624,6 +656,7 @@
   "field_name": "base_rounded_total", 
   "modified": "2018-01-11 14:21:02.058247", 
   "name": "Sales Invoice-base_rounded_total-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "1"
@@ -641,6 +674,7 @@
   "field_name": "rounded_total", 
   "modified": "2018-01-11 14:21:02.134365", 
   "name": "Sales Invoice-rounded_total-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -658,6 +692,7 @@
   "field_name": "rounded_total", 
   "modified": "2018-01-11 14:21:02.210469", 
   "name": "Sales Invoice-rounded_total-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -675,6 +710,7 @@
   "field_name": "base_rounded_total", 
   "modified": "2018-01-11 14:21:02.284424", 
   "name": "Delivery Note-base_rounded_total-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -692,6 +728,7 @@
   "field_name": "base_rounded_total", 
   "modified": "2018-01-11 14:21:02.344832", 
   "name": "Delivery Note-base_rounded_total-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "1"
@@ -709,6 +746,7 @@
   "field_name": "rounded_total", 
   "modified": "2018-01-11 14:21:02.408805", 
   "name": "Delivery Note-rounded_total-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -726,6 +764,7 @@
   "field_name": "rounded_total", 
   "modified": "2018-01-11 14:21:02.475649", 
   "name": "Delivery Note-rounded_total-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -743,6 +782,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:02.538038", 
   "name": "Quotation-in_words-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -760,6 +800,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:02.581943", 
   "name": "Quotation-in_words-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -777,6 +818,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:02.627524", 
   "name": "Sales Order-in_words-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -794,6 +836,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:02.694283", 
   "name": "Sales Order-in_words-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -811,6 +854,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:02.753881", 
   "name": "Sales Invoice-in_words-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -828,6 +872,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:02.829162", 
   "name": "Sales Invoice-in_words-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -845,6 +890,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:02.904105", 
   "name": "Delivery Note-in_words-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -862,6 +908,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:02.965009", 
   "name": "Delivery Note-in_words-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -879,6 +926,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:03.042133", 
   "name": "Supplier Quotation-in_words-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -896,6 +944,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:03.081646", 
   "name": "Supplier Quotation-in_words-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -913,6 +962,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:03.121797", 
   "name": "Purchase Order-in_words-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -930,6 +980,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:03.168606", 
   "name": "Purchase Order-in_words-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -947,6 +998,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:03.217529", 
   "name": "Purchase Invoice-in_words-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -964,6 +1016,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:03.277900", 
   "name": "Purchase Invoice-in_words-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -981,6 +1034,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:03.336558", 
   "name": "Purchase Receipt-in_words-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -998,6 +1052,7 @@
   "field_name": "in_words", 
   "modified": "2018-01-11 14:21:03.389844", 
   "name": "Purchase Receipt-in_words-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -1015,6 +1070,7 @@
   "field_name": "naming_series", 
   "modified": "2018-01-11 14:21:05.979679", 
   "name": "Customer-naming_series-reqd", 
+  "parent": null, 
   "property": "reqd", 
   "property_type": "Check", 
   "value": "0"
@@ -1032,6 +1088,7 @@
   "field_name": "naming_series", 
   "modified": "2018-01-11 14:21:06.016791", 
   "name": "Customer-naming_series-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -1049,6 +1106,7 @@
   "field_name": "tax_id", 
   "modified": "2018-01-11 14:21:06.055277", 
   "name": "Sales Order-tax_id-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1066,6 +1124,7 @@
   "field_name": "tax_id", 
   "modified": "2018-01-11 14:21:06.139891", 
   "name": "Sales Order-tax_id-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -1083,6 +1142,7 @@
   "field_name": "tax_id", 
   "modified": "2018-01-11 14:21:06.196939", 
   "name": "Sales Invoice-tax_id-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1100,6 +1160,7 @@
   "field_name": "tax_id", 
   "modified": "2018-01-11 14:21:06.273844", 
   "name": "Sales Invoice-tax_id-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -1117,6 +1178,7 @@
   "field_name": "tax_id", 
   "modified": "2018-01-11 14:21:06.360846", 
   "name": "Delivery Note-tax_id-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1134,6 +1196,7 @@
   "field_name": "tax_id", 
   "modified": "2018-01-11 14:21:06.433440", 
   "name": "Delivery Note-tax_id-print_hide", 
+  "parent": null, 
   "property": "print_hide", 
   "property_type": "Check", 
   "value": "0"
@@ -1151,6 +1214,7 @@
   "field_name": "naming_series", 
   "modified": "2018-01-11 14:21:06.651254", 
   "name": "Supplier-naming_series-reqd", 
+  "parent": null, 
   "property": "reqd", 
   "property_type": "Check", 
   "value": "0"
@@ -1168,6 +1232,7 @@
   "field_name": "naming_series", 
   "modified": "2018-01-11 14:21:06.716187", 
   "name": "Supplier-naming_series-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -1185,6 +1250,7 @@
   "field_name": "naming_series", 
   "modified": "2018-01-11 14:21:06.879077", 
   "name": "Employee-naming_series-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1202,6 +1268,7 @@
   "field_name": "naming_series", 
   "modified": "2018-01-11 14:21:06.955997", 
   "name": "Employee-naming_series-reqd", 
+  "parent": null, 
   "property": "reqd", 
   "property_type": "Check", 
   "value": "1"
@@ -1219,6 +1286,7 @@
   "field_name": "employee_number", 
   "modified": "2018-01-11 14:21:07.079467", 
   "name": "Employee-employee_number-reqd", 
+  "parent": null, 
   "property": "reqd", 
   "property_type": "Check", 
   "value": "0"
@@ -1236,6 +1304,7 @@
   "field_name": "employee_number", 
   "modified": "2018-01-11 14:21:07.153171", 
   "name": "Employee-employee_number-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -1253,6 +1322,7 @@
   "field_name": "manufacturing", 
   "modified": "2018-01-11 14:21:08.272512", 
   "name": "Item-manufacturing-collapsible_depends_on", 
+  "parent": null, 
   "property": "collapsible_depends_on", 
   "property_type": "Code", 
   "value": "is_stock_item"
@@ -1270,6 +1340,7 @@
   "field_name": "naming_series", 
   "modified": "2018-01-11 14:21:08.571376", 
   "name": "Item-naming_series-reqd", 
+  "parent": null, 
   "property": "reqd", 
   "property_type": "Check", 
   "value": "0"
@@ -1287,6 +1358,7 @@
   "field_name": "naming_series", 
   "modified": "2018-01-11 14:21:08.637552", 
   "name": "Item-naming_series-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -1304,6 +1376,7 @@
   "field_name": "item_code", 
   "modified": "2018-01-11 14:21:08.703718", 
   "name": "Item-item_code-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1321,6 +1394,7 @@
   "field_name": "item_code", 
   "modified": "2018-01-11 14:21:08.759514", 
   "name": "Item-item_code-reqd", 
+  "parent": null, 
   "property": "reqd", 
   "property_type": "Check", 
   "value": "1"
@@ -1338,6 +1412,7 @@
   "field_name": "barcode", 
   "modified": "2018-01-11 14:21:08.817328", 
   "name": "Sales Invoice Item-barcode-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1355,6 +1430,7 @@
   "field_name": "barcode", 
   "modified": "2018-01-11 14:21:08.851830", 
   "name": "Purchase Receipt Item-barcode-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1372,6 +1448,7 @@
   "field_name": "barcode", 
   "modified": "2018-01-11 14:21:08.887260", 
   "name": "Delivery Note Item-barcode-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1389,6 +1466,7 @@
   "field_name": "barcode", 
   "modified": "2018-01-11 14:21:08.921181", 
   "name": "Stock Entry Detail-barcode-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1406,6 +1484,7 @@
   "field_name": "barcode", 
   "modified": "2018-01-11 14:21:08.945061", 
   "name": "Item-barcode-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1423,6 +1502,7 @@
   "field_name": "barcode", 
   "modified": "2018-01-11 14:21:09.004502", 
   "name": "Stock Reconciliation Item-barcode-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "0"
@@ -1440,6 +1520,7 @@
   "field_name": null, 
   "modified": "2018-01-12 02:16:33.708115", 
   "name": "Purchase Receipt-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1457,6 +1538,7 @@
   "field_name": null, 
   "modified": "2018-01-12 02:16:39.978457", 
   "name": "Purchase Invoice-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1474,6 +1556,7 @@
   "field_name": null, 
   "modified": "2018-01-12 02:19:32.412356", 
   "name": "Delivery Note-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1491,6 +1574,7 @@
   "field_name": null, 
   "modified": "2018-01-12 02:21:52.304099", 
   "name": "Material Request-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1508,6 +1592,7 @@
   "field_name": null, 
   "modified": "2018-01-12 02:23:03.785669", 
   "name": "Terms and Conditions-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1525,6 +1610,7 @@
   "field_name": null, 
   "modified": "2018-01-12 14:22:49.709279", 
   "name": "Delivery Note Item-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1542,6 +1628,7 @@
   "field_name": "warehouse", 
   "modified": "2018-01-12 14:22:49.798473", 
   "name": "Delivery Note Item-warehouse-read_only", 
+  "parent": null, 
   "property": "read_only", 
   "property_type": "Check", 
   "value": "1"
@@ -1559,6 +1646,7 @@
   "field_name": "stock_qty", 
   "modified": "2018-01-23 15:24:23.697509", 
   "name": "Delivery Note Item-stock_qty-width", 
+  "parent": null, 
   "property": "width", 
   "property_type": null, 
   "value": "144"
@@ -1576,6 +1664,7 @@
   "field_name": null, 
   "modified": "2018-01-25 15:26:16.980413", 
   "name": "User-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1593,6 +1682,7 @@
   "field_name": "address_type", 
   "modified": "2018-01-25 15:27:09.188932", 
   "name": "Address-address_type-options", 
+  "parent": null, 
   "property": "options", 
   "property_type": "Text", 
   "value": "\nHead Office\nCamp Office\nChilling Centre\nPlant\nVlcc\nVeterinary AI Tech\nFarmer\nBilling\nShipping\nOffice\nPersonal\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nPermanent\nOther"
@@ -1610,6 +1700,7 @@
   "field_name": "company", 
   "modified": "2018-02-05 13:34:30.195824", 
   "name": "Purchase Order-company-read_only", 
+  "parent": null, 
   "property": "read_only", 
   "property_type": "Check", 
   "value": "1"
@@ -1627,6 +1718,7 @@
   "field_name": null, 
   "modified": "2018-02-05 13:34:54.128553", 
   "name": "Purchase Order Item-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1644,6 +1736,7 @@
   "field_name": "warehouse", 
   "modified": "2018-02-05 13:34:54.227763", 
   "name": "Purchase Order Item-warehouse-read_only", 
+  "parent": null, 
   "property": "read_only", 
   "property_type": "Check", 
   "value": "1"
@@ -1661,6 +1754,7 @@
   "field_name": null, 
   "modified": "2018-02-05 13:41:55.313536", 
   "name": "Purchase Order-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1678,6 +1772,7 @@
   "field_name": null, 
   "modified": "2018-02-05 16:58:47.940312", 
   "name": "Payment Entry-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1695,6 +1790,7 @@
   "field_name": null, 
   "modified": "2018-02-15 15:50:53.489700", 
   "name": "Supplier-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1712,6 +1808,7 @@
   "field_name": "default_payable_accounts", 
   "modified": "2018-02-15 15:50:53.604737", 
   "name": "Supplier-default_payable_accounts-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -1729,6 +1826,7 @@
   "field_name": null, 
   "modified": "2018-02-15 16:24:31.233562", 
   "name": "Customer-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1746,6 +1844,7 @@
   "field_name": "default_receivable_accounts", 
   "modified": "2018-02-15 16:24:31.275174", 
   "name": "Customer-default_receivable_accounts-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -1763,6 +1862,7 @@
   "field_name": "is_your_company_address", 
   "modified": "2018-02-15 16:57:31.697772", 
   "name": "Address-is_your_company_address-hidden", 
+  "parent": null, 
   "property": "hidden", 
   "property_type": "Check", 
   "value": "1"
@@ -1780,6 +1880,7 @@
   "field_name": null, 
   "modified": "2018-02-15 16:59:09.113984", 
   "name": "Address-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
@@ -1797,6 +1898,7 @@
   "field_name": null, 
   "modified": "2018-02-27 22:14:27.319026", 
   "name": "Sales Invoice-read_only_onload", 
+  "parent": null, 
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null

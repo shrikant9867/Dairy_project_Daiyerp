@@ -44,8 +44,10 @@ doctype_js = {
     "Sales Order":["customization/sales_order/sales_order.js"],
     "Purchase Receipt": ["customization/purchase_receipt/purchase_receipt.js"],
     "Sales Invoice": ["customization/sales_invoice/sales_invoice.js"],
-    "Stock Entry":["customization/stock_entry/stock_entry.js"]
-    }
+    "Stock Entry":["customization/stock_entry/stock_entry.js"],
+    "Purchase Invoice": "customization/purchase_invoice/purchase_invoice.js",
+    "Delivery Note": "customization/delivery_note/delivery_note.js"
+}
 doctype_list_js = {
     "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"],
     "Material Request" :["customization/material_request/material_request_list.js"],
@@ -184,7 +186,8 @@ permission_query_conditions = {
     "Supplier":"dairy_erp.customization.customization.supplier_permission",
     "Customer": "dairy_erp.customization.customization.customer_permission",
     "Company": "dairy_erp.customization.customization.company_permission",
-    "Warehouse": "dairy_erp.customization.customization.warehouse_permission"
+    "Warehouse": "dairy_erp.customization.customization.warehouse_permission",
+    "Material Price List" : "dairy_erp.dairy_erp.doctype.material_price_list.material_price_list.permission_query_condition"
 }
 # Testing
 # -------

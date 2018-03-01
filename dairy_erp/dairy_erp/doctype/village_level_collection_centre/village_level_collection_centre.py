@@ -182,7 +182,7 @@ class VillageLevelCollectionCentre(Document):
 			operator.add_roles("Vlcc Manager")
 			create_user_permission(operator.email,self.name)
 			
-		if self.operator_same_as_agent and not frappe.db.exists('User', self.email_id):
+		if self.operator_same_as_agent and not frappe.db.exists('User', self.operator_email_id):
 			agent = frappe.new_doc("User")
 			agent.email = self.operator_email_id
 			agent.first_name = self.operator_name

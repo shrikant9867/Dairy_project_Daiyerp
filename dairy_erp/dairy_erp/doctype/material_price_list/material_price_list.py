@@ -17,37 +17,55 @@ class MaterialPriceList(Document):
 
 		# if 'Dairy Manager' in roles:
 	
-		# 	if self.is_new():
-		# 		self.get_conditions()
+		if self.is_new():
+			self.get_conditions()
 
 			
 	def get_conditions(self):
 
+		roles = frappe.get_roles()
 
-		if self.price_template_type == 'Dairy Supplier' and frappe.db.get_value("Price List",{'name':'GTCOB'},"name"):
-			frappe.throw("GTCOB exits")
+		camp_office = self.camp_office if self.camp_office else ""
+		company = self.company if 'Vlcc Manager' in roles or 'Vlcc Operator' in roles else ""
 
-		elif self.price_template_type == 'VLCC Local Supplier' and frappe.db.get_value("Price List",{'name':'GTVLCCB'},"name"):
-			frappe.throw("GTVLCCB exits")
-			# conditions = "where price_template_type = '{0}' and buying = 1".format(self.price_template_type)
+		if self.price_template_type == 'Dairy Supplier' and frappe.db.get_value("Price List",{'name':'GTCOB'},"name") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
+			frappe.throw("Please add items in the existing Material Price List GTCOB")
 
-		# elif self.price_template_type == 'CO to VLCC' and frappe.db.exists("Material Price List",'GTCOS'):
-		# 	frappe.throw("GTCOS exits")
+		elif self.price_template_type == 'VLCC Local Supplier' and frappe.db.get_value("Price List",{'name':'GTVLCCB'},"name") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
+			frappe.throw("Please add items in the existing Material Price List GTVLCCB")
 
-		# elif self.price_template_type == 'CO to VLCC' and frappe.db.get_value("Price List",{'name':'GTCOVLCCB'},"name"):
-		# 	frappe.throw("GTCOVLCCB exits")
-			# conditions = "where price_template_type = '{0}' and buying = 1".format(self.price_template_type)
+		elif self.price_template_type == 'CO to VLCC' and frappe.db.get_value("Price List",{'name':'GTCOS'},"name") and ('Dairy Manager' in roles or 'Dairy Operator' in roles) and self.selling == 1:
+			frappe.throw("Please add items in the existing Material Price List GTCOS")
 
-			# conditions = "where price_template_type = '{0}' and selling = 1".format(self.price_template_type)
+		elif self.price_template_type == 'CO to VLCC' and frappe.db.get_value("Price List",{'name':'GTCOVLCCB'},"name") and ('Dairy Manager' in roles or 'Dairy Operator' in roles) and self.buying == 1:
+			frappe.throw("Please add items in the existing Material Price List GTCOVLCCB")
 
-		elif self.price_template_type == "VLCC Local Farmer" and frappe.db.get_value("Price List",{'name':'GTFS'},"name"):
-			frappe.throw("GTFS exits")
+		elif self.price_template_type == "VLCC Local Farmer" and frappe.db.get_value("Price List",{'name':'GTFS'},"name") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
+			frappe.throw("Please add items in the existing Material Price List GTFS")
 
-		elif self.price_template_type == "VLCC Local Customer" and frappe.db.get_value("Price List",{'name':'GTCS'},"name"):
-			frappe.throw("GTCS exits")
-			
+		elif self.price_template_type == "VLCC Local Customer" and frappe.db.get_value("Price List",{'name':'GTCS'},"name") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
+			frappe.throw("Please add items in the existing Material Price List GTCS")
+
+			####local prices validation
 		
-		# return conditions
+
+		elif self.price_template_type == "Dairy Supplier" and ('Camp Manager' in roles or 'Camp Operator' in roles) and frappe.db.get_value("Price List",'LCOB' +'-'+camp_office,"name"):
+			frappe.throw("Please add items in the existing Material Price List LCOB-{0}".format(camp_office))
+
+		elif self.price_template_type == "VLCC Local Supplier" and frappe.db.get_value("Price List",'LVLCCB'+"-"+company,"name") and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+			frappe.throw("Please add items in the existing Material Price List LVLCCB-{0}".format(company))
+
+		elif self.price_template_type == "CO to VLCC" and frappe.db.exists('Price List', "LCOS" +"-"+camp_office) and ('Camp Manager' in roles or 'Camp Operator' in roles) and self.selling == 1:
+			frappe.throw("Please add items in the existing Material Price List LCOS-{0}".format(camp_office))
+
+		elif self.price_template_type == "CO to VLCC" and frappe.db.exists('Price List', "LCOVLCCB" +"-"+camp_office) and ('Camp Manager' in roles or 'Camp Operator' in roles) and self.buying == 1:
+			frappe.throw("Please add items in the existing Material Price List LCOVLCCB-{0}".format(camp_office))
+
+		elif self.price_template_type == "VLCC Local Farmer" and frappe.db.exists('Price List', "LFS" +"-"+company ) and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+			frappe.throw("Please add items in the existing Material Price List LFS-{0}".format(company))
+
+		elif self.price_template_type == "VLCC Local Customer" and frappe.db.exists('Price List', "LCS" +"-"+company ) and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+			frappe.throw("Please add items in the existing Material Price List LCS-{0}".format(company))
 
 
 	def after_insert(self):
@@ -61,41 +79,43 @@ class MaterialPriceList(Document):
 	def create_price_list(self):
 
 		roles = frappe.get_roles()
+		camp_office = self.camp_office if self.camp_office else ""
+		company = self.company if 'Vlcc Manager' in roles or 'Vlcc Operator' in roles else ""
 
-		if self.price_template_type == "Dairy Supplier" and not frappe.db.exists('Price List', "GTCOB"):
+		if self.price_template_type == "Dairy Supplier" and not frappe.db.exists('Price List', "GTCOB") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
 			self.price_list_doc(template_name='GTCOB',buying=1,selling=0)
 
-		elif self.price_template_type == "VLCC Local Supplier" and not frappe.db.exists('Price List', "GTVLCCB"):
+		elif self.price_template_type == "VLCC Local Supplier" and not frappe.db.exists('Price List', "GTVLCCB") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
 			self.price_list_doc(template_name='GTVLCCB',buying=1,selling=0)
 
-		elif self.price_template_type == "CO to VLCC" and not frappe.db.exists('Price List', "GTCOS"):
+		elif self.price_template_type == "CO to VLCC" and not frappe.db.exists('Price List', "GTCOS") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
 			self.price_list_doc(template_name='GTCOS',buying=0,selling=1)
 			self.create_covlcc_buying(template_name="GTCOVLCCB")
 
-		elif self.price_template_type == "VLCC Local Farmer" and not frappe.db.exists('Price List', "GTFS"):
+		elif self.price_template_type == "VLCC Local Farmer" and not frappe.db.exists('Price List', "GTFS") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
 			self.price_list_doc(template_name='GTFS',buying=0,selling=1)
 
-		elif self.price_template_type == "VLCC Local Customer" and not frappe.db.exists('Price List', "GTCS"):
+		elif self.price_template_type == "VLCC Local Customer" and not frappe.db.exists('Price List', "GTCS") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
 			self.price_list_doc(template_name='GTCS',buying=0,selling=1)
 
 		#####Local Prices
 
-		elif self.price_template_type == "Dairy Supplier" and not frappe.db.exists('Price List', "LCOB") and 'Camp Manager' in roles:
-			self.price_list_doc(template_name='LCOB',buying=1,selling=0)
+		elif self.price_template_type == "Dairy Supplier" and not frappe.db.exists('Price List', "LCOB"+"-"+camp_office) and ('Camp Manager' in roles or 'Camp Operator' in roles):
+			self.price_list_doc(template_name='LCOB'+"-"+camp_office,buying=1,selling=0)
 
-		elif self.price_template_type == "VLCC Local Supplier" and not frappe.db.exists('Price List', "GTVLCCB"):
-			self.price_list_doc(template_name='LVLCCB',buying=1,selling=0)
+		elif self.price_template_type == "VLCC Local Supplier" and not frappe.db.exists('Price List', "LVLCCB"+"-"+company) and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+			self.price_list_doc(template_name='LVLCCB'+"-"+company,buying=1,selling=0)
 
-		elif self.price_template_type == "CO to VLCC" and not frappe.db.exists('Price List', "LCOS") and 'Camp Manager' in roles:
-			self.price_list_doc(template_name='LCOS',buying=0,selling=1)
-			self.create_covlcc_buying(template_name="LCOVLCCB")
+		elif self.price_template_type == "CO to VLCC" and not frappe.db.exists('Price List', "LCOS"+"-"+camp_office) and ('Camp Manager' in roles or 'Camp Operator' in roles):
+			self.price_list_doc(template_name='LCOS'+"-"+camp_office,buying=0,selling=1)
+			self.create_covlcc_buying(template_name="LCOVLCCB"+"-"+camp_office)
 
 
-		elif self.price_template_type == "VLCC Local Farmer" and not frappe.db.exists('Price List', "GTVLCCB"):
-			self.price_list_doc(template_name='LFS',buying=1,selling=0)
+		elif self.price_template_type == "VLCC Local Farmer" and not frappe.db.exists('Price List', "LFS"+"-"+company) and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+			self.price_list_doc(template_name='LFS'+"-"+company,buying=1,selling=0)
 
-		elif self.price_template_type == "VLCC Local Customer" and not frappe.db.exists('Price List', "GTCS"):
-			self.price_list_doc(template_name='LCS',buying=0,selling=1)
+		elif self.price_template_type == "VLCC Local Customer" and not frappe.db.exists('Price List', "LCS"+"-"+company) and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+			self.price_list_doc(template_name='LCS'+"-"+company,buying=0,selling=1)
 
 	
 	def update_item_price(self):
@@ -132,6 +152,8 @@ class MaterialPriceList(Document):
 
 
 	def price_list_doc(self,template_name,buying,selling):
+
+		roles = frappe.get_roles()
 
 		price_doc = frappe.new_doc("Price List")
 		price_doc.price_list_name = template_name

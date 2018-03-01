@@ -70,27 +70,37 @@ def get_buying_price_list(doc, is_vlcc=False, is_camp_office=False):
 	# 		- LVLCCB-{name} or GTVLCCB
 	roles = frappe.get_roles()
 
+	supplier_type = frappe.db.get_value("Supplier", doc.get('supplier'), "supplier_type")
 	#camp-office user
 	if has_common(["Camp Manager", "Camp Operator"], roles or is_camp_office):
-		local_price = "LCOB-"+doc.get('camp_office')
-		if validate_price_list(local_price):
-			return local_price
+	
+		if supplier_type == 'Dairy Type':
+			if validate_price_list("LCOVLCCB-"+doc.get('camp_office')):
+				return "LCOVLCCB-"+doc.get('camp_office')
+			elif validate_price_list("GTCOVLCCB"):
+				return "GTCOVLCCB"
+			
+		if validate_price_list("LCOB-"+doc.get('camp_office')):
+			return "LCOB-"+doc.get('camp_office')
 		elif validate_price_list("GTCOB"):
 			return "GTCOB"
 	# vlcc user
-	elif has_common(["Vlcc Manager", "Vlcc Operator"], roles or is_vlcc):
-		supplier_type = frappe.db.get_value("Supplier", doc.get('supplier'), "supplier_type")
 		# co - vlcc
-		if supplier_type == "Dairy Type":
-			if validate_price_list("LCOVLCCB-"+doc.get('company')):
-				return "LCOVLCCB-"+doc.get('company')
-			elif validate_price_list("GTCOVLCCB"):
-				return "GTCOVLCCB"
-		elif supplier_type == "VLCC Local":
+		# if supplier_type == "Dairy Type":
+	elif has_common(["Vlcc Manager", "Vlcc Operator"], roles or is_vlcc):
+		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+		co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+		print "inside vlcc....\n\n"
+		if supplier_type == "VLCC Local":
 			if validate_price_list("LVLCCB-"+doc.get('company')):
 				return "LVLCCB-"+doc.get('company')
 			elif validate_price_list("GTVLCCB"):
 				return "GTVLCCB"
+		elif supplier_type == 'Dairy Type':
+			if validate_price_list("LCOVLCCB-"+ co):
+				return "LCOVLCCB-"+ co
+			elif validate_price_list("GTCOVLCCB"):
+				return "GTCOVLCCB"
 
 def validate_price_list(price_list):
 	if frappe.db.exists("Price List", price_list):

@@ -59,6 +59,17 @@ def get_selling_price_list(doc, is_vlcc=False, is_camp_office=False):
 			elif validate_price_list("GTVLCCS"):
 				return "GTVLCCS"
 
+	elif has_common (['Vet/AI Technician'],roles):
+		if doc.get('customer_or_farmer') == "Farmer":
+			local_price = "LFS-"+doc.get('company')
+			if validate_price_list(local_price):
+				return local_price
+			elif validate_price_list("GTFS"):
+				return "GTFS"
+
+
+
+
 def get_buying_price_list(doc, is_vlcc=False, is_camp_office=False):
 	# co operator/ co manger - 
 	# 	- LCOB-{name} OR GTCOB
@@ -90,7 +101,6 @@ def get_buying_price_list(doc, is_vlcc=False, is_camp_office=False):
 	elif has_common(["Vlcc Manager", "Vlcc Operator"], roles or is_vlcc):
 		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 		co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
-		print "inside vlcc....\n\n"
 		if supplier_type == "VLCC Local":
 			if validate_price_list("LVLCCB-"+doc.get('company')):
 				return "LVLCCB-"+doc.get('company')

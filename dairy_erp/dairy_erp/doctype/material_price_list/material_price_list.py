@@ -112,7 +112,7 @@ class MaterialPriceList(Document):
 
 
 		elif self.price_template_type == "VLCC Local Farmer" and not frappe.db.exists('Price List', "LFS"+"-"+company) and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
-			self.price_list_doc(template_name='LFS'+"-"+company,buying=1,selling=0)
+			self.price_list_doc(template_name='LFS'+"-"+company,buying=0,selling=1)
 
 		elif self.price_template_type == "VLCC Local Customer" and not frappe.db.exists('Price List', "LCS"+"-"+company) and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
 			self.price_list_doc(template_name='LCS'+"-"+company,buying=0,selling=1)

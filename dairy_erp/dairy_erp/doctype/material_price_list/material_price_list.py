@@ -73,8 +73,8 @@ class MaterialPriceList(Document):
 		self.create_price_list()
 
 	def on_update(self):
-		# pass
-		self.update_item_price()
+		pass
+		# self.update_item_price()
 
 	def create_price_list(self):
 

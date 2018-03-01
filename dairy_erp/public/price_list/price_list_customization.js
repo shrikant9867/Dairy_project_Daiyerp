@@ -9,6 +9,14 @@ dairy.price_list.PriceListController = Class.extend({
 	supplier:function(){
 		if(! in_list(STANDARD_USERS, frappe.session.user))
 			dairy.price_list.set_price_list_(this.frm.doc);
+	},
+	customer:function(){
+		if(! in_list(STANDARD_USERS, frappe.session.user))
+			dairy.price_list.set_price_list_(this.frm.doc);
+	},
+	farmer:function(){
+		if(! in_list(STANDARD_USERS, frappe.session.user))
+			dairy.price_list.set_price_list_(this.frm.doc);
 	}
 })
 
@@ -32,7 +40,6 @@ dairy.price_list.guess_price_list = function(transaction_type,doc) {
 		callback: function(r) {
 			price_list_field = transaction_type == "Selling" ? "selling_price_list" : "buying_price_list"
 			if(!r.exc && r.message){
-				console.log(r.message,"rrrrr")
 				cur_frm.set_value(price_list_field, r.message)
 				cur_frm.refresh_field(price_list_field)
 			}

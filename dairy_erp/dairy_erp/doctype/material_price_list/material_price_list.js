@@ -3,30 +3,75 @@
 
 frappe.ui.form.on('Material Price List', {
 	refresh: function(frm) {
+		if(in_list(frappe.user_roles,"Vlcc Manager") ){
+			frm.set_df_property("price_template_type", "read_only",1);
+			frm.set_df_property("operator_name", "read_only",1);
+			frm.set_df_property("items", "read_only",1);
+		}
+		else if(in_list(frappe.user_roles,"Camp Manager") && (frm.doc.name == "GTCOS" || frm.doc.name == "GTCOB")){
+			frm.set_df_property("price_template_type", "read_only",1);
+			frm.set_df_property("operator_name", "read_only",1);
+			frm.set_df_property("items", "read_only",1);
+		}
+
+		if(frm.is_new() && in_list(frappe.user_roles,"Camp Manager")) {
+			frm.set_df_property("price_template_type", "read_only",0);
+			frm.set_df_property("operator_name", "read_only",0);
+			frm.set_df_property("items", "read_only",0);
+		}
+		else if(frm.is_new() && in_list(frappe.user_roles,"Vlcc Manager")) {
+			frm.set_df_property("price_template_type", "read_only",0);
+			frm.set_df_property("operator_name", "read_only",0);
+			frm.set_df_property("items", "read_only",0);
+		}
 
 	},
-	party_type: function(frm) {
-	if(cur_frm.doc.party_type == "VLCC (CO)"){
-		frm.set_value("selling",1)
-		frm.set_value("buying",0)
+	price_template_type: function(frm) {
+		if(cur_frm.doc.price_template_type == "CO to VLCC"){
+			frm.set_value("selling",1)
+			frm.set_value("buying",0)
+		}
+		else if(cur_frm.doc.price_template_type == "Dairy Supplier"){
+			frm.set_value("buying",1)
+			frm.set_value("selling",0)
+		}
+		else if(cur_frm.doc.price_template_type == "VLCC Local Supplier"){
+			frm.set_value("buying",1)
+			frm.set_value("selling",0)
+		}
+		else if(cur_frm.doc.price_template_type == "VLCC Local Farmer"){
+			frm.set_value("buying",0)
+			frm.set_value("selling",1)
+		}
+		else if(cur_frm.doc.price_template_type == "VLCC Local Customer"){
+			frm.set_value("buying",0)
+			frm.set_value("selling",1)
+		}
+	},
+	price_list_template: function(frm){
+		if (frm.doc.price_list_template) {
+			frappe.call({
+				method: "dairy_erp.dairy_erp.doctype.material_price_list.material_price_list.get_template",
+				args: {
+					"template": frm.doc.price_list_template
+				},
+				callback: function(r) {
+					frm.set_value("items" ,"");
+					if (r.message) {
+						$.each(r.message.items, function(i, d) {
+							var row = frappe.model.add_child(cur_frm.doc, "Material Price", "items");
+							row.item = d.item;
+							row.item_name = d.item_name;
+							row.price = d.price;
+						});
+					}
+					refresh_field("items");
+				}
+			});
+		};
+		// frm.set_value("items" ,"");
+
 	}
-	else if(cur_frm.doc.party_type == "Dairy Supplier (CO)"){
-		frm.set_value("buying",1)
-		frm.set_value("selling",0)
-	}
-	else if(cur_frm.doc.party_type == "VLCC Supplier (VLCC)"){
-		frm.set_value("buying",1)
-		frm.set_value("selling",0)
-	}
-	else if(cur_frm.doc.party_type == "Farmer (VLCC)"){
-		frm.set_value("buying",0)
-		frm.set_value("selling",1)
-	}
-	else if(cur_frm.doc.party_type == "VLCC Local Customer (VLCC)"){
-		frm.set_value("buying",0)
-		frm.set_value("selling",1)
-	}
-}
 });
 
 

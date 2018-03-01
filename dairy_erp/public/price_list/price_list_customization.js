@@ -1,9 +1,20 @@
 frappe.provide("dairy.price_list");
 
 STANDARD_USERS = ["Guest", "Administrator"]
-dairy.price_list.PriceListController = erpnext.TransactionController.extend({
+dairy.price_list.PriceListController = Class.extend({
 	onload: function() {
-		this._super();
+		if(! in_list(STANDARD_USERS, frappe.session.user))
+			dairy.price_list.set_price_list_(this.frm.doc);
+	},
+	supplier:function(){
+		if(! in_list(STANDARD_USERS, frappe.session.user))
+			dairy.price_list.set_price_list_(this.frm.doc);
+	},
+	customer:function(){
+		if(! in_list(STANDARD_USERS, frappe.session.user))
+			dairy.price_list.set_price_list_(this.frm.doc);
+	},
+	farmer:function(){
 		if(! in_list(STANDARD_USERS, frappe.session.user))
 			dairy.price_list.set_price_list_(this.frm.doc);
 	}
@@ -32,9 +43,9 @@ dairy.price_list.guess_price_list = function(transaction_type,doc) {
 				cur_frm.set_value(price_list_field, r.message)
 				cur_frm.refresh_field(price_list_field)
 			}
-			else {
+			/*else {
 				frappe.msgprint(__("Local or Global {0} not found", [frappe.model.unscrub(price_list_field)]))
-			}
+			}*/
 		}
 	})
 }

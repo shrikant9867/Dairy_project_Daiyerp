@@ -257,7 +257,7 @@ def make_si(dn):
 				"cost_center": item.cost_center,
 				"delivery_note": dn.name
 			})
-	si.selling_price_list = get_selling_price_list(si, is_camp_office=True)
+	si.selling_price_list = dn.selling_price_list#get_selling_price_list(si, is_camp_office=True)
 	si.flags.ignore_permissions = True
 	si.save()
 	si.submit()
@@ -285,7 +285,7 @@ def make_pi(doc):
 					"cost_center": item.cost_center,
 					"purchase_receipt": doc.name
 				})
-		pi.buying_price_list = get_buying_price_list(pi, is_vlcc=True)
+		pi.buying_price_list = doc.buying_price_list#get_buying_price_list(pi, is_vlcc=True)
 		pi.flags.ignore_permissions = True
 		pi.save()
 		pi.submit()
@@ -295,6 +295,7 @@ def make_pi_against_localsupp(po_doc,pr_doc):
 	"""Make PI for CO(dairy) local supplier @CO Use case 2"""
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 
 	pi = frappe.new_doc("Purchase Invoice")
 	pi.supplier = po_doc.supplier
@@ -309,7 +310,7 @@ def make_pi_against_localsupp(po_doc,pr_doc):
 				"rate": frappe.db.get('Item Price',{'name':row_.item_code,'buying':'1','company':po_doc.company,'price_list':po_doc.buying_price_list},'rate'),
 				"purchase_order": po_doc.name
 			})
-	pi.buying_price_list = "LCOB" if frappe.db.get_value("Price List","LCOB") else "GTCOB"#get_buying_price_list(pi, is_camp_office=True)
+	pi.buying_price_list = "LCOB"+"-"+co if frappe.db.get_value("Price List","LCOB"+"-"+co ,"name") else "GTCOB"#get_buying_price_list(pi, is_camp_office=True) #"LCOB" if frappe.db.get_value("Price List","LCOB") else "GTCOB"#get_buying_price_list(pi, is_camp_office=True)
 	return pi
 
 def validate_qty_against_mi(doc):
@@ -352,6 +353,7 @@ def check_if_dropship(doc):
 	conditions = ""
 	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 
 	if user_doc.get("operator_type") == 'VLCC':
 		for item in doc.items:
@@ -391,7 +393,7 @@ def check_if_dropship(doc):
 									"amount": item.amount,
 									"warehouse": frappe.db.get_value("Address",{"name":po_doc.camp_office},"warehouse")
 								})
-				si.selling_price_list = get_selling_price_list(si, is_camp_office=True)
+				si.selling_price_list = "LCOS" +"-"+co if frappe.db.get_value("Price List","LCOS"+"-"+co ,"name") else "GTCOS"#get_selling_price_list(si, is_vlcc=True)
 				si.flags.ignore_permissions = True  		#Sales Invoice @CO in use case 2
 				si.save()
 				si.submit()
@@ -500,6 +502,7 @@ def set_co_warehouse_pr(doc,method=None):
 
 
 
+
 def set_vlcc_warehouse(doc,method=None):
 
 	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type","company"],as_dict=1)
@@ -584,7 +587,7 @@ def make_purchase_receipt(doc,method=None):
 			purchase_rec.supplier =  branch_office.get('branch_office')
 			purchase_rec.company = doc.customer
 			purchase_rec.base_in_words = money_in_words(doc.base_rounded_total,doc.currency)
-			purchase_rec.buying_price_list = "LCOVLCCB" if frappe.db.get_value("Price List","LVLCCB") else "GTCOVLCCB"
+			purchase_rec.buying_price_list = get_buying_price_list(purchase_rec, is_camp_office=True) #"LCOVLCCB" if frappe.db.get_value("Price List","LVLCCB") else "GTCOVLCCB"
 			for item in doc.items:
 				purchase_rec.append("items",
 					{
@@ -776,7 +779,7 @@ def customer_permission(user):
 	if user_doc.get('operator_type') == "Camp Office":
 
 		customer_list = frappe.db.sql("""select c.name as cust,c.customer_group from `tabCustomer` c, `tabParty Account` p where p.parent = c.name and 
-					p.company = %s and c.customer_group in ('Vlcc') and c.camp_office = %s group by c.name""",(user_doc.get('company'),user_doc.get('branch_office')),as_dict=1)
+					p.company = %s and c.customer_group in ('Vlcc') and c.camp_office = %s group by c.name""",(user_doc.get('company'),user_doc.get('branch_office')),as_dict=1,debug=1)
 
 		customer = [ '"%s"'%cust.get("cust") for cust in customer_list ]
 
@@ -855,3 +858,4 @@ def validate_dn(doc,method):
 				if item.item_code == mi_items.item_code:
 					if item.qty > mi_items.qty:
 						frappe.throw(_("Accepted quantity should not greater Requested quantity"))
+

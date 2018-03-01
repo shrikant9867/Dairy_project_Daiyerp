@@ -200,13 +200,14 @@ class MaterialPriceList(Document):
 
 def permission_query_condition(user):
 
-	pass
+	roles = frappe.get_roles()
+	if user != 'Administrator' and ('Camp Manager' in roles or 'Camp Operator' in roles):
+		return """`tabMaterial Price List`.price_list in ('GTCOB','GTCOS','LCOB','LCOS') """
+	elif user != 'Administrator' and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+		return """`tabMaterial Price List`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','LVLCCB','LFS','LCS','LCOVLCCB') """
+	elif user != 'Administrator' and 'Vet/AI Technician' in roles:
+		return """`tabMaterial Price List`.price_list in ('GTFS','LFS') """
 
-	# branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
-	# if branch_office.get('operator_type') == 'Camp Office':
-	# 	return """`tabMaterial Price List`.price_list in ('GTCOB','GTCOS','LCOB','LCOS') """
-	# elif branch_office.get('operator_type') == 'VLCC':
-	# 	return """`tabMaterial Price List`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB') """
 
 @frappe.whitelist()
 def get_template(template):

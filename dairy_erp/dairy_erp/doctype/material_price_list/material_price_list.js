@@ -3,26 +3,28 @@
 
 frappe.ui.form.on('Material Price List', {
 	refresh: function(frm) {
-		if(in_list(frappe.user_roles,"Vlcc Manager") ){
-			frm.set_df_property("price_template_type", "read_only",1);
-			frm.set_df_property("operator_name", "read_only",1);
-			frm.set_df_property("items", "read_only",1);
+		var template = ['GTVLCCB','GTFS','GTCS','GTCOVLCCB','GTCOB','GTCOS','LCOVLCCB']
+		// var local_template = ['LVLCCB','LFS','LCS','LCOB','LCOS']
+		if (!in_list(frappe.user_roles,"Dairy Manager") && !frm.doc.__islocal){
+			if (in_list(template,frm.doc.price_list)){
+				frm.set_df_property("price_template_type", "read_only",1);
+				frm.set_df_property("operator_name", "read_only",1);
+				frm.set_df_property("items", "read_only",1);
+				frm.set_df_property("price_list_template", "hidden",1);	
+			}
 		}
-		else if(in_list(frappe.user_roles,"Camp Manager") && (frm.doc.name == "GTCOS" || frm.doc.name == "GTCOB")){
-			frm.set_df_property("price_template_type", "read_only",1);
-			frm.set_df_property("operator_name", "read_only",1);
-			frm.set_df_property("items", "read_only",1);
-		}
+	/*	if(!in_list(frappe.user_roles,"Dairy Operator") && !frm.doc.__islocal){
+			console.log("kjdgfhdj")
+			if (in_list(template,frm.doc.price_list)){
+				frm.set_df_property("price_template_type", "read_only",1);
+				frm.set_df_property("operator_name", "read_only",1);
+				frm.set_df_property("items", "read_only",1);
+				frm.set_df_property("price_list_template", "hidden",1);	
+			}
 
-		if(frm.is_new() && in_list(frappe.user_roles,"Camp Manager")) {
-			frm.set_df_property("price_template_type", "read_only",0);
-			frm.set_df_property("operator_name", "read_only",0);
-			frm.set_df_property("items", "read_only",0);
-		}
-		else if(frm.is_new() && in_list(frappe.user_roles,"Vlcc Manager")) {
-			frm.set_df_property("price_template_type", "read_only",0);
-			frm.set_df_property("operator_name", "read_only",0);
-			frm.set_df_property("items", "read_only",0);
+		}*/
+		if(frm.doc.__islocal && (in_list(frappe.user_roles,"Dairy Manager") || in_list(frappe.user_roles,"Dairy Operator"))){
+			frm.set_df_property("price_list_template", "hidden",1);	
 		}
 
 	},

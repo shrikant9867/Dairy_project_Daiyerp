@@ -34,3 +34,9 @@ def validate(doc,method):
 	for item in doc.items:
 		if item.qty < 0.00:
 			frappe.throw(_("Quantity should not be negative"))
+
+
+@frappe.whitelist()
+def update_status(status,name):
+	mi = frappe.get_doc("Material Request", name)
+	frappe.db.sql("""update `tabMaterial Request` set status = '{0}' where name ='{1}' """.format(status,name))

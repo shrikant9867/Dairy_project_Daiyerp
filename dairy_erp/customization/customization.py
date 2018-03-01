@@ -496,6 +496,9 @@ def set_co_warehouse_pr(doc,method=None):
 				item.warehouse = vlcc
 				if item.rejected_qty:
 					item.rejected_warehouse = vlcc
+		doc.buying_price_list = "LCOVLCCB" if frappe.db.get_value("Price List","LVLCCB") else "GTCOVLCCB"
+
+
 
 
 
@@ -615,7 +618,7 @@ def mr_permission(user):
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 	vlcc = frappe.db.get_values("Village Level Collection Centre",{"camp_office":user_doc.get('branch_office')},"name",as_dict=1)
-
+	vlcc.append({'name':frappe.db.get_value("Company",{'is_dairy':1},'name')})
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabMaterial Request`.company = '{0}')""".format(user_doc.get('company'))
 
@@ -625,6 +628,8 @@ def mr_permission(user):
 			return """`tabMaterial Request`.company in  ({company})""".format(company=','.join(company))
 		else:
 			return """`tabMaterial Request`.company = 'Guest' """
+
+
 
 def pr_permission(user):
 
@@ -845,4 +850,12 @@ def set_chilling_wrhouse(doc, method):
 
 
 def validate_dn(doc,method):
-	pass
+	for item in doc.items:
+		if item.material_request:
+			mi=frappe.get_doc("Material Request",item.material_request)
+
+			for mi_items in mi.items:
+				if item.item_code == mi_items.item_code:
+					if item.qty > mi_items.qty:
+						frappe.throw(_("Accepted quantity should not greater Requested quantity"))
+

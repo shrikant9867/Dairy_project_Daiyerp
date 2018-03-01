@@ -3,7 +3,10 @@ frappe.listview_settings['Material Request'] = {
 	get_indicator: function(doc) {
 		if(doc.status=="Stopped") {
 			return [__("Stopped"), "red", "status,=,Stopped"];
-		}else if(doc.docstatus==1 && flt(doc.per_ordered, 2) == 0 && flt(doc.per_delivered, 2) == 100) {
+		}else if(doc.status=="Closed") {
+			return [__("Closed"), "green", "status,=,Closed"];
+		}
+		else if(doc.docstatus==1 && flt(doc.per_ordered, 2) == 0 && flt(doc.per_delivered, 2) == 100) {
 			return [__("Delivered"), "green", "per_ordered,=,0|per_delivered,=,100"];
 		} else if(doc.docstatus==1 && flt(doc.per_ordered, 2) == 0) {
 			return [__("Pending"), "orange", "per_ordered,=,0"];

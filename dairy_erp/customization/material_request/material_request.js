@@ -21,6 +21,10 @@ frappe.ui.form.on('Material Request', {
 				make_dialog(frm)
 			})
 		}*/
+		if(!frm.doc.__islocal && frm.doc.docstatus == 1 && operator_type == 'VLCC' && frm.doc.status != 'Closed'){
+			frm.add_custom_button(__('Close'),
+				function() { frm.events.close_material_request(frm) }, __("Status"))
+		}
 
 	},
 	onload : function (frm) {
@@ -30,7 +34,23 @@ frappe.ui.form.on('Material Request', {
 			console.log(camp,"##")
 			frm.set_value("camp_office",camp.camp_office)
 		}
-	}
+	},
+	close_material_request: function(frm){
+		this.update_status("Close", "Closed",frm)
+	},
+	update_status: function(label, status,doc){
+		frappe.ui.form.is_saving = true;
+		frappe.call({
+			method: "dairy_erp.customization.material_request.material_request.update_status",
+			args: {status: status, name: doc.docname},
+			callback: function(r){
+				me.frm.reload_doc();
+			},
+			always: function() {
+				frappe.ui.form.is_saving = false;
+			}
+		});
+	},
 
 
 })

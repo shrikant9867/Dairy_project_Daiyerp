@@ -141,6 +141,10 @@ doc_events = {
     "Sales Invoice":{
         "validate": "dairy_erp.customization.sales_invoice.sales_invoice.validate_local_sale",
         "on_submit": "dairy_erp.customization.sales_invoice.sales_invoice.payment_entry"
+    },
+    "Stock Entry":{
+        "validate": "dairy_erp.customization.stock_entry.stock_entry.set_target_warehouse",
+        "on_submit": "dairy_erp.customization.stock_entry.stock_entry.validate_camp_submission"
     }
 }
 

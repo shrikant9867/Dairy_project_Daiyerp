@@ -73,8 +73,8 @@ class MaterialPriceList(Document):
 		self.create_price_list()
 
 	def on_update(self):
-		pass
-		# self.update_item_price()
+		# pass
+		self.update_item_price()
 
 	def create_price_list(self):
 
@@ -220,7 +220,8 @@ def permission_query_condition(user):
 		return """`tabMaterial Price List`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','{0}','{1}','{2}','{3}') """.format(lvlccb,lfs,lcs,lcovlccb)
 	elif user != 'Administrator' and 'Vet/AI Technician' in roles:
 		return """`tabMaterial Price List`.price_list in ('GTFS','{0}') """.format(lfs)
-
+	elif user != 'Administrator' and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
+		return """`tabMaterial Price List`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','GTCOB','GTCOS') """
 
 @frappe.whitelist()
 def get_template(template):

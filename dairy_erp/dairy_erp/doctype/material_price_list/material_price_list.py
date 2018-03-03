@@ -201,12 +201,25 @@ class MaterialPriceList(Document):
 def permission_query_condition(user):
 
 	roles = frappe.get_roles()
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+
+	lcob = "LCOB"+"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
+	lcos = "LCOS" +"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
+
+	lvlccb = "LVLCCB" +"-"+user_doc.get('company') if user_doc.get('company') else ""
+	lfs = "LFS" +"-"+user_doc.get('company') if user_doc.get('company') else ""
+	lcs = "LCS" +"-"+user_doc.get('company') if user_doc.get('company') else ""
+	lfs = "LFS" +"-"+user_doc.get('company') if user_doc.get('company') else ""
+	lcovlccb = "LCOVLCCB" +"-"+co if co else ""
+
+
 	if user != 'Administrator' and ('Camp Manager' in roles or 'Camp Operator' in roles):
-		return """`tabMaterial Price List`.price_list in ('GTCOB','GTCOS','LCOB','LCOS') """
+		return """`tabMaterial Price List`.price_list in ('GTCOB','GTCOS','{0}','{1}') """.format(lcob,lcos)
 	elif user != 'Administrator' and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
-		return """`tabMaterial Price List`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','LVLCCB','LFS','LCS','LCOVLCCB') """
+		return """`tabMaterial Price List`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','{0}','{1}','{2}','{3}') """.format(lvlccb,lfs,lcs,lcovlccb)
 	elif user != 'Administrator' and 'Vet/AI Technician' in roles:
-		return """`tabMaterial Price List`.price_list in ('GTFS','LFS') """
+		return """`tabMaterial Price List`.price_list in ('GTFS','{0}') """.format(lfs)
 
 
 @frappe.whitelist()

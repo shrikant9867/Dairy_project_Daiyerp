@@ -11,7 +11,7 @@ frappe.ui.form.on("Purchase Receipt Item", {
 			if(item.qty > item.received_qty){
 				frappe.model.set_value(cdt,cdn,"qty","")
 				frappe.model.set_value(cdt,cdn,"rejected_qty","")
-				frappe.throw("Accepted Qty cannot be greater than Received Qty")
+				frappe.throw("<b>Accepted Quantity</b> should not be greater than <b>Dispatched Quantity</b>")
 			}
 			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));

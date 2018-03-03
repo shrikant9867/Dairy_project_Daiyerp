@@ -857,5 +857,5 @@ def validate_dn(doc,method):
 			for mi_items in mi.items:
 				if item.item_code == mi_items.item_code:
 					if item.qty > mi_items.qty:
-						frappe.throw(_("Accepted quantity should not greater Requested quantity"))
+						frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
 

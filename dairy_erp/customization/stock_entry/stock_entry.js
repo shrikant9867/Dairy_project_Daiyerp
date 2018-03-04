@@ -1,13 +1,14 @@
 frappe.ui.form.on('Stock Entry', {
 	onload:function(frm){
-		// if (get_session_user_type().operator_type == "Chilling Centre"){
-		// 	camp = address_attr(get_session_user_type().branch_office)
-		// 	console.log(camp.camp_office,"##")
-		// 	frm.set_value("camp_office",camp.camp_office)
-		// }
-		// if (get_session_user_type().operator_type == "Camp Office"){
-		// 	load_attr(frm)
-		// }
+		frm.set_df_property("from_warehouse", "read_only",1);
+		if (get_session_user_type().operator_type == "Chilling Centre"){
+			camp = address_attr(get_session_user_type().branch_office)
+			console.log(camp.camp_office,"##")
+			frm.set_value("camp_office",camp.camp_office)
+		}
+		/*if (get_session_user_type().operator_type == "Camp Office"){
+			load_attr(frm)
+		}*/
 	},
 	refresh: function(frm){
 		// if (get_session_user_type().operator_type == "Chilling Centre"){
@@ -71,8 +72,12 @@ address_attr = function(branch_office) {
 	return camp
 }
 
-load_attr = function(frm) {
+/*load_attr = function(frm) {
 	camp = address_attr(get_session_user_type().branch_office)
 	frm.set_value('purpose','Material Transfer')
 	frm.set_value('from_warehouse',camp.warehouse)
-}
+}*/
+
+frappe.ui.form.on('Stock Entry Detail','qty', function(frm) {
+	console.log(frm)
+})

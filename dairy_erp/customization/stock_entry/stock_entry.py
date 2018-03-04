@@ -15,16 +15,23 @@ from frappe.utils import money_in_words
 def set_target_warehouse(doc,method):
 	chilling_centre = ""
 	doc.purpose = "Material Transfer"
+	target_warhouse = ""
 	user_ = frappe.db.get_value("User", frappe.session.user, ['branch_office','operator_type'],as_dict=1)
 	if user_.get('operator_type') == "Camp Office":
 		for row in doc.items:
 			chilling_centre = row.chilling_centre
-			row.s_warehouse = frappe.db.get_value("Address",user_,'warehouse')
+			row.s_warehouse = frappe.db.get_value("Address",user_.get('branch_office'),'warehouse')
 			row.t_warehouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
 		target_warhouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
 	
-	if target_warhouse:
-		doc.to_warehouse = target_warhouse  
+	if target_warhouse and user_.get('operator_type') == "Camp Office":
+		doc.to_warehouse = target_warhouse
+	
+	if user_.get('operator_type') == "Chilling Centre":
+		for row in doc.items:
+			if row.accepted_qty:
+				row.qty = row.accepted_qty
+				row.rejected_qty = row.original_qty - row.accepted_qty
 
 
 def validate_camp_submission(doc, method):

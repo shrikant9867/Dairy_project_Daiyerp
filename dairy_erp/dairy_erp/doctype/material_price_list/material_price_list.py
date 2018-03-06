@@ -262,10 +262,9 @@ def permission_query_condition(user):
 	lcob = "LCOB"+"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
 	lcos = "LCOS" +"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
 
-	lvlccb = "LVLCCB" +"-"+user_doc.get('company') if user_doc.get('company') else ""
-	lfs = "LFS" +"-"+user_doc.get('company') if user_doc.get('company') else ""
-	lcs = "LCS" +"-"+user_doc.get('company') if user_doc.get('company') else ""
-	lfs = "LFS" +"-"+user_doc.get('company') if user_doc.get('company') else ""
+	lvlccb = "LVLCCB" +"-"+user_doc.get('company') if user_doc.get('company') and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) else ""
+	lfs = "LFS" +"-"+user_doc.get('company') if user_doc.get('company') and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) else ""
+	lcs = "LCS" +"-"+user_doc.get('company') if user_doc.get('company') and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) else ""
 	lcovlccb = "LCOVLCCB" +"-"+co if co else ""
 
 

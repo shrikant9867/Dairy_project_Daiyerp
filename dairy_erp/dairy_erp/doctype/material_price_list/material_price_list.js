@@ -13,6 +13,14 @@ frappe.ui.form.on('Material Price List', {
 				frm.set_df_property("price_list_template", "hidden",1);	
 			}
 		}
+		else if(in_list(frappe.user_roles,"Dairy Manager") && !frm.doc.__islocal){
+			if (frm.doc.price_list == 'GTCOVLCCB'){
+				frm.set_df_property("price_template_type", "read_only",1);
+				frm.set_df_property("operator_name", "read_only",1);
+				frm.set_df_property("items", "read_only",1);
+				frm.set_df_property("price_list_template", "hidden",1);	
+			}
+		}
 	/*	if(!in_list(frappe.user_roles,"Dairy Operator") && !frm.doc.__islocal){
 			console.log("kjdgfhdj")
 			if (in_list(template,frm.doc.price_list)){

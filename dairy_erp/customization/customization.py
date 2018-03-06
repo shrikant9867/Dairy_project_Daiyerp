@@ -5,8 +5,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.stock.stock_balance import get_balance_qty_from_sle
 import json
 import re
+from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
@@ -417,6 +419,7 @@ def mi_status_update(doc):
 		mr_qty = get_material_req_qty(material_request_updater)
 		
 		if mr_qty > row.get('qty_sum'):
+			
 			material_request_updater.per_delivered = 99.99
 			material_request_updater.set_status("Partially Delivered")
 			material_request_updater.save()
@@ -853,11 +856,27 @@ def set_chilling_wrhouse(doc, method):
 
 def validate_dn(doc,method):
 	for item in doc.items:
+		warehouse_qty = get_balance_qty_from_sle(item.item_code,item.warehouse)
 		if item.material_request:
 			mi=frappe.get_doc("Material Request",item.material_request)
+			if item.qty > warehouse_qty:
+				frappe.throw(_("<b>Warehouse Insufficent Stock </b>"))
+			else:
+				for mi_items in mi.items:
+					if item.item_code == mi_items.item_code:
+						if item.qty > mi_items.new_dn_qty:
+							frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
 
-			for mi_items in mi.items:
-				if item.item_code == mi_items.item_code:
-					if item.qty > mi_items.qty:
-						frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
 
+def update_mi(doc,method):
+	# update_modified = now()
+	# material_request_updater =frappe.get_doc("Material Request",'MREQ-00122')
+	# material_request_updater.per_delivered = 100
+	# material_request_updater.db_set('status', "Delivered", update_modified = update_modified)
+	# material_request_updater.save()
+	frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00123'""",debug=1)
+	frappe.db.commit()
+
+def test():
+	print "#####)))"
+	frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00122'""")

@@ -44,6 +44,7 @@ def get_item_qty(item):
 
 @frappe.whitelist()
 def get_masters():
+	#generic
 	response_dict = {}
 	try:
 		if frappe.session.user != "Administrator":

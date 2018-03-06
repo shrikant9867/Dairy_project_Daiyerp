@@ -1,22 +1,32 @@
 frappe.ui.form.on('Stock Entry', {
 	onload:function(frm){
+		frm.set_query("camp_office", function () {
+			return {
+				"filters": {
+					"address_type": "Camp Office",
+				}
+			};
+		});
 		frm.set_df_property("from_warehouse", "read_only",1);
-		if (get_session_user_type().operator_type == "Chilling Centre"){
+		/*if (get_session_user_type().operator_type == "Chilling Centre"){
 			camp = address_attr(get_session_user_type().branch_office)
 			console.log(camp.camp_office,"##")
 			frm.set_value("camp_office",camp.camp_office)
-		}
+			frm.refresh_field('camp_office')
+		}*/
 		/*if (get_session_user_type().operator_type == "Camp Office"){
 			load_attr(frm)
 		}*/
 	},
 	refresh: function(frm){
-		// if (get_session_user_type().operator_type == "Chilling Centre"){
-		// 	camp = address_attr(get_session_user_type().branch_office)
-		// 	console.log(camp.camp_office,"##")
-		// 	frm.set_value("camp_office",camp.camp_office)
-		// 	frm.set_value("to_warehouse",)
-		// }
+		if (get_session_user_type().operator_type == "Chilling Centre"){
+			camp = address_attr(get_session_user_type().branch_office)
+			console.log(camp.camp_office,"##")
+			if(frm.doc.camp_office != camp.camp_office){
+				frm.set_value("camp_office",camp.camp_office)
+				frm.refresh_field('camp_office')
+			}
+		}
 		// if (get_session_user_type().operator_type == "Camp Office"){
 		// 	load_attr(frm)
 		// }

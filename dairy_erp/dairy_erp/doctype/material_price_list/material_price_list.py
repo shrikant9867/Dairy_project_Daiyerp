@@ -73,8 +73,8 @@ class MaterialPriceList(Document):
 		self.create_price_list()
 
 	def on_update(self):
-		pass
-		# self.update_item_price()
+		# pass
+		self.update_item_price()
 
 	def create_price_list(self):
 
@@ -119,6 +119,10 @@ class MaterialPriceList(Document):
 
 	
 	def update_item_price(self):
+
+		print "inside update_item_price....\n\n"
+
+		
 
 		item_data = frappe.db.sql("""select item_code from `tabItem Price` where price_list = '{0}'""".format(self.price_list),as_dict=1)
 		item_price_list = [data.get('item_code') for data in item_data]
@@ -200,13 +204,28 @@ class MaterialPriceList(Document):
 
 def permission_query_condition(user):
 
-	pass
+	roles = frappe.get_roles()
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 
-	# branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
-	# if branch_office.get('operator_type') == 'Camp Office':
-	# 	return """`tabMaterial Price List`.price_list in ('GTCOB','GTCOS','LCOB','LCOS') """
-	# elif branch_office.get('operator_type') == 'VLCC':
-	# 	return """`tabMaterial Price List`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB') """
+	lcob = "LCOB"+"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
+	lcos = "LCOS" +"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
+
+	lvlccb = "LVLCCB" +"-"+user_doc.get('company') if user_doc.get('company') else ""
+	lfs = "LFS" +"-"+user_doc.get('company') if user_doc.get('company') else ""
+	lcs = "LCS" +"-"+user_doc.get('company') if user_doc.get('company') else ""
+	lfs = "LFS" +"-"+user_doc.get('company') if user_doc.get('company') else ""
+	lcovlccb = "LCOVLCCB" +"-"+co if co else ""
+
+
+	if user != 'Administrator' and ('Camp Manager' in roles or 'Camp Operator' in roles):
+		return """`tabMaterial Price List`.price_list in ('GTCOB','GTCOS','{0}','{1}') """.format(lcob,lcos)
+	elif user != 'Administrator' and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+		return """`tabMaterial Price List`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','{0}','{1}','{2}','{3}') """.format(lvlccb,lfs,lcs,lcovlccb)
+	elif user != 'Administrator' and 'Vet/AI Technician' in roles:
+		return """`tabMaterial Price List`.price_list in ('GTFS','{0}') """.format(lfs)
+	elif user != 'Administrator' and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
+		return """`tabMaterial Price List`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','GTCOB','GTCOS') """
 
 @frappe.whitelist()
 def get_template(template):

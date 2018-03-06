@@ -751,7 +751,7 @@ def supplier_permission(user):
 
 		supplier_list = frappe.db.sql("""select s.name as supp,p.company from `tabSupplier` s, `tabParty Account` 
 						p where p.parent = s.name and s.supplier_type in ('Dairy Local','Vlcc Type') and 
-						p.company = %s and camp_office = %s group by s.name""",(user_doc.get('company'),user_doc.get('branch_office')),as_dict=1)
+						p.company = %s and s.camp_office = %s group by s.name""",(user_doc.get('company'),user_doc.get('branch_office')),as_dict=1)
 
 		supp = [ '"%s"'%sup.get("supp") for sup in supplier_list ]
 		if supp:
@@ -859,5 +859,5 @@ def validate_dn(doc,method):
 			for mi_items in mi.items:
 				if item.item_code == mi_items.item_code:
 					if item.qty > mi_items.qty:
-						frappe.throw(_("Accepted quantity should not greater Requested quantity"))
+						frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
 

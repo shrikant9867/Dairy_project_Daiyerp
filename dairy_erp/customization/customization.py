@@ -532,6 +532,7 @@ def set_mr_warehouse(doc,method=None):
 	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
 			for item in doc.items:
+				# item.original_qty = item.qty
 				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 
 	
@@ -849,6 +850,7 @@ def set_chilling_wrhouse(doc, method):
 	if branch_office.get('operator_type') == 'Chilling Centre':
 		if doc.items:
 			for item in doc.items:
+				item.original_qty = item.qty
 				item.warehouse = frappe.db.get_value("Address",{"name":branch_office.get('branch_office')},"warehouse")
 
 

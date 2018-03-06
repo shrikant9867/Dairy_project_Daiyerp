@@ -120,6 +120,10 @@ class MaterialPriceList(Document):
 	
 	def update_item_price(self):
 
+		print "inside update_item_price....\n\n"
+
+		
+
 		item_data = frappe.db.sql("""select item_code from `tabItem Price` where price_list = '{0}'""".format(self.price_list),as_dict=1)
 		item_price_list = [data.get('item_code') for data in item_data]
 

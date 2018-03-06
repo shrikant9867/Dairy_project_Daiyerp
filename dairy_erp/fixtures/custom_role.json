@@ -2,12 +2,31 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:18.892063", 
-  "name": "5d72ccb57f", 
-  "page": null, 
-  "parent": null, 
-  "ref_doctype": "GL Entry", 
-  "report": "Balance Sheet", 
+  "modified": "2018-02-08 18:17:48.922630", 
+  "name": "fd1b2345cc", 
+  "page": "pos", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Purchase User"
+   }, 
+   {
+    "role": "Accounts User"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-08 18:18:03.779942", 
+  "name": "9342c23b37", 
+  "page": "point-of-sale", 
+  "ref_doctype": null, 
+  "report": null, 
   "roles": [
    {
     "role": "Accounts User"
@@ -16,77 +35,22 @@
     "role": "Accounts Manager"
    }, 
    {
-    "role": "Auditor"
+    "role": "Sales User"
    }, 
    {
-    "role": "Dairy Manager"
+    "role": "Sales Manager"
    }, 
    {
-    "role": "Camp Manager"
+    "role": "Vlcc Operator"
    }
   ]
  }, 
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.198288", 
-  "name": "27073ea9c1", 
+  "modified": "2018-02-08 22:40:25.479274", 
+  "name": "692aa97c0b", 
   "page": null, 
-  "parent": null, 
-  "ref_doctype": "GL Entry", 
-  "report": "Trial Balance", 
-  "roles": [
-   {
-    "role": "Accounts User"
-   }, 
-   {
-    "role": "Accounts Manager"
-   }, 
-   {
-    "role": "Auditor"
-   }, 
-   {
-    "role": "Dairy Manager"
-   }, 
-   {
-    "role": "Camp Manager"
-   }
-  ]
- }, 
- {
-  "docstatus": 0, 
-  "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.219299", 
-  "name": "62057af6bd", 
-  "page": null, 
-  "parent": null, 
-  "ref_doctype": "GL Entry", 
-  "report": "Profit and Loss Statement", 
-  "roles": [
-   {
-    "role": "Accounts User"
-   }, 
-   {
-    "role": "Accounts Manager"
-   }, 
-   {
-    "role": "Auditor"
-   }, 
-   {
-    "role": "Dairy Manager"
-   }, 
-   {
-    "role": "Camp Manager"
-   }
-  ]
- }, 
- {
-  "docstatus": 0, 
-  "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.236003", 
-  "name": "5dfbebcd26", 
-  "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Sales Register", 
   "roles": [
@@ -101,10 +65,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.251621", 
-  "name": "a19588ac2b", 
+  "modified": "2018-02-08 22:40:25.499708", 
+  "name": "01441ad462", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Purchase Register", 
   "roles": [
@@ -119,10 +82,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.267239", 
-  "name": "412df08fe5", 
+  "modified": "2018-02-08 22:40:25.504102", 
+  "name": "4ba6b5f1d7", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Itemised Sales Register", 
   "roles": [
@@ -137,10 +99,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.281940", 
-  "name": "670f537b62", 
+  "modified": "2018-02-08 22:40:25.508900", 
+  "name": "7d9bc1886e", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Itemised Purchase Register", 
   "roles": [
@@ -155,10 +116,699 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.297564", 
-  "name": "44e71465f2", 
+  "modified": "2018-02-08 22:40:25.514568", 
+  "name": "47650e23b3", 
   "page": null, 
-  "parent": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Balance", 
+  "roles": [
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-08 22:40:25.521180", 
+  "name": "a97dbfc387", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Ledger", 
+  "roles": [
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-08 22:40:25.529679", 
+  "name": "b0d5bf9b98", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "Accounts Receivable", 
+  "roles": [
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-08 22:40:25.537840", 
+  "name": "a1e8382c84", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "Accounts Payable", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Purchase User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-08 22:40:25.546400", 
+  "name": "fc747168c6", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "General Ledger", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-08 22:40:25.553436", 
+  "name": "f54605ae5f", 
+  "page": "dairy-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.724066", 
+  "name": "59acc81cdf", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.746381", 
+  "name": "76ed062d9d", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.752526", 
+  "name": "0583133ea6", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Itemised Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.757910", 
+  "name": "07717dd5ef", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Itemised Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.840541", 
+  "name": "b16e06c3e4", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Balance", 
+  "roles": [
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.847320", 
+  "name": "9db9a651cd", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Ledger", 
+  "roles": [
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.854219", 
+  "name": "292a5e345b", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "Accounts Receivable", 
+  "roles": [
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.866218", 
+  "name": "02acea1767", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "Accounts Payable", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Purchase User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.873969", 
+  "name": "c1bdc7ab41", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "General Ledger", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-13 14:00:54.881117", 
+  "name": "01c8cd7b62", 
+  "page": "dairy-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.806191", 
+  "name": "175127fa1a", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.816448", 
+  "name": "b1977ae200", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.822613", 
+  "name": "7f76d69039", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Itemised Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.828067", 
+  "name": "99719d7a18", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Itemised Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.897014", 
+  "name": "e94978aed1", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Balance", 
+  "roles": [
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.904399", 
+  "name": "9a377f7604", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Ledger", 
+  "roles": [
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.911920", 
+  "name": "e9feb6626f", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "Accounts Receivable", 
+  "roles": [
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.921850", 
+  "name": "4ac0600212", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "Accounts Payable", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Purchase User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.931677", 
+  "name": "7de24db947", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "General Ledger", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-15 14:46:16.939889", 
+  "name": "10f1a8aefd", 
+  "page": "dairy-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-17 12:51:02.127001", 
+  "name": "bf38574dd3", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-17 12:51:02.144462", 
+  "name": "ce4554d438", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-17 12:51:02.149715", 
+  "name": "fe78811338", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Itemised Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-17 12:51:02.155241", 
+  "name": "77988b6358", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Itemised Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-17 12:51:02.161295", 
+  "name": "08d7b15146", 
+  "page": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Balance", 
   "roles": [
@@ -188,10 +838,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.323288", 
-  "name": "7a768f0177", 
+  "modified": "2018-02-17 12:51:02.240826", 
+  "name": "2cb2303992", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Ledger", 
   "roles": [
@@ -227,10 +876,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.431449", 
-  "name": "8a1197c413", 
+  "modified": "2018-02-17 12:51:02.255003", 
+  "name": "9dcad64858", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "Accounts Receivable", 
   "roles": [
@@ -266,10 +914,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.457828", 
-  "name": "993007f4f4", 
+  "modified": "2018-02-17 12:51:02.265266", 
+  "name": "fe26d5e011", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "Accounts Payable", 
   "roles": [
@@ -311,10 +958,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.486730", 
-  "name": "79f90646e5", 
+  "modified": "2018-02-17 12:51:02.277660", 
+  "name": "398485597b", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "GL Entry", 
   "report": "General Ledger", 
   "roles": [
@@ -353,10 +999,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.508361", 
-  "name": "65207ae841", 
+  "modified": "2018-02-17 12:51:02.290176", 
+  "name": "d3a9fc5a69", 
   "page": "dairy-dashboard", 
-  "parent": null, 
   "ref_doctype": null, 
   "report": null, 
   "roles": [
@@ -371,10 +1016,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.522819", 
-  "name": "05fb23240b", 
+  "modified": "2018-02-17 12:51:02.297202", 
+  "name": "624b8cf651", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Village Level Collection Centre", 
   "report": "Vlcc Net Pay Off", 
   "roles": [
@@ -392,10 +1036,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.551071", 
-  "name": "73e7674a49", 
+  "modified": "2018-02-17 12:51:02.310145", 
+  "name": "ef16c30143", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Farmer", 
   "report": "Farmer Net Payoff", 
   "roles": [
@@ -488,10 +1131,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.591881", 
-  "name": "6077053b2e", 
+  "modified": "2018-02-17 12:51:02.331744", 
+  "name": "075c468cb5", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Farmer Milk Collection Record", 
   "report": "Milk Passbook", 
   "roles": [
@@ -509,109 +1151,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:02:19.606892", 
-  "name": "58db81c8f6", 
-  "page": "vlcc-dashboard", 
-  "parent": null, 
-  "ref_doctype": null, 
-  "report": null, 
-  "roles": [
-   {
-    "role": "Vlcc Operator"
-   }, 
-   {
-    "role": "Vlcc Manager"
-   }
-  ]
- }, 
- {
-  "docstatus": 0, 
-  "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.866233", 
-  "name": "db0a30e004", 
+  "modified": "2018-02-19 11:52:21.728116", 
+  "name": "dd943e1857", 
   "page": null, 
-  "parent": null, 
-  "ref_doctype": "GL Entry", 
-  "report": "Balance Sheet", 
-  "roles": [
-   {
-    "role": "Accounts User"
-   }, 
-   {
-    "role": "Accounts Manager"
-   }, 
-   {
-    "role": "Auditor"
-   }, 
-   {
-    "role": "Dairy Manager"
-   }, 
-   {
-    "role": "Camp Manager"
-   }
-  ]
- }, 
- {
-  "docstatus": 0, 
-  "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.875025", 
-  "name": "33700b0d20", 
-  "page": null, 
-  "parent": null, 
-  "ref_doctype": "GL Entry", 
-  "report": "Trial Balance", 
-  "roles": [
-   {
-    "role": "Accounts User"
-   }, 
-   {
-    "role": "Accounts Manager"
-   }, 
-   {
-    "role": "Auditor"
-   }, 
-   {
-    "role": "Dairy Manager"
-   }, 
-   {
-    "role": "Camp Manager"
-   }
-  ]
- }, 
- {
-  "docstatus": 0, 
-  "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.885895", 
-  "name": "caa14ac59d", 
-  "page": null, 
-  "parent": null, 
-  "ref_doctype": "GL Entry", 
-  "report": "Profit and Loss Statement", 
-  "roles": [
-   {
-    "role": "Accounts User"
-   }, 
-   {
-    "role": "Accounts Manager"
-   }, 
-   {
-    "role": "Auditor"
-   }, 
-   {
-    "role": "Dairy Manager"
-   }, 
-   {
-    "role": "Camp Manager"
-   }
-  ]
- }, 
- {
-  "docstatus": 0, 
-  "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.895458", 
-  "name": "920f5d01fe", 
-  "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Sales Register", 
   "roles": [
@@ -626,10 +1168,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.901844", 
-  "name": "7900d90efa", 
+  "modified": "2018-02-19 11:52:21.815564", 
+  "name": "5014b10c59", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Purchase Register", 
   "roles": [
@@ -644,10 +1185,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.907750", 
-  "name": "447d067d6c", 
+  "modified": "2018-02-19 11:52:21.825868", 
+  "name": "a9414ed817", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "GST Itemised Sales Register", 
   "roles": [
@@ -662,10 +1202,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.913891", 
-  "name": "fc87389fa4", 
+  "modified": "2018-02-19 11:52:21.839721", 
+  "name": "0cbc279bf7", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "GST Itemised Purchase Register", 
   "roles": [
@@ -680,10 +1219,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.921319", 
-  "name": "c2c498cd78", 
+  "modified": "2018-02-19 11:52:21.849869", 
+  "name": "6ab36341a9", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Balance", 
   "roles": [
@@ -713,10 +1251,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.932987", 
-  "name": "5daea80a7f", 
+  "modified": "2018-02-19 11:52:21.943177", 
+  "name": "17981d7f7a", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Stock Ledger Entry", 
   "report": "Stock Ledger", 
   "roles": [
@@ -752,10 +1289,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.947077", 
-  "name": "bb1509e50d", 
+  "modified": "2018-02-19 11:52:21.956851", 
+  "name": "162ac515c9", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Sales Invoice", 
   "report": "Accounts Receivable", 
   "roles": [
@@ -791,10 +1327,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.961205", 
-  "name": "d932513f68", 
+  "modified": "2018-02-19 11:52:22.051594", 
+  "name": "de1990f297", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Purchase Invoice", 
   "report": "Accounts Payable", 
   "roles": [
@@ -836,10 +1371,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.977291", 
-  "name": "21d9425c0e", 
+  "modified": "2018-02-19 11:52:22.062997", 
+  "name": "c49762a734", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "GL Entry", 
   "report": "General Ledger", 
   "roles": [
@@ -878,10 +1412,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.989808", 
-  "name": "fcb84010b1", 
+  "modified": "2018-02-19 11:52:22.076682", 
+  "name": "184015f9ca", 
   "page": "dairy-dashboard", 
-  "parent": null, 
   "ref_doctype": null, 
   "report": null, 
   "roles": [
@@ -896,10 +1429,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:56.997282", 
-  "name": "0622603802", 
+  "modified": "2018-02-19 11:52:22.082475", 
+  "name": "b8cd920953", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Village Level Collection Centre", 
   "report": "Vlcc Net Pay Off", 
   "roles": [
@@ -917,10 +1449,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:57.006723", 
-  "name": "b569bad6bc", 
+  "modified": "2018-02-19 11:52:22.090183", 
+  "name": "0e0dd78f32", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Farmer", 
   "report": "Farmer Net Payoff", 
   "roles": [
@@ -1013,10 +1544,9 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:57.031567", 
-  "name": "5653d4c110", 
+  "modified": "2018-02-19 11:52:22.142430", 
+  "name": "40f3e6790d", 
   "page": null, 
-  "parent": null, 
   "ref_doctype": "Farmer Milk Collection Record", 
   "report": "Milk Passbook", 
   "roles": [
@@ -1034,10 +1564,2471 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Role", 
-  "modified": "2018-02-28 19:54:57.037794", 
-  "name": "1ad8d5be72", 
+  "modified": "2018-02-19 11:52:22.150449", 
+  "name": "382d40f24c", 
   "page": "vlcc-dashboard", 
-  "parent": null, 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.219264", 
+  "name": "94015c8f55", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.224176", 
+  "name": "8d1a2ac2be", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.229043", 
+  "name": "ef9eb0b80a", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Itemised Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.233345", 
+  "name": "a9129d1f87", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Itemised Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.237540", 
+  "name": "48903e3f51", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Balance", 
+  "roles": [
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.246078", 
+  "name": "fb41850511", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Ledger", 
+  "roles": [
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.254278", 
+  "name": "e1cc5401b2", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "Accounts Receivable", 
+  "roles": [
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.262712", 
+  "name": "8839f851c5", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "Accounts Payable", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Purchase User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.271893", 
+  "name": "65c978444f", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "General Ledger", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.280158", 
+  "name": "0d6a20310c", 
+  "page": "dairy-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.284276", 
+  "name": "74022f5361", 
+  "page": null, 
+  "ref_doctype": "Village Level Collection Centre", 
+  "report": "Vlcc Net Pay Off", 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.289860", 
+  "name": "470e8f5b75", 
+  "page": null, 
+  "ref_doctype": "Farmer", 
+  "report": "Farmer Net Payoff", 
+  "roles": [
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.307585", 
+  "name": "b4117746e0", 
+  "page": null, 
+  "ref_doctype": "Farmer Milk Collection Record", 
+  "report": "Milk Passbook", 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-02-23 10:55:41.312038", 
+  "name": "83d6227a85", 
+  "page": "vlcc-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.205840", 
+  "name": "0479872bcc", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Balance Sheet", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.264530", 
+  "name": "8023a0ea87", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Trial Balance", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.274331", 
+  "name": "bc3ad86218", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Profit and Loss Statement", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.283337", 
+  "name": "bfe115d623", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.288325", 
+  "name": "0a2a3f9ddc", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.293099", 
+  "name": "d3cfe55b25", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Itemised Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.298224", 
+  "name": "83051d6a7a", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Itemised Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.303029", 
+  "name": "6778e8a79b", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Balance", 
+  "roles": [
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.311704", 
+  "name": "c70697a0a2", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Ledger", 
+  "roles": [
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.322750", 
+  "name": "c16d495f18", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "Accounts Receivable", 
+  "roles": [
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.331832", 
+  "name": "00c335d484", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "Accounts Payable", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Purchase User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.382937", 
+  "name": "13cf09f014", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "General Ledger", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.394815", 
+  "name": "c5cbbbe22b", 
+  "page": "dairy-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.399246", 
+  "name": "df3bfa0fc8", 
+  "page": null, 
+  "ref_doctype": "Village Level Collection Centre", 
+  "report": "Vlcc Net Pay Off", 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.405477", 
+  "name": "80a48002a2", 
+  "page": null, 
+  "ref_doctype": "Farmer", 
+  "report": "Farmer Net Payoff", 
+  "roles": [
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.466650", 
+  "name": "fe7dfbda72", 
+  "page": null, 
+  "ref_doctype": "Farmer Milk Collection Record", 
+  "report": "Milk Passbook", 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.482642", 
+  "name": "21ccc345b3", 
+  "page": "vlcc-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.487299", 
+  "name": "658785f261", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Balance Sheet", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.494845", 
+  "name": "6454762017", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Trial Balance", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.502597", 
+  "name": "e9c9618bdb", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Profit and Loss Statement", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.509267", 
+  "name": "780f93a761", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.513897", 
+  "name": "02928422ec", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.521256", 
+  "name": "30e77254ca", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Itemised Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.526375", 
+  "name": "153d8a29af", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Itemised Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.531053", 
+  "name": "58798cdd86", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Balance", 
+  "roles": [
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.539654", 
+  "name": "d16e834065", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Ledger", 
+  "roles": [
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.547985", 
+  "name": "d99dd6ef58", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "Accounts Receivable", 
+  "roles": [
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.558522", 
+  "name": "92debed5f0", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "Accounts Payable", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Purchase User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.568991", 
+  "name": "9ce58e31c3", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "General Ledger", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.578430", 
+  "name": "be7b985bb9", 
+  "page": "dairy-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.582831", 
+  "name": "a085dd4cd1", 
+  "page": null, 
+  "ref_doctype": "Village Level Collection Centre", 
+  "report": "Vlcc Net Pay Off", 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.588569", 
+  "name": "b17658bab7", 
+  "page": null, 
+  "ref_doctype": "Farmer", 
+  "report": "Farmer Net Payoff", 
+  "roles": [
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.617938", 
+  "name": "0e93c43522", 
+  "page": null, 
+  "ref_doctype": "Farmer Milk Collection Record", 
+  "report": "Milk Passbook", 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-01 21:54:32.622999", 
+  "name": "88975f08fd", 
+  "page": "vlcc-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.625249", 
+  "name": "3760684720", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Balance Sheet", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.633341", 
+  "name": "1378892ad6", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Trial Balance", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.651300", 
+  "name": "b5ae14bda8", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Profit and Loss Statement", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.657482", 
+  "name": "c538b640bf", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.662451", 
+  "name": "285c58ef2d", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.668452", 
+  "name": "0eebaf6be2", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Itemised Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.672748", 
+  "name": "d7e106623a", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Itemised Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.677137", 
+  "name": "5a2b7116e2", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Balance", 
+  "roles": [
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.685163", 
+  "name": "8ab6991ce6", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Ledger", 
+  "roles": [
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.730074", 
+  "name": "4359428056", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "Accounts Receivable", 
+  "roles": [
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.741267", 
+  "name": "34f8cc9c53", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "Accounts Payable", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Purchase User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.752671", 
+  "name": "11f6ffebe3", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "General Ledger", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.762610", 
+  "name": "3fd01564db", 
+  "page": "dairy-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.767084", 
+  "name": "e32e7efbde", 
+  "page": null, 
+  "ref_doctype": "Village Level Collection Centre", 
+  "report": "Vlcc Net Pay Off", 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.772986", 
+  "name": "3bfa1b2b18", 
+  "page": null, 
+  "ref_doctype": "Farmer", 
+  "report": "Farmer Net Payoff", 
+  "roles": [
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.791145", 
+  "name": "c6645dbbd6", 
+  "page": null, 
+  "ref_doctype": "Farmer Milk Collection Record", 
+  "report": "Milk Passbook", 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.798048", 
+  "name": "369f1a91aa", 
+  "page": "vlcc-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.802440", 
+  "name": "1e3105b396", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Balance Sheet", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.809696", 
+  "name": "93945768d0", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Trial Balance", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.815915", 
+  "name": "6f31cf717a", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "Profit and Loss Statement", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.822720", 
+  "name": "3d65bae46d", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.828027", 
+  "name": "ef3e2dc544", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.832370", 
+  "name": "c472ba4baa", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "GST Itemised Sales Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.836701", 
+  "name": "7ecf4a8243", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "GST Itemised Purchase Register", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.842622", 
+  "name": "9a10d9b003", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Balance", 
+  "roles": [
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.850062", 
+  "name": "5189e4db2a", 
+  "page": null, 
+  "ref_doctype": "Stock Ledger Entry", 
+  "report": "Stock Ledger", 
+  "roles": [
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.859864", 
+  "name": "68ade6ca01", 
+  "page": null, 
+  "ref_doctype": "Sales Invoice", 
+  "report": "Accounts Receivable", 
+  "roles": [
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.870043", 
+  "name": "d6929e612a", 
+  "page": null, 
+  "ref_doctype": "Purchase Invoice", 
+  "report": "Accounts Payable", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Purchase User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.882271", 
+  "name": "004d28e8e7", 
+  "page": null, 
+  "ref_doctype": "GL Entry", 
+  "report": "General Ledger", 
+  "roles": [
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Auditor"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.891303", 
+  "name": "05e91dc0e5", 
+  "page": "dairy-dashboard", 
+  "ref_doctype": null, 
+  "report": null, 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.895796", 
+  "name": "11981b8284", 
+  "page": null, 
+  "ref_doctype": "Village Level Collection Centre", 
+  "report": "Vlcc Net Pay Off", 
+  "roles": [
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.901722", 
+  "name": "3bcf977e0b", 
+  "page": null, 
+  "ref_doctype": "Farmer", 
+  "report": "Farmer Net Payoff", 
+  "roles": [
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Sales Master Manager"
+   }, 
+   {
+    "role": "Sales Manager"
+   }, 
+   {
+    "role": "Accounts User"
+   }, 
+   {
+    "role": "Accounts Manager"
+   }, 
+   {
+    "role": "Sales User"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.925595", 
+  "name": "94f6bcefb9", 
+  "page": null, 
+  "ref_doctype": "Farmer Milk Collection Record", 
+  "report": "Milk Passbook", 
+  "roles": [
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }
+  ]
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Custom Role", 
+  "modified": "2018-03-03 11:33:47.964296", 
+  "name": "3b96c88264", 
+  "page": "vlcc-dashboard", 
   "ref_doctype": null, 
   "report": null, 
   "roles": [

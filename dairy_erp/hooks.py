@@ -124,12 +124,14 @@ doc_events = {
         "validate": "dairy_erp.customization.customization.set_vlcc_warehouse"
     },
     "Delivery Note":{
-        "on_submit": "dairy_erp.customization.customization.validate_pr",
+        "on_submit": ["dairy_erp.customization.customization.validate_pr","dairy_erp.customization.customization.update_mi"],
         "validate":["dairy_erp.customization.customization.set_vlcc_warehouse","dairy_erp.customization.customization.validate_dn"],
-        "after_insert":"dairy_erp.customization.customization.make_purchase_receipt"
+        "after_insert":"dairy_erp.customization.customization.make_purchase_receipt",
+        "on_update":"dairy_erp.customization.delivery_note.delivery_note.get_partial_quatity"
     },
     "Material Request":{
-        "validate": ["dairy_erp.customization.customization.set_mr_warehouse","dairy_erp.customization.customization.set_chilling_wrhouse","dairy_erp.customization.material_request.material_request.validate"]
+        "validate": ["dairy_erp.customization.customization.set_mr_warehouse","dairy_erp.customization.customization.set_chilling_wrhouse","dairy_erp.customization.material_request.material_request.validate"],
+        "on_update_after_submit":"dairy_erp.customization.material_request.material_request.status_updater"
     },
     "Supplier":{
         "validate": "dairy_erp.customization.customization.set_company",

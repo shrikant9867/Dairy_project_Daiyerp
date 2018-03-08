@@ -104,8 +104,8 @@ def set_co_warehouse_po(doc,method=None):
 				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
 				if item.material_request:
 					mr = frappe.get_doc("Material Request",item.material_request)
-					item.customer = mr.company
-					item.address = frappe.db.get_value("Village Level Collection Centre",{"name":mr.company},"address_display")
+					# item.customer = mr.company
+					# item.address = frappe.db.get_value("Village Level Collection Centre",{"name":mr.company},"address_display")
 	if branch_office.get('operator_type') == 'VLCC':
 		vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"camp_office")
 		for item in doc.items:
@@ -358,6 +358,8 @@ def validate_qty_against_mi(doc):
 	"""update Material Request Status mapped with delivery Note"""
 
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC' and not doc.is_new():
+		delivered_qty = 0
+
 		dn_value = frappe.db.sql("""select parent from `tabDelivery Note Item` where purchase_receipt = '{0}' """.format(doc.name),as_dict=1)
 
 		if dn_value:
@@ -368,12 +370,19 @@ def validate_qty_against_mi(doc):
 				material_request_updater = frappe.get_doc("Material Request",row.get('material_request'))
 				mr_qty = get_material_req_qty(material_request_updater)
 				
-				if mr_qty > row.get('qty_sum'):
+				delivery_note = frappe.get_doc("Delivery Note",dn_value[0].get('parent'))
+				for data in material_request_updater.items:
+					for row in delivery_note.items:
+						if data.item_code == row.item_code:
+							data.new_dn_qty = data.qty - row.qty
+							data.completed_dn = data.completed_dn + row.qty
+							delivered_qty += data.completed_dn
+
+				if mr_qty > delivered_qty:
 					material_request_updater.per_delivered = 99.99
 					material_request_updater.set_status("Partially Delivered")
 					material_request_updater.save()
-
-				elif mr_qty == row.get('qty_sum'):
+				elif mr_qty == delivered_qty:
 					material_request_updater.per_delivered = 100
 					material_request_updater.set_status("Delivered")
 					material_request_updater.save()
@@ -908,14 +917,16 @@ def validate_dn(doc,method):
 
 
 def update_mi(doc,method):
+	pass
 	# update_modified = now()
 	# material_request_updater =frappe.get_doc("Material Request",'MREQ-00122')
 	# material_request_updater.per_delivered = 100
 	# material_request_updater.db_set('status', "Delivered", update_modified = update_modified)
 	# material_request_updater.save()
-	frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00123'""",debug=1)
-	frappe.db.commit()
+	# frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00123'""",debug=1)
+	# frappe.db.commit()
 
 def test():
-	print "#####)))"
-	frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00122'""")
+	pass
+	# print "#####)))"
+	# frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00122'""")

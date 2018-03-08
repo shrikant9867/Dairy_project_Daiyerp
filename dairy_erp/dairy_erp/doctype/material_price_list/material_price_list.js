@@ -3,35 +3,39 @@
 
 frappe.ui.form.on('Material Price List', {
 	refresh: function(frm) {
+
 		var template = ['GTVLCCB','GTFS','GTCS','GTCOVLCCB','GTCOB','GTCOS','LCOVLCCB']
-		// var local_template = ['LVLCCB','LFS','LCS','LCOB','LCOS']
+
 		if (!in_list(frappe.user_roles,"Dairy Manager") && !frm.doc.__islocal){
 			if (in_list(template,frm.doc.price_list)){
 				frm.set_df_property("price_template_type", "read_only",1);
 				frm.set_df_property("operator_name", "read_only",1);
 				frm.set_df_property("items", "read_only",1);
-				frm.set_df_property("price_list_template", "hidden",1);	
+				frm.set_df_property("price_list_template", "hidden",1);
+				var price = frappe.meta.get_docfield('Material Price', "price", frm.doc.name);
+				var item = frappe.meta.get_docfield('Material Price', "item", frm.doc.name);
+				var item_name = frappe.meta.get_docfield('Material Price', "item_name", frm.doc.name);
+				price.read_only = 1;
+				item_name.read_only = 1;
+				item.read_only = 1;
 			}
 		}
-		else if(in_list(frappe.user_roles,"Dairy Manager") && !frm.doc.__islocal){
+		else if(!frm.doc.__islocal && has_common(frappe.user_roles, ["Dairy Operator", "Dairy Manager"])){
 			if (frm.doc.price_list == 'GTCOVLCCB'){
 				frm.set_df_property("price_template_type", "read_only",1);
 				frm.set_df_property("operator_name", "read_only",1);
 				frm.set_df_property("items", "read_only",1);
 				frm.set_df_property("price_list_template", "hidden",1);	
+				var price = frappe.meta.get_docfield('Material Price', "price", frm.doc.name);
+				var item = frappe.meta.get_docfield('Material Price', "item", frm.doc.name);
+				var item_name = frappe.meta.get_docfield('Material Price', "item_name", frm.doc.name);
+				price.read_only = 1;
+				item_name.read_only = 1;
+				item.read_only = 1;
 			}
 		}
-	/*	if(!in_list(frappe.user_roles,"Dairy Operator") && !frm.doc.__islocal){
-			console.log("kjdgfhdj")
-			if (in_list(template,frm.doc.price_list)){
-				frm.set_df_property("price_template_type", "read_only",1);
-				frm.set_df_property("operator_name", "read_only",1);
-				frm.set_df_property("items", "read_only",1);
-				frm.set_df_property("price_list_template", "hidden",1);	
-			}
 
-		}*/
-		if(frm.doc.__islocal && (in_list(frappe.user_roles,"Dairy Manager") || in_list(frappe.user_roles,"Dairy Operator"))){
+		if(frm.doc.__islocal && has_common(frappe.user_roles, ["Dairy Operator", "Dairy Manager"])){
 			frm.set_df_property("price_list_template", "hidden",1);	
 		}
 		if(has_common(frappe.user_roles, ["Camp Operator", "Camp Manager"])) {

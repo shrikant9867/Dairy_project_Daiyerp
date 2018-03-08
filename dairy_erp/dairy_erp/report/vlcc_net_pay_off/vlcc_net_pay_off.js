@@ -41,7 +41,13 @@ frappe.query_reports["Vlcc Net Pay Off"] = {
 			"fieldtype": "Select",
 			"options": 'Posting Date\nDue Date',
 			"default": "Posting Date"
-		}
+		},
+		{
+			"fieldname":"account",
+			"label": __("Account"),
+			"fieldtype": "Link",
+			"options": "Account"
+		},
 	]
 }
 

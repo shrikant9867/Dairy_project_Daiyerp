@@ -160,4 +160,23 @@ def get_service_note_item(doctype, txt, searchfield, start, page_len, filters):
 def get_servicenote_item():
 	query_item = frappe.db.sql(""" select item_code from `tabItem` where item_group in ('Medicines', 'Services')""",as_list=1)
 	return query_item
-	
+
+@frappe.whitelist()
+def get_account_invoice():
+	user = frappe.session.user
+	user_data = frappe.db.get_value("User", user, ["operator_type", "branch_office"], as_dict=True)
+	if user_data.get('operator_type') == "Camp Office" and user_data.get('branch_office'):
+		camp_office_data = frappe.db.get_value("Address", user_data.get('branch_office'),
+			["income_account", "expense_account", "stock_account", "warehouse"], as_dict=True)
+		return camp_office_data
+	return {}
+
+def set_camp_office_accounts(doc, method=None):
+	accounts = get_account_invoice()
+	if accounts:
+		for i in doc.items:
+			if doc.doctype == "Purchase Invoice":
+				i.expense_account = accounts.get('expense_account')
+			else:
+				i.income_account = accounts.get('income_account')
+				i.warehouse = accounts.get('warehouse')

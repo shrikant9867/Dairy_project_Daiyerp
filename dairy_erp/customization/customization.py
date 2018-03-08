@@ -38,15 +38,54 @@ def validate_dairy_company(doc,method=None):
 		doc.flags.ignore_mandatory = True
 		doc.save()
 
-def set_warehouse(doc, method=None):
-	"""configure w/h for dairy components"""
+def make_account_and_warehouse(doc, method=None):
+	try:
+		if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name"):
+			make_accounts(doc)
+			make_warehouse(doc)
+		else:
+			frappe.throw("Please create Head Office first for Dairy")
+	except Exception as e:
+		raise e
 
+def make_accounts(doc):
+	company_abbr = frappe.db.get_value("Company",doc.links[0].link_name,"abbr")
+	# Income Account
+	if not frappe.db.exists("Account", doc.address_title + " Income - " + company_abbr):
+		inc_acc = frappe.new_doc("Account")
+		inc_acc.account_name = doc.address_title + " Income"
+		inc_acc.parent_account = "Direct Income - " + company_abbr
+		inc_acc.insert()
+		doc.income_account = inc_acc.name
+
+	# Expence Account
+	if not frappe.db.exists("Account", doc.address_title + " Expense - " + company_abbr):
+		exp_acc = frappe.new_doc("Account")
+		exp_acc.account_name = doc.address_title + " Expense"
+		exp_acc.parent_account = "Stock Expenses - " + company_abbr
+		exp_acc.insert()
+		doc.expense_account = exp_acc.name
+
+	# Stock Account
+	if not frappe.db.exists("Account", doc.address_title + " Stock - " + company_abbr):
+		stock_acc = frappe.new_doc("Account")
+		stock_acc.account_name = doc.address_title + " Stock"
+		stock_acc.account_type = "Stock"
+		stock_acc.parent_account = "Stock Assets - " + company_abbr
+		stock_acc.insert()
+		doc.stock_account = stock_acc.name
+
+
+def make_warehouse(doc):
+	"""configure w/h for dairy components"""
 	if frappe.db.sql("""select name from `tabAddress` where address_type ='Head Office'"""):
+		company_abbr = frappe.db.get_value("Company",doc.links[0].link_name,"abbr")
 		if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and \
-		   not frappe.db.exists('Warehouse', doc.address_title + " - "+frappe.db.get_value("Company",doc.links[0].link_name,"abbr")):
+		   not frappe.db.exists('Warehouse', doc.address_title + " - "+ company_abbr):
 				wr_house_doc = frappe.new_doc("Warehouse")
 				wr_house_doc.warehouse_name = doc.address_title
 				wr_house_doc.company =  doc.links[0].link_name if doc.links else []
+				# wr_house_doc.account = doc.address_title + " Stock - " + company_abbr
 				wr_house_doc.insert()
 				doc.warehouse = wr_house_doc.name
 				doc.save()
@@ -162,7 +201,7 @@ def validate_user(doc):
 
 def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
-	set_warehouse(doc)
+	make_warehouse(doc)
 	
 
 @frappe.whitelist()

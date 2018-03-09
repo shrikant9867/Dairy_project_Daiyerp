@@ -108,7 +108,7 @@ after_install = "dairy_erp.customization.customization.after_install"
 
 doc_events = {
     "Address": {
-        "after_insert": ["dairy_erp.customization.customization.validate_dairy_company","dairy_erp.customization.customization.set_warehouse"],
+        "after_insert": ["dairy_erp.customization.customization.validate_dairy_company","dairy_erp.customization.customization.make_account_and_warehouse"],
         "on_update": "dairy_erp.customization.customization.update_warehouse",
         "validate": "dairy_erp.customization.customization.validate_headoffice"
     },
@@ -124,12 +124,14 @@ doc_events = {
         "validate": "dairy_erp.customization.customization.set_vlcc_warehouse"
     },
     "Delivery Note":{
-        "on_submit": "dairy_erp.customization.customization.validate_pr",
+        "on_submit": ["dairy_erp.customization.customization.validate_pr","dairy_erp.customization.customization.update_mi"],
         "validate":["dairy_erp.customization.customization.set_vlcc_warehouse","dairy_erp.customization.customization.validate_dn"],
-        "after_insert":"dairy_erp.customization.customization.make_purchase_receipt"
+        "after_insert":"dairy_erp.customization.customization.make_purchase_receipt",
+        "on_update":"dairy_erp.customization.delivery_note.delivery_note.get_partial_quatity"
     },
     "Material Request":{
-        "validate": ["dairy_erp.customization.customization.set_mr_warehouse","dairy_erp.customization.customization.set_chilling_wrhouse","dairy_erp.customization.material_request.material_request.validate"]
+        "validate": ["dairy_erp.customization.customization.set_mr_warehouse","dairy_erp.customization.customization.set_chilling_wrhouse","dairy_erp.customization.material_request.material_request.validate"],
+        "on_update_after_submit":"dairy_erp.customization.material_request.material_request.status_updater"
     },
     "Supplier":{
         "validate": "dairy_erp.customization.customization.set_company",
@@ -139,12 +141,18 @@ doc_events = {
         "before_submit": "dairy_erp.customization.customization.set_camp"
     },
     "Sales Invoice":{
-        "validate": "dairy_erp.customization.sales_invoice.sales_invoice.validate_local_sale",
+        "validate": ["dairy_erp.customization.sales_invoice.sales_invoice.validate_local_sale", "dairy_erp.customization.sales_invoice.sales_invoice.set_camp_office_accounts"],
         "on_submit": "dairy_erp.customization.sales_invoice.sales_invoice.payment_entry"
     },
     "Stock Entry":{
         "validate": "dairy_erp.customization.stock_entry.stock_entry.set_target_warehouse",
         "on_submit": ["dairy_erp.customization.stock_entry.stock_entry.validate_camp_submission","dairy_erp.customization.stock_entry.stock_entry.check_if_dropship"]
+    },
+    "Purchase Invoice": {
+        "validate": "dairy_erp.customization.sales_invoice.sales_invoice.set_camp_office_accounts",
+    },
+    "Payment Entry": {
+        "validate": "dairy_erp.customization.payment_entry.payment_entry.validate_by_credit_invoice"
     }
 }
 

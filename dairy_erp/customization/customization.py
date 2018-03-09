@@ -5,8 +5,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.stock.stock_balance import get_balance_qty_from_sle
 import json
 import re
+from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
@@ -36,15 +38,54 @@ def validate_dairy_company(doc,method=None):
 		doc.flags.ignore_mandatory = True
 		doc.save()
 
-def set_warehouse(doc, method=None):
-	"""configure w/h for dairy components"""
+def make_account_and_warehouse(doc, method=None):
+	try:
+		if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name"):
+			make_accounts(doc)
+			make_warehouse(doc)
+		else:
+			frappe.throw("Please create Head Office first for Dairy")
+	except Exception as e:
+		raise e
 
+def make_accounts(doc):
+	company_abbr = frappe.db.get_value("Company",doc.links[0].link_name,"abbr")
+	# Income Account
+	if not frappe.db.exists("Account", doc.address_title + " Income - " + company_abbr):
+		inc_acc = frappe.new_doc("Account")
+		inc_acc.account_name = doc.address_title + " Income"
+		inc_acc.parent_account = "Direct Income - " + company_abbr
+		inc_acc.insert()
+		doc.income_account = inc_acc.name
+
+	# Expence Account
+	if not frappe.db.exists("Account", doc.address_title + " Expense - " + company_abbr):
+		exp_acc = frappe.new_doc("Account")
+		exp_acc.account_name = doc.address_title + " Expense"
+		exp_acc.parent_account = "Stock Expenses - " + company_abbr
+		exp_acc.insert()
+		doc.expense_account = exp_acc.name
+
+	# Stock Account
+	if not frappe.db.exists("Account", doc.address_title + " Stock - " + company_abbr):
+		stock_acc = frappe.new_doc("Account")
+		stock_acc.account_name = doc.address_title + " Stock"
+		stock_acc.account_type = "Stock"
+		stock_acc.parent_account = "Stock Assets - " + company_abbr
+		stock_acc.insert()
+		doc.stock_account = stock_acc.name
+
+
+def make_warehouse(doc):
+	"""configure w/h for dairy components"""
 	if frappe.db.sql("""select name from `tabAddress` where address_type ='Head Office'"""):
+		company_abbr = frappe.db.get_value("Company",doc.links[0].link_name,"abbr")
 		if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and \
-		   not frappe.db.exists('Warehouse', doc.address_title + " - "+frappe.db.get_value("Company",doc.links[0].link_name,"abbr")):
+		   not frappe.db.exists('Warehouse', doc.address_title + " - "+ company_abbr):
 				wr_house_doc = frappe.new_doc("Warehouse")
 				wr_house_doc.warehouse_name = doc.address_title
 				wr_house_doc.company =  doc.links[0].link_name if doc.links else []
+				# wr_house_doc.account = doc.address_title + " Stock - " + company_abbr
 				wr_house_doc.insert()
 				doc.warehouse = wr_house_doc.name
 				doc.save()
@@ -168,7 +209,7 @@ def validate_user(doc):
 
 def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
-	set_warehouse(doc)
+	make_warehouse(doc)
 	
 
 @frappe.whitelist()
@@ -325,6 +366,8 @@ def validate_qty_against_mi(doc):
 	"""update Material Request Status mapped with delivery Note"""
 
 	if frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC' and not doc.is_new():
+		delivered_qty = 0
+
 		dn_value = frappe.db.sql("""select parent from `tabDelivery Note Item` where purchase_receipt = '{0}' """.format(doc.name),as_dict=1)
 
 		if dn_value:
@@ -335,12 +378,19 @@ def validate_qty_against_mi(doc):
 				material_request_updater = frappe.get_doc("Material Request",row.get('material_request'))
 				mr_qty = get_material_req_qty(material_request_updater)
 				
-				if mr_qty > row.get('qty_sum'):
+				delivery_note = frappe.get_doc("Delivery Note",dn_value[0].get('parent'))
+				for data in material_request_updater.items:
+					for row in delivery_note.items:
+						if data.item_code == row.item_code:
+							data.new_dn_qty = data.qty - row.qty
+							data.completed_dn = data.completed_dn + row.qty
+							delivered_qty += data.completed_dn
+
+				if mr_qty > delivered_qty:
 					material_request_updater.per_delivered = 99.99
 					material_request_updater.set_status("Partially Delivered")
 					material_request_updater.save()
-
-				elif mr_qty == row.get('qty_sum'):
+				elif mr_qty == delivered_qty:
 					material_request_updater.per_delivered = 100
 					material_request_updater.set_status("Delivered")
 					material_request_updater.save()
@@ -425,6 +475,7 @@ def mi_status_update(doc):
 		mr_qty = get_material_req_qty(material_request_updater)
 		
 		if mr_qty > row.get('qty_sum'):
+			
 			material_request_updater.per_delivered = 99.99
 			material_request_updater.set_status("Partially Delivered")
 			material_request_updater.save()
@@ -861,11 +912,29 @@ def set_chilling_wrhouse(doc, method):
 
 def validate_dn(doc,method):
 	for item in doc.items:
+		warehouse_qty = get_balance_qty_from_sle(item.item_code,item.warehouse)
 		if item.material_request:
 			mi=frappe.get_doc("Material Request",item.material_request)
+			if item.qty > warehouse_qty:
+				frappe.throw(_("<b>Warehouse Insufficent Stock </b>"))
+			else:
+				for mi_items in mi.items:
+					if item.item_code == mi_items.item_code:
+						if item.qty > mi_items.new_dn_qty:
+							frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
 
-			for mi_items in mi.items:
-				if item.item_code == mi_items.item_code:
-					if item.qty > mi_items.qty:
-						frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
 
+def update_mi(doc,method):
+	pass
+	# update_modified = now()
+	# material_request_updater =frappe.get_doc("Material Request",'MREQ-00122')
+	# material_request_updater.per_delivered = 100
+	# material_request_updater.db_set('status', "Delivered", update_modified = update_modified)
+	# material_request_updater.save()
+	# frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00123'""",debug=1)
+	# frappe.db.commit()
+
+def test():
+	pass
+	# print "#####)))"
+	# frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00122'""")

@@ -171,3 +171,13 @@ address_attr = function(branch_office) {
 
 	return camp
 }
+
+frappe.ui.form.on("Material Request Item", {
+
+	qty: function(frm, cdt, cdn) {
+		console.log("#################################################")
+		var child = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "new_dn_qty",parseFloat(child.qty));			
+		cur_frm.refresh_fields('items');
+	},
+});

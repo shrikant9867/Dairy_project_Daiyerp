@@ -139,6 +139,7 @@ def make_payment_entry(si_doc):
 	si_payment.outstanding_amount = 0
 	si_payment.flags.ignore_permissions = True
 	si_payment.flags.ignore_mandatory = True
+	si_payment.flags.ignore_validate = True
 	si_payment.submit()
 	frappe.msgprint(_("Payment Entry : {0} Created!!!".format("<a href='#Form/Payment Entry/{0}'>{0}</a>".format(si_payment.name))))
 

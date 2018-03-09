@@ -47,9 +47,8 @@ def fetch_balance_qty():
 def get_effective_credit(customer):
 	# SIdhant code for effective credit
 	company = frappe.db.get_value("User", frappe.session.user, "company")
-	purchase = frappe.db.sql("""select sum(grand_total) as pur_amnt from `tabPurchase Invoice` where company = '{0}' and supplier = '{1}' and status not in ('Paid') and docstatus = '1'""".format(company, customer),as_dict=1)
-	sales = frappe.db.sql("""select sum(grand_total) as si_amnt from `tabSales Invoice` where company = '{0}' and customer = '{1}' and status not in ('Paid') and docstatus = '1'""".format(company, customer),as_dict=1)
-	
+	purchase = frappe.db.sql("""select sum(outstanding_amount) as pur_amnt from `tabPurchase Invoice` where company = '{0}' and supplier = '{1}' and status not in ('Paid') and docstatus = '1'""".format(company, customer),as_dict=1)
+	sales = frappe.db.sql("""select sum(outstanding_amount) as si_amnt from `tabSales Invoice` where company = '{0}' and customer = '{1}' and status not in ('Paid') and docstatus = '1'""".format(company, customer),as_dict=1)
 	if purchase[0].get('pur_amnt') == None:
 		eff_amt = 0.0
 		return round(eff_amt,2)
@@ -74,7 +73,8 @@ def get_effective_credit(customer):
 def validate_local_sale(doc, method):
 	if doc.effective_credit <= 0.000 and doc.service_note == 1:
 		frappe.throw(_("Service Note cannot be created if <b>'Effective Credit' </b> is zero"))
-	elif doc.grand_total > doc.effective_credit and doc.service_note == 1:
+	elif (doc.grand_total > doc.effective_credit and doc.service_note and not doc.by_cash) \
+	or (doc.service_note and doc.by_credit and doc.by_credit > doc.grand_total ):
 		frappe.throw(_("Service note cannot be created if Grand Total  greater than Effective Credit "))
 
 	if doc.local_sale:
@@ -99,15 +99,18 @@ def payment_entry(doc, method):
 	# 	frappe.throw(_("Service note cannot be created if Grand Total  greater than Effective Credit "))
 
 	input_ = get_effective_credit(doc.customer)
-	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 :
+	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.cash_payment:
 		frappe.throw(_("Cannot create, If <b>Effective Credit</b> is zero "))
-	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ < doc.grand_total :
-		frappe.throw(_("Cannot create, If Grand Total is greater than <b>Effective Credit</b>"))
+	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ < doc.grand_total and not doc.cash_payment\
+	and not doc.by_credit:
+		frappe.throw(_("Cannot create, If Grand Total is greater than <b>Effective Credit</b>"))doc.local_sale or doc.service_note
+	if (doc.local_sale or doc.service_note) and doc.by_credit and doc.by_credit > input_:
+		frappe.throw(_("By Credit Amount must be less that equal to Effective Credit."))
 	if doc.local_sale and not doc.update_stock:
 		frappe.throw(_("Please set <b>Update Stock</b> checked"))
 	if doc.local_sale and doc.customer_or_farmer == "Vlcc Local Customer":
 		make_payment_entry(doc)
-	if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.cash_payment:
+	if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and (doc.cash_payment or doc.by_cash):
 		make_payment_entry(doc)
 
 @frappe.whitelist()
@@ -126,7 +129,7 @@ def make_payment_entry(si_doc):
 		{
 			"reference_doctype": si_doc.doctype,
 			"reference_name": si_doc.name,
-			"allocated_amount": si_doc.grand_total,
+			"allocated_amount": si_doc.by_cash or si_doc.grand_total,
 			"due_date": si_doc.due_date
 		})
 

@@ -21,7 +21,7 @@ def get_user_data():
 		co = frappe.db.get_value("Village Level Collection Centre",{"name":frappe.db.get_value("User",{"name":frappe.session.user},'company')},"camp_office")
 		for user_ in user_data:
 			user_.update({"camp_office":co,"dairy":frappe.db.get_value("Company",{"is_dairy":1},"name")})
-		response_dict.update({"status":"success","data":user_data})
+		response_dict.update({"status":"success","data":user_data[0]})
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict

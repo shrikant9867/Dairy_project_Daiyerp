@@ -144,7 +144,7 @@ doc_events = {
     },
     "Stock Entry":{
         "validate": "dairy_erp.customization.stock_entry.stock_entry.set_target_warehouse",
-        "on_submit": ["dairy_erp.customization.stock_entry.stock_entry.validate_camp_submission","dairy_erp.customization.stock_entry.stock_entry.drop_ship_opeartion"]
+        "on_submit": ["dairy_erp.customization.stock_entry.stock_entry.validate_camp_submission","dairy_erp.customization.stock_entry.stock_entry.check_if_dropship"]
     }
 }
 

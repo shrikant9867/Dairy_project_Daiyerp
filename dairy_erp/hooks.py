@@ -150,6 +150,9 @@ doc_events = {
     },
     "Purchase Invoice": {
         "validate": "dairy_erp.customization.sales_invoice.sales_invoice.set_camp_office_accounts",
+    },
+    "Payment Entry": {
+        "validate": "dairy_erp.customization.payment_entry.payment_entry.validate_by_credit_invoice"
     }
 }
 

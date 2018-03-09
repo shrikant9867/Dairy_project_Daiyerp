@@ -74,7 +74,7 @@ def make_accounts(doc):
 		stock_acc.parent_account = "Stock Assets - " + company_abbr
 		stock_acc.insert()
 		doc.stock_account = stock_acc.name
-
+		doc.save()
 
 def make_warehouse(doc):
 	"""configure w/h for dairy components"""

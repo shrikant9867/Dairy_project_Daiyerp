@@ -103,7 +103,7 @@ def payment_entry(doc, method):
 		frappe.throw(_("Cannot create, If <b>Effective Credit</b> is zero "))
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ < doc.grand_total and not doc.cash_payment\
 	and not doc.by_credit:
-		frappe.throw(_("Cannot create, If Grand Total is greater than <b>Effective Credit</b>"))doc.local_sale or doc.service_note
+		frappe.throw(_("Cannot create, If Grand Total is greater than <b>Effective Credit</b>"))
 	if (doc.local_sale or doc.service_note) and doc.by_credit and doc.by_credit > input_:
 		frappe.throw(_("By Credit Amount must be less that equal to Effective Credit."))
 	if doc.local_sale and not doc.update_stock:

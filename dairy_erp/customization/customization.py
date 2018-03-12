@@ -37,21 +37,25 @@ def validate_dairy_company(doc,method=None):
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True
 		doc.save()
+	if doc.address_type == "Vlcc" and not doc.links:
+		frappe.throw(_("Please choose <b>vlcc company</b>"))
 
 def make_account_and_warehouse(doc, method=None):
 	try:
-		if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name"):
+		if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name") and doc.address_type == "Camp Office":
 			make_accounts(doc)
 			make_warehouse(doc)
+		elif doc.address_type == "Vlcc":
+			pass
 		else:
-			frappe.throw("Please create Head Office first for Dairy")
+			frappe.throw(_("Please create Head Office first"))
 	except Exception as e:
 		raise e
 
 def make_accounts(doc):
 	company_abbr = frappe.db.get_value("Company",doc.links[0].link_name,"abbr")
 	# Income Account
-	if not frappe.db.exists("Account", doc.address_title + " Income - " + company_abbr):
+	if not frappe.db.exists("Account", doc.address_title + " Income - " + company_abbr) and doc.links:
 		inc_acc = frappe.new_doc("Account")
 		inc_acc.account_name = doc.address_title + " Income"
 		inc_acc.parent_account = "Direct Income - " + company_abbr
@@ -59,7 +63,7 @@ def make_accounts(doc):
 		doc.income_account = inc_acc.name
 
 	# Expence Account
-	if not frappe.db.exists("Account", doc.address_title + " Expense - " + company_abbr):
+	if not frappe.db.exists("Account", doc.address_title + " Expense - " + company_abbr) and doc.links:
 		exp_acc = frappe.new_doc("Account")
 		exp_acc.account_name = doc.address_title + " Expense"
 		exp_acc.parent_account = "Stock Expenses - " + company_abbr
@@ -67,7 +71,7 @@ def make_accounts(doc):
 		doc.expense_account = exp_acc.name
 
 	# Stock Account
-	if not frappe.db.exists("Account", doc.address_title + " Stock - " + company_abbr):
+	if not frappe.db.exists("Account", doc.address_title + " Stock - " + company_abbr) and doc.links:
 		stock_acc = frappe.new_doc("Account")
 		stock_acc.account_name = doc.address_title + " Stock"
 		stock_acc.account_type = "Stock"

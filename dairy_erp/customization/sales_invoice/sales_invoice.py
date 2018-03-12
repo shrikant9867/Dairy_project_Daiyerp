@@ -102,14 +102,14 @@ def payment_entry(doc, method):
 
 	input_ = get_effective_credit(doc.customer, doc.name)
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.cash_payment:
-		frappe.throw(_("Cannot create, If <b>Effective Credit</b> is zero "))
+		frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b>  zero, use Multimode Payment option for cash "))
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ < doc.grand_total and not doc.cash_payment\
-	and not doc.by_credit and doc.multimode_payment:
+	and doc.by_credit and doc.multimode_payment:
 		frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
 	if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and not doc.cash_payment and doc.grand_total > input_:
 		frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
 	if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.by_credit > input_:
-		frappe.throw(_("By Credit Amount must be less that equal to Effective Credit."))
+		frappe.throw(_("By Credit Amount must be less than or equal to Effective Credit."))
 	if doc.local_sale and not doc.update_stock:
 		frappe.throw(_("Please set <b>Update Stock</b> checked"))
 	if doc.local_sale and doc.customer_or_farmer == "Vlcc Local Customer":
@@ -184,11 +184,11 @@ def set_camp_office_accounts(doc, method=None):
 	accounts = get_account_invoice()
 	if accounts:
 		for i in doc.items:
-			if doc.doctype == "Purchase Invoice":
+			if doc.doctype == "Purchase Invoice" and accounts.get('expense_account'):
 				i.expense_account = accounts.get('expense_account')
-			else:
+			elif doc.doctype == "Sales Invoice" and accounts.get('income_account'):
 				i.income_account = accounts.get('income_account')
 				i.warehouse = accounts.get('warehouse')
 		account = accounts.get('expense_account') if doc.doctype == "Purchase Invoice" else accounts.get('income_account')
-		if doc.remarks.find("[#"+account+"#]") == -1:
+		if account and doc.remarks.find("[#"+account+"#]") == -1:
 			doc.remarks = doc.remarks + " [#"+account+"#]"

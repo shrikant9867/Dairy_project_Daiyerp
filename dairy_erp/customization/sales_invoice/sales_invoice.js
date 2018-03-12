@@ -156,7 +156,7 @@ local_sale_operations = function(frm){
 set_farmer_config = function(frm) {
 	if(frm.doc.farmer){
 		frappe.call({
-			args: { "farmer": frm.doc.farmer },
+			args: { "farmer": frm.doc.farmer, "invoice": frm.doc.name },
 			method: "dairy_erp.customization.sales_invoice.sales_invoice.get_farmer_config",
 			callback: function(r) {
 				if(r.message){

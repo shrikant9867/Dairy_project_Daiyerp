@@ -19,9 +19,9 @@ def get_local_customer(company):
 
 
 @frappe.whitelist()
-def get_farmer_config(farmer= None):
+def get_farmer_config(farmer, invoice):
 	data = fetch_balance_qty()
-	eff_credit = get_effective_credit(frappe.db.get_value("Farmer",farmer,'full_name'))
+	eff_credit = get_effective_credit(frappe.db.get_value("Farmer",farmer,'full_name'), invoice)
 	data.update({'eff_credit': eff_credit, 'customer': frappe.db.get_value("Farmer",farmer,'full_name')})
 	return data
 
@@ -44,11 +44,11 @@ def fetch_balance_qty():
 	return items_dict
 
 @frappe.whitelist()
-def get_effective_credit(customer):
+def get_effective_credit(customer, invoice):
 	# SIdhant code for effective credit
 	company = frappe.db.get_value("User", frappe.session.user, "company")
-	purchase = frappe.db.sql("""select sum(outstanding_amount) as pur_amnt from `tabPurchase Invoice` where company = '{0}' and supplier = '{1}' and status not in ('Paid') and docstatus = '1'""".format(company, customer),as_dict=1)
-	sales = frappe.db.sql("""select sum(outstanding_amount) as si_amnt from `tabSales Invoice` where company = '{0}' and customer = '{1}' and status not in ('Paid') and docstatus = '1'""".format(company, customer),as_dict=1)
+	purchase = frappe.db.sql("""select sum(outstanding_amount) as pur_amnt from `tabPurchase Invoice` where company = '{0}' and supplier = '{1}' and status not in ('Paid') and docstatus = '1' and name <> '{2}'""".format(company, customer, invoice),as_dict=1)
+	sales = frappe.db.sql("""select sum(outstanding_amount) as si_amnt from `tabSales Invoice` where company = '{0}' and customer = '{1}' and status not in ('Paid') and docstatus = '1' and name <> '{2}'""".format(company, customer, invoice),as_dict=1)
 	if purchase[0].get('pur_amnt') == None:
 		eff_amt = 0.0
 		return round(eff_amt,2)
@@ -75,7 +75,7 @@ def validate_local_sale(doc, method):
 		frappe.throw(_("Service Note cannot be created if <b>'Effective Credit' </b> is zero"))
 	elif (doc.grand_total > doc.effective_credit and doc.service_note and not doc.by_cash) \
 	or (doc.service_note and doc.by_credit and doc.by_credit > doc.grand_total ):
-		frappe.throw(_("Service note cannot be created if Grand Total  greater than Effective Credit "))
+		frappe.throw(_("Service note cannot be created if Outstanding amount  greater than Effective Credit "))
 
 	if doc.local_sale:
 		if doc.customer_or_farmer == "Farmer":
@@ -98,12 +98,14 @@ def payment_entry(doc, method):
 	# if doc.grand_total > doc.effective_credit:
 	# 	frappe.throw(_("Service note cannot be created if Grand Total  greater than Effective Credit "))
 
-	input_ = get_effective_credit(doc.customer)
+	input_ = get_effective_credit(doc.customer, doc.name)
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.cash_payment:
 		frappe.throw(_("Cannot create, If <b>Effective Credit</b> is zero "))
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ < doc.grand_total and not doc.cash_payment\
-	and not doc.by_credit:
-		frappe.throw(_("Cannot create, If Grand Total is greater than <b>Effective Credit</b>"))
+	and not doc.by_credit and doc.multimode_payment:
+		frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
+	if not doc.multimode_payment and not doc.cash_payment and doc.grand_total > input_:
+		frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
 	if (doc.local_sale or doc.service_note) and doc.by_credit and doc.by_credit > input_:
 		frappe.throw(_("By Credit Amount must be less that equal to Effective Credit."))
 	if doc.local_sale and not doc.update_stock:
@@ -138,8 +140,8 @@ def make_payment_entry(si_doc):
 	# si_payment.party_balance = si_doc.grand_total
 	si_payment.outstanding_amount = 0
 	si_payment.flags.ignore_permissions = True
+	si_payment.flags.ignore_credit_validation = True
 	si_payment.flags.ignore_mandatory = True
-	si_payment.flags.ignore_validate = True
 	si_payment.submit()
 	frappe.msgprint(_("Payment Entry : {0} Created!!!".format("<a href='#Form/Payment Entry/{0}'>{0}</a>".format(si_payment.name))))
 
@@ -176,6 +178,7 @@ def get_account_invoice():
 	return {}
 
 def set_camp_office_accounts(doc, method=None):
+	# set income/expense account in item grid & also as remarks to filter it as account in reports.
 	accounts = get_account_invoice()
 	if accounts:
 		for i in doc.items:
@@ -184,3 +187,6 @@ def set_camp_office_accounts(doc, method=None):
 			else:
 				i.income_account = accounts.get('income_account')
 				i.warehouse = accounts.get('warehouse')
+		account = accounts.get('expense_account') if doc.doctype == "Purchase Invoice" else accounts.get('income_account')
+		if doc.remarks.find(account) == -1:
+			doc.remarks = doc.remarks + " [#"+account+"#]"

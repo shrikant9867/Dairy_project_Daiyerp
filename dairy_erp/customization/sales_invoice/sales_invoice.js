@@ -163,7 +163,7 @@ set_farmer_config = function(frm) {
 					frm.set_value("customer",r.message.customer)
 					frm.set_value("total_cow_milk_qty",r.message.cow_milk)
 					frm.set_value("total_buffalo_milk_qty",r.message.buff_milk)
-					frm.set_value("effective_credit",r.message.eff_credit)
+					frm.set_value("effective_credit",r.message.percent_eff_credit)
 				}
 			}
 		})

@@ -21,8 +21,10 @@ def get_local_customer(company):
 @frappe.whitelist()
 def get_farmer_config(farmer, invoice):
 	data = fetch_balance_qty()
-	eff_credit = get_effective_credit(frappe.db.get_value("Farmer",farmer,'full_name'), invoice)
-	data.update({'eff_credit': eff_credit, 'customer': frappe.db.get_value("Farmer",farmer,'full_name')})
+	farmer_doc = frappe.get_doc("Farmer",farmer)
+	eff_credit = get_effective_credit(farmer_doc.full_name, invoice)
+	percent_eff_credit = eff_credit * (farmer_doc.percent_effective_credit/100) if farmer_doc.percent_effective_credit else eff_credit
+	data.update({'eff_credit': eff_credit, "percent_eff_credit":percent_eff_credit,'customer': frappe.db.get_value("Farmer",farmer,'full_name')})
 	return data
 
 

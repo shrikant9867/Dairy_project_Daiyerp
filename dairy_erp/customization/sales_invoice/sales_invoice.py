@@ -44,7 +44,7 @@ def fetch_balance_qty():
 	return items_dict
 
 @frappe.whitelist()
-def get_effective_credit(customer, invoice):
+def get_effective_credit(customer, invoice=None):
 	# SIdhant code for effective credit
 	company = frappe.db.get_value("User", frappe.session.user, "company")
 	purchase = frappe.db.sql("""select sum(outstanding_amount) as pur_amnt from `tabPurchase Invoice` where company = '{0}' and supplier = '{1}' and status not in ('Paid') and docstatus = '1' and name <> '{2}'""".format(company, customer, invoice),as_dict=1)

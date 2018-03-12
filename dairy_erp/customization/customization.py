@@ -78,7 +78,7 @@ def make_accounts(doc):
 		stock_acc.parent_account = "Stock Assets - " + company_abbr
 		stock_acc.insert()
 		doc.stock_account = stock_acc.name
-
+		doc.save()
 
 def make_warehouse(doc):
 	"""configure w/h for dairy components"""
@@ -592,7 +592,6 @@ def set_mr_warehouse(doc,method=None):
 	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
 			for item in doc.items:
-				# item.original_qty = item.qty
 				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 
 	

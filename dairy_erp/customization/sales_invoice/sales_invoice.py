@@ -178,6 +178,7 @@ def get_account_invoice():
 	return {}
 
 def set_camp_office_accounts(doc, method=None):
+	# set income/expense account in item grid & also as remarks to filter it as account in reports.
 	accounts = get_account_invoice()
 	if accounts:
 		for i in doc.items:
@@ -186,3 +187,6 @@ def set_camp_office_accounts(doc, method=None):
 			else:
 				i.income_account = accounts.get('income_account')
 				i.warehouse = accounts.get('warehouse')
+		account = accounts.get('expense_account') if doc.doctype == "Purchase Invoice" else accounts.get('income_account')
+		if doc.remarks.find(account) == -1:
+			doc.remarks = doc.remarks + " [#"+account+"#]"

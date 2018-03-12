@@ -104,9 +104,9 @@ def payment_entry(doc, method):
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ < doc.grand_total and not doc.cash_payment\
 	and not doc.by_credit and doc.multimode_payment:
 		frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
-	if not doc.multimode_payment and not doc.cash_payment and doc.grand_total > input_:
+	if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and not doc.cash_payment and doc.grand_total > input_:
 		frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
-	if (doc.local_sale or doc.service_note) and doc.by_credit and doc.by_credit > input_:
+	if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.by_credit > input_:
 		frappe.throw(_("By Credit Amount must be less that equal to Effective Credit."))
 	if doc.local_sale and not doc.update_stock:
 		frappe.throw(_("Please set <b>Update Stock</b> checked"))
@@ -188,5 +188,5 @@ def set_camp_office_accounts(doc, method=None):
 				i.income_account = accounts.get('income_account')
 				i.warehouse = accounts.get('warehouse')
 		account = accounts.get('expense_account') if doc.doctype == "Purchase Invoice" else accounts.get('income_account')
-		if doc.remarks.find(account) == -1:
+		if doc.remarks.find("[#"+account+"#]") == -1:
 			doc.remarks = doc.remarks + " [#"+account+"#]"

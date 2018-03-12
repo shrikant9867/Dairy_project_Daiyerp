@@ -117,7 +117,7 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frm.doc[field] > frm.doc.grand_total) {
 			frm.set_value(field, 0.00);
 			refresh_field(field)
-			frappe.msgprint(__("<b>{0}</b> must be less than or equal to Grand Total", [frappe.model.unscrub(field)]))
+			frappe.msgprint(__("<b>{0}</b> must be less than or equal to Outstanding Amount", [frappe.model.unscrub(field)]))
 		}
 		else {
 			frm.set_value(trigger_map[field], frm.doc.grand_total - frm.doc[field])
@@ -132,7 +132,7 @@ frappe.ui.form.on("Sales Invoice", {
 	validate_multimode_payment: function(frm) {
 		multimode_amt = frm.doc.by_cash + frm.doc.by_credit
 		if(frm.doc.multimode_payment && (frm.doc.grand_total != multimode_amt)) {
-			frappe.throw("Sum of By Cash and By credit must be equal to Grand Total")
+			frappe.throw("Sum of By Cash and By credit must be equal to Outstanding Amount")
 		}
 	}
 })

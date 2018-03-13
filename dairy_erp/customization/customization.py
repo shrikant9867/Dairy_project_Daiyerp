@@ -42,7 +42,7 @@ def validate_dairy_company(doc,method=None):
 
 def make_account_and_warehouse(doc, method=None):
 	try:
-		if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name") and doc.address_type == "Camp Office":
+		if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name"):
 			make_accounts(doc)
 			make_warehouse(doc)
 		elif doc.address_type != "Head Office":

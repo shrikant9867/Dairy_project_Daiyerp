@@ -103,7 +103,7 @@ def payment_entry(doc, method):
 	input_ = get_effective_credit(doc.customer, doc.name)
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.cash_payment:
 		frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b>  zero, use Multimode Payment option for cash "))
-	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ < doc.grand_total and not doc.cash_payment\
+	if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and not doc.cash_payment\
 	and doc.by_credit and doc.multimode_payment:
 		frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
 	if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and not doc.cash_payment and doc.grand_total > input_:

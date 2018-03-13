@@ -28,7 +28,7 @@ def validate_dairy_company(doc,method=None):
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		make_user(doc)
 
-	if doc.address_type in ["Chilling Centre","Camp Office","Plant","Head Office"]:
+	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		doc.append("links",
 			{
 			"link_doctype": "Company",
@@ -45,9 +45,7 @@ def make_account_and_warehouse(doc, method=None):
 		if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name") and doc.address_type == "Camp Office":
 			make_accounts(doc)
 			make_warehouse(doc)
-		elif doc.address_type == "Vlcc":
-			pass
-		else:
+		elif doc.address_type != "Head Office":
 			frappe.throw(_("Please create Head Office first"))
 	except Exception as e:
 		raise e
@@ -185,18 +183,23 @@ def validate_headoffice(doc, method):
 		frappe.throw(_("Id exist Already"))
 	if frappe.db.sql("select address_type from tabAddress where address_type = 'Head Office' and not name = '{0}'".format(doc.name)) and doc.address_type == "Head Office":
 		frappe.throw(_("Head Office exist already"))
-	# if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.links:
-	# 	frappe.throw(_("Please Choose Company"))
+	if doc.address_type in ["Head Office"] and not doc.links:
+		frappe.throw(_("Please Choose Company"))
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.centre_id:
 		frappe.throw(_("Centre id needed"))
-	# if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and count!=1:
-	# 	frappe.throw(_("Only one entry allowed row"))
+	if doc.address_type in ["Head Office"] and count!=1:
+		frappe.throw(_("Only one entry allowed row"))
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		for row in doc.links:
 			if row.get('link_doctype') != "Company":
 				frappe.throw(_("Row entry must be company"))
 			elif row.get('link_name') and  frappe.get_value("Company",row.get('link_name'),'is_dairy') != 1:
 				frappe.throw(_("Please choose <b>Dairy only</b>"))
+	if doc.address_type == "Head Office":
+		for row in doc.links:
+			if row.get('link_doctype') != "Company":
+				frappe.throw(_("Row entry must be company"))
+
 
 	validate_user(doc)
 

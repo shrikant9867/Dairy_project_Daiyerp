@@ -26,7 +26,7 @@ class VillageLevelCollectionCentre(Document):
 			frappe.throw(_('User Exist already'))
 		
 		if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', self.email_id) == None:
-			frappe.throw(_('Email not valid'))
+			frappe.throw(_('Please enter valid Email Id'))
 
 	def validate_vlcc_abbr(self):
 		if frappe.db.sql("select abbr from `tabVillage Level Collection Centre`  where name!=%s and abbr=%s", (self.name, self.abbr)):

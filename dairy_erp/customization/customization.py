@@ -42,11 +42,12 @@ def validate_dairy_company(doc,method=None):
 
 def make_account_and_warehouse(doc, method=None):
 	try:
-		if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name"):
-			make_accounts(doc)
-			make_warehouse(doc)
-		elif doc.address_type != "Head Office":
-			frappe.throw(_("Please create Head Office first"))
+		if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
+			if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name"):
+				make_accounts(doc)
+				make_warehouse(doc)
+			elif doc.address_type != "Head Office":
+				frappe.throw(_("Please create Head Office first"))
 	except Exception as e:
 		raise e
 
@@ -180,7 +181,7 @@ def validate_headoffice(doc, method):
 	for row in doc.links:
 		count += 1
 	if doc.is_new() and frappe.db.sql("select name from `tabAddress` where centre_id = '{0}'".format(doc.centre_id)):
-		frappe.throw(_("Id exist Already"))
+		frappe.throw(_("Centre Id exist Already"))
 	if frappe.db.sql("select address_type from tabAddress where address_type = 'Head Office' and not name = '{0}'".format(doc.name)) and doc.address_type == "Head Office":
 		frappe.throw(_("Head Office exist already"))
 	if doc.address_type in ["Head Office"] and not doc.links:
@@ -216,7 +217,8 @@ def validate_user(doc):
 
 def update_warehouse(doc, method):
 	"""update w/h for address for selected type ==>[cc,co,plant]"""
-	make_warehouse(doc)
+	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
+		make_warehouse(doc)
 	
 
 @frappe.whitelist()

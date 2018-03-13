@@ -184,7 +184,7 @@ def validate_headoffice(doc, method):
 	if frappe.db.sql("select address_type from tabAddress where address_type = 'Head Office' and not name = '{0}'".format(doc.name)) and doc.address_type == "Head Office":
 		frappe.throw(_("Head Office exist already"))
 	if doc.address_type in ["Head Office"] and not doc.links:
-		frappe.throw(_("Please Choose Company"))
+		frappe.throw(_("Please Choose Company from <b>Reference Section</b>"))
 	if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and not doc.centre_id:
 		frappe.throw(_("Centre id needed"))
 	if doc.address_type in ["Head Office"] and count!=1:

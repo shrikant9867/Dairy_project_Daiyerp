@@ -102,7 +102,7 @@ def payment_entry(doc, method):
 	if doc.local_sale and not doc.update_stock:
 		frappe.throw(_("Please set <b>Update Stock</b> checked"))
 	if (doc.local_sale or doc.service_note) and has_common(["Farmer", "Vlcc Local Customer"], doc.customer_or_farmer)\
-	and doc.by_cash:
+	and (doc.by_cash or not doc.multimode_payment):
 		make_payment_entry(doc)
 
 @frappe.whitelist()

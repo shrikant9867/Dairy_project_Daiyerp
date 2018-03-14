@@ -71,11 +71,11 @@ def get_effective_credit(customer, invoice=None):
 
 @frappe.whitelist()
 def validate_local_sale(doc, method):
-	if doc.effective_credit <= 0.000 and doc.service_note == 1:
-		frappe.throw(_("Service Note cannot be created if <b>'Effective Credit' </b> is zero"))
+	if doc.effective_credit <= 0.000 and doc.service_note and not doc.by_cash:
+		frappe.throw(_("Cannot create Service Note, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
 	elif (doc.grand_total > doc.effective_credit and doc.service_note and not doc.by_cash) \
 	or (doc.service_note and doc.by_credit and doc.by_credit > doc.grand_total ):
-		frappe.throw(_("Service note cannot be created if Outstanding amount  greater than Effective Credit "))
+		frappe.throw(_("Service note cannot be created if Outstanding amount is greater than Effective Credit "))
 
 	if doc.local_sale:
 		if doc.customer_or_farmer == "Farmer":
@@ -91,8 +91,8 @@ def validate_local_sale(doc, method):
 @frappe.whitelist()
 def payment_entry(doc, method):
 	input_ = doc.effective_credit or 0
-	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0:
-		frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b>  zero, use Multimode Payment option for cash "))
+	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.by_cash:
+		frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment:
 		frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
 	if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and doc.grand_total > input_:

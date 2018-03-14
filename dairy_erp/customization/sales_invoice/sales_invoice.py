@@ -101,8 +101,8 @@ def payment_entry(doc, method):
 		frappe.throw(_("By Credit Amount must be less than or equal to Effective Credit."))
 	if doc.local_sale and not doc.update_stock:
 		frappe.throw(_("Please set <b>Update Stock</b> checked"))
-	if (doc.local_sale or doc.service_note) and has_common(["Farmer", "Vlcc Local Customer"], doc.customer_or_farmer)\
-	and (doc.by_cash or not doc.multimode_payment):
+	if (doc.local_sale or doc.service_note) and has_common([doc.customer_or_farmer],["Farmer", "Vlcc Local Customer"])\
+	and (doc.by_cash or not doc.multimode_payment) and (not doc.effective_credit or doc.by_cash):
 		make_payment_entry(doc)
 
 @frappe.whitelist()

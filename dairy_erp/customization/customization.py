@@ -297,6 +297,8 @@ def submit_dn(doc):
 def make_si(dn):
 	"""Make auto sales invoice on submit of DN @Camp (DN gets submit on submit of PR)"""
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+	accounts = frappe.db.get_value("Address",{"name":co},["income_account","expense_account","stock_account"],as_dict=1)
 
 	si = frappe.new_doc("Sales Invoice")
 	si.customer = dn.customer
@@ -313,9 +315,11 @@ def make_si(dn):
 				"amount": item.amount,
 				"warehouse": item.warehouse,
 				"cost_center": item.cost_center,
-				"delivery_note": dn.name
+				"delivery_note": dn.name,
+				"income_account": accounts.get('income_account')
 			})
 	si.selling_price_list = dn.selling_price_list#get_selling_price_list(si, is_camp_office=True)
+	si.remarks = "[#"+accounts.get('income_account')+"#]"
 	si.flags.ignore_permissions = True
 	si.save()
 	si.submit()
@@ -354,6 +358,7 @@ def make_pi_against_localsupp(po_doc,pr_doc):
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+	accounts = frappe.db.get_value("Address",{"name":co},["income_account","expense_account","stock_account"],as_dict=1)
 
 	pi = frappe.new_doc("Purchase Invoice")
 	pi.supplier = po_doc.supplier
@@ -366,9 +371,11 @@ def make_pi_against_localsupp(po_doc,pr_doc):
 				"qty":row_.qty,
 				"item_code": row_.item_code,
 				"rate": frappe.db.get('Item Price',{'name':row_.item_code,'buying':'1','company':po_doc.company,'price_list':po_doc.buying_price_list},'rate'),
-				"purchase_order": po_doc.name
+				"purchase_order": po_doc.name,
+				"expense_account":accounts.get('expense_account')
 			})
 	pi.buying_price_list = "LCOB"+"-"+co if frappe.db.get_value("Price List","LCOB"+"-"+co ,"name") else "GTCOB"#get_buying_price_list(pi, is_camp_office=True) #"LCOB" if frappe.db.get_value("Price List","LCOB") else "GTCOB"#get_buying_price_list(pi, is_camp_office=True)
+	pi.remarks = "[#"+accounts.get('expense_account')+"#]"
 	return pi
 
 def validate_qty_against_mi(doc):
@@ -421,6 +428,7 @@ def check_if_dropship(doc):
 	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+	accounts = frappe.db.get_value("Address",{"name":co},["income_account","expense_account","stock_account"],as_dict=1)
 
 	if user_doc.get("operator_type") == 'VLCC':
 		for item in doc.items:
@@ -458,9 +466,11 @@ def check_if_dropship(doc):
 									"qty": item.qty,
 									"rate": item.rate,
 									"amount": item.amount,
-									"warehouse": frappe.db.get_value("Address",{"name":po_doc.camp_office},"warehouse")
+									"warehouse": frappe.db.get_value("Address",{"name":po_doc.camp_office},"warehouse"),
+									"income_account": accounts.get('income_account')
 								})
 				si.selling_price_list = "LCOS" +"-"+co if frappe.db.get_value("Price List","LCOS"+"-"+co ,"name") else "GTCOS"#get_selling_price_list(si, is_vlcc=True)
+				si.remarks = "[#"+accounts.get('income_account')+"#]"
 				si.flags.ignore_permissions = True  		#Sales Invoice @CO in use case 2
 				si.save()
 				si.submit()
@@ -476,24 +486,32 @@ def check_if_dropship(doc):
 
 def mi_status_update(doc):
 
+	delivered_qty = 0
+
 	material_req_list = frappe.db.sql("""select sum(qty) as qty_sum, material_request from `tabPurchase Receipt Item` 
 				where parent = '{0}' group by material_request""".format(doc.name),as_dict=1)
 
 	for row in material_req_list:
 		material_request_updater = frappe.get_doc("Material Request",row.get('material_request'))
 		mr_qty = get_material_req_qty(material_request_updater)
+
+		for data in material_request_updater.items:
+			for row in doc.items:
+				if data.item_code == row.item_code:
+					data.new_dn_qty = data.qty - row.qty
+					data.completed_dn = data.completed_dn + row.qty
+					delivered_qty += data.completed_dn
 		
-		if mr_qty > row.get('qty_sum'):
+		if mr_qty > delivered_qty:
 			
 			material_request_updater.per_delivered = 99.99
 			material_request_updater.set_status("Partially Delivered")
 			material_request_updater.save()
 
-		elif mr_qty == row.get('qty_sum'):
+		elif mr_qty == delivered_qty:
 			material_request_updater.per_delivered = 100
 			material_request_updater.set_status("Delivered")
 			material_request_updater.save()
-	
 
 
 def validate_qty(doc, method):
@@ -564,11 +582,7 @@ def set_co_warehouse_pr(doc,method=None):
 				item.warehouse = vlcc
 				if item.rejected_qty:
 					item.rejected_warehouse = vlcc
-		doc.buying_price_list = "LCOVLCCB" if frappe.db.get_value("Price List","LVLCCB") else "GTCOVLCCB"
-
-
-
-
+		doc.buying_price_list = "LCOVLCCB" +"-"+branch_office.get('branch_office') if frappe.db.get_value("Price List","LCOVLCCB" +"-"+branch_office.get('branch_office')) else "GTCOVLCCB"
 
 
 def set_vlcc_warehouse(doc,method=None):
@@ -930,6 +944,13 @@ def validate_dn(doc,method):
 					if item.item_code == mi_items.item_code:
 						if item.qty > mi_items.new_dn_qty:
 							frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
+
+
+def item_permissions(user):
+
+	user_doc = frappe.db.get_value("User",user,'operator_type')
+	if user_doc == "Vet AI Technician":
+		return """tabItem.item_group in ('Veterinary Services','Medicines') """
 
 
 def update_mi(doc,method):

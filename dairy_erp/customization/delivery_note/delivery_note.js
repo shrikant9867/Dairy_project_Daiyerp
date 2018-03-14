@@ -1,17 +1,3 @@
-
-frappe.ui.form.on("Delivery Note", {
-	onload:function(frm){
-		console.log("___________________partial quantity")
-	},
-	refesh:function(frm){
-
-	},
-	validate:function(frm){
-		console.log("______________validate_____partial quantity")
-	},
-
-	
-});
 $.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));
 
 frappe.ui.form.on("Delivery Note Item", {
@@ -22,7 +8,6 @@ frappe.ui.form.on("Delivery Note Item", {
 			var child = locals[cdt][cdn];
 			if(child){ 
 				if (child.item_code){
-					console.log("_____item")
 					frappe.model.set_value(cdt, cdn, "qty",parseFloat(child.new_dn_qty));							
 				}
 			}	

@@ -129,6 +129,9 @@ class MaterialPriceList(Document):
 			self.price_list_doc(template_name='LCS'+"-"+company,buying=0,selling=1)
 			self.is_update = 1
 
+		self.save()
+
+
 	def update_reference_buying(self):
 
 		item_list = []

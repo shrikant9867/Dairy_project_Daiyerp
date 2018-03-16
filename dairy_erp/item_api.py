@@ -31,7 +31,7 @@ def get_items():
 		except Exception,e:
 			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
 			data = row.get('name'), message=e, traceback=frappe.get_traceback())
-			response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
+			response_dict.append({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
 	return response_dict
 
 

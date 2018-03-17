@@ -319,7 +319,7 @@ def make_si(dn):
 				"income_account": accounts.get('income_account')
 			})
 	si.selling_price_list = dn.selling_price_list#get_selling_price_list(si, is_camp_office=True)
-	si.remarks = "[#"+accounts.get('income_account')+"#]"
+	si.remarks = "[#"+accounts.get('income_account')+"#]" if accounts.get('income_account') else "" 
 	si.flags.ignore_permissions = True
 	si.save()
 	si.submit()

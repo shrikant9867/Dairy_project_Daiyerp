@@ -55,7 +55,7 @@ def make_fmrc(data, response_dict):
 			if i == "collectionEntryList":
 				for row in v:
 					try:
-						if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate') and data.get('processedstatus'):
+						if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
 							if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') and row.get('milkquantity') and row.get('rate') and row.get('status'):
 								response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): []})
 								fmrc_entry = validate_fmrc_entry(data,row)

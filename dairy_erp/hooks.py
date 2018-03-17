@@ -126,8 +126,7 @@ doc_events = {
     "Delivery Note":{
         "on_submit": ["dairy_erp.customization.customization.validate_pr","dairy_erp.customization.customization.update_mi"],
         "validate":["dairy_erp.customization.customization.set_vlcc_warehouse","dairy_erp.customization.customization.validate_dn"],
-        "after_insert":"dairy_erp.customization.customization.make_purchase_receipt",
-        "on_update":"dairy_erp.customization.delivery_note.delivery_note.get_partial_quatity"
+        "after_insert":"dairy_erp.customization.customization.make_purchase_receipt"
     },
     "Material Request":{
         "validate": ["dairy_erp.customization.customization.set_mr_warehouse","dairy_erp.customization.customization.set_chilling_wrhouse","dairy_erp.customization.material_request.material_request.validate"],
@@ -195,7 +194,8 @@ permission_query_conditions = {
     "Customer": "dairy_erp.customization.customization.customer_permission",
     "Company": "dairy_erp.customization.customization.company_permission",
     "Warehouse": "dairy_erp.customization.customization.warehouse_permission",
-    "Material Price List" : "dairy_erp.dairy_erp.doctype.material_price_list.material_price_list.permission_query_condition"
+    "Material Price List" : "dairy_erp.dairy_erp.doctype.material_price_list.material_price_list.permission_query_condition",
+    "Item": "dairy_erp.customization.customization.item_permissions"
 }
 # Testing
 # -------

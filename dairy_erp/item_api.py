@@ -25,13 +25,13 @@ def get_items():
 		'Artificial Insemination Services','Milk & Products') and is_stock_item=1 and disabled =0""",as_dict = 1)
 	for row in response_dict:
 		try:
-			row.update({"qty": get_item_qty(row.get('item_code')),"uom":frappe.db.sql("select um.uom,um.conversion_factor * i.standard_rate as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = '{0}'".format(row.get('item_code')),as_dict=1)})
+			row.update({"qty": get_item_qty(row.get('item_code')),"uom":frappe.db.sql("select um.uom,um.conversion_factor * i.standard_rate as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = %s",(row.get('item_code')),as_dict=1)})
 			# row.get('uom').append({"uom": frappe.db.get_value('Item',row.get('item_code'),'stock_uom'),"rate": frappe.db.get_value('Item',row.get('item_code'), "standard_rate")})
 		
 		except Exception,e:
 			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
 			data = row.get('name'), message=e, traceback=frappe.get_traceback())
-			response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
+			response_dict.append({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
 	return response_dict
 
 
@@ -98,7 +98,7 @@ def terms_condition():
 def get_supplier():
 	supplier = frappe.db.sql("""select su.name,su.contact_no from `tabSupplier` as su join `tabParty Account` as pa on  pa.parent = su.name where supplier_type in ('VLCC Local','Dairy Type') and pa.company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
 	for row in supplier:
-		update_supplier_value(row)
+		row.update({"items":[]})
 	return supplier
 
 

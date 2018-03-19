@@ -6,13 +6,14 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, cstr, cint
+from frappe.utils import flt, cstr, cint, has_common
 import time
 from frappe import _
 import api_utils as utils
 import requests
 import json
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
+from customization.price_list.price_list_customization import validate_price_list
 #from dairy_erp.customization.sales_invoice.sales_invoice import get_effective_credit
 
 @frappe.whitelist()
@@ -61,7 +62,9 @@ def get_masters():
 				"purchase_taxes":pr_taxes_templates(),
 				"diseases": get_diseases(),
 				"total_cow_milk": get_milk_attr('COW Milk'),
-				"total_buffalo_milk": get_milk_attr('BUFFALO Milk')
+				"total_buffalo_milk": get_milk_attr('BUFFALO Milk'),
+				"farmer_prices": { "items": get_party_item_prices("Farmer") },
+				"customer_prices": { "items": get_party_item_prices("Customer") }
 			})
 		else:
 			frappe.throw(_("User cannot be administrator"))
@@ -69,7 +72,74 @@ def get_masters():
 			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
 			data = "", message=e, traceback=frappe.get_traceback())
 			response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
-	return response_dict	
+	return response_dict
+
+def get_party_item_prices(party):
+	price_list = guess_price_list(party)
+	if price_list:
+		return get_item_prices(price_list)
+	return []
+
+def get_supplier_item_prices(supplier_type):
+	price_list = guess_price_list("Supplier", supplier_type)
+	if price_list:
+		return get_item_prices(price_list)
+	return []
+
+def guess_price_list(party_type, supplier_type=None):
+	company = frappe.db.get_value("User", frappe.session.user, "company")
+	if company:
+		if has_common([party_type],["Farmer","Customer"]):
+			# Farmer - LFS-{company_name} or GTFS
+			# Customer - LCS-{company_name} or GTCS
+			price_list_map = {"Farmer": ["LFS-"+company, "GTFS"], "Customer": ["LCS-"+company, "GTCS"]}
+			local_price, global_price = price_list_map[party_type]
+			if validate_price_list(local_price):
+				return local_price
+			elif validate_price_list(global_price):
+				return global_price
+		elif party_type == "Supplier" and supplier_type:
+			camp_off = frappe.db.get_value("Village Level Collection Centre",{
+				"name": company },"camp_office")
+			# dairy supplier - LCOVLCCB-{name} or GTCOVLCCB
+			if supplier_type == "VLCC Local":
+				if validate_price_list("LVLCCB-"+company):
+					return "LVLCCB-"+company
+				elif validate_price_list("GTVLCCB"):
+					return "GTVLCCB"
+			# local (vlcc) supplier - LVLCCB-{name} or GTVLCCB
+			elif supplier_type == 'Dairy Type' and camp_off:
+				if validate_price_list("LCOVLCCB-"+ camp_off):
+					return "LCOVLCCB-"+ camp_off
+				elif validate_price_list("GTCOVLCCB"):
+					return "GTCOVLCCB"
+		return ""
+
+
+def get_item_list():
+	# return item details along with uom
+	return frappe.db.sql("""select i.name, i.description, i.item_name,
+		uom.uom, uom.conversion_factor from `tabItem` i
+		left join `tabUOM Conversion Detail` uom
+		on uom.parent = i.name group by i.name, uom.uom""",
+	as_dict=True)
+
+def get_item_prices(price_list):
+	""" item prices with per uom rate """
+	items = get_item_list()
+	items_ = {}
+	for i in items:
+		item_price = frappe.db.get_value("Item Price", {
+			"price_list": price_list,
+			"item_code": i.get('name')
+		}, "price_list_rate") or 0
+		if i.get('name') not in items_:
+			uom = [{ 'uom': i.pop('uom'),  'rate': i.pop('conversion_factor') * item_price }]
+			i.update({'uom': uom, 'standard_rate': item_price})
+			items_[i.get('name')] = i
+		else:
+			items_[i.get('name')]['uom'].append({ 'uom':i.get('uom'), 'rate': i.pop('conversion_factor') * item_price })
+	return items_.values()
 
 
 def get_uom():
@@ -96,9 +166,9 @@ def terms_condition():
 
 
 def get_supplier():
-	supplier = frappe.db.sql("""select su.name,su.contact_no from `tabSupplier` as su join `tabParty Account` as pa on  pa.parent = su.name where supplier_type in ('VLCC Local','Dairy Type') and pa.company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
+	supplier = frappe.db.sql("""select su.name,su.contact_no, su.supplier_type from `tabSupplier` as su join `tabParty Account` as pa on  pa.parent = su.name where supplier_type in ('VLCC Local','Dairy Type') and pa.company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
 	for row in supplier:
-		row.update({"items":[]})
+		row.update({"items": get_supplier_item_prices(row.pop('supplier_type'))})
 	return supplier
 
 

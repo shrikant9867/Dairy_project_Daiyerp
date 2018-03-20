@@ -51,7 +51,10 @@ def create_ls(data):
 def local_sale_list():
 	response_dict = {}
 	try:
-		la_list = frappe.db.sql("""select name,customer_or_farmer,posting_date,additional_discount_percentage,discount_amount,grand_total,status,apply_discount_on from `tabSales Invoice` where local_sale =1 and company = '{0}'order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
+		la_list = frappe.db.sql("""select name,customer_or_farmer,posting_date,additional_discount_percentage,
+			discount_amount,grand_total,status,apply_discount_on, by_cash, by_credit, multimode_payment
+			from `tabSales Invoice` 
+			where local_sale =1 and company = '{0}'order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
 		for row in la_list:
 			if row.get('customer_or_farmer') == "Farmer":
 				row.update(

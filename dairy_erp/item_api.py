@@ -119,7 +119,7 @@ def guess_price_list(party_type, supplier_type=None):
 def get_item_list():
 	# return item details along with uom
 	return frappe.db.sql("""select i.name, i.description, i.item_name,
-		uom.uom, uom.conversion_factor from `tabItem` i
+		i.item_group,uom.uom, uom.conversion_factor from `tabItem` i
 		left join `tabUOM Conversion Detail` uom
 		on uom.parent = i.name group by i.name, uom.uom""",
 	as_dict=True)
@@ -247,11 +247,17 @@ def forgot_password(user_id):
 
 	return response_dict
 
-
 def calculate_effective_credit(id_):
 	from customization.sales_invoice.sales_invoice import get_effective_credit
-	farmer_name = frappe.db.get_value("Farmer",id_,'full_name')
-	return get_effective_credit(farmer_name)
+	farmer, eff_percent, is_ignore, vlcc = frappe.db.get_value("Farmer", id_ ,['full_name', 'percent_effective_credit', 'ignore_effective_credit_percent', 'vlcc_name'])
+	eff_credit = get_effective_credit(farmer)
+	percent_eff_credit = 0
+	if is_ignore:
+		eff_percent = 0
+	elif not eff_percent:
+		eff_percent = frappe.db.get_value("Village Level Collection Center",vlcc, "global_percent_effective_credit")
+	percent_eff_credit = eff_credit * (eff_percent/100) if eff_percent else eff_credit
+	return flt(percent_eff_credit, 2)
 
 def get_milk_attr(item):
 	if item:

@@ -15,6 +15,7 @@ class VillageLevelCollectionCentre(Document):
 		self.validate_vlcc_id()
 		self.validate_email_user()
 		self.validate_comp_exist()
+		self.validate_global_eff_credit_percent()
 
 	def validate_comp_exist(self):
 		print  self.name == frappe.db.get_value("Company",{"is_dairy":1},'name')
@@ -36,6 +37,11 @@ class VillageLevelCollectionCentre(Document):
 		if self.is_new():		
 			if frappe.db.sql("select amcu_id from `tabVillage Level Collection Centre` where amcu_id = %s",(self.amcu_id)):
 				frappe.throw(_("Amcu id exist already"))
+
+	def validate_global_eff_credit_percent(self):
+		# global eff-credit % must be between 0-99
+		if self.global_percent_effective_credit < 0 or self.global_percent_effective_credit > 99:
+			frappe.throw(_("Global Percent Effective Credit must be between 0 to 99"))
 
 	def after_insert(self):
 		"""create company and w/h configure associated company"""

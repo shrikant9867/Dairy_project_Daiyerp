@@ -28,6 +28,13 @@ frappe.ui.form.on('Farmer', {
 	address: function(frm) {
 		erpnext.utils.get_address_display(frm, "address", "address_details");
 	},
+	percent_effective_credit: function(frm) {
+		if(frm.doc.percent_effective_credit < 0 || frm.doc.percent_effective_credit > 99) {
+			frm.set_value("percent_effective_credit", 0)
+			refresh_field("percent_effective_credit")
+			frappe.msgprint(__("Percent Of Effective Credit must be between 0 to 99"))
+		}
+	}
 });
 
 

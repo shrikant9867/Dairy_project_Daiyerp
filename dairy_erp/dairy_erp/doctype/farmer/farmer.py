@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 
 class Farmer(Document):
@@ -49,5 +50,6 @@ class Farmer(Document):
 
 	def validate_eff_credit_percent(self):
 		# eff-credit % must be between 0-99
-		if self.percent_effective_credit and (self.percent_effective_credit < 0 or self.percent_effective_credit > 99):
+		eff_credit_percent = flt(self.percent_effective_credit)
+		if not self.ignore_effective_credit_percent and (eff_credit_percent < 0 or eff_credit_percent > 99):
 			frappe.throw(_("Percent Of Effective Credit must be between 0 to 99"))

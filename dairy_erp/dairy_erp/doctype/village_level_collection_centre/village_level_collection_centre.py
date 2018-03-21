@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from dairy_erp.dairy_utils import make_dairy_log
 import re
 from frappe.model.document import Document
@@ -40,7 +41,8 @@ class VillageLevelCollectionCentre(Document):
 
 	def validate_global_eff_credit_percent(self):
 		# global eff-credit % must be between 0-99
-		if self.global_percent_effective_credit and (self.global_percent_effective_credit < 0 or self.global_percent_effective_credit > 99):
+		eff_credit_percent = flt(self.global_percent_effective_credit)
+		if eff_credit_percent and (eff_credit_percent < 0 or eff_credit_percent > 99):
 			frappe.throw(_("Global Percent Effective Credit must be between 0 to 99"))
 
 	def after_insert(self):

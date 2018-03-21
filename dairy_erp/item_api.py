@@ -135,7 +135,7 @@ def get_item_prices(price_list):
 		}, "price_list_rate") or 0
 		if i.get('name') not in items_:
 			uom = [{ 'uom': i.pop('uom'),  'rate': i.pop('conversion_factor') * item_price }]
-			i.update({'uom': uom, 'standard_rate': item_price})
+			i.update({'uom': uom, 'standard_rate': item_price, "qty": get_item_qty(i.get('name'))})
 			items_[i.get('name')] = i
 		else:
 			items_[i.get('name')]['uom'].append({ 'uom':i.get('uom'), 'rate': i.pop('conversion_factor') * item_price })

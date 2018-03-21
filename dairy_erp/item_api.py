@@ -255,7 +255,7 @@ def calculate_effective_credit(id_):
 	if is_ignore:
 		eff_percent = 0
 	elif not eff_percent:
-		eff_percent = frappe.db.get_value("Village Level Collection Center",vlcc, "global_percent_effective_credit")
+		eff_percent = frappe.db.get_value("Village Level Collection Centre",vlcc, "global_percent_effective_credit")
 	percent_eff_credit = eff_credit * (eff_percent/100) if eff_percent else eff_credit
 	return flt(percent_eff_credit, 2)
 

@@ -40,7 +40,7 @@ class VillageLevelCollectionCentre(Document):
 
 	def validate_global_eff_credit_percent(self):
 		# global eff-credit % must be between 0-99
-		if self.global_percent_effective_credit < 0 or self.global_percent_effective_credit > 99:
+		if self.global_percent_effective_credit and (self.global_percent_effective_credit < 0 or self.global_percent_effective_credit > 99):
 			frappe.throw(_("Global Percent Effective Credit must be between 0 to 99"))
 
 	def after_insert(self):

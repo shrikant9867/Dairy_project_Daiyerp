@@ -12,7 +12,6 @@ frappe.ui.form.on("Purchase Receipt Item", {
 				frappe.throw("<b>Accepted Quantity</b> should not be greater than <b>Dispatched Quantity</b>")
 			}
 			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-			
 		}*/
 	}
 

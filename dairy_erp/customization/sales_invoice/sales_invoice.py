@@ -24,7 +24,7 @@ def get_farmer_config(farmer, invoice):
 	eff_credit = get_effective_credit(doc.full_name, invoice)
 	eff_percent = doc.percent_effective_credit if doc.percent_effective_credit and not doc.ignore_effective_credit_percent else 0
 	if not eff_percent and not doc.ignore_effective_credit_percent:
-		eff_percent = frappe.db.get_value("Village Level Collection Center", doc.vlcc_name, "global_percent_effective_credit")
+		eff_percent = frappe.db.get_value("Village Level Collection Centre", doc.vlcc_name, "global_percent_effective_credit")
 	percent_eff_credit = eff_credit * (eff_percent/100) if eff_percent else eff_credit
 	data.update({'eff_credit': eff_credit, "percent_eff_credit":flt(percent_eff_credit, 2),'customer': frappe.db.get_value("Farmer",farmer,'full_name')})
 	return data

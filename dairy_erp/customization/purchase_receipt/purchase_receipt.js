@@ -4,6 +4,10 @@ frappe.ui.form.on("Purchase Receipt Item", {
 		var item = frappe.get_doc(cdt, cdn);
 		//original_qty, received_qty, qty, rejected_qty
 		if(item.original_qty && item.purchase_order) {
+			if(item.qty > item.original_qty) {
+				frappe.msgprint("Accepted Qty should not be greater than Dispatched Qty")
+				frappe.model.set_value(cdt, cdn, "qty", 0)
+			}
 			frappe.model.round_floats_in(item, ["qty", "received_qty", "rejected_qty"]);
 			rejected_qty = flt(item.original_qty - item.qty, precision("rejected_qty", item));
 			frappe.model.set_value(cdt, cdn, "rejected_qty", rejected_qty)

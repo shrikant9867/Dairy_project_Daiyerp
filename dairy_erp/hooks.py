@@ -155,7 +155,7 @@ doc_events = {
         "validate": "dairy_erp.customization.payment_entry.payment_entry.validate_by_credit_invoice"
     },
     "User": {
-        "after_insert": ["dairy_erp.customization.user.user.add_user_permission","dairy_erp.customization.customization.create_operator"]
+        "after_insert": "dairy_erp.customization.user.user.add_user_permission"
     }
 }
 

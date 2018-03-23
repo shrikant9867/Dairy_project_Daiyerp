@@ -1025,6 +1025,3 @@ def item_permissions(user):
 	user_doc = frappe.db.get_value("User",user,'operator_type')
 	if user_doc == "Vet AI Technician":
 		return """tabItem.item_group in ('Veterinary Services','Medicines') """
-
-def create_operator(doc,method=None):
-	pass

@@ -23,8 +23,14 @@ frappe.ui.form.on("Sales Invoice", {
 		if(user_.operator_type != "Vet AI Technician"){
 			cur_frm.set_df_property('service_note', 'hidden', 1);
 			// cur_frm.set_df_property('due_date', 'hidden', 1);
-
 		}
+
+		frm.trigger("set_debit_to");
+	},
+
+	set_debit_to: function(frm) {
+		abbr = frappe.get_abbr(frm.doc.company);
+		frm.set_value("debit_to", "Debtors - "+abbr)
 	},
 
 	local_sale: function(frm) {

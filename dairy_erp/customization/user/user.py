@@ -10,8 +10,6 @@ def add_user_permission(doc, method=None):
 		# company - dairy
 		create_user_permission(doc.email, "Company", doc.company)
 
-
-
 def create_user_permission(user,doctype,docname):
 	try:
 		user_perm = frappe.new_doc("User Permission")

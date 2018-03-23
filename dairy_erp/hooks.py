@@ -125,7 +125,7 @@ doc_events = {
         "validate": "dairy_erp.customization.customization.set_vlcc_warehouse"
     },
     "Delivery Note":{
-        "on_submit": ["dairy_erp.customization.customization.validate_pr","dairy_erp.customization.customization.update_mi"],
+        "on_submit": "dairy_erp.customization.customization.validate_pr",
         "validate":["dairy_erp.customization.customization.set_vlcc_warehouse","dairy_erp.customization.customization.validate_dn"],
         "after_insert":"dairy_erp.customization.customization.make_purchase_receipt"
     },
@@ -155,7 +155,7 @@ doc_events = {
         "validate": "dairy_erp.customization.payment_entry.payment_entry.validate_by_credit_invoice"
     },
     "User": {
-        "after_insert": "dairy_erp.customization.user.user.add_user_permission"
+        "after_insert": ["dairy_erp.customization.user.user.add_user_permission","dairy_erp.customization.customization.create_operator"]
     }
 }
 
@@ -199,7 +199,10 @@ permission_query_conditions = {
     "Company": "dairy_erp.customization.customization.company_permission",
     "Warehouse": "dairy_erp.customization.customization.warehouse_permission",
     "Material Price List" : "dairy_erp.dairy_erp.doctype.material_price_list.material_price_list.permission_query_condition",
-    "Item": "dairy_erp.customization.customization.item_permissions"
+    "Item": "dairy_erp.customization.customization.item_permissions",
+    "User":"dairy_erp.customization.customization.user_permissions",
+    "Item Price":"dairy_erp.customization.customization.item_price_permission",
+    "Price List":"dairy_erp.customization.customization.price_list_permission"
 }
 # Testing
 # -------

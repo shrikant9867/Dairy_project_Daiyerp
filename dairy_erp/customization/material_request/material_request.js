@@ -28,10 +28,8 @@ frappe.ui.form.on('Material Request', {
 
 	},
 	onload : function (frm) {
-		console.log(get_session_user_type())
 		if (get_session_user_type().operator_type == "Chilling Centre"){
 			camp = address_attr(get_session_user_type().branch_office)
-			console.log(camp,"##")
 			frm.set_value("camp_office",camp.camp_office)
 		}
 	},
@@ -161,7 +159,6 @@ address_attr = function(branch_office) {
 		async:false,
 		callback: function(r){
 			if(r.message){
-			console.log(r.message.associated_camp_office)	
 				camp = {
 					"camp_office": r.message.associated_camp_office,
 				}		
@@ -175,7 +172,6 @@ address_attr = function(branch_office) {
 frappe.ui.form.on("Material Request Item", {
 
 	qty: function(frm, cdt, cdn) {
-		console.log("#################################################")
 		var child = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "new_dn_qty",parseFloat(child.qty));			
 		cur_frm.refresh_fields('items');

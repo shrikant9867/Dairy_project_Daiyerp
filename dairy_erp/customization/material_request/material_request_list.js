@@ -37,7 +37,6 @@ frappe.listview_settings['Material Request'] = {
 	},
 	onload: function(me) {
 		user_type = get_session_user_type()
-		console.log(user_type)
 		if ((frappe.session.user != "Administrator")) {
 			if (user_type.operator_type == "Camp Office") {
 				frappe.route_options = {
@@ -45,7 +44,6 @@ frappe.listview_settings['Material Request'] = {
 				};
 			}
 			if (user_type.operator_type == "VLCC"){
-				console.log("inside")
 				frappe.route_options = {
 					"company" : user_type.company
 				};

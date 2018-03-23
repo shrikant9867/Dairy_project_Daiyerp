@@ -13,11 +13,5 @@ frappe.ui.form.on("Delivery Note Item", {
 			}	
 			cur_frm.refresh_fields('item_code');
 		}
-	},
-	
-	qty:function(frm, cdt, cdn) {
-		console.log("qty")
-	},
-
-	
+	}
 });

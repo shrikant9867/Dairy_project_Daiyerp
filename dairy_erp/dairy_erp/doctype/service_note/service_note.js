@@ -38,7 +38,6 @@ frappe.ui.form.on('Service Note', {
 				},
 				callback: function(r) {
 					frm.set_value("taxes_tab" ,"");
-					// console.log("###",r.message)
 					if (r.message) {
 						$.each(r.message.taxes, function(i, d) {
 							var row = frappe.model.add_child(cur_frm.doc, "Service Note Taxes", "taxes_tab");
@@ -49,8 +48,6 @@ frappe.ui.form.on('Service Note', {
 							row.rate = d.rate;
 							row.tax_amount = d.tax_amount;
 							frm.events.get_total_taxes(frm)
-							// row.title = r.message.name
-							// row.company = r.message.company
 						});
 					}
 					refresh_field("taxes_tab");
@@ -112,7 +109,6 @@ frappe.ui.form.on('Service Note', {
 		$.each(frm.doc.items, function(idx, row){
 			total_amt += row.amount
 		})
-		// console.log(total_amt)
 		frm.set_value("total", total_amt);
 		frm.set_value("grand_total", total_amt);
 		frm.set_value("net_total", total_amt);
@@ -133,7 +129,6 @@ frappe.ui.form.on('Service Note', {
 			total_tax += row.tax_amount
 			row.total = total_tax
 		})
-		console.log("total_tax",total_tax)
 		frm.set_value("total_taxes_and_charges", total_tax);
 		frm.set_value("grand_total", frm.doc.grand_total + total_tax);
 		frm.refresh_field("total_taxes_and_charges")
@@ -195,7 +190,6 @@ frappe.ui.form.on('Service Note Item', {
 							method:"dairy_erp.dairy_erp.doctype.service_note.service_note.get_vlcc_warehouse",
 							callback: function(r) {
 								if(r.message) {
-									// console.log(r.message)
 									frappe.model.set_value(cdt, cdn, "warehouse",r.message)	
 								}
 							}
@@ -210,7 +204,6 @@ frappe.ui.form.on('Service Note Item', {
 							},
 							callback: function(r){
 								if(r.message){
-									// console.log(r.message.conversion_factor)
 									frappe.model.set_value(cdt, cdn, "conversion_factor",r.message.conversion_factor)
 								}
 							}

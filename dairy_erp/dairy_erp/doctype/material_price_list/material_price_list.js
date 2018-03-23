@@ -4,7 +4,7 @@
 frappe.ui.form.on('Material Price List', {
 	refresh: function(frm) {
 
-		var template = ['GTVLCCB','GTFS','GTCS','GTCOVLCCB','GTCOB','GTCOS','LCOVLCCB']
+		var template = ['GTVLCCB','GTFS','GTCS','GTCOVLCCB','GTCOB','GTCOS','LCOVLCCB'+"-"+frm.doc.camp_office]
 
 		if (!in_list(frappe.user_roles,"Dairy Manager") && !frm.doc.__islocal){
 			if (in_list(template,frm.doc.price_list)){

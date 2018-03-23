@@ -108,17 +108,12 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Setup"),
+			"label": _("Payment Tool"),
 			"icon": "icon-star",
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Company",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Warehouse",
+					"name": "VLCC Payment Cycle",
 					"description": _(" "),
 				},
 				{
@@ -210,6 +205,12 @@ def get_data():
 					"type": "report",
 					"name": "Vlcc Net Pay Off",
 					"doctype": "Village Level Collection Centre",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "VLCC Payment Settlement",
+					"doctype": "VLCC Payment Cycle",
 					"is_query_report": True
 				}
 			]

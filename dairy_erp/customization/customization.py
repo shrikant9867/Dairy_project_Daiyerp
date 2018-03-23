@@ -12,9 +12,9 @@ from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
+from frappe.utils import has_common
 from dairy_erp.customization.price_list.price_list_customization \
 	import get_selling_price_list, get_buying_price_list
-
 
 
 def validate_dairy_company(doc,method=None):
@@ -82,15 +82,27 @@ def make_accounts(doc):
 def make_warehouse(doc):
 	"""configure w/h for dairy components"""
 	if frappe.db.sql("""select name from `tabAddress` where address_type ='Head Office'"""):
+
 		company_abbr = frappe.db.get_value("Company",doc.links[0].link_name,"abbr")
 		if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and \
 		   not frappe.db.exists('Warehouse', doc.address_title + " - "+ company_abbr):
+
 				wr_house_doc = frappe.new_doc("Warehouse")
 				wr_house_doc.warehouse_name = doc.address_title
 				wr_house_doc.company =  doc.links[0].link_name if doc.links else []
 				# wr_house_doc.account = doc.address_title + " Stock - " + company_abbr
 				wr_house_doc.insert()
 				doc.warehouse = wr_house_doc.name
+				doc.save()
+
+		if doc.address_type in ["Chilling Centre","Head Office","Camp Office","Plant"] and \
+		   not frappe.db.exists('Warehouse', doc.address_title +"-Rejected"+ " - "+ company_abbr):
+				wr_house_doc = frappe.new_doc("Warehouse")
+				wr_house_doc.warehouse_name = doc.address_title + "-Rejected"
+				wr_house_doc.company =  doc.links[0].link_name if doc.links else []
+				# wr_house_doc.account = doc.address_title + " Stock - " + company_abbr
+				wr_house_doc.insert()
+				doc.rejected_warehouse = wr_house_doc.name
 				doc.save()
 	else:
 		frappe.throw("Please create Head Office first for Dairy")
@@ -574,16 +586,17 @@ def set_co_warehouse_pr(doc,method=None):
 				if not item.delivery_note:
 					item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
 					if item.rejected_qty:
-						item.rejected_warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
+						warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),["warehouse","rejected_warehouse"],as_dict=1)
+						item.rejected_warehouse = warehouse.get('rejected_warehouse') if warehouse.get('rejected_warehouse') else warehouse.get('warehouse')
 	if branch_office.get('operator_type') == 'VLCC':
 		if doc.items:
-			vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
+			vlcc_wr = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},["warehouse","rejected_warehouse"],as_dict=1)
 			co = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"camp_office")
 
 			for item in doc.items:
-				item.warehouse = vlcc
+				item.warehouse = vlcc_wr.get('warehouse')
 				if item.rejected_qty:
-					item.rejected_warehouse = vlcc
+					item.rejected_warehouse = vlcc_wr.get('rejected_warehouse')
 		doc.buying_price_list = "LCOVLCCB"+"-"+co if frappe.db.get_value("Price List","LCOVLCCB"+"-"+co) else "GTCOVLCCB"
 
 
@@ -885,6 +898,123 @@ def customer_permission(user):
 		else:
 			return """tabCustomer.customer_group = 'Guest' """
 
+def user_permissions(user):
+
+	roles = frappe.get_roles()
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
+	if user=="Administrator":
+		return ""
+	elif "Dairy Manager" in roles:
+
+		user_ = frappe.db.sql("""select user.name from tabUser user, `tabHas Role` user_role where 
+			user_role.role = "Dairy Operator" and 
+			user_role.parent = user.name and 
+			user.enabled and user.name not in ('Guest', 'Administrator')""",as_dict=True)
+
+		user_list = ['"%s"'%data.name for data in user_]
+
+		if user_list:
+			return """tabUser.name = '%(user)s' or  tabUser.name in ({user_list})"""\
+				.format(user_list=','.join(user_list))
+		else:
+			return """tabUser.name = '%(user)s'"""
+
+	elif "Dairy Operator" in roles:
+
+		return """tabUser.name = '%(user)s'"""
+
+	elif "Camp Manager" in roles:
+	
+		user_ = frappe.db.sql("""select user.name from tabUser user, `tabHas Role` user_role where 
+			user_role.role = "Camp Operator" and 
+			user.branch_office = %s and user_role.parent = user.name and 
+			user.enabled and user.name not in ('Guest', 'Administrator')""",(user_doc.get('branch_office')),as_dict=True)
+
+		user_list = ['"%s"'%data.name for data in user_]
+		
+		if user_list:
+			return """tabUser.name = '%(user)s' or  tabUser.name in ({user_list})"""\
+				.format(user_list=','.join(user_list))
+		else:
+			return """tabUser.name = '%(user)s'"""
+
+	elif "Camp Operator" in roles:
+		return """tabUser.name = '%(user)s'"""
+
+	elif "Vlcc Manager" in roles:
+
+		user_ = frappe.db.sql("""select user.name as name from tabUser user, 
+				`tabHas Role` user_role,`tabVeterinary AI Technician` vet 
+				where user_role.role in ("Vlcc Operator","Vet/AI Technician") and 
+				user_role.parent = user.name and 
+				user.company = vet.vlcc and user.company = %s and 
+				user.enabled and user.name not in ("Guest", "Administrator") 
+				group by name""",(user_doc.get('company')),as_dict=1)
+
+		user_list = ['"%s"'%data.name for data in user_]
+		
+		if user_list:
+			return """tabUser.name = '%(user)s' or  tabUser.name in ({user_list})"""\
+				.format(user_list=','.join(user_list))
+		else:
+			return """tabUser.name = '%(user)s'"""
+
+	elif "Vlcc Operator" in roles:
+		return """tabUser.name = '%(user)s'"""
+
+	elif "Vet/AI Technician" in roles:
+		return """tabUser.name = '%(user)s'"""
+
+def item_price_permission(user):
+
+	roles = frappe.get_roles()
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+
+	lcob = "LCOB"+"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
+	lcos = "LCOS" +"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
+
+	lvlccb = "LVLCCB" +"-"+user_doc.get('company') if user_doc.get('company') and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) else ""
+	lfs = "LFS" +"-"+user_doc.get('company') if user_doc.get('company') and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) else ""
+	lcs = "LCS" +"-"+user_doc.get('company') if user_doc.get('company') and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) else ""
+	lcovlccb = "LCOVLCCB" +"-"+co if co else ""
+
+
+	if user != 'Administrator' and ('Camp Manager' in roles or 'Camp Operator' in roles):
+		return """`tabItem Price`.price_list in ('GTCOB','GTCOS','{0}','{1}') """.format(lcob,lcos)
+	elif user != 'Administrator' and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+		return """`tabItem Price`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','{0}','{1}','{2}','{3}') """.format(lvlccb,lfs,lcs,lcovlccb)
+	elif user != 'Administrator' and 'Vet/AI Technician' in roles:
+		return """`tabItem Price`.price_list in ('GTFS','{0}') """.format(lfs)
+	elif user != 'Administrator' and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
+		return """`tabItem Price`.price_list in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','GTCOB','GTCOS') """
+
+def price_list_permission(user):
+
+	roles = frappe.get_roles()
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+
+	lcob = "LCOB"+"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
+	lcos = "LCOS" +"-"+user_doc.get('branch_office') if user_doc.get('branch_office') else ""
+
+	lvlccb = "LVLCCB" +"-"+user_doc.get('company') if user_doc.get('company') and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) else ""
+	lfs = "LFS" +"-"+user_doc.get('company') if user_doc.get('company') and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) else ""
+	lcs = "LCS" +"-"+user_doc.get('company') if user_doc.get('company') and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) else ""
+	lcovlccb = "LCOVLCCB" +"-"+co if co else ""
+
+
+	if user != 'Administrator' and ('Camp Manager' in roles or 'Camp Operator' in roles):
+		return """`tabPrice List`.name in ('GTCOB','GTCOS','{0}','{1}','Standard Buying','Standard Selling')""".format(lcob,lcos)
+	elif user != 'Administrator' and ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+		return """`tabPrice List`.name in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','{0}','{1}','{2}','{3}','Standard Buying','Standard Selling') """.format(lvlccb,lfs,lcs,lcovlccb)
+	elif user != 'Administrator' and 'Vet/AI Technician' in roles:
+		return """`tabPrice List`.name in ('GTFS','{0}','Standard Buying','Standard Selling') """.format(lfs)
+	elif user != 'Administrator' and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
+		return """`tabPrice List`.name in ('GTVLCCB','GTFS','GTCS','GTCOVLCCB','GTCOB','GTCOS','Standard Buying','Standard Selling') """
+	
+
 
 def set_camp(doc, method):
 
@@ -954,18 +1084,5 @@ def item_permissions(user):
 	if user_doc == "Vet AI Technician":
 		return """tabItem.item_group in ('Veterinary Services','Medicines') """
 
-
-def update_mi(doc,method):
+def create_operator():
 	pass
-	# update_modified = now()
-	# material_request_updater =frappe.get_doc("Material Request",'MREQ-00122')
-	# material_request_updater.per_delivered = 100
-	# material_request_updater.db_set('status', "Delivered", update_modified = update_modified)
-	# material_request_updater.save()
-	# frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00123'""",debug=1)
-	# frappe.db.commit()
-
-def test():
-	pass
-	# print "#####)))"
-	# frappe.db.sql("""update `tabMaterial Request` set status = 'Closed', per_delivered = 100 where name = 'MREQ-00122'""")

@@ -16,11 +16,6 @@ frappe.ui.form.on('Local Sale', {
 		 	frappe.throw(__("Please enter Farmer"))
 		 }
 	},
-
-	refresh: function(frm) {
-		console.log("###dd	")
-	},
-
 	onload: function(frm) {
 		frappe.call({
 			method: "dairy_erp.dairy_erp.doctype.local_sale.local_sale.fetch_balance_qty",
@@ -67,11 +62,9 @@ frappe.ui.form.on('Local Sale', {
 					"tax": frm.doc.taxes_and_charges
 				},
 				callback: function(r) {
-					// console.log(r.message)
 					frm.set_value("taxe_charge_template" ,"");
 					if (r.message) {
 						$.each(r.message.taxes, function(i, d) {
-							console.log(d)
 							var row = frappe.model.add_child(cur_frm.doc, "Service Note Taxes", "taxe_charge_template");
 							row.charge_type = d.charge_type;
 							row.account_head = d.account_head;
@@ -80,16 +73,11 @@ frappe.ui.form.on('Local Sale', {
 							row.rate = d.rate;
 							row.tax_amount = d.tax_amount;
 							frm.events.get_total_taxes(frm)
-							// row.title = r.message.name
-							// row.company = r.message.company
 						});
 					}
 					refresh_field("taxe_charge_template");
 				}
 			});
-		}
-		else {
-			// cur_frm.set_value("total_taxes_and_charges",0.0)
 		}
 	},
 
@@ -109,7 +97,6 @@ frappe.ui.form.on('Local Sale', {
 	},
 
 	discount_amount: function(frm) {
-		console.log("----")
 		item_total = get_items_amount(frm)
 		tax_total = get_taxes_total(frm)
 		if (frm.doc.discount_amount) {
@@ -181,7 +168,6 @@ frappe.ui.form.on('Local Sale', {
 			total_tax += row.tax_amount
 			row.total = total_tax
 		})
-		// console.log("total_tax",total_tax)
 		frm.set_value("total_taxes_and_charges", total_tax);
 		var grand_total = (total_tax + frm.doc.total) - cur_frm.doc.discount_amount
 		frm.set_value("grand_total", grand_total);
@@ -216,10 +202,6 @@ frappe.ui.form.on('Local Sale', {
 
 
 frappe.ui.form.on('Local Sales Item', {
-	refresh: function(frm, cdt, cdn) {
-		console.log("$$$")
-	},
-
 	item_code: function(frm, cdt, cdn) {
 			if (cur_frm.doc.local_customer_or_farmer){
 				var child = locals[cdt][cdn];
@@ -264,7 +246,6 @@ frappe.ui.form.on('Local Sales Item', {
 							},
 							callback: function(r){
 								if(r.message){
-									// console.log(r.message.conversion_factor)
 									frappe.model.set_value(cdt, cdn, "conversion_factor",r.message.conversion_factor)
 								}
 							}
@@ -330,10 +311,8 @@ frappe.ui.form.on('Local Sales Item', {
 });
 
 frappe.ui.form.on("Local Sales Item", "items_remove", function(frm) {
-	console.log("#####")
 	total_ = get_items_amount()
 	taxes_ = get_taxes_total()
-	console.log(total_,taxes_,"11")
 	cur_frm.set_value("total",total_)
 	cur_frm.set_value("grand_total",(total_ + taxes_) - cur_frm.doc.discount_amount)
 	
@@ -343,10 +322,8 @@ get_items_amount = function(frm) {
 	//getter setter item total
 	total = 0
 	$.each(cur_frm.doc.items, function(i,value){
-		console.log(value.amount)
 		total += value.amount
 	})
-	console.log("tt",total)
 	return total
 }
 

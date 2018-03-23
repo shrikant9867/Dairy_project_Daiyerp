@@ -61,12 +61,21 @@ class VillageLevelCollectionCentre(Document):
 		comp_doc.save() 
 
 	def create_warehouse(self):
+
 		wr_hs_doc = frappe.new_doc("Warehouse")
 		wr_hs_doc.warehouse_name = self.vlcc_name
 		wr_hs_doc.company = self.vlcc_name
 		wr_hs_doc.flags.ignore_permissions = True
 		wr_hs_doc.save()
 		self.warehouse = wr_hs_doc.name
+		self.save()
+
+		rej_wr_doc = frappe.new_doc("Warehouse")
+		rej_wr_doc.warehouse_name = self.vlcc_name + "-Rejected"
+		rej_wr_doc.company = self.vlcc_name 
+		rej_wr_doc.flags.ignore_permissions = True
+		rej_wr_doc.save()
+		self.rejected_warehouse =rej_wr_doc.name
 		self.save()
 
 	def create_supplier(self):

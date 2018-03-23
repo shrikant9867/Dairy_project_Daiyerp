@@ -18,6 +18,15 @@ dairy.price_list.PriceListController = Class.extend({
 	farmer:function(){
 		if(!in_list(STANDARD_USERS, frappe.session.user))
 			dairy.price_list.set_price_list_(this.frm.doc);
+	},
+
+	validate: function(){
+		$.each(cur_frm.doc.items, function(idx, row) {
+			console.log(row.rate)
+			if(!row.rate || row.rate == 0) {
+				frappe.throw(__("The item price for selected <b>{0}</b> is zero, do set the Material Price list for that Item", [row.item_code]))
+			}
+		})
 	}
 })
 

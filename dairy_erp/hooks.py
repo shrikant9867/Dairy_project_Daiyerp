@@ -108,9 +108,9 @@ after_install = "dairy_erp.customization.customization.after_install"
 
 doc_events = {
     "Address": {
-        "after_insert": ["dairy_erp.customization.customization.validate_dairy_company","dairy_erp.customization.customization.make_account_and_warehouse"],
+        "after_insert": ["dairy_erp.customization.customization.validate_dairy_company","dairy_erp.customization.customization.make_account_and_warehouse", "dairy_erp.customization.address.address.create_manager_operator_user"],
         "on_update": "dairy_erp.customization.customization.update_warehouse",
-        "validate": "dairy_erp.customization.customization.validate_headoffice"
+        "validate": ["dairy_erp.customization.customization.validate_headoffice", "dairy_erp.customization.address.address.create_manager_operator_user"]
     },
     "Purchase Order":{
         "validate":["dairy_erp.customization.customization.set_co_warehouse_po","dairy_erp.customization.customization.set_page_break"],
@@ -153,6 +153,9 @@ doc_events = {
     },
     "Payment Entry": {
         "validate": "dairy_erp.customization.payment_entry.payment_entry.validate_by_credit_invoice"
+    },
+    "User": {
+        "after_insert": "dairy_erp.customization.user.user.add_user_permission"
     }
 }
 

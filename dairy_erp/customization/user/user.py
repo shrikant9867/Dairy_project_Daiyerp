@@ -6,9 +6,9 @@ def add_user_permission(doc, method=None):
 		# address - branch office
 		create_user_permission(doc.email, "Address", doc.branch_office)
 
-		if has_common([doc.operator_type], ["Camp Office", "VLCC"]) and doc.company:
-			# company - dairy
-			create_user_permission(doc.email, "Company", doc.company)
+	if has_common([doc.operator_type], ["Camp Office", "VLCC"]) and doc.company:
+		# company - dairy
+		create_user_permission(doc.email, "Company", doc.company)
 
 
 

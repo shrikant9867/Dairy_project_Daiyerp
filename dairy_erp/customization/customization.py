@@ -886,19 +886,26 @@ def user_permissions(user):
 
 	elif "Vlcc Manager" in roles:
 
-		user_ = frappe.db.sql("""select user.name as name from tabUser user, 
-				`tabHas Role` user_role,`tabVeterinary AI Technician` vet 
-				where user_role.role in ("Vlcc Operator","Vet/AI Technician") and 
-				user_role.parent = user.name and 
-				user.company = vet.vlcc and user.company = %s and 
-				user.enabled and user.name not in ("Guest", "Administrator") 
-				group by name""",(user_doc.get('company')),as_dict=1)
+		user_ = frappe.db.sql("""select user.name as name from tabUser user,  `tabHas Role` user_role 
+				where user_role.role in ("Vlcc Operator") and  user_role.parent = user.name and user.company = %s and  
+				user.enabled and user.name not in ("Guest", "Administrator");""",(user_doc.get('company')),as_dict=1)
+
+		vet = frappe.db.sql("""select email from `tabVeterinary AI Technician` where
+			 vlcc = %s""",(user_doc.get('company')),as_dict=True)
 
 		user_list = ['"%s"'%data.name for data in user_]
+
+		vet_list = ['"%s"'%data.email for data in vet]
 		
-		if user_list:
-			return """tabUser.name = '%(user)s' or  tabUser.name in ({user_list})"""\
+		if user_list and vet_list:
+			return """tabUser.name = '%(user)s' or  tabUser.name in ({user_list}) or tabUser.name in ({vet_list})"""\
+				.format(user_list=','.join(user_list),vet_list=','.join(vet_list))
+		elif user_list and not vet_list:
+			return """tabUser.name = '%(user)s' or  tabUser.name in ({user_list}) """\
 				.format(user_list=','.join(user_list))
+		elif vet_list and not user_list:
+			return """tabUser.name = '%(user)s' or  tabUser.name in ({vet_list}) """\
+				.format(vet_list=','.join(vet_list))
 		else:
 			return """tabUser.name = '%(user)s'"""
 

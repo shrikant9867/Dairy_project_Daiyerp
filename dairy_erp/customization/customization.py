@@ -1026,5 +1026,5 @@ def item_permissions(user):
 	if user_doc == "Vet AI Technician":
 		return """tabItem.item_group in ('Veterinary Services','Medicines') """
 
-def create_operator():
+def create_operator(doc,method=None):
 	pass

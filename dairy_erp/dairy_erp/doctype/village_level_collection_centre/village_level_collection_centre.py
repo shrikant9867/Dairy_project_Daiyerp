@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from dairy_erp.dairy_utils import make_dairy_log
 import re
 from frappe.model.document import Document
@@ -15,6 +16,7 @@ class VillageLevelCollectionCentre(Document):
 		self.validate_vlcc_id()
 		self.validate_email_user()
 		self.validate_comp_exist()
+		self.validate_global_eff_credit_percent()
 
 	def validate_comp_exist(self):
 		print  self.name == frappe.db.get_value("Company",{"is_dairy":1},'name')
@@ -37,6 +39,12 @@ class VillageLevelCollectionCentre(Document):
 			if frappe.db.sql("select amcu_id from `tabVillage Level Collection Centre` where amcu_id = %s",(self.amcu_id)):
 				frappe.throw(_("Amcu id exist already"))
 
+	def validate_global_eff_credit_percent(self):
+		# global eff-credit % must be between 0-99
+		eff_credit_percent = flt(self.global_percent_effective_credit)
+		if eff_credit_percent and (eff_credit_percent < 0 or eff_credit_percent > 99):
+			frappe.throw(_("Global Percent Effective Credit must be between 0 to 99"))
+
 	def after_insert(self):
 		"""create company and w/h configure associated company"""
 	
@@ -45,7 +53,6 @@ class VillageLevelCollectionCentre(Document):
 		self.create_supplier()
 		self.create_customer()
 		self.create_user()
-		self.create_camp_permission()
 		
 		
 	def on_update(self):
@@ -189,7 +196,6 @@ class VillageLevelCollectionCentre(Document):
 			operator.save()
 			# add_all_roles_to(operator.name)
 			operator.add_roles("Vlcc Manager")
-			create_user_permission(operator.email,self.name)
 			
 		if self.operator_same_as_agent and not frappe.db.exists('User', self.operator_email_id):
 			agent = frappe.new_doc("User")
@@ -204,12 +210,6 @@ class VillageLevelCollectionCentre(Document):
 			agent.save()
 			agent.add_roles("Vlcc Operator")
 			# add_all_roles_to(agent.name)
-			create_user_permission(agent.email,self.name)
-
-	def create_camp_permission(self):
-		
-		camp_operator = frappe.db.get_value("Address",{"name":self.camp_office},"user")
-		create_user_permission(camp_operator,self.name)
 
 	def local_customer_vlcc(self):
 		#local supplier specification for data analytics
@@ -224,15 +224,3 @@ class VillageLevelCollectionCentre(Document):
 				})
 			custmer_doc_vlcc.flags.ignore_permissions = True		
 			custmer_doc_vlcc.save()
-
-def create_user_permission(user_email,name):
-	perm_doc = frappe.new_doc("User Permission")
-	perm_doc.user = user_email
-	perm_doc.allow = "Company"
-	perm_doc.for_value = name
-	perm_doc.apply_for_all_roles = 0
-	perm_doc.flags.ignore_permissions = True
-	perm_doc.flags.ignore_mandatory = True
-	perm_doc.save()
-
-			

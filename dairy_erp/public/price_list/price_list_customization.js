@@ -3,20 +3,30 @@ frappe.provide("dairy.price_list");
 STANDARD_USERS = ["Guest", "Administrator"]
 dairy.price_list.PriceListController = Class.extend({
 	onload: function() {
-		if(! in_list(STANDARD_USERS, frappe.session.user))
+		if(!in_list(STANDARD_USERS, frappe.session.user))
 			dairy.price_list.set_price_list_(this.frm.doc);
 	},
+
 	supplier:function(){
-		if(! in_list(STANDARD_USERS, frappe.session.user))
+		if(!in_list(STANDARD_USERS, frappe.session.user))
 			dairy.price_list.set_price_list_(this.frm.doc);
 	},
 	customer:function(){
-		if(! in_list(STANDARD_USERS, frappe.session.user))
+		if(!in_list(STANDARD_USERS, frappe.session.user))
 			dairy.price_list.set_price_list_(this.frm.doc);
 	},
 	farmer:function(){
-		if(! in_list(STANDARD_USERS, frappe.session.user))
+		if(!in_list(STANDARD_USERS, frappe.session.user))
 			dairy.price_list.set_price_list_(this.frm.doc);
+	},
+
+	validate: function(){
+		$.each(cur_frm.doc.items, function(idx, row) {
+			console.log(row.rate)
+			if(!row.rate || row.rate == 0) {
+				frappe.throw(__("The item price for selected <b>{0}</b> is zero, do set the Material Price list for that Item", [row.item_code]))
+			}
+		})
 	}
 })
 
@@ -42,10 +52,17 @@ dairy.price_list.guess_price_list = function(transaction_type,doc) {
 			if(!r.exc && r.message){
 				cur_frm.set_value(price_list_field, r.message)
 				cur_frm.refresh_field(price_list_field)
+				dairy.price_list.trigger_price_list();
 			}
-			/*else {
-				frappe.msgprint(__("Local or Global {0} not found", [frappe.model.unscrub(price_list_field)]))
-			}*/
+			dairy.price_list.trigger_price_list();
 		}
 	})
+}
+
+dairy.price_list.trigger_price_list = function() {
+	// trigger price list rate
+	$.each(cur_frm.doc.items, function(idx, row) {
+		cur_frm.script_manager.trigger("price_list_rate", row.doctype, row.name);
+	})
+	cur_frm.refresh_field("items")
 }

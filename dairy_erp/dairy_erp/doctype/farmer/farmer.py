@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 
 class Farmer(Document):
@@ -43,5 +44,12 @@ class Farmer(Document):
 		custmer_doc.insert()
 
 	def validate(self):
-		if len(self.farmer_id) > 4:
+		self.validate_eff_credit_percent()
+		if len(self.farmer_id) != 4:
 			frappe.throw(_("Only <b>4</b> Digits Farmer ID Allowed"))
+
+	def validate_eff_credit_percent(self):
+		# eff-credit % must be between 0-99
+		eff_credit_percent = flt(self.percent_effective_credit)
+		if not self.ignore_effective_credit_percent and (eff_credit_percent < 0 or eff_credit_percent > 99):
+			frappe.throw(_("Percent Of Effective Credit must be between 0 to 99"))

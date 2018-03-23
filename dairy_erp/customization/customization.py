@@ -25,8 +25,6 @@ def validate_dairy_company(doc,method=None):
 				comp_doc = frappe.get_doc("Company",link.link_name)
 				comp_doc.is_dairy = 1
 				comp_doc.save()
-	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
-		make_user(doc)
 
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		doc.append("links",
@@ -144,49 +142,6 @@ def set_page_break(doc,method=None):
 			item.page_break = 1
 		doc.items[-1].page_break = 0
 
-
-def make_user(doc):
-
-	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
-	dairy = frappe.db.get_value("Company",{"is_dairy":1},"name")
-	if not frappe.db.sql("select name from `tabUser` where name=%s", doc.user):
-		user_doc = frappe.new_doc("User")
-		user_doc.email = doc.user
-		user_doc.first_name = doc.operator_name
-		user_doc.operator_type = doc.address_type
-		user_doc.branch_office = doc.name
-		user_doc.company = dairy
-		user_doc.send_welcome_email = 0
-		user_doc.new_password = "admin"
-		user_doc.flags.ignore_permissions = True
-		user_doc.flags.ignore_mandatory = True
-		user_doc.save()
-		# add_all_roles_to(user_doc.name)
-		if doc.address_type == 'Camp Office':
-			user_doc.add_roles("Camp Operator")
-		elif doc.address_type == "Chilling Centre":
-			user_doc.add_roles("Chilling Center Operator")
-		else:
-			add_all_roles_to(user_doc.name)
-		give_permission(user_doc,"Address",doc.name)
-		if doc.address_type == 'Camp Office':
-			if dairy:
-				give_permission(user_doc,"Company",dairy)
-	else:
-		frappe.throw("User exists already") 
-
-
-def give_permission(user_doc,allowed_doctype,for_value):
-
-	perm_doc = frappe.new_doc("User Permission")
-	perm_doc.user = user_doc.email
-	perm_doc.allow = allowed_doctype
-	perm_doc.for_value = for_value
-	perm_doc.apply_for_all_roles = 0
-	perm_doc.flags.ignore_permissions = True
-	perm_doc.flags.ignore_mandatory = True
-	perm_doc.save()
-
 def validate_headoffice(doc, method):
 
 	count = 0
@@ -212,19 +167,6 @@ def validate_headoffice(doc, method):
 		for row in doc.links:
 			if row.get('link_doctype') != "Company":
 				frappe.throw(_("Row entry must be company"))
-
-
-	validate_user(doc)
-
-
-def validate_user(doc):
-
-	if doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.user and not doc.operator_name:
-		frappe.throw("Please add Operator Email ID and Name")
-	elif doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.user:
-		frappe.throw("Please add Operator Email ID")
-	elif doc.address_type in ["Chilling Centre","Camp Office","Plant"] and not doc.operator_name:
-		frappe.throw("Please add Operator name")
 
 
 def update_warehouse(doc, method):
@@ -331,7 +273,7 @@ def make_si(dn):
 				"income_account": accounts.get('income_account')
 			})
 	si.selling_price_list = dn.selling_price_list#get_selling_price_list(si, is_camp_office=True)
-	si.remarks = "[#"+accounts.get('income_account')+"#]"
+	si.remarks = "[#"+accounts.get('income_account')+"#]" if accounts.get('income_account') else "" 
 	si.flags.ignore_permissions = True
 	si.save()
 	si.submit()

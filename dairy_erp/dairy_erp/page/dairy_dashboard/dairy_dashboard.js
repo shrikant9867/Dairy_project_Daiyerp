@@ -56,6 +56,11 @@ frappe.dairy_dashboard = Class.extend({
             "label": "Supplier",
             "doctype": "Supplier",
             "add_type": ""
+        },
+        {
+            "label": "Material Price List",
+            "doctype": "Material Price List",
+            "add_type": ""
         }]
 
         this.$sidebar.append(frappe.render_template('dashboard_sidebar', {'side_menus': side_menus}))

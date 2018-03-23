@@ -22,7 +22,15 @@ frappe.query_reports["Milk Passbook"] = {
 			"label": __("From Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
-			"reqd":1
+			"reqd":1,
+			"on_change": function(query_report) {
+				var to_date = frappe.query_report_filters_by_name.to_date.get_value()
+				var from_date = frappe.query_report_filters_by_name.from_date.get_value()
+				if (frappe.datetime.str_to_obj(to_date) < frappe.datetime.str_to_obj(from_date)){
+					frappe.throw("To date cannot be less than from date")
+				}
+				query_report.trigger_refresh();
+			}
 		},
 		{
 			"fieldname":"to_date",
@@ -30,12 +38,13 @@ frappe.query_reports["Milk Passbook"] = {
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
 			"reqd":1,
-			"on_change":function(){
+			"on_change": function(query_report) {
 				var to_date = frappe.query_report_filters_by_name.to_date.get_value()
 				var from_date = frappe.query_report_filters_by_name.from_date.get_value()
 				if (frappe.datetime.str_to_obj(to_date) < frappe.datetime.str_to_obj(from_date)){
 					frappe.throw("To date cannot be less than from date")
 				}
+				query_report.trigger_refresh();
 			}
 		}
 

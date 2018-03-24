@@ -184,3 +184,13 @@ def set_camp_office_accounts(doc, method=None):
 		account = accounts.get('expense_account') if doc.doctype == "Purchase Invoice" else accounts.get('income_account')
 		if account and doc.remarks.find("[#"+account+"#]") == -1:
 			doc.remarks = doc.remarks + " [#"+account+"#]"
+	set_missing_po_accounts(doc)
+
+def set_missing_po_accounts():
+	if doc.doctype == "Purchase Invoice" and doc.remarks:
+		remark_split = doc.remarks.split('#')
+		expense_account = remark_split[1] if len(remark_split) == 3 else ""
+		if expense_account and frappe.db.exists("Account", expense_account):
+			for i in doc.items:
+				if expense_account != i.expense_account:
+					i.expense_account = expense_account

@@ -186,7 +186,7 @@ def set_camp_office_accounts(doc, method=None):
 			doc.remarks = doc.remarks + " [#"+account+"#]"
 	set_missing_po_accounts(doc)
 
-def set_missing_po_accounts():
+def set_missing_po_accounts(doc):
 	if doc.doctype == "Purchase Invoice" and doc.remarks:
 		remark_split = doc.remarks.split('#')
 		expense_account = remark_split[1] if len(remark_split) == 3 else ""

@@ -818,7 +818,7 @@ def customer_permission(user):
 	if user_doc.get('operator_type') == "Camp Office":
 
 		customer_list = frappe.db.sql("""select c.name as cust,c.customer_group from `tabCustomer` c, `tabParty Account` p where p.parent = c.name and 
-					p.company = %s and c.customer_group in ('Vlcc') and c.camp_office = %s group by c.name""",(user_doc.get('company'),user_doc.get('branch_office')),as_dict=1,debug=1)
+					p.company = %s and c.customer_group in ('Vlcc') and c.camp_office = %s group by c.name""",(user_doc.get('company'),user_doc.get('branch_office')),as_dict=1)
 
 		customer = [ '"%s"'%cust.get("cust") for cust in customer_list ]
 

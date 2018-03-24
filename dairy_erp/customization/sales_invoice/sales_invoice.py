@@ -94,7 +94,7 @@ def validate_local_sale(doc, method):
 
 @frappe.whitelist()
 def payment_entry(doc, method):
-	input_ = doc.effective_credit or 0
+	input_ = get_effective_credit(doc.customer,doc.name) or 0
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.by_cash:
 		frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment:

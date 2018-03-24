@@ -17,7 +17,7 @@ def get_local_customer(company):
 
 
 @frappe.whitelist()
-def get_farmer_config(farmer, invoice):
+def get_farmer_config(farmer, invoice=None):
 	# check local eff credit % else take global eff credit % defined on vlcc iff not ignored
 	data = fetch_balance_qty()
 	doc = frappe.get_doc("Farmer",farmer)
@@ -37,7 +37,6 @@ def fetch_balance_qty():
 	item = ["COW Milk","BUFFALO Milk"]
 	company = frappe.db.get_value("User",frappe.session.user,"company")
 	warehouse = frappe.db.get_value("Village Level Collection Centre",company,"warehouse")
-	print "warehouse",get_balance_qty_from_sle("COW Milk",warehouse)
 	for row in item:
 		if row == "COW Milk":
 			row_ = "cow_milk"
@@ -94,7 +93,7 @@ def validate_local_sale(doc, method):
 
 @frappe.whitelist()
 def payment_entry(doc, method):
-	input_ = get_effective_credit(doc.customer,doc.name) or 0
+	input_ = get_farmer_config(doc.farmer,doc.name).get('percent_eff_credit') or 0
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.by_cash:
 		frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
 	if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment:
@@ -148,7 +147,6 @@ def get_wrhous():
 
 @frappe.whitelist()
 def get_service_note_item(doctype, txt, searchfield, start, page_len, filters):
-	print "\n\nfilters",filters
 	if filters.service_note:
 		query_item = frappe.db.sql(""" select item_code from `tabItem` where item_group in ('Medicines', 'Services')""")
 		return query_item
@@ -184,6 +182,7 @@ def set_camp_office_accounts(doc, method=None):
 		account = accounts.get('expense_account') if doc.doctype == "Purchase Invoice" else accounts.get('income_account')
 		if account and doc.remarks.find("[#"+account+"#]") == -1:
 			doc.remarks = doc.remarks + " [#"+account+"#]"
+
 	set_missing_po_accounts(doc)
 
 def set_missing_po_accounts(doc):

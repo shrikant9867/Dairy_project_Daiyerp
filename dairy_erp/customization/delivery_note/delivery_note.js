@@ -15,3 +15,9 @@ frappe.ui.form.on("Delivery Note Item", {
 		}
 	}
 });
+
+frappe.ui.form.on("Delivery Note", {
+	refresh: function(frm) {
+		dairy.price_list.trigger_price_list();
+	}
+})

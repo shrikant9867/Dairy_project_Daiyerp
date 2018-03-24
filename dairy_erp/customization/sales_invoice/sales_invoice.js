@@ -28,9 +28,23 @@ frappe.ui.form.on("Sales Invoice", {
 		frm.trigger("set_debit_to");
 	},
 
+	company: function(frm) {
+		frm.trigger("set_debit_to");
+	},
+
 	set_debit_to: function(frm) {
-		abbr = frappe.get_abbr(frm.doc.company);
-		frm.set_value("debit_to", "Debtors - "+abbr)
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Company",
+				filters: {"name": frm.doc.company},
+				fieldname: ["abbr"]
+			},
+			async:false,
+			callback: function(r){
+				frm.set_value("debit_to", "Debtors - "+r.message.abbr)
+			}
+		})
 	},
 
 	local_sale: function(frm) {

@@ -9,10 +9,16 @@ def add_user_permission(doc, method=None):
 	if has_common([doc.operator_type], ["Camp Office", "VLCC"]) and doc.company:
 		# company - dairy
 		create_user_permission(doc.email, "Company", doc.company)
-		manager_role = ['Vlcc Manager', 'Camp Manager', 'Dairy Manager']
-		roles = frappe.get_roles()
-		if doc.operator_type == "VLCC" and has_common(roles, manager_role):
+
+	if doc.operator_type == "VLCC" and "Vlcc Manager" in frappe.get_roles():
+		if 'Vlcc Operator' not in frappe.get_roles(doc.name):
+			doc.flags.ignore_permissions = True
 			doc.add_roles("Vlcc Operator")
+
+	if doc.operator_type == "Camp Office" and "Camp Manager" in frappe.get_roles():
+		if 'Camp Operator' not in frappe.get_roles(doc.name):
+			doc.flags.ignore_permissions = True
+			doc.add_roles("Camp Operator")
 
 def create_user_permission(user,doctype,docname):
 	try:

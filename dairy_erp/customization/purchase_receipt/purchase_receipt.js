@@ -19,6 +19,11 @@
 
 		frappe.model.round_floats_in(item, ["qty", "received_qty", "rejected_qty"]);
 	}
-
 })*/
+
+frappe.ui.form.on("Purchase Receipt", {
+	refresh: function(frm) {
+		dairy.price_list.trigger_price_list();
+	}
+})
 $.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));

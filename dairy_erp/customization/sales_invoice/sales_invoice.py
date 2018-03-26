@@ -19,15 +19,16 @@ def get_local_customer(company):
 @frappe.whitelist()
 def get_farmer_config(farmer, invoice=None):
 	# check local eff credit % else take global eff credit % defined on vlcc iff not ignored
-	data = fetch_balance_qty()
-	doc = frappe.get_doc("Farmer",farmer)
-	eff_credit = get_effective_credit(doc.full_name, invoice)
-	eff_percent = doc.percent_effective_credit if doc.percent_effective_credit and not doc.ignore_effective_credit_percent else 0
-	if not eff_percent and not doc.ignore_effective_credit_percent:
-		eff_percent = frappe.db.get_value("Village Level Collection Centre", doc.vlcc_name, "global_percent_effective_credit")
-	percent_eff_credit = eff_credit * (eff_percent/100) if eff_percent else eff_credit
-	data.update({'eff_credit': eff_credit, "percent_eff_credit":flt(percent_eff_credit, 2),'customer': frappe.db.get_value("Farmer",farmer,'full_name')})
-	return data
+	if farmer:
+		data = fetch_balance_qty()
+		doc = frappe.get_doc("Farmer",farmer)
+		eff_credit = get_effective_credit(doc.full_name, invoice)
+		eff_percent = doc.percent_effective_credit if doc.percent_effective_credit and not doc.ignore_effective_credit_percent else 0
+		if not eff_percent and not doc.ignore_effective_credit_percent:
+			eff_percent = frappe.db.get_value("Village Level Collection Centre", doc.vlcc_name, "global_percent_effective_credit")
+		percent_eff_credit = eff_credit * (eff_percent/100) if eff_percent else eff_credit
+		data.update({'eff_credit': eff_credit, "percent_eff_credit":flt(percent_eff_credit, 2),'customer': frappe.db.get_value("Farmer",farmer,'full_name')})
+		return data
 
 
 @frappe.whitelist()
@@ -93,20 +94,21 @@ def validate_local_sale(doc, method):
 
 @frappe.whitelist()
 def payment_entry(doc, method):
-	input_ = get_farmer_config(doc.farmer,doc.name).get('percent_eff_credit') or 0
-	if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.by_cash:
-		frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
-	if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment:
-		frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
-	if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and doc.grand_total > input_:
-		frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
-	if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.by_credit > input_:
-		frappe.throw(_("By Credit Amount must be less than or equal to Effective Credit."))
-	if doc.local_sale and not doc.update_stock:
-		frappe.throw(_("Please set <b>Update Stock</b> checked"))
-	if (doc.local_sale or doc.service_note) and has_common([doc.customer_or_farmer],["Farmer", "Vlcc Local Customer"])\
-	and (doc.by_cash or not doc.multimode_payment) and (not doc.effective_credit or doc.by_cash):
-		make_payment_entry(doc)
+	if doc.local_sale  or doc.service_note :
+		input_ = get_farmer_config(doc.farmer,doc.name).get('percent_eff_credit') or 0
+		if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.by_cash:
+			frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
+		if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment:
+			frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
+		if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and doc.grand_total > input_:
+			frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
+		if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.by_credit > input_:
+			frappe.throw(_("By Credit Amount must be less than or equal to Effective Credit."))
+		if doc.local_sale and not doc.update_stock:
+			frappe.throw(_("Please set <b>Update Stock</b> checked"))
+		if (doc.local_sale or doc.service_note) and has_common([doc.customer_or_farmer],["Farmer", "Vlcc Local Customer"])\
+		and (doc.by_cash or not doc.multimode_payment) and (not doc.effective_credit or doc.by_cash):
+			make_payment_entry(doc)
 
 @frappe.whitelist()
 def make_payment_entry(si_doc):

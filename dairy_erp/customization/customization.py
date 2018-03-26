@@ -329,7 +329,7 @@ def make_pi_against_localsupp(po_doc,pr_doc):
 				"expense_account":accounts.get('expense_account')
 			})
 	pi.buying_price_list = "LCOB"+"-"+co if frappe.db.get_value("Price List","LCOB"+"-"+co ,"name") else "GTCOB"#get_buying_price_list(pi, is_camp_office=True) #"LCOB" if frappe.db.get_value("Price List","LCOB") else "GTCOB"#get_buying_price_list(pi, is_camp_office=True)
-	pi.remarks = "[#"+accounts.get('expense_account')+"#]"
+	pi.remarks = "[#"+accounts.get('expense_account')+"#]" if accounts.get('expense_account') else ""
 	return pi
 
 def validate_qty_against_mi(doc):
@@ -424,7 +424,7 @@ def check_if_dropship(doc):
 									"income_account": accounts.get('income_account')
 								})
 				si.selling_price_list = "LCOS" +"-"+co if frappe.db.get_value("Price List","LCOS"+"-"+co ,"name") else "GTCOS"#get_selling_price_list(si, is_vlcc=True)
-				si.remarks = "[#"+accounts.get('income_account')+"#]"
+				si.remarks = "[#"+accounts.get('income_account')+"#]" if accounts.get('income_account') else ""
 				si.flags.ignore_permissions = True  		#Sales Invoice @CO in use case 2
 				si.save()
 				si.submit()

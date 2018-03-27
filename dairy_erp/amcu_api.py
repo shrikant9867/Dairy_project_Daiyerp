@@ -89,9 +89,9 @@ def make_fmrc(data, response_dict):
 											fmrc_doc.flags.ignore_permissions = True
 											fmrc_doc.submit()
 											response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"fmrc": fmrc_doc.name})
-											if row.get('status') == "Accept":
-												pr = make_purchase_receipt_vlcc(data, row, vlcc, farmer_supplier, response_dict, fmrc_doc.name )
-												purchase_invoice_against_farmer(data, row, vlcc,  farmer_supplier, pr.get('item_'), response_dict, pr.get('pr_obj'), fmrc_doc.name)
+											# if row.get('status') == "Accept":
+											# 	pr = make_purchase_receipt_vlcc(data, row, vlcc, farmer_supplier, response_dict, fmrc_doc.name )
+											# 	purchase_invoice_against_farmer(data, row, vlcc,  farmer_supplier, pr.get('item_'), response_dict, pr.get('pr_obj'), fmrc_doc.name)
 										else:
 											traceback = "farmer does not exist"
 											frappe.throw(_("farmer does not exist"))
@@ -305,8 +305,8 @@ def make_vmrc(data, response_dict):
 											vmrc_doc.submit()
 											response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"vmrc":vmrc_doc.name})
 											vlcc = validate_vlcc(row)
-											if row.get('status') == "Accept":
-												make_purchase_receipt_dairy(data, row, vlcc_name, response_dict, vmrc_doc.name)
+											# if row.get('status') == "Accept":
+											# 	make_purchase_receipt_dairy(data, row, vlcc_name, response_dict, vmrc_doc.name)
 										else:
 											traceback = "vlcc does not exist"
 											frappe.throw(_("Vlcc Does not exist"))

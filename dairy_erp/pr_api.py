@@ -59,10 +59,10 @@ def get_po_attr(supplier):
 	return response_dict
 
 @frappe.whitelist()
-def get_mi_attr():
+def get_mi_attr(supplier):
 	response_dict = {}
 	try:
-		mr_list = frappe.db.sql("select name,schedule_date from `tabMaterial Request` where company = '{0}' and status = 'Ordered'".format(get_seesion_company_datails().get('company')),as_dict=1)
+		mr_list = frappe.db.sql("""select name,schedule_date from `tabMaterial Request` where company = '{0}' and status = 'Ordered' and camp_office = '{1}' and is_dropship =1""".format(get_seesion_company_datails().get('company'),supplier),as_dict=1)
 		for row in mr_list:
 			row.update({"items": frappe.db.sql("select item_code,qty,uom from `tabMaterial Request Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
 		response_dict.update({"status":"success","data": mr_list})

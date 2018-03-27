@@ -778,7 +778,9 @@ def pe_permission(user):
 
 	if user_doc.get('operator_type') == "Camp Office":
 		return """(`tabPayment Entry`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
-		
+
+	if user_doc.get('operator_type') == "Vet AI Technician":
+		return """(`tabPayment Entry`.company = '{0}')""".format(user_doc.get('company'))
 
 def supplier_permission(user):
 

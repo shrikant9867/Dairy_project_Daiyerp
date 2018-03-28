@@ -780,18 +780,20 @@ def pe_permission(user):
 		return """(`tabPayment Entry`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
 
 	if user_doc.get('operator_type') == "Vet AI Technician":
-		return """(`tabPayment Entry`.company = '{0}')""".format(user_doc.get('company'))
+		return """(`tabPayment Entry`.owner = '{0}')""".format(user_doc.get('name'))
 
 def supplier_permission(user):
 
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
-
+	dairy_mgr = frappe.db.sql("select distinct u.name from `tabUser` u left join `tabHas Role` r on r.parent = u.name where r.role = 'Dairy Manager'")
+	dairy_mgr = "(" + ",".join([ "'{0}'".format(d[0]) for d in dairy_mgr ]) + ")"
 	if user_doc.get('operator_type') == "Camp Office":
 
 		supplier_list = frappe.db.sql("""select s.name as supp,p.company from `tabSupplier` s, `tabParty Account` 
-						p where p.parent = s.name and s.supplier_type in ('Dairy Local','Vlcc Type') and 
-						p.company = %s and s.camp_office = %s group by s.name""",(user_doc.get('company'),user_doc.get('branch_office')),as_dict=1)
+						p where (p.parent = s.name and s.supplier_type in ('Dairy Local','Vlcc Type') and
+						p.company = '{0}' and s.camp_office = '{1}') or (s.supplier_type = 'Dairy Local' and s.owner in {2})
+						group by s.name""".format(user_doc.get('company'),user_doc.get('branch_office'), dairy_mgr),as_dict=1, debug=1)
 
 		supp = [ '"%s"'%sup.get("supp") for sup in supplier_list ]
 		if supp:

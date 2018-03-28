@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Farmer Milk Collection Record', {
-	refresh: function(frm) {
-
+	setup: function(frm) {
+		frm.add_fetch("farmerid", "full_name", "farmer")
 	}
 });

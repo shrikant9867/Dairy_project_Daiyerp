@@ -20,7 +20,11 @@ class FarmerMilkCollectionRecord(Document):
 		try:
 			if self.status == "Accept":
 				pr = self.purchase_receipt()
-				self.purchase_invoice(pr)
+				pi = self.purchase_invoice(pr)
+				frappe.msgprint(_("Purchase Receipt <b>{0}</b>, Purchase Invoice <b>{1}</b> Created".format(
+					'<a href="#Form/Purchase Receipt/'+pr+'">'+pr+'</a>',
+					'<a href="#Form/Purchase Invoice/'+pi+'">'+pi+'</a>',
+				)))
 		except Exception as e:
 			print frappe.get_traceback()
 			frappe.db.rollback()
@@ -116,3 +120,4 @@ class FarmerMilkCollectionRecord(Document):
 		)
 		pi.flags.ignore_permissions = True
 		pi.submit()
+		return pi.name

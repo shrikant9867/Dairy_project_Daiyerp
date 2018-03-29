@@ -2,17 +2,17 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["VLCC Payment Settlement"] = {
+frappe.query_reports["Farmer Payment Settlement"] = {
 
 	"filters": [
 		{
 			"fieldname":"cycle",
 			"label": __("Cycle"),
 			"fieldtype": "Link",
-			"options": "Cyclewise Date Computation",
+			"options": "Farmer Date Computation",
 			"on_change":function(query_report){
 				frappe.call({	
-					method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_dates",
+					method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_dates",
 					args:{
 							"filters":query_report.get_values()
 						},
@@ -32,16 +32,16 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 			},
 			"get_query":function(){
 				return{
-					query:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_settlement_per"	
+					query:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_settlement_per"	
 				}
 
 			}
 		},
 		{
-			"fieldname":"vlcc",
-			"label": __("VLCC"),
+			"fieldname":"farmer",
+			"label": __("Farmer"),
 			"fieldtype": "Link",
-			"options":"Village Level Collection Centre",
+			"options":"Farmer",
 			"reqd":1
 		},
 		{
@@ -95,7 +95,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 			if (frappe.selected_rows.length === 0){
 				frappe.throw("Please select records")
 			}
-			frappe.query_reports['VLCC Payment Settlement'].get_summary_dialog(report)
+			frappe.query_reports['Farmer Payment Settlement'].get_summary_dialog(report)
 		});
 
 		$('body').on("click", "input[type='checkbox'][data-row]", function() {
@@ -153,7 +153,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 	});
 
 	frappe.call({
-		method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_payment_amt",
+		method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_payment_amt",
 		args : {"row_data":frappe.selected_rows},
 		callback : function(r){
 			dialog.set_values({
@@ -182,7 +182,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 	dialog.set_primary_action(__("Submit"), function() {
 
 		frappe.call({
-			method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.make_payment",
+			method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.make_payment",
 			args : {
 					"data":dialog.get_values(),
 					"row_data":frappe.selected_rows,
@@ -197,3 +197,4 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 	}
 
 }
+

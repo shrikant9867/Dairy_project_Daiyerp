@@ -118,6 +118,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Farmer Payment Cycle",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
 					"name": "Dairy Log",
 					"description": _(" "),
 				},
@@ -211,6 +216,12 @@ def get_data():
 					"type": "report",
 					"name": "VLCC Payment Settlement",
 					"doctype": "VLCC Payment Cycle",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Farmer Payment Settlement",
+					"doctype": "Farmer Payment Cycle",
 					"is_query_report": True
 				}
 			]

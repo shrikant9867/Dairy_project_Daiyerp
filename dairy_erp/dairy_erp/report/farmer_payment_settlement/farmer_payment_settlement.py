@@ -11,6 +11,7 @@ from erpnext.accounts.utils import get_outstanding_invoices, get_account_currenc
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_outstanding_reference_documents
 from frappe import _
 import json
+from dairy_erp import dairy_utils as utils
 
 def execute(filters=None):
 
@@ -32,7 +33,8 @@ def get_columns():
 
 def get_data(filters):
 
-	dairy = frappe.db.get_value("Company",{"is_dairy":1},'name')
+	vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
+
 	supplier_data = frappe.db.sql("""select 'test' as test,posting_date, 
 			account, party_type, party,voucher_type, 
 			voucher_no, against_voucher_type, against_voucher,
@@ -44,7 +46,7 @@ def get_data(filters):
 			and (party is not null and party != '') and company = '{0}' {1}
 			group by against_voucher, party
 			having credit > 0
-			order by posting_date,party,voucher_type""".format(dairy,get_conditions(filters)),filters,as_list=True)
+			order by posting_date,party,voucher_type""".format(vlcc,get_conditions(filters)),filters,as_list=True,debug=1)
 
 	customer_data = frappe.db.sql("""select 'test' as test,posting_date, 
 			account, party_type, party,voucher_type, 
@@ -57,7 +59,7 @@ def get_data(filters):
 			and (party is not null and party != '') and company = '{0}' {1}
 			group by against_voucher, party
 			having debit > 0
-			order by posting_date,party,voucher_type""".format(dairy,get_conditions(filters)),filters,as_list=True)
+			order by posting_date,party,voucher_type""".format(vlcc,get_conditions(filters)),filters,as_list=True,debug=1)
 
 	return supplier_data + customer_data
 
@@ -65,8 +67,9 @@ def get_conditions(filters):
 
 	conditions = " and 1=1"
 
-	if filters.get('vlcc'):
-		conditions += " and party = %(vlcc)s"
+	if filters.get('farmer'):
+		farmer_name = frappe.db.get_value("Farmer",filters.get('farmer'),"full_name")
+		conditions += " and party = '{farmer_name}'".format(farmer_name=farmer_name)
 	conditions += " and posting_date between %(start_date)s and %(end_date)s"
 
 	return conditions
@@ -95,7 +98,9 @@ def make_payment(data,row_data,filters):
 	data = json.loads(data)
 	row_data = json.loads(row_data)
 	filters = json.loads(filters)
-	dairy = frappe.db.get_value("Company",{"is_dairy":1},'name')
+	vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
+	farmer_name = frappe.db.get_value("Farmer",filters.get('farmer'),"full_name")
+	filters.update({"farmer":farmer_name})
 
 	payble_list, recv_list = [], []
 
@@ -106,15 +111,15 @@ def make_payment(data,row_data,filters):
 		elif gl_doc.voucher_type == 'Sales Invoice':
 			recv_list.append(gl_doc.voucher_no)
 	
-	make_payble_payment(data=data,row_data=row_data,filters=filters,company=dairy,payble_list=payble_list)
-	make_receivable_payment(data=data,row_data=row_data,filters=filters,company=dairy,recv_list=recv_list)
-	make_manual_payment(data=data,row_data=row_data,filters=filters,company=dairy,payble_list=payble_list)
+	make_payble_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
+	make_receivable_payment(data=data,row_data=row_data,filters=filters,company=vlcc,recv_list=recv_list)
+	make_manual_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
 	make_payment_log(data=data,filters=filters)
 
 
 def make_payment_log(**kwargs):
 
-	log_doc = frappe.new_doc("VLCC Payment Log")
+	log_doc = frappe.new_doc("Farmer Payment Log")
 	log_doc.payble = kwargs.get('data').get('payble')
 	log_doc.receivable = kwargs.get('data').get('receivable') 
 	log_doc.settled_amount = kwargs.get('data').get('set_amt') 
@@ -127,20 +132,20 @@ def make_payment_log(**kwargs):
 	log_doc.save()
 
 	payble_amt = flt(log_doc.settled_amount)+flt(log_doc.set_amt_manual) if log_doc.set_amt_manual else flt(log_doc.settled_amount)
-
 	try:
-		date_doc = frappe.get_doc("Cyclewise Date Computation",log_doc.cycle)
+		date_doc = frappe.get_doc("Farmer Date Computation",log_doc.cycle)
 		date_doc.set_per = ((payble_amt)/date_doc.amount) * 100
 		date_doc.outstanding_amount = date_doc.amount - payble_amt
 		date_doc.flags.ignore_permissions = True
 		date_doc.save()
 	except Exception,e: 
-		utils.make_dairy_log(title="ZeroDivisionError-Dairy",method="set_percentage", status="Error",
+		utils.make_dairy_log(title="ZeroDivisionError-VLCC",method="set_percentage", status="Error",
 					 message=e, traceback=frappe.get_traceback())
+
 
 def make_payble_payment(**kwargs):
 
-	party_account = get_party_account("Supplier", kwargs.get('filters').get('vlcc'), kwargs.get('company'))
+	party_account = get_party_account("Supplier", kwargs.get('filters').get('farmer'), kwargs.get('company'))
 	default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Bank")
 	if not default_bank_cash_account:
 		default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Cash")
@@ -152,7 +157,7 @@ def make_payble_payment(**kwargs):
 	
 def make_receivable_payment(**kwargs):
 
-	party_account = get_party_account("Customer", kwargs.get('filters').get('vlcc'), kwargs.get('company'))
+	party_account = get_party_account("Customer", kwargs.get('filters').get('farmer'), kwargs.get('company'))
 	default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Bank")
 	if not default_bank_cash_account:
 		default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Cash")
@@ -164,7 +169,7 @@ def make_receivable_payment(**kwargs):
 
 def make_manual_payment(**kwargs):
 
-	party_account = get_party_account("Supplier", kwargs.get('filters').get('vlcc'), kwargs.get('company'))
+	party_account = get_party_account("Supplier", kwargs.get('filters').get('farmer'), kwargs.get('company'))
 	default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Bank")
 	if not default_bank_cash_account:
 		default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Cash")
@@ -182,7 +187,7 @@ def make_payment_entry(**kwargs):
 	pe.posting_date = nowdate()
 	pe.mode_of_payment = kwargs.get('args').get('data').get('mode_of_payment')
 	pe.party_type = kwargs.get('party_type')
-	pe.party = kwargs.get('args').get('filters').get('vlcc')
+	pe.party = kwargs.get('args').get('filters').get('farmer')
 	pe.paid_from = kwargs.get('party_account') if kwargs.get('payment_type')=="Receive" else kwargs.get('bank').account
 	pe.paid_to = kwargs.get('party_account') if kwargs.get('payment_type')=="Pay" else kwargs.get('bank').account
 	pe.paid_from_account_currency = kwargs.get('party_account_currency') \
@@ -248,7 +253,7 @@ def get_dates(filters):
 	filters = json.loads(filters)
 	return frappe.db.sql("""select start_date,end_date 
 				from 
-					`tabCyclewise Date Computation` 
+					`tabFarmer Date Computation` 
 				where 
 					name = %s""",(filters.get('cycle')),as_dict=1)
 
@@ -256,15 +261,15 @@ def get_dates(filters):
 def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 
 	return frappe.db.sql("""select name,ifnull(round(set_per,2),'0') as set_per,
-		ifnull(round(outstanding_amount,2),0) from `tabCyclewise Date Computation` 
+		ifnull(round(outstanding_amount,2),0) from `tabFarmer Date Computation` 
 		where set_per<100 and name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1)
 
 def test():
-	dairy = frappe.db.get_value("Company",{"is_dairy":1},'name')
+	vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
 	a = frappe.db.sql("""select min(due_date),name 
 						from 
 							`tabPurchase Invoice` 
 						where 
-							status in ('Overdue','Unpaid') and company = %s
-							and due_date between '2017-04-01' and '2018-03-31'""",(dairy),as_dict=True)
+							status in ('Overdue','Unpaid') and company = %s 
+							and due_date between '2017-04-01' and '2018-03-31'""",(vlcc),as_dict=True)
 

@@ -202,7 +202,8 @@ permission_query_conditions = {
     "Item": "dairy_erp.customization.customization.item_permissions",
     "User":"dairy_erp.customization.customization.user_permissions",
     "Item Price":"dairy_erp.customization.customization.item_price_permission",
-    "Price List":"dairy_erp.customization.customization.price_list_permission"
+    "Price List":"dairy_erp.customization.customization.price_list_permission",
+    "Veterinary AI Technician": "dairy_erp.dairy_erp.doctype.veterinary_ai_technician.veterinary_ai_technician.permission_query_condition"
 }
 # Testing
 # -------

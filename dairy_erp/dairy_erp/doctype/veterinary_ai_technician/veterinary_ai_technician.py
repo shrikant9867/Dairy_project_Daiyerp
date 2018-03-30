@@ -50,3 +50,10 @@ class VeterinaryAITechnician(Document):
 		perm_doc.flags.ignore_permissions = True
 		perm_doc.flags.ignore_mandatory = True
 		perm_doc.save()
+
+def permission_query_condition(user):
+	company = frappe.db.get_value("User", user, "company")
+	if user == "Administrator":
+		return ""
+	return """`tabVeterinary AI Technician`.vlcc = '{0}' or
+		`tabVeterinary AI Technician`.owner = '{1}'""".format(company, user)

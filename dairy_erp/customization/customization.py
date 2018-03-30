@@ -780,7 +780,7 @@ def pe_permission(user):
 		return """(`tabPayment Entry`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
 
 	if user_doc.get('operator_type') == "Vet AI Technician":
-		return """(`tabPayment Entry`.owner = '{0}')""".format(user_doc.get('name'))
+		return """(`tabPayment Entry`.owner = '{0}')""".format(frappe.session.user)
 
 def supplier_permission(user):
 

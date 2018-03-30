@@ -12,6 +12,7 @@ class FarmerMilkCollectionRecord(Document):
 	def validate(self):
 		self.create_milk_item()
 		self.make_uom_config()
+		self.validate_status()
 		self.validate_duplicate_entry()
 		self.validate_society_id()
 		self.check_valid_farmer()
@@ -66,7 +67,12 @@ class FarmerMilkCollectionRecord(Document):
 	def check_valid_farmer(self):
 		is_valide_farmer = frappe.db.get_value("Farmer",{"vlcc_name": self.associated_vlcc,"name":self.farmerid },'name')
 		if not is_valide_farmer:
-			frappe.throw(_("Invalid Farmer {0}".format(is_valide_farmer)))
+			frappe.throw(_("Invalid Farmer {0}".format(self.farmerid)))
+
+	def validate_status(self):
+		# user only create transactions with status - Accept
+		if self.status == "Reject":
+			frappe.throw(_("Status is Reject, Transaction can not be created"))
 
 	def purchase_receipt(self):
 		# purchase receipt against VLCC

@@ -11,6 +11,7 @@ class VlccMilkCollectionRecord(Document):
 
 	def validate(self):
 		self.validate_duplicate_entry()
+		self.validate_status()
 		self.validate_society()
 		self.validate_vlcc()
 		self.check_stock()
@@ -63,17 +64,24 @@ class VlccMilkCollectionRecord(Document):
 		if not vlcc:
 			frappe.throw("Invalid Amcu ID/VLCC")
 
+	def validate_status(self):
+		# user only create transactions with status - Accept
+		if self.status == "Reject":
+			frappe.throw(_("Status is Reject, Transaction can not be created"))
+
 	def check_stock(self):
 		"""check stock is available for transactions"""
 		item = self.milktype+" Milk"
 		vlcc_warehouse = frappe.db.get_value("Village Level Collection Centre", self.associated_vlcc, "warehouse")
+		if not vlcc_warehouse:
+			frappe.throw(_("Warehouse is not present on VLCC <b>{0}</b>".format(self.associated_vlcc)))
 		stock_qty = frappe.db.get_value("Bin", {
 			"warehouse": vlcc_warehouse,
 			"item_code": item
-		},"actual_qty")
+		},"actual_qty") or 0
 		if not stock_qty or stock_qty < self.milkquantity:
-			frappe.throw(_("The dispatched quantity of {0} should be less than or \
-				equal to stock {1} available at {2} warehouse".format(item, stock_qty, vlcc_warehouse)))
+			frappe.throw(_("The dispatched quantity of <b>{0}</b> should be less than or \
+				equal to stock <b>{1}</b> available at <b>{2}</b> warehouse".format(item, stock_qty, vlcc_warehouse)))
 
 	def make_purchase_receipt(self):
 		try:

@@ -113,7 +113,8 @@ doc_events = {
         "validate": ["dairy_erp.customization.customization.validate_headoffice", "dairy_erp.customization.address.address.create_manager_operator_user"]
     },
     "Purchase Order":{
-        "validate":["dairy_erp.customization.customization.set_co_warehouse_po","dairy_erp.customization.customization.set_page_break"],
+        "validate":["dairy_erp.customization.customization.set_co_warehouse_po",
+            "dairy_erp.customization.customization.set_page_break", "dairy_erp.customization.purchase_order.purchase_order.update_chilling_centre_flag"],
         "on_submit": "dairy_erp.customization.purchase_order.purchase_order.update_material_indent"
     },
     "Purchase Receipt":{

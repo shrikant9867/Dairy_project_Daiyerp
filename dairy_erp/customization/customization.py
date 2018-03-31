@@ -793,7 +793,7 @@ def supplier_permission(user):
 		supplier_list = frappe.db.sql("""select s.name as supp,p.company from `tabSupplier` s, `tabParty Account` 
 						p where (p.parent = s.name and s.supplier_type in ('Dairy Local','Vlcc Type') and
 						p.company = '{0}' and s.camp_office = '{1}') or (s.supplier_type = 'Dairy Local' and s.owner in {2})
-						group by s.name""".format(user_doc.get('company'),user_doc.get('branch_office'), dairy_mgr),as_dict=1, debug=1)
+						group by s.name""".format(user_doc.get('company'),user_doc.get('branch_office'), dairy_mgr),as_dict=1)
 
 		supp = [ '"%s"'%sup.get("supp") for sup in supplier_list ]
 		if supp:

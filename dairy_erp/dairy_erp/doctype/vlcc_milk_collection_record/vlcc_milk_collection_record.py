@@ -50,9 +50,15 @@ class VlccMilkCollectionRecord(Document):
 			frappe.throw(_("Duplicate Entry found - {0}".format(is_duplicate)))
 
 	def validate_vlcc_chilling_centre(self):
-		vlcc, chilling_centre = frappe.db.get_value("Village Level Collection Centre", {
+		vlcc_data = frappe.db.get_value("Village Level Collection Centre", {
 			"amcu_id": self.farmerid
 		}, ["name", "chilling_centre"])
+
+		if vlcc_data:
+			vlcc, chilling_centre = vlcc_data[0], vlcc_data[1]
+		else:
+			frappe.throw(_("Invalid VLCC ID"))
+
 		if not vlcc:
 			frappe.throw("Invalid Amcu ID/VLCC")
 

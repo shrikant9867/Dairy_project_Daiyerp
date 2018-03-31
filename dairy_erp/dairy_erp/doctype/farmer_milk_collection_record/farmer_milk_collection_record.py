@@ -19,7 +19,7 @@ class FarmerMilkCollectionRecord(Document):
 
 	def on_submit(self):
 		try:
-			if self.status == "Accept":
+			if self.status == "Accept" and not self.flags.is_api:
 				pr = self.purchase_receipt()
 				pi = self.purchase_invoice(pr)
 				frappe.msgprint(_("Purchase Receipt <b>{0}</b>, Purchase Invoice <b>{1}</b> Created".format(

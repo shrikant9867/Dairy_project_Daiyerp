@@ -78,6 +78,11 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 	},
 	onload: function(report) {
 
+		frappe.query_reports['Farmer Payment Settlement'].report_operation(report)
+		frappe.query_reports['Farmer Payment Settlement'].get_default_cycle(report)
+
+	},
+	report_operation: function(report){
 		var me = frappe.container.page.query_report;
 		
 		frappe.selected_rows = []
@@ -102,6 +107,7 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			me.data[$(this).attr('data-row')].selected
 					= this.checked ? true : false;
 		})
+
 	},
 	get_summary_dialog:function(report){
 		var dialog = new frappe.ui.Dialog({
@@ -154,7 +160,7 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 
 	frappe.call({
 		method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_payment_amt",
-		args : {"row_data":frappe.selected_rows},
+		args : {"row_data":frappe.selected_rows,"filters":report.get_values()},
 		callback : function(r){
 			dialog.set_values({
 				'payble': r.message.payble,
@@ -179,21 +185,39 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 	
 	dialog.show()
 
-	dialog.set_primary_action(__("Submit"), function() {
+		dialog.set_primary_action(__("Submit"), function() {
 
-		frappe.call({
-			method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.make_payment",
-			args : {
-					"data":dialog.get_values(),
-					"row_data":frappe.selected_rows,
-					"filters":report.get_values()
-					},
-			callback : function(r){
-				
-				dialog.hide()
-			}
+			frappe.call({
+				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.make_payment",
+				args : {
+						"data":dialog.get_values(),
+						"row_data":frappe.selected_rows,
+						"filters":report.get_values()
+						},
+				callback : function(r){
+					
+					dialog.hide()
+				}
+			})
 		})
-	})
+	},
+	get_default_cycle:function(report){
+		frappe.call({
+				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_default_cycle",
+				callback : function(r){
+					if(r.message){
+						frappe.query_report_filters_by_name.cycle.set_input(r.message[0].name);
+						frappe.query_report_filters_by_name.start_date.set_input(r.message[0].start_date);
+						frappe.query_report_filters_by_name.end_date.set_input(r.message[0].end_date);
+						report.trigger_refresh();		
+					}
+					else{
+						frappe.query_report_filters_by_name.start_date.set_input(frappe.datetime.get_today());
+						frappe.query_report_filters_by_name.end_date.set_input(frappe.datetime.get_today());
+						report.trigger_refresh();
+					}
+				}
+			})
 	}
 
 }

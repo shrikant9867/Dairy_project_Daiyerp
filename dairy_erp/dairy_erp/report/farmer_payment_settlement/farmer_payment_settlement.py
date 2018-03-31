@@ -23,9 +23,9 @@ def get_columns():
 	columns = [
 		_("") + ":Data:40",_("Posting Date") + ":Date:90", _("Account") + ":Link/Account:200",
 		 _("Party Type") + "::80", _("Party") + "::150",
+		_("Debit") + ":Float:100", _("Credit") + ":Float:100",
 		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":160",
 		_("Against Voucher Type") + "::120", _("Against Voucher") + ":Dynamic Link/"+_("Against Voucher Type")+":160",
-		_("Debit") + ":Float:100", _("Credit") + ":Float:100",
 		_("Remarks") + "::400",_("Name") + ":Data:100",
 	]
 
@@ -36,9 +36,9 @@ def get_data(filters):
 	vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
 
 	supplier_data = frappe.db.sql("""select 'test' as test,posting_date, 
-			account, party_type, party,voucher_type, 
-			voucher_no, against_voucher_type, against_voucher,
-			0 as debit, sum(credit) - sum(debit) as credit,remarks,name
+			account, party_type, party,0 as debit, sum(credit) - sum(debit) as credit,
+			voucher_type, voucher_no, 
+			against_voucher_type, against_voucher,remarks,name
 		from 
 			`tabGL Entry` 
 		where  
@@ -49,9 +49,9 @@ def get_data(filters):
 			order by posting_date,party,voucher_type""".format(vlcc,get_conditions(filters)),filters,as_list=True,debug=1)
 
 	customer_data = frappe.db.sql("""select 'test' as test,posting_date, 
-			account, party_type, party,voucher_type, 
-			voucher_no, against_voucher_type, against_voucher,
-			sum(debit) - sum(credit) as debit, 0 as credit,remarks,name
+			account, party_type, party,sum(debit) - sum(credit) as debit, 0 as credit,
+			voucher_type, voucher_no, 
+			against_voucher_type, against_voucher,remarks,name
 		from 
 			`tabGL Entry` 
 		where  
@@ -75,20 +75,21 @@ def get_conditions(filters):
 	return conditions
 
 @frappe.whitelist()
-def get_payment_amt(row_data):
+def get_payment_amt(row_data,filters):
 
+	report_data = get_data(json.loads(filters))
 	row_data = json.loads(row_data)
+
 	payble = 0.0
 	receivable = 0.0
 	set_amt = 0.0
 
-	for data in row_data:
-		gl_doc = frappe.get_doc("GL Entry",data)
-
-		if gl_doc.voucher_type == "Purchase Invoice":
-			payble += gl_doc.credit
-		if gl_doc.voucher_type == "Sales Invoice":
-			receivable += gl_doc.debit
+	for data in report_data:
+		if data[12] in row_data:
+			if data[9] == "Purchase Invoice":
+				payble += data[6]
+			if data[9] == "Sales Invoice":
+				receivable += data[5]
 
 	return {"payble":payble,"receivable":receivable,"set_amt": min(payble,receivable)}
 
@@ -111,10 +112,12 @@ def make_payment(data,row_data,filters):
 		elif gl_doc.voucher_type == 'Sales Invoice':
 			recv_list.append(gl_doc.voucher_no)
 	
+	set_payble_amt(filters=filters)
 	make_payble_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
 	make_receivable_payment(data=data,row_data=row_data,filters=filters,company=vlcc,recv_list=recv_list)
 	make_manual_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
 	make_payment_log(data=data,filters=filters)
+	calculate_percentage(filters=filters)
 
 
 def make_payment_log(**kwargs):
@@ -131,16 +134,50 @@ def make_payment_log(**kwargs):
 	log_doc.flags.ignore_permissions = True
 	log_doc.save()
 
-	payble_amt = flt(log_doc.settled_amount)+flt(log_doc.set_amt_manual) if log_doc.set_amt_manual else flt(log_doc.settled_amount)
+
+def calculate_percentage(**kwargs):
+
+	amt = 0.0
+
+	logs = frappe.db.sql_list("""select name from `tabFarmer Payment Log` where cycle = %s""",(kwargs.get('filters').get('cycle')))
+
+	for log in logs:
+		l = frappe.get_doc("Farmer Payment Log",log)
+		payble_amt = flt(l.settled_amount)+flt(l.set_amt_manual) if l.set_amt_manual else flt(l.settled_amount)
+		amt += payble_amt
+
 	try:
-		date_doc = frappe.get_doc("Farmer Date Computation",log_doc.cycle)
-		date_doc.set_per = ((payble_amt)/date_doc.amount) * 100
-		date_doc.outstanding_amount = date_doc.amount - payble_amt
+		date_doc = frappe.get_doc("Farmer Date Computation",kwargs.get('filters').get('cycle'))
+		date_doc.set_per = (amt/date_doc.amount) * 100
+		date_doc.outstanding_amount = date_doc.amount - amt
 		date_doc.flags.ignore_permissions = True
 		date_doc.save()
 	except Exception,e: 
-		utils.make_dairy_log(title="ZeroDivisionError-VLCC",method="set_percentage", status="Error",
+		utils.make_dairy_log(title="ZeroDivisionError-Dairy",method="set_percentage", status="Error",
 					 message=e, traceback=frappe.get_traceback())
+
+
+def set_payble_amt(**kwargs):
+
+		vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
+
+		credit = frappe.db.sql("""select sum(g.credit) as credit,g.voucher_no ,p.posting_date
+				from 
+					`tabGL Entry` g,`tabPurchase Invoice` p 
+				where 
+					g.party = %s and g.against_voucher_type in ('Purchase Invoice') 
+					and (g.party is not null and g.party != '') and 
+					g.docstatus < 2 and p.name = g.voucher_no and g.company = %s and
+					p.status!='Paid' and p.posting_date between %s and %s 
+					group by g.against_voucher, 
+					g.party having credit > 0""",(kwargs.get('filters').get('farmer'),vlcc,kwargs.get('filters').get('start_date'),
+					kwargs.get('filters').get('end_date')),as_dict=1)
+
+		credit_list = [i.get('credit') for i in credit]
+		date_doc = frappe.get_doc("Farmer Date Computation",kwargs.get('filters').get('cycle'))
+		date_doc.amount = sum(credit_list)
+		date_doc.flags.ignore_permissions = True
+		date_doc.save()
 
 
 def make_payble_payment(**kwargs):
@@ -264,12 +301,23 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 		ifnull(round(outstanding_amount,2),0) from `tabFarmer Date Computation` 
 		where set_per<100 and name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1)
 
-def test():
+@frappe.whitelist()
+def get_default_cycle():
 	vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
-	a = frappe.db.sql("""select min(due_date),name 
-						from 
+	due_date = frappe.db.sql("""select min(due_date) as date,name 
+						from   
 							`tabPurchase Invoice` 
-						where 
-							status in ('Overdue','Unpaid') and company = %s 
-							and due_date between '2017-04-01' and '2018-03-31'""",(vlcc),as_dict=True)
-
+						where   
+							status in ('Overdue','Unpaid') and company = %s and  
+							due_date between '2018-01-01' and '2018-12-31'""",
+							(vlcc),as_dict=True)
+	if due_date[0].get('name'):
+		# try:
+		return frappe.db.sql("""select name,start_date,end_date 
+	 						from 
+	 							`tabFarmer Date Computation` 
+ 							where 
+	 							%s between start_date and end_date 
+								and name is not null and name!= '' """,(due_date[0].get('date')),as_dict=True)
+		# except Exception,e: 
+		# 	return []

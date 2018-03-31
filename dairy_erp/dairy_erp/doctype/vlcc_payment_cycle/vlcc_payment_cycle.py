@@ -90,30 +90,11 @@ class VLCCPaymentCycle(Document):
 					elif data.end_day < cint(month_dict[i].day):
 						end_date = getdate(getdate(nowdate()).strftime("%Y") + "-"+i + "-"+str(data.end_day))
 
-					payble_amount = self.get_payble_amount(start_date,end_date)
-					credit_list = [i.get('credit') for i in payble_amount]
-				
 					date_computation = frappe.new_doc("Cyclewise Date Computation")
 					date_computation.start_date = start_date
 					date_computation.end_date = end_date 
 					date_computation.month = val
-					date_computation.amount = sum(credit_list)
 					date_computation.cycle = data.cycle
 					date_computation.doc_name = val + "-" +data.cycle
 					date_computation.flags.ignore_permissions = True
 					date_computation.save()
-
-
-	def get_payble_amount(self,start_date,end_date):
-
-		dairy = frappe.db.get_value("Company",{"is_dairy":1},'name')
-
-		return frappe.db.sql("""select sum(g.credit) as credit,g.voucher_no ,p.posting_date
-				from 
-					`tabGL Entry` g,`tabPurchase Invoice` p 
-				where 
-					g.party = 'vlcc1' and g.against_voucher_type in ('Purchase Invoice') 
-					and (g.party is not null and g.party != '') and 
-					g.docstatus < 2 and p.name = g.voucher_no and g.company = %s and
-					p.status!='Paid' and p.posting_date between %s and %s 
-					group by g.against_voucher, g.party having credit > 0""",(dairy,start_date,end_date),as_dict=1)

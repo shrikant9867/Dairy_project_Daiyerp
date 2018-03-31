@@ -352,8 +352,8 @@ def validate_qty_against_mi(doc):
 				for data in material_request_updater.items:
 					for row in delivery_note.items:
 						if data.item_code == row.item_code:
-							data.new_dn_qty = data.qty - row.qty
-							data.completed_dn = data.completed_dn + row.qty
+							data.completed_dn += row.qty
+							data.new_dn_qty = data.qty - data.completed_dn
 							delivered_qty += data.completed_dn
 
 				if mr_qty > delivered_qty:
@@ -452,8 +452,8 @@ def mi_status_update(doc):
 		for data in material_request_updater.items:
 			for row in doc.items:
 				if data.item_code == row.item_code:
-					data.new_dn_qty = data.qty - row.qty
-					data.completed_dn = data.completed_dn + row.qty
+					data.completed_dn += row.qty
+					data.new_dn_qty = data.qty - data.completed_dn
 					delivered_qty += data.completed_dn
 		
 		if mr_qty > delivered_qty:

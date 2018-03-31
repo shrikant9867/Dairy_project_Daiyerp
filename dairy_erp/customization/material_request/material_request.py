@@ -40,6 +40,3 @@ def validate(doc,method):
 def update_status(status,name):
 	mi = frappe.get_doc("Material Request", name)
 	frappe.db.sql("""update `tabMaterial Request` set status = '{0}' where name ='{1}' """.format(status,name))
-
-def status_updater(doc,method):
-	print "#####################status_updater##############"

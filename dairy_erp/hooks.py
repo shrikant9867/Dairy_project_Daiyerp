@@ -131,8 +131,7 @@ doc_events = {
         "after_insert":"dairy_erp.customization.customization.make_purchase_receipt"
     },
     "Material Request":{
-        "validate": ["dairy_erp.customization.customization.set_mr_warehouse","dairy_erp.customization.customization.set_chilling_wrhouse","dairy_erp.customization.material_request.material_request.validate"],
-        "on_update_after_submit":"dairy_erp.customization.material_request.material_request.status_updater"
+        "validate": ["dairy_erp.customization.customization.set_mr_warehouse","dairy_erp.customization.customization.set_chilling_wrhouse","dairy_erp.customization.material_request.material_request.validate"]
     },
     "Supplier":{
         "validate": "dairy_erp.customization.customization.set_company",
@@ -147,7 +146,8 @@ doc_events = {
     },
     "Stock Entry":{
         "validate": "dairy_erp.customization.stock_entry.stock_entry.set_target_warehouse",
-        "on_submit": ["dairy_erp.customization.stock_entry.stock_entry.validate_camp_submission","dairy_erp.customization.stock_entry.stock_entry.check_if_dropship"]
+        "on_submit": ["dairy_erp.customization.stock_entry.stock_entry.validate_camp_submission",
+            "dairy_erp.customization.stock_entry.stock_entry.check_if_dropship", "dairy_erp.customization.stock_entry.stock_entry.update_mi_status"]
     },
     "Purchase Invoice": {
         "validate": "dairy_erp.customization.sales_invoice.sales_invoice.set_camp_office_accounts",

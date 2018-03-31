@@ -149,6 +149,31 @@ def make_pr_against_localsupp(po_doc,stock_doc):
 	pr_doc.save()
 	pr_doc.submit()
 
+def update_mi_status(doc, method=None):
+# update MI delivery status
+	stock_entry_against_mi = frappe.db.get_value("Stock Entry Detail", {
+	"parent": doc.name}, "material_request")
+	if stock_entry_against_mi:
+		stock_in_qty = frappe.db.sql("""select sum(qty) as qty, material_request as mi 
+		from `tabStock Entry Detail` where parent = '{0}' 
+		group by material_request""".format(doc.name),as_dict=True)
+		if stock_in_qty:
+			for st in stock_in_qty:
+				if st.get('mi'):
+					mi_qty = frappe.db.get_value("Material Request Item", {
+					"parent": st.get('mi')}, "sum(qty) as mi_qty")
+					mi = frappe.get_doc("Material Request", st.get('mi'))
+					if st.get('qty') < mi_qty:
+						mi.per_delivered = 99.99
+						mi.set_status(status="Partially Delivered", update=True)
+						mi.flags.ignore_permissions = True
+						mi.save()
+					elif st.get('qty') == mi_qty:
+						mi.per_delivered = 100
+						mi.set_status(status="Delivered", update=True)
+						mi.flags.ignore_permissions = True
+						mi.save()
+
 
 
 

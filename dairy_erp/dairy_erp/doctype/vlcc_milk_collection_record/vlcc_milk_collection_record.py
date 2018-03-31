@@ -12,13 +12,12 @@ class VlccMilkCollectionRecord(Document):
 	def validate(self):
 		self.validate_duplicate_entry()
 		self.validate_status()
-		self.validate_society()
-		self.validate_vlcc()
+		self.validate_vlcc_chilling_centre()
 		self.check_stock()
 
 	def on_submit(self):
 		try:
-			if self.status == "Accept":
+			if self.status == "Accept" and not self.flags.is_api:
 				pr = self.make_purchase_receipt()
 				dn = self.make_delivery_note_vlcc()
 				pi = self.make_purchase_invoice(pr)
@@ -50,19 +49,24 @@ class VlccMilkCollectionRecord(Document):
 		if is_duplicate and is_duplicate != self.name:
 			frappe.throw(_("Duplicate Entry found - {0}".format(is_duplicate)))
 
-	def validate_society(self):
+	def validate_vlcc_chilling_centre(self):
+		vlcc, chilling_centre = frappe.db.get_value("Village Level Collection Centre", {
+			"amcu_id": self.farmerid
+		}, ["name", "chilling_centre"])
+		if not vlcc:
+			frappe.throw("Invalid Amcu ID/VLCC")
+
+		# check chilling centre
 		address = frappe.db.get_value("Address", {
 				"centre_id": self.societyid
 			}, "name")
 		if not address:
 			frappe.throw(_("Invalid Society ID"))
 
-	def validate_vlcc(self):
-		vlcc = frappe.db.get_value("Village Level Collection Centre", {
-			"amcu_id": self.farmerid
-		}, "name")
-		if not vlcc:
-			frappe.throw("Invalid Amcu ID/VLCC")
+		# check chilling_centre - centre_id
+		cc_centre_id = frappe.db.get_value("Address", chilling_centre, "centre_id")
+		if self.societyid != cc_centre_id:
+			frappe.throw(_("Chilling Centre ID <b>{0}</b> not belongs to VLCC <b>{1}</b>".format(self.societyid, vlcc)))
 
 	def validate_status(self):
 		# user only create transactions with status - Accept
@@ -72,9 +76,9 @@ class VlccMilkCollectionRecord(Document):
 	def check_stock(self):
 		"""check stock is available for transactions"""
 		item = self.milktype+" Milk"
-		vlcc_warehouse = frappe.db.get_value("Village Level Collection Centre", self.associated_vlcc, "warehouse")
+		vlcc_warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "warehouse")
 		if not vlcc_warehouse:
-			frappe.throw(_("Warehouse is not present on VLCC <b>{0}</b>".format(self.associated_vlcc)))
+			frappe.throw(_("Warehouse is not present on VLCC"))
 		stock_qty = frappe.db.get_value("Bin", {
 			"warehouse": vlcc_warehouse,
 			"item_code": item
@@ -86,10 +90,10 @@ class VlccMilkCollectionRecord(Document):
 	def make_purchase_receipt(self):
 		try:
 			item_mapper = {"COW": "COW Milk", "BUFFALO": "BUFFALO Milk"}
-			camp_office = frappe.db.get_value("Village Level Collection Centre",{'name':self.associated_vlcc},"camp_office")
+			camp_office = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":self.farmerid},"camp_office")
 			item = frappe.get_doc("Item", item_mapper[self.milktype])
 			pr = frappe.new_doc("Purchase Receipt")
-			pr.supplier =  self.associated_vlcc
+			pr.supplier =  frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "name")
 			pr.vlcc_milk_collection_record = self.name
 			pr.company = frappe.db.get_value("Company",{"is_dairy":1},'name')
 			pr.camp_office = camp_office
@@ -117,13 +121,14 @@ class VlccMilkCollectionRecord(Document):
 		try:
 			item_mapper = {"COW": "COW Milk", "BUFFALO": "BUFFALO Milk"}
 			item = frappe.get_doc("Item", item_mapper[self.milktype])
-			customer = frappe.db.get_value("Village Level Collection Centre", self.associated_vlcc, "plant_office")
+			customer = frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "plant_office")
 			warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": self.farmerid }, 'warehouse')
-			cost_center = frappe.db.get_value("Cost Center", {"company": self.associated_vlcc}, 'name')
+			vlcc = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": self.farmerid }, 'name')
+			cost_center = frappe.db.get_value("Cost Center", {"company": vlcc}, 'name')
 			dn = frappe.new_doc("Delivery Note")
 			dn.customer = customer
 			dn.vlcc_milk_collection_record = self.name
-			dn.company = self.associated_vlcc
+			dn.company = vlcc
 			dn.append("items",
 			{
 				"item_code": item.item_code,
@@ -148,7 +153,7 @@ class VlccMilkCollectionRecord(Document):
 			item_mapper = {"COW": "COW Milk", "BUFFALO": "BUFFALO Milk"}
 			item = frappe.get_doc("Item", item_mapper[self.milktype])
 			pi = frappe.new_doc("Purchase Invoice")
-			pi.supplier =  "vlcc2"
+			pi.supplier = frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "name")
 			pi.vlcc_milk_collection_record = self.name
 			pi.company = frappe.db.get_value("Company",{"is_dairy":1},'name')
 			pi.append("items",
@@ -160,7 +165,7 @@ class VlccMilkCollectionRecord(Document):
 					"qty": self.milkquantity,
 					"rate": self.rate,
 					"amount": self.amount,
-					"warehouse": frappe.db.get_value("Village Level Collection Centre", self.associated_vlcc, 'warehouse'),
+					"warehouse": frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, 'warehouse'),
 					"purchase_receipt": pr
 				}
 			)
@@ -174,12 +179,13 @@ class VlccMilkCollectionRecord(Document):
 		try:
 			item_mapper = {"COW": "COW Milk", "BUFFALO": "BUFFALO Milk"}
 			item = frappe.get_doc("Item", item_mapper[self.milktype])
-			customer = frappe.db.get_value("Village Level Collection Centre", self.associated_vlcc, "plant_office")
+			customer = frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "plant_office")
 			warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": self.farmerid }, 'warehouse')
-			cost_center = frappe.db.get_value("Cost Center", {"company": self.associated_vlcc}, 'name')
+			vlcc = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": self.farmerid }, 'name')
+			cost_center = frappe.db.get_value("Cost Center", {"company": vlcc}, 'name')
 			si = frappe.new_doc("Sales Invoice")
 			si.customer = customer
-			si.company = self.associated_vlcc
+			si.company = vlcc
 			si.vlcc_milk_collection_record = self.name
 			si.append("items",
 			{

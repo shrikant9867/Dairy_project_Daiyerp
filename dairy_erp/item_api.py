@@ -121,7 +121,8 @@ def get_item_list():
 	return frappe.db.sql("""select i.name, i.description, i.item_name,
 		i.item_group,uom.uom, uom.conversion_factor from `tabItem` i
 		left join `tabUOM Conversion Detail` uom
-		on uom.parent = i.name group by i.name, uom.uom""",
+		on uom.parent = i.name where i.is_stock_item = 1
+		and i.disabled = 0 and now() <= i.end_of_life group by i.name, uom.uom""",
 	as_dict=True)
 
 def get_item_prices(price_list):

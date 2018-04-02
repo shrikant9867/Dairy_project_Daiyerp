@@ -181,7 +181,7 @@ doc_events = {
 #       "dairy_erp.tasks.monthly"
 #   ]
 # }
-fixtures=['Property Setter','Custom Field','Print Format','Role']
+fixtures=['Property Setter','Custom Field','Print Format']
 
 
 permission_query_conditions = {

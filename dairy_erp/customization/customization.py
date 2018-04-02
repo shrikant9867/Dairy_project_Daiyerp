@@ -661,13 +661,15 @@ def mr_permission(user):
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabMaterial Request`.company = '{0}')""".format(user_doc.get('company'))
 
-	if user_doc.get('operator_type') == "Camp Office":
+	elif user_doc.get('operator_type') == "Camp Office":
 		company = ['"%s"'%comp.get('name') for comp in vlcc]
 		if company:
 			return """`tabMaterial Request`.company in  ({company})""".format(company=','.join(company))
 		else:
 			return """`tabMaterial Request`.company = 'Guest' """
 
+	elif user_doc.get('operator_type') == "Chilling Centre":
+		return """`tabMaterial Request`.owner = '{0}' """.format(frappe.session.user)
 
 
 def pr_permission(user):
@@ -676,8 +678,11 @@ def pr_permission(user):
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabPurchase Receipt`.company = '{0}')""".format(user_doc.get('company'))
 
-	if user_doc.get('operator_type') == "Camp Office":
+	elif user_doc.get('operator_type') == "Camp Office":
 		return """(`tabPurchase Receipt`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+	elif user_doc.get('operator_type') == "Chilling Centre":
+		return """`tabPurchase Receipt`.owner = '{0}' """.format(frappe.session.user)
 
 def po_permission(user):
 
@@ -696,8 +701,11 @@ def pi_permission(user):
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabPurchase Invoice`.company = '{0}')""".format(user_doc.get('company'))
 
-	if user_doc.get('operator_type') == "Camp Office":
+	elif user_doc.get('operator_type') == "Camp Office":
 		return """(`tabPurchase Invoice`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+
+	elif user_doc.get('operator_type') == "Chilling Centre":
+		return """`tabPurchase Invoice`.owner = '{0}' """.format(frappe.session.user)
 
 def dn_permission(user):
 
@@ -917,6 +925,9 @@ def user_permissions(user):
 		return """tabUser.name = '%(user)s'"""
 
 	elif "Vet/AI Technician" in roles:
+		return """tabUser.name = '%(user)s'"""
+
+	elif has_common(["Chilling Center Operator", "Chilling Center Manager", "Vet/AI Technician"], roles):
 		return """tabUser.name = '%(user)s'"""
 
 def item_price_permission(user):

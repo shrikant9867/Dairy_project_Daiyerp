@@ -9,7 +9,7 @@ import json
 import re
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
-from frappe.utils import money_in_words
+from frappe.utils import money_in_words, has_common
 
 
 def set_target_warehouse(doc,method):
@@ -174,6 +174,7 @@ def update_mi_status(doc, method=None):
 						mi.flags.ignore_permissions = True
 						mi.save()
 
-
-
-
+def se_permission_query(user):
+	roles = frappe.get_roles()
+	if has_common(["Chilling Center Operator", "Chilling Center Manager"], roles) and user != 'Administrator':
+		return """`tabStock Entry`.owner = '{0}'""".format(frappe.session.user)

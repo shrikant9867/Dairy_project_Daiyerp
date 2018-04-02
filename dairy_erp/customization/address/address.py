@@ -15,6 +15,11 @@ def create_manager_operator_user(doc, method=None):
 			role_manager = {"Chilling Centre": "Chilling Center Operator","Camp Office": "Camp Operator","Plant": ""}
 			create_user(doc, "Operator", role_manager[doc.address_type])
 
+def check_camp_office_for_cc(doc, method=None):
+	# camp office should be mandatory for CC
+	if doc.address_type == "Chilling Centre" and not doc.associated_camp_office:
+		frappe.throw("Associated Camp Office is mandatory for Address type Chilling Centre")
+
 
 def create_user(doc, operator_manager,role=None):
 	try:

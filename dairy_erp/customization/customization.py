@@ -575,7 +575,7 @@ def set_mr_warehouse(doc,method=None):
 def create_item_group(args=None):
 
 	item_groups = ['Cattle feed', 'Mineral Mixtures', 'Medicines', 'Artificial Insemination Services',
-		'Veterinary Services', 'Others/Miscellaneous','Milk & Products']
+		'Veterinary Services', 'Others/Miscellaneous','Milk & Products', 'Stationary']
 	for i in item_groups:
 		if not frappe.db.exists('Item Group',i):
 			item_grp = frappe.new_doc("Item Group")
@@ -1033,6 +1033,8 @@ def validate_dn(doc,method):
 
 def item_permissions(user):
 
-	user_doc = frappe.db.get_value("User",user,'operator_type')
-	if user_doc == "Vet AI Technician":
+	operator_type = frappe.db.get_value("User",user,'operator_type')
+	if operator_type == "Vet AI Technician":
 		return """tabItem.item_group in ('Veterinary Services','Medicines') """
+	elif operator_type == "Chilling Centre":
+		return """tabItem.item_group = 'Stationary'"""

@@ -110,7 +110,8 @@ doc_events = {
     "Address": {
         "after_insert": ["dairy_erp.customization.customization.validate_dairy_company","dairy_erp.customization.customization.make_account_and_warehouse", "dairy_erp.customization.address.address.create_manager_operator_user"],
         "on_update": "dairy_erp.customization.customization.update_warehouse",
-        "validate": ["dairy_erp.customization.customization.validate_headoffice", "dairy_erp.customization.address.address.create_manager_operator_user"]
+        "validate": ["dairy_erp.customization.customization.validate_headoffice", 
+            "dairy_erp.customization.address.address.create_manager_operator_user", "dairy_erp.customization.address.address.check_camp_office_for_cc"]
     },
     "Purchase Order":{
         "validate":["dairy_erp.customization.customization.set_co_warehouse_po",

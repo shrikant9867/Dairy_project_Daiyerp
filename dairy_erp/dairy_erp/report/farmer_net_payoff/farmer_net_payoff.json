@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2018-01-29 11:19:07.365924", 
+ "modified": "2018-03-30 16:42:19.642824", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "Farmer Net Payoff", 
@@ -17,82 +17,7 @@
  "report_type": "Script Report", 
  "roles": [
   {
-   "role": "Stock Manager"
-  }, 
-  {
-   "role": "Stock User"
-  }, 
-  {
-   "role": "Sales Master Manager"
-  }, 
-  {
-   "role": "Sales Manager"
-  }, 
-  {
-   "role": "Accounts User"
-  }, 
-  {
-   "role": "Accounts Manager"
-  }, 
-  {
-   "role": "Sales User"
-  }, 
-  {
-   "role": "Camp Operator"
-  }, 
-  {
-   "role": "Vlcc Operator"
-  }, 
-  {
-   "role": "Stock Manager"
-  }, 
-  {
-   "role": "Stock User"
-  }, 
-  {
-   "role": "Sales Master Manager"
-  }, 
-  {
-   "role": "Sales Manager"
-  }, 
-  {
-   "role": "Accounts User"
-  }, 
-  {
-   "role": "Accounts Manager"
-  }, 
-  {
-   "role": "Sales User"
-  }, 
-  {
-   "role": "Camp Operator"
-  }, 
-  {
-   "role": "Vlcc Operator"
-  }, 
-  {
-   "role": "Stock Manager"
-  }, 
-  {
-   "role": "Stock User"
-  }, 
-  {
-   "role": "Sales Master Manager"
-  }, 
-  {
-   "role": "Sales Manager"
-  }, 
-  {
-   "role": "Accounts User"
-  }, 
-  {
-   "role": "Accounts Manager"
-  }, 
-  {
-   "role": "Sales User"
-  }, 
-  {
-   "role": "Camp Operator"
+   "role": "Vlcc Manager"
   }, 
   {
    "role": "Vlcc Operator"

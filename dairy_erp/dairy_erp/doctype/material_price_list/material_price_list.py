@@ -173,6 +173,7 @@ class MaterialPriceList(Document):
 						item_pric_= frappe.get_doc("Item Price",item)
 						if item_pric_.price_list_rate != row.price:
 							item_pric_.price_list_rate = row.price
+							item_pric_.flags.ignore_permissions = True
 							item_pric_.save()
 			
 	
@@ -195,6 +196,7 @@ class MaterialPriceList(Document):
 				item_pric_= frappe.get_doc("Item Price",item)
 				if item_pric_.price_list_rate != row.price:
 					item_pric_.price_list_rate = row.price
+					item_pric_.flags.ignore_permissions = True
 					item_pric_.save()
 
 

@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2018-02-07 19:32:23.073810", 
+ "modified": "2018-03-30 16:43:04.484523", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "Vlcc Net Pay Off", 
@@ -21,6 +21,12 @@
   }, 
   {
    "role": "Camp Operator"
+  }, 
+  {
+   "role": "Camp Manager"
+  }, 
+  {
+   "role": "Dairy Manager"
   }
  ]
 }

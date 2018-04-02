@@ -11,7 +11,7 @@ from erpnext.accounts.utils import get_fiscal_year
 import calendar
 import datetime
 
-class VLCCPaymentCycle(Document):
+class FarmerPaymentCycle(Document):
 
 	def validate(self):
 
@@ -42,7 +42,7 @@ class VLCCPaymentCycle(Document):
 
 	def delete_date_computation(self):
 
-		frappe.delete_doc("Cyclewise Date Computation", frappe.db.sql_list("""select name from `tabCyclewise Date Computation`
+		frappe.delete_doc("Farmer Date Computation", frappe.db.sql_list("""select name from `tabFarmer Date Computation`
 		where {0}""".format(self.get_conditions())), for_reload=True,ignore_permissions=True,force=True)
 
 	def get_conditions(self):
@@ -59,7 +59,7 @@ class VLCCPaymentCycle(Document):
 		month = getdate(nowdate()).month
 		current_month = calendar.month_abbr[month]
 		fiscal_year = get_fiscal_year(nowdate(), company=frappe.db.get_value("Company",{'is_dairy':1},'name'))[0]
-		month_list = frappe.db.sql_list("""select month from `tabCyclewise Date Computation`
+		month_list = frappe.db.sql_list("""select month from `tabFarmer Date Computation`
 			where month = %s""",(current_month))
 
 		month_end = {
@@ -90,11 +90,31 @@ class VLCCPaymentCycle(Document):
 					elif data.end_day < cint(month_dict[i].day):
 						end_date = getdate(getdate(nowdate()).strftime("%Y") + "-"+i + "-"+str(data.end_day))
 
-					date_computation = frappe.new_doc("Cyclewise Date Computation")
+					payble_amount = self.get_payble_amount(start_date,end_date)
+					credit_list = [i.get('credit') for i in payble_amount]
+				
+					date_computation = frappe.new_doc("Farmer Date Computation")
 					date_computation.start_date = start_date
 					date_computation.end_date = end_date 
 					date_computation.month = val
+					date_computation.amount = sum(credit_list)
 					date_computation.cycle = data.cycle
 					date_computation.doc_name = val + "-" +data.cycle
 					date_computation.flags.ignore_permissions = True
 					date_computation.save()
+
+
+	def get_payble_amount(self,start_date,end_date):
+
+		vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
+
+		return frappe.db.sql("""select sum(g.credit) as credit,g.voucher_no ,p.posting_date
+				from 
+					`tabGL Entry` g,`tabPurchase Invoice` p 
+				where 
+					g.party = 'vlcc1' and g.against_voucher_type in ('Purchase Invoice') 
+					and (g.party is not null and g.party != '') and 
+					g.docstatus < 2 and p.name = g.voucher_no and g.company = %s and
+					p.status!='Paid' and p.posting_date between %s and %s 
+					group by g.against_voucher, g.party having credit > 0""",(vlcc,start_date,end_date),as_dict=1)
+

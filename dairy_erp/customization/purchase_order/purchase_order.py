@@ -12,10 +12,11 @@ def update_material_indent(doc, method=None):
 			frappe.db.commit()
 
 def update_chilling_centre_flag(doc, method=None):
+	pass
 	# if user is cc and dropship checked , check chilling centre
-	user = frappe.session.user
-	operator_type = frappe.db.get_value("User", user, "operator_type")
-	if operator_type and operator_type == "Chilling Centre" and doc.is_dropship:
-		doc.chilling_centre = 1
-	elif doc.chilling_centre:
-		doc.chilling_centre = 0
+	# user = frappe.session.user
+	# operator_type = frappe.db.get_value("User", user, "operator_type")
+	# if operator_type and operator_type == "Chilling Centre" and doc.is_dropship:
+	# 	doc.chilling_centre = 1
+	# elif doc.chilling_centre:
+	# 	doc.chilling_centre = 0

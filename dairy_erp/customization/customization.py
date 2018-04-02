@@ -352,8 +352,8 @@ def validate_qty_against_mi(doc):
 				for data in material_request_updater.items:
 					for row in delivery_note.items:
 						if data.item_code == row.item_code:
-							data.new_dn_qty = data.qty - row.qty
-							data.completed_dn = data.completed_dn + row.qty
+							data.completed_dn += row.qty
+							data.new_dn_qty = data.qty - data.completed_dn
 							delivered_qty += data.completed_dn
 
 				if mr_qty > delivered_qty:
@@ -452,8 +452,8 @@ def mi_status_update(doc):
 		for data in material_request_updater.items:
 			for row in doc.items:
 				if data.item_code == row.item_code:
-					data.new_dn_qty = data.qty - row.qty
-					data.completed_dn = data.completed_dn + row.qty
+					data.completed_dn += row.qty
+					data.new_dn_qty = data.qty - data.completed_dn
 					delivered_qty += data.completed_dn
 		
 		if mr_qty > delivered_qty:
@@ -657,7 +657,7 @@ def mr_permission(user):
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 	vlcc = frappe.db.get_values("Village Level Collection Centre",{"camp_office":user_doc.get('branch_office')},"name",as_dict=1)
-	vlcc.append({'name':frappe.db.get_value("Company",{'is_dairy':1},'name')})
+	vlcc.append({'name':frappe.db.get_value("Company",{'is_dairy':1},'name')}) # added by khushal please correct it
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabMaterial Request`.company = '{0}')""".format(user_doc.get('company'))
 

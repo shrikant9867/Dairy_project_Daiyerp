@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2018-02-03 00:13:34.698390", 
+ "modified": "2018-03-30 16:43:37.553840", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "Milk Passbook", 
@@ -18,6 +18,9 @@
  "roles": [
   {
    "role": "Vlcc Operator"
+  }, 
+  {
+   "role": "Vlcc Manager"
   }
  ]
 }

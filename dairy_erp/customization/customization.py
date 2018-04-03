@@ -117,7 +117,7 @@ def set_co_warehouse_po(doc,method=None):
 				item.warehouse = frappe.db.get_value("Address",branch_office.get('branch_office'),"warehouse")
 				if item.material_request:
 					mr = frappe.get_doc("Material Request",item.material_request)
-					item.customer = mr.company if not doc.chilling_centre else ""
+					item.customer = mr.company if not item.chilling_centre else ""
 					chilling_centre_doc = frappe.get_doc("Address",item.chilling_centre)
 					addr1 = chilling_centre_doc.address_line1 if chilling_centre_doc.address_line1 else ""
 					addr2 = chilling_centre_doc.address_line2 if chilling_centre_doc.address_line2 else ""
@@ -125,7 +125,7 @@ def set_co_warehouse_po(doc,method=None):
 					country = chilling_centre_doc.country if chilling_centre_doc.country else ""
 					state = chilling_centre_doc.state if chilling_centre_doc.state else ""
 					address_ = addr1+","+addr2+","+city+","+country+","+state
-					item.address = frappe.db.get_value("Village Level Collection Centre",{"name":mr.company},"address_display") if not doc.chilling_centre else address_
+					item.address = frappe.db.get_value("Village Level Collection Centre",{"name":mr.company},"address_display") if not item.chilling_centre else address_
 	
 	if branch_office.get('operator_type') == 'VLCC':
 		vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"camp_office")

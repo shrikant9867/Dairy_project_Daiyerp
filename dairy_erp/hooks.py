@@ -115,7 +115,7 @@ doc_events = {
     },
     "Purchase Order":{
         "validate":["dairy_erp.customization.customization.set_co_warehouse_po",
-            "dairy_erp.customization.customization.set_page_break", "dairy_erp.customization.purchase_order.purchase_order.update_chilling_centre_flag"],
+            "dairy_erp.customization.customization.set_page_break"],
         "on_submit": "dairy_erp.customization.purchase_order.purchase_order.update_material_indent"
     },
     "Purchase Receipt":{

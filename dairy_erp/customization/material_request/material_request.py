@@ -35,6 +35,11 @@ def validate(doc,method):
 		if item.qty < 0.00:
 			frappe.throw(_("Quantity should not be negative"))
 
+	# set cc flag if cc user
+	operator_type = frappe.db.get_value("User", frappe.session.user, "operator_type")
+	if operator_type == "Chilling Centre":
+		doc.chilling_centre = 1
+
 
 @frappe.whitelist()
 def update_status(status,name):

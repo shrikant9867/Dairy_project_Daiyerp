@@ -1049,3 +1049,5 @@ def item_permissions(user):
 		return """tabItem.item_group in ('Veterinary Services','Medicines') """
 	elif operator_type == "Chilling Centre":
 		return """tabItem.item_group = 'Stationary'"""
+	elif operator_type == "VLCC":
+		return """tabItem.item_group != 'Stationary'"""

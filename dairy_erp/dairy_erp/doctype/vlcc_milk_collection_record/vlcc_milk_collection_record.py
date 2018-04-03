@@ -111,6 +111,7 @@ class VlccMilkCollectionRecord(Document):
 					"uom": "Litre",
 					"qty": self.milkquantity,
 					"rate": self.rate,
+					"price_list_rate": self.rate,
 					"amount": self.amount,
 					"warehouse": frappe.db.get_value("Address", {"centre_id": self.societyid }, 'warehouse')
 				}
@@ -143,6 +144,7 @@ class VlccMilkCollectionRecord(Document):
 				"uom": "Litre",
 				"qty": self.milkquantity,
 				"rate": self.rate,
+				"price_list_rate": self.rate,
 				"amount": self.amount,
 				"warehouse": warehouse,
 				"cost_center": cost_center

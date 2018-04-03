@@ -399,6 +399,7 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 			"uom": "Litre",
 			"qty": row.get('milkquantity'),
 			"rate": row.get('rate'),
+			"price_list_rate": row.get('rate'),
 			"amount": row.get('amount'),
 			"warehouse": warehouse,
 			"cost_center": cost_center
@@ -456,6 +457,7 @@ def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,c
 				"uom": "Litre",
 				"qty": row.get('milkquantity'),
 				"rate": row.get('rate'),
+				"price_list_rate": row.get('rate'),
 				"amount": row.get('amount'),
 				"warehouse": frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
 			}

@@ -7,7 +7,7 @@ def create_manager_operator_user(doc, method=None):
 	if not doc.is_new() and doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		if doc.manager_name and doc.manager_email:
 			# make manager user
-			role_manager = {"Chilling Centre": "Camp Manager","Camp Office": "Camp Manager","Plant": "Camp Manager"}
+			role_manager = {"Chilling Centre": "Chilling Center Manager","Camp Office": "Camp Manager","Plant": "Camp Manager"}
 			create_user(doc, "Manager", role_manager[doc.address_type])
 			
 		if doc.different_operator and doc.operator_name and doc.user:

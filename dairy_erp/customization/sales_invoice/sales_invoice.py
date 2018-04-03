@@ -164,11 +164,11 @@ def get_servicenote_item():
 	return query_item
 
 @frappe.whitelist()
-def get_account_invoice(is_report=None):
+def get_account_invoice(for_cc=None):
 	user = frappe.session.user
 	user_data = frappe.db.get_value("User", user, ["operator_type", "branch_office"], as_dict=True)
 	if (user_data.get('operator_type') == "Camp Office" and user_data.get('branch_office')) \
-		or (user_data.get('operator_type') == "Chilling Centre" and user_data.get('branch_office') and is_report):
+		or (user_data.get('operator_type') == "Chilling Centre" and user_data.get('branch_office') and for_cc):
 		camp_office_data = frappe.db.get_value("Address", user_data.get('branch_office'),
 			["income_account", "expense_account", "stock_account", "warehouse"], as_dict=True)
 		return camp_office_data
@@ -176,7 +176,11 @@ def get_account_invoice(is_report=None):
 
 def set_camp_office_accounts(doc, method=None):
 	# set income/expense account in item grid & also as remarks to filter it as account in reports.
-	accounts = get_account_invoice()
+	# fix - for chilling centre accounts
+	for_cc = False
+	if doc.flags.for_cc:
+		for_cc = True
+	accounts = get_account_invoice(for_cc=for_cc)
 	if accounts:
 		for i in doc.items:
 			if doc.doctype == "Purchase Invoice" and accounts.get('expense_account'):

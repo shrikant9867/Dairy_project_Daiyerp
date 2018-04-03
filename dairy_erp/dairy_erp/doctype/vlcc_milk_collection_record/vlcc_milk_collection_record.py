@@ -176,6 +176,7 @@ class VlccMilkCollectionRecord(Document):
 				}
 			)
 			pi.flags.ignore_permissions = True
+			pi.flags.for_cc = True
 			pi.submit()
 			return pi.name
 		except Exception as e:

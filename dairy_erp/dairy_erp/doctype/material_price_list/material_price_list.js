@@ -95,20 +95,60 @@ frappe.ui.form.on('Material Price List', {
 	onload: function(frm){
 		if(has_common(frappe.user_roles, ["Camp Operator", "Camp Manager"])) {
 			frm.set_query("price_list_template", function () {
-				return {
-					"filters": {
-						"price_list": ["in",["GTCOB","GTCOS"]],
+				if(frm.doc.price_template_type == 'Dairy Supplier'){
+					
+					return {
+						"filters": {
+							"price_list": ["=","GTCOB"]
+						}
+					};
+				}
+				else if(frm.doc.price_template_type == 'CO to VLCC'){
+					return {
+						"filters": {
+							"price_list": ["=","GTCOS"]
+						}
+					};
+				}
+				else{
+					return {
+						"filters": {
+							"price_list": ["=",""]
+						}
 					}
-				};
+				}
 			});
 		}
 		else if (has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])) {
 			frm.set_query("price_list_template", function () {
-				return {
-					"filters": {
-						"price_list": ["in",["GTVLCCB","GTCS","GTFS"]],
+				if(frm.doc.price_template_type == 'VLCC Local Supplier'){			
+					return {
+						"filters": {
+							"price_list": ["=","GTVLCCB"]
+						}
+					};
+				}
+				else if(frm.doc.price_template_type == 'VLCC Local Farmer'){
+					return {
+						"filters": {
+							"price_list": ["=","GTFS"]
+						}
+					};
+				}
+				else if(frm.doc.price_template_type == 'VLCC Local Customer'){
+					return {
+						"filters": {
+							"price_list": ["=","GTCS"]
+						}
+					};
+				}
+				else{
+					return {
+						"filters": {
+							"price_list": ["=",""]
+						}
 					}
-				};
+				}
 			});
 		}
 	}

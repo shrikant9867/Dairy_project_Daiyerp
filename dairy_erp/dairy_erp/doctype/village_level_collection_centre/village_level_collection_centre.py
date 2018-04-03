@@ -19,7 +19,6 @@ class VillageLevelCollectionCentre(Document):
 		self.validate_global_eff_credit_percent()
 
 	def validate_comp_exist(self):
-		print  self.name == frappe.db.get_value("Company",{"is_dairy":1},'name')
 		if self.name == frappe.db.get_value("Company",{"is_dairy":1},'name'):
 			frappe.throw(_("Company Exist already"))
 	
@@ -47,14 +46,12 @@ class VillageLevelCollectionCentre(Document):
 
 	def after_insert(self):
 		"""create company and w/h configure associated company"""
-	
 		self.create_company()
 		self.create_warehouse()
 		self.create_supplier()
 		self.create_customer()
-		self.create_user()
-		
-		
+		self.create_user()			
+
 	def on_update(self):
 		self.create_supplier()
 		self.create_customer()
@@ -132,8 +129,6 @@ class VillageLevelCollectionCentre(Document):
 				suppl_doc_exist.save()	
 
 
-
-
 	def create_customer(self):
 		"""Vlcc customer for ==>Dairy& vice versa. Reconfigurable customer and A/C head
 		   for Plant offices.plant offices > customer ==> for Dairy and vice versa.
@@ -154,11 +149,15 @@ class VillageLevelCollectionCentre(Document):
 				})
 			custmer_doc.flags.ignore_permissions = True		
 			custmer_doc.save()
+
+		self.create_plant_customer()
 		
+
+	def create_plant_customer(self):
 		if not frappe.db.exists('Customer', self.plant_office):
 			custmer_doc_vlcc = frappe.new_doc("Customer")
 			custmer_doc_vlcc.customer_name = self.plant_office
-			custmer_doc.customer_group = "Dairy"
+			custmer_doc_vlcc.customer_group = "Dairy"
 			custmer_doc_vlcc.company = self.vlcc_name
 			custmer_doc_vlcc.append("accounts",{
 					"company": self.vlcc_name,

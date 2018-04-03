@@ -103,6 +103,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Purchase Receipt",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Stock Entry",
+					"description": _(" "),
 				}
 			
 			]
@@ -223,7 +228,38 @@ def get_data():
 					"name": "Farmer Payment Settlement",
 					"doctype": "Farmer Payment Cycle",
 					"is_query_report": True
-				}
+				},
+				{
+					"type": "report",
+					"name": "Accounts Receivable",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Accounts Payable",
+					"doctype": "Purchase Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Stock Ledger",
+					"doctype": "Stock Ledger Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Stock Balance",
+					"doctype": "Stock Ledger Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Profit and Loss Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				}		
+
 			]
 		}				
 	]			

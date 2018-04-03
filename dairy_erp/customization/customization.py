@@ -246,7 +246,7 @@ def submit_dn(doc):
 
 			make_si(dn_doc) 	#Sales Invoice @CO use case 1
 
-			make_pi(doc) 	#Purchase Invoice @VLCC use case 1
+			make_pi(doc,is_camp_office=True) 	#Purchase Invoice @VLCC use case 1
 
 def make_si(dn):
 	"""Make auto sales invoice on submit of DN @Camp (DN gets submit on submit of PR)"""
@@ -278,7 +278,7 @@ def make_si(dn):
 	si.save()
 	si.submit()
 
-def make_pi(doc):
+def make_pi(doc,is_camp_office):
 	"""Make auto PI on submit of PR @VLCC"""
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
@@ -288,8 +288,7 @@ def make_pi(doc):
 		pi = frappe.new_doc("Purchase Invoice")
 		pi.supplier = doc.supplier
 		pi.company = doc.company
-		pi.camp_office = co
-		# pi.buying_price_list = "LCOB" if frappe.db.get_value("Price List","LCOB") else "GTCOB"
+		pi.camp_office = co if is_camp_office == True else ""
 		for item in doc.items:
 			pi.append("items",
 				{
@@ -301,7 +300,7 @@ def make_pi(doc):
 					"cost_center": item.cost_center,
 					"purchase_receipt": doc.name
 				})
-		pi.buying_price_list = doc.buying_price_list#get_buying_price_list(pi, is_vlcc=True)
+		pi.buying_price_list = doc.buying_price_list
 		pi.flags.ignore_permissions = True
 		pi.save()
 		pi.submit()
@@ -369,7 +368,7 @@ def validate_qty_against_mi(doc):
 def get_material_req_qty(doc):
 	"""count total quantity for specific MI"""
 	
-	total_qty =0 
+	total_qty =0.0
 	for row in doc.items:
 		total_qty += row.qty
 	return total_qty
@@ -434,7 +433,7 @@ def check_if_dropship(doc):
 					pi.save()
 					pi.submit()
 
-				make_pi(doc)			#Purchase Invoice @VLCC in use case 2
+				make_pi(doc,is_camp_office=False)			#Purchase Invoice @VLCC in use case 2
 				mi_status_update(doc)
 
 
@@ -479,6 +478,16 @@ def validate_qty(doc, method):
 			for row , row_ in zip(doc.items, dn_doc.items):
 				if row.qty > row_.qty:
 					frappe.throw("Quantity should not be greater than {0} in row#{1}".format(row_.qty,row.idx))
+
+	elif frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
+		pr_qty = 0.0
+		for item in doc.items:
+			if item.material_request:
+				material_request = frappe.get_doc("Material Request",item.material_request)
+				mr_qty = get_material_req_qty(material_request)
+				pr_qty += item.qty 
+		if pr_qty > mr_qty:
+			frappe.throw("Quantity should not be greater than Requested Qty")
 
 
 def make_so_against_vlcc(doc,method=None):
@@ -539,7 +548,11 @@ def set_co_warehouse_pr(doc,method=None):
 				item.warehouse = vlcc_wr.get('warehouse')
 				if item.rejected_qty:
 					item.rejected_warehouse = vlcc_wr.get('rejected_warehouse')
-		doc.buying_price_list = "LCOVLCCB"+"-"+co if frappe.db.get_value("Price List","LCOVLCCB"+"-"+co) else "GTCOVLCCB"
+				if item.material_request:
+					doc.buying_price_list = "LCOVLCCB"+"-"+co if frappe.db.get_value("Price List","LCOVLCCB"+"-"+co) else "GTCOVLCCB"
+				else:
+					doc.buying_price_list = "LVLCCB"+"-"+co if frappe.db.get_value("Price List","LVLCCB"+"-"+co) else "GTVLCCB"
+
 
 
 def set_vlcc_warehouse(doc,method=None):

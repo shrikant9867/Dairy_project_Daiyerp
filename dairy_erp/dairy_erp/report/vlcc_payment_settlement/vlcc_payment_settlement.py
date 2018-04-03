@@ -154,25 +154,25 @@ def calculate_percentage(**kwargs):
 
 def set_payble_amt(**kwargs):
 
-		dairy = frappe.db.get_value("Company",{"is_dairy":1},'name')
+	dairy = frappe.db.get_value("Company",{"is_dairy":1},'name')
 
-		credit = frappe.db.sql("""select sum(g.credit) as credit,g.voucher_no ,p.posting_date
-				from 
-					`tabGL Entry` g,`tabPurchase Invoice` p 
-				where 
-					g.party = %s and g.against_voucher_type in ('Purchase Invoice') 
-					and (g.party is not null and g.party != '') and 
-					g.docstatus < 2 and p.name = g.voucher_no and g.company = %s and
-					p.status!='Paid' and p.posting_date between %s and %s 
-					group by g.against_voucher, 
-					g.party having credit > 0""",(kwargs.get('filters').get('vlcc'),dairy,kwargs.get('filters').get('start_date'),
-					kwargs.get('filters').get('end_date')),as_dict=1)
+	credit = frappe.db.sql("""select sum(g.credit) as credit
+			from 
+				`tabGL Entry` g,`tabPurchase Invoice` p 
+			where 
+				g.party = %s and g.against_voucher_type in ('Purchase Invoice') 
+				and (g.party is not null and g.party != '') and 
+				g.docstatus < 2 and p.name = g.voucher_no and g.company = %s 
+				and p.posting_date between %s and %s 
+				group by g.against_voucher, 
+				g.party having credit > 0""",(kwargs.get('filters').get('vlcc'),dairy,kwargs.get('filters').get('start_date'),
+				kwargs.get('filters').get('end_date')),as_dict=1)
 
-		credit_list = [i.get('credit') for i in credit]
-		date_doc = frappe.get_doc("Cyclewise Date Computation",kwargs.get('filters').get('cycle'))
-		date_doc.amount = sum(credit_list)
-		date_doc.flags.ignore_permissions = True
-		date_doc.save()
+	credit_list = [i.get('credit') for i in credit]
+	date_doc = frappe.get_doc("Cyclewise Date Computation",kwargs.get('filters').get('cycle'))
+	date_doc.amount = sum(credit_list)
+	date_doc.flags.ignore_permissions = True
+	date_doc.save()
 
 
 def make_payble_payment(**kwargs):

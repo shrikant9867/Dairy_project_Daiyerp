@@ -167,8 +167,8 @@ def set_payble_amt(**kwargs):
 				where 
 					g.party = %s and g.against_voucher_type in ('Purchase Invoice') 
 					and (g.party is not null and g.party != '') and 
-					g.docstatus < 2 and p.name = g.voucher_no and g.company = %s and
-					p.status!='Paid' and p.posting_date between %s and %s 
+					g.docstatus < 2 and p.name = g.voucher_no and g.company = %s 
+					and p.posting_date between %s and %s 
 					group by g.against_voucher, 
 					g.party having credit > 0""",(kwargs.get('filters').get('farmer'),vlcc,kwargs.get('filters').get('start_date'),
 					kwargs.get('filters').get('end_date')),as_dict=1)

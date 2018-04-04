@@ -283,7 +283,7 @@ def make_payment_entry(**kwargs):
 @frappe.whitelist()
 def get_dates(filters):
 	filters = json.loads(filters)
-	return frappe.db.sql("""select start_date,end_date 
+	return frappe.db.sql("""select start_date,end_date,set_per 
 				from 
 					`tabCyclewise Date Computation` 
 				where 

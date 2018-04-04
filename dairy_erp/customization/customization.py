@@ -485,11 +485,18 @@ def validate_qty(doc, method):
 		for item in doc.items:
 			if item.material_request:
 				material_request = frappe.get_doc("Material Request",item.material_request)
-				mr_qty = get_material_req_qty(material_request)
+				mr_qty = qty_computation(material_request)
 				pr_qty += item.qty 
 
 		if mr_qty and pr_qty > mr_qty:
 			frappe.throw("Quantity should not be greater than Requested Qty")
+
+def qty_computation(mr):
+	
+	total_qty =0.0
+	for row in mr.items:
+		total_qty += row.new_dn_qty
+	return total_qty
 
 
 def make_so_against_vlcc(doc,method=None):
@@ -650,6 +657,7 @@ def make_purchase_receipt(doc,method=None):
 						"description": item.item_code,
 						"uom": item.uom,
 						"qty": item.qty,
+						"received_qty":item.qty,
 						"rate":item.rate,
 						"amount": item.amount,
 						"delivery_note":doc.name,

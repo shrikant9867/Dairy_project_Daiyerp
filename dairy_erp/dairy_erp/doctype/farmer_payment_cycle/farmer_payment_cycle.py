@@ -58,7 +58,7 @@ class FarmerPaymentCycle(Document):
 		month_dict = {}
 		month = getdate(nowdate()).month
 		current_month = calendar.month_abbr[month]
-		fiscal_year = get_fiscal_year(nowdate(), company=frappe.db.get_value("Company",{'is_dairy':1},'name'))[0]
+		fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 		month_list = frappe.db.sql_list("""select month from `tabFarmer Date Computation`
 			where month = %s""",(current_month))
 
@@ -80,7 +80,7 @@ class FarmerPaymentCycle(Document):
 		for data in self.cycles:
 			for i,val in sorted(month_end.items()):
 				if val not in month_list:
-					end_date = get_month_details(fiscal_year,i).month_end_date
+					end_date = get_month_details(fiscal_year.get('name'),i).month_end_date
 					month_dict.update({i:end_date})
 
 					start_date = getdate(getdate(nowdate()).strftime("%Y") + "-"+i+ "-"+str(data.start_day))

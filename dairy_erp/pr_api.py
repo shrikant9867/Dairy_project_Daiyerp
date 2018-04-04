@@ -34,6 +34,8 @@ def create_pr(data):
 def make_pr(data):
 	pr_obj = frappe.new_doc("Purchase Receipt")
 	pr_obj.update(data)
+	for row in pr_obj.items:
+		row.rejected_qty = row.received_qty - row.qty
 	pr_obj.flags.ignore_permissions = True
 	pr_obj.save()
 	pr_obj.submit()
@@ -101,6 +103,7 @@ def draft_pr(data):
 			pr_doc.update(data)
 			for row in pr_doc.items:
 				row.delivery_note = dn_reference
+				row.rejected_qty = row.received_qty - row.qty
 			pr_doc.flags.ignore_permissions = True
 			pr_doc.flags.ignore_mandatory = True
 			pr_doc.save()

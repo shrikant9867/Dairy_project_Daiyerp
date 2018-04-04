@@ -193,6 +193,7 @@ def set_camp_office_accounts(doc, method=None):
 			doc.remarks = doc.remarks + " [#"+account+"#]"
 
 	set_missing_po_accounts(doc)
+	set_missing_cost_centers(doc)
 
 def set_missing_po_accounts(doc):
 	if doc.doctype == "Purchase Invoice" and doc.remarks:
@@ -202,3 +203,29 @@ def set_missing_po_accounts(doc):
 			for i in doc.items:
 				if expense_account != i.expense_account:
 					i.expense_account = expense_account
+
+def set_missing_cost_centers(doc):
+	# validate taxes_and_charges template & set cost center
+	if doc.company and doc.taxes_and_charges:
+		for tax in doc.taxes:
+			cost_center = frappe.db.get_value("Cost Center", {
+				"company": doc.company,
+				"cost_center_name": "Main"
+			}, "name")
+			if(cost_center and not tax.cost_center) or (cost_center and cost_center != tax.cost_center):
+				tax.cost_center = cost_center
+
+
+def get_taxes_and_charges_template(doc, template):
+	if doc.company and template:
+		tax_temp_map = {
+			"Purchase Invoice":"Purchase Taxes and Charges Template",
+			"Purchase Receipt": "Purchase Taxes and Charges Template",
+			"Sales Invoice": "Sales Taxes and Charges Template",
+			"Delivery Note": "Sales Taxes and Charges Template"
+		}
+		tax_template = frappe.db.sql("select name from `tab{0}` \
+			where name like '%{1}%' and company = '{2}'".format(tax_temp_map[doc.doctype], template, doc.company))
+		if tax_template:
+			return tax_template[0][0]
+	return ''

@@ -15,6 +15,7 @@ from frappe.utils import money_in_words
 from frappe.utils import has_common
 from dairy_erp.customization.price_list.price_list_customization \
 	import get_selling_price_list, get_buying_price_list
+from dairy_erp.customization.sales_invoice.sales_invoice import get_taxes_and_charges_template
 
 
 def validate_dairy_company(doc,method=None):
@@ -259,7 +260,8 @@ def make_si(dn):
 	si.company = dn.company
 	si.selling_price_list = "LCOS" if frappe.db.get_value("Price List","LCOS") else "GTCOS"
 	si.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
-
+	if dn.taxes_and_charges:
+		si.taxes_and_charges = get_taxes_and_charges_template(si, dn.taxes_and_charges)
 	for item in dn.items:
 		si.append("items",
 			{
@@ -300,6 +302,8 @@ def make_pi(doc,is_camp_office):
 					"cost_center": item.cost_center,
 					"purchase_receipt": doc.name
 				})
+		if doc.taxes_and_charges:
+			pi.taxes_and_charges = get_taxes_and_charges_template(pi, doc.taxes_and_charges)
 		pi.buying_price_list = doc.buying_price_list
 		pi.flags.ignore_permissions = True
 		pi.save()
@@ -317,7 +321,8 @@ def make_pi_against_localsupp(po_doc,pr_doc):
 	pi.supplier = po_doc.supplier
 	pi.company = po_doc.company
 	pi.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
-
+	if po_doc.taxes_and_charges:
+			pi.taxes_and_charges = get_taxes_and_charges_template(pi, po_doc.taxes_and_charges)
 	for row_ in pr_doc.items:
 		pi.append("items",
 			{
@@ -408,7 +413,8 @@ def check_if_dropship(doc):
 						si.customer = doc.company
 						si.company = frappe.db.get_value("Company",{"is_dairy":1},"name")
 						si.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
-
+						if doc.taxes_and_charges:
+							si.taxes_and_charges = get_taxes_and_charges_template(si, doc.taxes_and_charges)
 						for item in doc.items:
 							si.append("items",
 								{
@@ -508,7 +514,8 @@ def make_so_against_vlcc(doc,method=None):
 		so = frappe.new_doc("Sales Order")
 		so.company = frappe.db.get_value("Company",{"is_dairy":1},"name")
 		so.customer = doc.company
-
+		if doc.taxes_and_charges:
+				so.taxes_and_charges = get_taxes_and_charges_template(so, doc.taxes_and_charges)
 		for item in doc.items:
 			so.append("items", {
 				"item_code": item.item_code,
@@ -636,7 +643,6 @@ def user_query(doctype, txt, searchfield, start, page_len, filters):
 
 def make_purchase_receipt(doc,method=None):
 	"""if MR reference on Delivery Note then only make PR"""
-	
 	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type","company"],as_dict=1)
 	mr_flag = 0
 	if branch_office.get('operator_type') == 'Camp Office':
@@ -664,12 +670,14 @@ def make_purchase_receipt(doc,method=None):
 						"warehouse": frappe.db.get_value("Village Level Collection Centre",{"name":doc.customer},"warehouse")
 					}
 				)
+			if doc.taxes_and_charges:
+				purchase_rec.taxes_and_charges = get_taxes_and_charges_template(purchase_rec, doc.taxes_and_charges)
 			purchase_rec.flags.ignore_permissions = True
 			purchase_rec.save()
 			for item in doc.items:
 				item.purchase_receipt = purchase_rec.name
 			doc.save()
-			
+
 def set_company(doc, method):
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)

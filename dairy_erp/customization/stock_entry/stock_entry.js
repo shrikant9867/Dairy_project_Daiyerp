@@ -1,3 +1,5 @@
+frappe.provide("dairy.stock_entry");
+
 frappe.ui.form.on('Stock Entry', {
 	onload:function(frm){
 		frm.set_query("camp_office", function () {
@@ -67,3 +69,44 @@ address_attr = function(branch_office) {
 
 	return camp
 }
+
+frappe.ui.form.on("Stock Entry Detail", {
+	accepted_qty: function(frm, cdt, cdn) {
+		dairy.stock_entry.calculate_accept_reject(frm,cdt, cdn, "rejected_qty")
+	},
+
+	rejected_qty: function(frm, cdt, cdn) {
+		dairy.stock_entry.calculate_accept_reject(frm,cdt, cdn, "accepted_qty")
+	}
+})
+
+$.extend(dairy.stock_entry, {
+	calculate_accept_reject: function(frm, cdt, cdn, field) {
+		row = locals[cdt][cdn]
+		if (row.original_qty) {
+			if(row.accepted_qty > row.original_qty || row.rejected_qty > row.original_qty) {
+				frappe.msgprint("Accepted Qty and Rejected Qty must be less than original qty")
+				frappe.model.set_value(cdt, cdn, "accepted_qty", 0)
+				frappe.model.set_value(cdt, cdn, "rejected_qty", 0)
+			}
+			else {
+				if (field == "rejected_qty") {
+					frappe.model.set_value(cdt, cdn, "rejected_qty", row.original_qty - row.accepted_qty);
+					frappe.model.set_value(cdt, cdn, "qty", row.accepted_qty);
+				}
+				else {
+					frappe.model.set_value(cdt, cdn, "accepted_qty", row.original_qty - row.rejected_qty);
+					frappe.model.set_value(cdt, cdn, "qty", row.accepted_qty);
+				}
+			}
+		}
+		else if(row.accepted_qty) {
+			frappe.model.set_value(cdt, cdn, "qty", row.accepted_qty);
+			frappe.model.set_value(cdt, cdn, "rejected_qty", 0);
+		}
+		else if(row.rejected_qty) {
+			frappe.model.set_value(cdt, cdn, "rejected_qty", 0);
+		}
+		refresh_field("items")
+	}
+})

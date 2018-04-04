@@ -120,4 +120,5 @@ def draft_pr(data):
 def update_po(pr_obj):
 	po_no = frappe.db.sql("""select purchase_order from `tabPurchase Receipt Item` where parent =%s""",(pr_obj.name),as_dict=1)
 	if po_no:
-		frappe.db.sql("""update `tabPurchase Order` set status = 'To Bill' where name =%s""",(po_no[0].get('purchase_order')))
+		for po in po_no:
+			frappe.db.sql("""update `tabPurchase Order` set status = 'To Bill' where name =%s""",(po.get('purchase_order')))

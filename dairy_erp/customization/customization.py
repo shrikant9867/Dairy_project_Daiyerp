@@ -481,12 +481,14 @@ def validate_qty(doc, method):
 
 	elif frappe.db.get_value("User",frappe.session.user,"operator_type") == 'VLCC':
 		pr_qty = 0.0
+		mr_qty = 0.0
 		for item in doc.items:
 			if item.material_request:
 				material_request = frappe.get_doc("Material Request",item.material_request)
 				mr_qty = get_material_req_qty(material_request)
 				pr_qty += item.qty 
-		if pr_qty > mr_qty:
+
+		if mr_qty and pr_qty > mr_qty:
 			frappe.throw("Quantity should not be greater than Requested Qty")
 
 

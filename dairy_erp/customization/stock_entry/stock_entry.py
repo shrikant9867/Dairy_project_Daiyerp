@@ -177,4 +177,12 @@ def update_mi_status(doc, method=None):
 def se_permission_query(user):
 	roles = frappe.get_roles()
 	if has_common(["Chilling Center Operator", "Chilling Center Manager"], roles) and user != 'Administrator':
-		return """`tabStock Entry`.owner = '{0}'""".format(frappe.session.user)
+		query = """`tabStock Entry`.owner = '{0}'""".format(user)
+		branch_office = frappe.db.get_value("User", user, "branch_office")
+		if branch_office:
+			st_entries = frappe.db.sql("select distinct parent from `tabStock Entry Detail` \
+					where chilling_centre = '{0}'".format(branch_office))
+			if st_entries:
+				st = "(" + ",".join([ "'{0}'".format(s[0]) for s in st_entries ]) + ")"
+				query += " or `tabStock Entry`.name in {0}".format(st)
+		return query

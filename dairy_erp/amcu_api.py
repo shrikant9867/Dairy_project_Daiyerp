@@ -509,7 +509,9 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 				"purchase_receipt": pr_co
 			}
 		)
-		#ToDo - set remarks for expense head
+
+		account = frappe.db.get_value("Address", {"centre_id": data.get('societyid')}, "expense_account")
+		pi_obj.remarks = "[#"+account+"#]"
 		pi_obj.flags.ignore_permissions = True
 		pi_obj.submit()
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})

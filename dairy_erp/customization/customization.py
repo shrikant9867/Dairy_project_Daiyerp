@@ -710,11 +710,19 @@ def pr_permission(user):
 		return """(`tabPurchase Receipt`.company = '{0}')""".format(user_doc.get('company'))
 
 	elif user_doc.get('operator_type') == "Camp Office":
-		return """(`tabPurchase Receipt`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+		pr_nos = get_pr_from_warehouse_ref(user_doc.get('branch_office'))
+		return """(`tabPurchase Receipt`.camp_office = '{0}' or `tabPurchase Receipt`.name in {1})""".format(user_doc.get('branch_office'), pr_nos)
 
 	elif user_doc.get('operator_type') == "Chilling Centre":
-		# ToDo - check cc warehouse
-		return """`tabPurchase Receipt`.owner = '{0}' """.format(frappe.session.user)
+		pr_nos = get_pr_from_warehouse_ref(user_doc.get('branch_office'))
+		return """`tabPurchase Receipt`.owner = '{0}' or `tabPurchase Receipt`.name in {1}""".format(frappe.session.user, pr_nos)
+
+def get_pr_from_warehouse_ref(branch_office):
+	# check warehouse in PR Item table & return distinct PR
+	warehouse = frappe.db.get_value("Address",branch_office , "warehouse")
+	pr_list = frappe.db.get_all("Purchase Receipt Item", {"warehouse": warehouse}, "distinct parent")
+	pr_nos = "(" + ",".join([ "'{0}'".format(pr.get('parent')) for pr in pr_list ])  +")"
+	return pr_nos
 
 def po_permission(user):
 
@@ -734,11 +742,19 @@ def pi_permission(user):
 		return """(`tabPurchase Invoice`.company = '{0}')""".format(user_doc.get('company'))
 
 	elif user_doc.get('operator_type') == "Camp Office":
-		return """(`tabPurchase Invoice`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
+		pi_nos = get_pi_from_exp_head_ref(user_doc.get('branch_office'))
+		return """(`tabPurchase Invoice`.camp_office = '{0}' or `tabPurchase Invoice`.name in {1})""".format(user_doc.get('branch_office'), pi_nos)
 
 	elif user_doc.get('operator_type') == "Chilling Centre":
-		# toDO - check expense head
-		return """`tabPurchase Invoice`.owner = '{0}' """.format(frappe.session.user)
+		pi_nos = get_pi_from_exp_head_ref(user_doc.get('branch_office'))
+		return """`tabPurchase Invoice`.owner = '{0}' or `tabPurchase Invoice`.name in {1}""".format(frappe.session.user, pi_nos)
+
+def get_pi_from_exp_head_ref(branch_office):
+	# check expense_head in PI Item and return distinct PI
+	exp_head = frappe.db.get_value("Address", branch_office, "expense_account")
+	pi_list = frappe.db.get_all("Purchase Invoice Item", {"expense_account": exp_head}, "distinct parent")
+	pi_nos = "(" + ",".join([ "'{0}'".format(pi.get('parent')) for pi in pi_list ])  +")"
+	return pi_nos
 
 def dn_permission(user):
 

@@ -83,6 +83,15 @@ frappe.ui.form.on("Stock Entry Detail", {
 $.extend(dairy.stock_entry, {
 	calculate_accept_reject: function(frm, cdt, cdn, field) {
 		row = locals[cdt][cdn]
+		// validation for cc
+		is_cc = has_common(["Chilling Center Operator", "Chilling Center Manager"], frappe.user_roles)
+		if(is_cc && row.material_request) {
+			if (row.accepted_qty > row.qty || (row.original_qty - row.rejected_qty) > row.qty) {
+				frappe.model.set_value(cdt, cdn, "accepted_qty", row.qty)
+				frappe.model.set_value(cdt, cdn, "rejected_qty", row.original_qty-row.accepted_qty)
+				frappe.throw("Accepted Quantity can not be greater than transferred quantity")
+			}
+		}
 		if (row.original_qty) {
 			if(row.accepted_qty > row.original_qty || row.rejected_qty > row.original_qty) {
 				frappe.msgprint("Accepted Qty and Rejected Qty must be less than original qty")

@@ -713,6 +713,7 @@ def pr_permission(user):
 		return """(`tabPurchase Receipt`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
 
 	elif user_doc.get('operator_type') == "Chilling Centre":
+		# ToDo - check cc warehouse
 		return """`tabPurchase Receipt`.owner = '{0}' """.format(frappe.session.user)
 
 def po_permission(user):
@@ -736,6 +737,7 @@ def pi_permission(user):
 		return """(`tabPurchase Invoice`.camp_office = '{0}')""".format(user_doc.get('branch_office'))
 
 	elif user_doc.get('operator_type') == "Chilling Centre":
+		# toDO - check expense head
 		return """`tabPurchase Invoice`.owner = '{0}' """.format(frappe.session.user)
 
 def dn_permission(user):
@@ -787,7 +789,6 @@ def vlcc_permission(user):
 	if user_doc.get('operator_type') == "Vet AI Technician":
 		return """(`tabVillage Level Collection Centre`.name = '{0}')""".format(user_doc.get('company'))
 
-
 def fmrc_permission(user):
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
@@ -806,6 +807,10 @@ def vmcr_permission(user):
 			return """`tabVlcc Milk Collection Record`.associated_vlcc in  ({company})""".format(company=','.join(company))
 		else:
 			return """`tabVlcc Milk Collection Record`.associated_vlcc = 'Guest' """
+
+	if user_doc.get('operator_type') == "Chilling Centre":
+		cc_centre_id = frappe.db.get_value("Address", user_doc.get('branch_office'), "centre_id")
+		return """`tabVlcc Milk Collection Record`.societyid = '{0}'""".format(cc_centre_id)
 
 def pe_permission(user):
 

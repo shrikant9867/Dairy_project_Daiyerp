@@ -174,6 +174,7 @@ def make_purchase_receipt_vlcc(data, row, vlcc, farmer, response_dict, fmrc):
 					"uom": "Litre",
 					"qty": row.get('milkquantity'),
 					"rate": row.get('rate'),
+					"price_list_rate": row.get('rate'),
 					"amount": row.get('amount'),
 					"warehouse": frappe.db.get_value("Village Level Collection Centre", vlcc, 'warehouse'),
 					"cost_center": cost_center
@@ -508,6 +509,7 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 				"purchase_receipt": pr_co
 			}
 		)
+		#ToDo - set remarks for expense head
 		pi_obj.flags.ignore_permissions = True
 		pi_obj.submit()
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})

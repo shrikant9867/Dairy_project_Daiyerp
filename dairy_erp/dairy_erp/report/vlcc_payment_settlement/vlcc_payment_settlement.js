@@ -84,6 +84,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 	},
 	report_operation: function(report){
 		var me = frappe.container.page.query_report;
+		var filters = report.get_values()
 		
 		frappe.selected_rows = []
 
@@ -100,6 +101,10 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 			if (frappe.selected_rows.length === 0){
 				frappe.throw("Please select records")
 			}
+			var end_date = frappe.query_report_filters_by_name.end_date.get_value()
+			if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
+				frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
+			}
 			frappe.query_reports['VLCC Payment Settlement'].get_summary_dialog(report)
 		});
 
@@ -114,7 +119,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 		title: __("Payment Settlement"),
 		fields: [
 			{
-				"label": __("Payble Amount"),
+				"label": __("Payable Amount"),
 				"fieldname": "payble",
 				"fieldtype": "Currency",
 				"read_only": 1,
@@ -187,6 +192,8 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 
 		dialog.set_primary_action(__("Submit"), function() {
 
+			frappe.query_reports['VLCC Payment Settlement'].validate_amount(dialog)
+
 			frappe.call({
 				method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.make_payment",
 				args : {
@@ -200,6 +207,19 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 				}
 			})
 		})
+	},
+	validate_amount:function(dialog){
+		var data = dialog.get_values()
+		if(data.set_amt && data.set_amt_manual && (data.set_amt_manual > (data.payble - data.set_amt))){		
+				frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
+					[data.set_amt_manual,data.payble-data.set_amt]))
+		}
+		else if(data.payble && !data.set_amt && (data.set_amt_manual > data.payble)){
+			frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
+				[data.set_amt_manual,data.payble]))
+		}
+
+
 	},
 	get_default_cycle:function(report){
 		frappe.call({

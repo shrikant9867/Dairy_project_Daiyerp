@@ -304,16 +304,16 @@ def get_default_cycle():
 							`tabPurchase Invoice` 
 						where   
 							status in ('Overdue','Unpaid') and company = %s and  
-							due_date between '2018-01-01' and '2018-12-31'""",
+							due_date between '2018-04-01' and '2019-03-31'""",
 							(dairy),as_dict=True)
 	if due_date[0].get('name'):
 		# try:
-		return frappe.db.sql("""select name,start_date,end_date 
+		return frappe.db.sql("""select name,start_date,end_date,set_per 
 	 						from 
 	 							`tabCyclewise Date Computation` 
  							where 
 	 							%s between start_date and end_date 
-								and name is not null and name!= '' """,(due_date[0].get('date')),as_dict=True)
+								and set_per < 90 and name is not null and name!= '' """,(due_date[0].get('date')),as_dict=True)
 		# except Exception,e: 
 		# 	return []
 

@@ -74,7 +74,6 @@ def check_if_dropship(doc,method):
 	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 
 	if user_doc.get("operator_type") == 'Chilling Centre':
-		print "inside check if dropship+++++++++++++++++\n\n"
 		for item in doc.items:
 			if item.material_request:
 				mr_list.append(str(item.material_request))
@@ -107,14 +106,16 @@ def make_pi_against_localsupp(po_doc,stock_doc):
 	"""Make PI for CO(dairy) local supplier @CO Use case 2"""
 
 
-	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
-	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
-
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company', 'branch_office'], as_dict =1)
+	#co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('branch_office')},"camp_office")
+	expense_account = frappe.db.get_value("Address",po_doc.camp_office, "expense_account")
 	pi = frappe.new_doc("Purchase Invoice")
 	pi.supplier = po_doc.supplier
 	pi.company = po_doc.company
-	pi.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
-
+	# pi.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+	pi.camp_office = po_doc.camp_office
+	if expense_account:
+		pi.remarks = "[#"+expense_account+"#]"
 	for row_ in stock_doc.items:
 		pi.append("items",
 			{
@@ -133,7 +134,8 @@ def make_pr_against_localsupp(po_doc,stock_doc):
 	pr_doc = frappe.new_doc("Purchase Receipt")
 	pr_doc.supplier = po_doc.supplier
 	pr_doc.company = po_doc.company
-	pr_doc.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+	# pr_doc.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
+	pr_doc.camp_office = po_doc.camp_office
 
 	for row_ in stock_doc.items:
 		print row_.__dict__
@@ -163,6 +165,7 @@ def update_mi_status(doc, method=None):
 		per_delivered = 100 if all_received else 99.99
 		mi.per_delivered = per_delivered
 		mi.set_status(status=mi_status, update=True)
+		mi.status = mi_status
 		mi.flags.ignore_permissions = True
 		mi.save()
 

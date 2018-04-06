@@ -717,10 +717,12 @@ def pr_permission(user):
 		return query
 
 	elif user_doc.get('operator_type') == "Chilling Centre":
-		query = "`tabPurchase Receipt`.owner = '{0}'".format(frappe.session.user)
+		#query = "`tabPurchase Receipt`.owner = '{0}'".format(frappe.session.user)
 		pr_nos = get_pr_from_warehouse_ref(user_doc.get('branch_office'))
 		if pr_nos:
-			query += """ or `tabPurchase Receipt`.name in {0}""".format(pr_nos)
+			query = """`tabPurchase Receipt`.name in {0}""".format(pr_nos)
+		else:
+			query = "1=2"
 		return query
 
 def get_pr_from_warehouse_ref(branch_office):
@@ -757,10 +759,12 @@ def pi_permission(user):
 		return query
 
 	elif user_doc.get('operator_type') == "Chilling Centre":
-		query = """`tabPurchase Invoice`.owner = '{0}'""".format(frappe.session.user) 
+		#query = """`tabPurchase Invoice`.owner = '{0}'""".format(frappe.session.user) 
 		pi_nos = get_pi_from_exp_head_ref(user_doc.get('branch_office'))
 		if pi_nos:
-			query += """ or `tabPurchase Invoice`.name in {0}""".format(pi_nos)
+			query = """`tabPurchase Invoice`.name in {0}""".format(pi_nos)
+		else:
+			query = "1=2"
 		return query
 
 def get_pi_from_exp_head_ref(branch_office):

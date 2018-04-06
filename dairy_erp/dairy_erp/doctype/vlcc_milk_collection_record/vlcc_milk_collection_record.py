@@ -14,6 +14,7 @@ class VlccMilkCollectionRecord(Document):
 		self.validate_status()
 		self.validate_vlcc_chilling_centre()
 		self.check_stock()
+		self.calculate_amount()
 
 	def on_submit(self):
 		try:
@@ -92,6 +93,10 @@ class VlccMilkCollectionRecord(Document):
 		if not stock_qty or stock_qty < self.milkquantity:
 			frappe.throw(_("The dispatched quantity of <b>{0}</b> should be less than or \
 				equal to stock <b>{1}</b> available at <b>{2}</b> warehouse".format(item, stock_qty, vlcc_warehouse)))
+
+	def calculate_amount(self):
+		if self.milkquantity and self.rate:
+			self.amount = self.milkquantity * self.rate
 
 	def make_purchase_receipt(self):
 		try:

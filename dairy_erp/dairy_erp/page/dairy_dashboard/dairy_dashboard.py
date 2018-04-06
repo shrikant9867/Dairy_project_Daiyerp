@@ -39,7 +39,7 @@ def get_data():
         vlcc = get_vlcc_data()
         supplier = get_supplier_data()
         vlcc_name = frappe.get_value("User", frappe.session.user, "company")
-        return {"addr":address,"vlcc":vlcc,"supplier":supplier, "total_summery": get_total_counts("Vlcc Milk Collection Record", vlcc_name)}
+        return {"addr":address,"vlcc":vlcc,"supplier":supplier, "total_summery": get_total_counts("Vlcc Milk Collection Record")}
 
 def address_manipulation(addr):
     final_addr = ""

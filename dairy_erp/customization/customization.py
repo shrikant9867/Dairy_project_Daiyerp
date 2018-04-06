@@ -750,7 +750,7 @@ def pi_permission(user):
 		return """(`tabPurchase Invoice`.company = '{0}')""".format(user_doc.get('company'))
 
 	elif user_doc.get('operator_type') == "Camp Office":
-		query = """(`tabPurchase Invoice`.camp_office = '{0}'""".format(user_doc.get('branch_office'))
+		query = """`tabPurchase Invoice`.camp_office = '{0}'""".format(user_doc.get('branch_office'))
 		pi_nos = get_pi_from_exp_head_ref(user_doc.get('branch_office'))
 		if pi_nos:
 			query += """ or `tabPurchase Invoice`.name in {0})""".format(pi_nos)

@@ -109,9 +109,9 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 				frappe.throw("Please select records")
 			}
 			var end_date = frappe.query_report_filters_by_name.end_date.get_value()
-			/*if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
+			if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
 				frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
-			}*/
+			}
 			frappe.query_reports['VLCC Payment Settlement'].get_summary_dialog(report)
 		});
 

@@ -165,9 +165,9 @@ def update_mi_status(doc, method=None):
 		mi_status = "Delivered" if all_received else "Partially Delivered"
 		per_delivered = 100 if all_received else 99.99
 		mi.per_delivered = per_delivered
-		mi.set_status(status=mi_status, update=True)
-		mi.status = mi_status
+		mi.set_status(status=mi_status)
 		mi.flags.ignore_permissions = True
+		mi.flags.ignore_validate_update_after_submit = True
 		mi.save()
 
 def update_received_stock_qty(doc):

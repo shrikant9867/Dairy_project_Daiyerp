@@ -51,7 +51,7 @@ def get_po_attr(supplier):
 		if frappe.db.exists('Supplier',supplier):
 			po_list = frappe.db.sql("""select name,schedule_date from `tabPurchase Order` where supplier = '{0}' and status in ('To Receive and Bill') and company = '{1}'""".format(supplier,get_seesion_company_datails().get('company')),as_dict=1)
 			for row in po_list:
-				row.update({"items": frappe.db.sql("select item_code,rate,qty,uom from `tabPurchase Order Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
+				row.update({"items": frappe.db.sql("select item_code,rate,(qty - received_qty) as qty,uom from `tabPurchase Order Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
 			response_dict.update({"status":"success", "data": po_list})
 		else:
 			frappe.throw("Supplier does not exist")
@@ -118,7 +118,26 @@ def draft_pr(data):
 
 
 def update_po(pr_obj):
-	po_no = frappe.db.sql("""select purchase_order from `tabPurchase Receipt Item` where parent =%s""",(pr_obj.name),as_dict=1)
-	if po_no:
-		for po in po_no:
-			frappe.db.sql("""update `tabPurchase Order` set status = 'To Bill' where name =%s""",(po.get('purchase_order')))
+	update_received_qty(pr_obj)
+	po_nos = frappe.db.get_all("Purchase Receipt Item", { "parent": pr_obj.name }, "purchase_order as po")
+	for po in po_nos:
+		po = frappe.get_doc("Purchase Order", po.get('po'))
+		all_received = True
+		for i in po.items:
+			if i.qty != i.received_qty:
+				all_received = False
+		po_status = "To Bill" if all_received else "To Receive and Bill"
+		frappe.db.sql("update `tabPurchase Order` set status = '{0}' \
+			where name = '{1}'".format(po_status, po.name))
+		po.flags.ignore_permissions = True
+		po.save()
+
+def update_received_qty(doc):
+	for pr_i in doc.items:
+		if pr_i.get('purchase_order'):
+			po = frappe.get_doc("Purchase Order", pr_i.get('purchase_order'))
+			for po_i in po.items:
+				if pr_i.item_code == po_i.item_code and po_i.parent == pr_i.purchase_order:
+					received_qty = po_i.received_qty + pr_i.qty
+					frappe.db.sql("update `tabPurchase Order Item` set received_qty = {0} \
+						where name = '{1}'".format(received_qty, po_i.name))

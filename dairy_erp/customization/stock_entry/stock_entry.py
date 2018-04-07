@@ -19,6 +19,7 @@ def set_target_warehouse(doc,method):
 	user_ = frappe.db.get_value("User", frappe.session.user, ['branch_office','operator_type'],as_dict=1)
 	if user_.get('operator_type') == "Camp Office":
 		for row in doc.items:
+			row.camp_qty = row.qty
 			chilling_centre = row.chilling_centre
 			row.s_warehouse = frappe.db.get_value("Address",user_.get('branch_office'),'warehouse')
 			row.t_warehouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
@@ -174,7 +175,7 @@ def update_received_stock_qty(doc):
 		if st_i.get('material_request'):
 			mi = frappe.get_doc("Material Request", st_i.get('material_request'))
 			for i in mi.items:
-				if st_i.item_code == i.item_code:
+				if st_i.item_code == i.item_code and st_i.material_request == i.parent:
 					i.received_stock_qty =  i.received_stock_qty + st_i.qty
 			mi.flags.ignore_permissions = True
 			mi.save()

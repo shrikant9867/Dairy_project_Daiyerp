@@ -5,44 +5,51 @@
 frappe.query_reports["VLCC Payment Settlement"] = {
 
 	"filters": [
-		{
-			"fieldname":"cycle",
-			"label": __("Cycle"),
-			"fieldtype": "Link",
-			"options": "Cyclewise Date Computation",
-			"on_change":function(query_report){
-				frappe.call({	
-					method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_dates",
-					args:{
-							"filters":query_report.get_values()
-						},
-				callback:function(r){
-						if(r.message){
-							frappe.query_report_filters_by_name.start_date.set_input(r.message[0].start_date);
-							frappe.query_report_filters_by_name.end_date.set_input(r.message[0].end_date);
-							query_report.trigger_refresh();		
+			{
+				"fieldname":"vlcc",
+				"label": __("VLCC"),
+				"fieldtype": "Link",
+				"options":"Village Level Collection Centre",
+				"reqd":1
+				},
+			{
+				"fieldname":"cycle",
+				"label": __("Cycle"),
+				"fieldtype": "Link",
+				"options": "Cyclewise Date Computation",
+				"reqd":1,
+				"on_change":function(query_report){
+					frappe.call({	
+						method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_dates",
+						args:{
+								"filters":query_report.get_values()
+							},
+					callback:function(r){
+							if(r.message){
+								frappe.query_report_filters_by_name.start_date.set_input(r.message[0].start_date);
+								frappe.query_report_filters_by_name.end_date.set_input(r.message[0].end_date);
+								query_report.trigger_refresh();		
+							}
+							else{
+								frappe.query_report_filters_by_name.start_date.set_input(frappe.datetime.get_today());
+								frappe.query_report_filters_by_name.end_date.set_input(frappe.datetime.get_today());
+								query_report.trigger_refresh();
+							}		
 						}
-						else{
-							frappe.query_report_filters_by_name.start_date.set_input(frappe.datetime.get_today());
-							frappe.query_report_filters_by_name.end_date.set_input(frappe.datetime.get_today());
-							query_report.trigger_refresh();
-						}		
-					}
-				})
+					})
 			},
-			"get_query":function(){
+			"get_query":function(query_report){
+				var vlcc = frappe.query_report_filters_by_name.vlcc.get_value()
+
 				return{
-					query:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_settlement_per"	
+					query:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_settlement_per",
+					filters: {
+						"vlcc": vlcc
+					}
+
 				}
 
 			}
-		},
-		{
-			"fieldname":"vlcc",
-			"label": __("VLCC"),
-			"fieldtype": "Link",
-			"options":"Village Level Collection Centre",
-			"reqd":1
 		},
 		{
 			"fieldname":"start_date",
@@ -79,7 +86,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 	onload: function(report) {
 
 		frappe.query_reports['VLCC Payment Settlement'].report_operation(report)
-		frappe.query_reports['VLCC Payment Settlement'].get_default_cycle(report)
+		// frappe.query_reports['VLCC Payment Settlement'].get_default_cycle(report)
 
 	},
 	report_operation: function(report){
@@ -102,9 +109,9 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 				frappe.throw("Please select records")
 			}
 			var end_date = frappe.query_report_filters_by_name.end_date.get_value()
-			if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
+			/*if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
 				frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
-			}
+			}*/
 			frappe.query_reports['VLCC Payment Settlement'].get_summary_dialog(report)
 		});
 
@@ -224,18 +231,22 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 	get_default_cycle:function(report){
 		frappe.call({
 				method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_default_cycle",
+				args:{
+					"filters":report.get_values()
+				},
 				callback : function(r){
-					if(r.message){
+					/*if(r.message){
 						frappe.query_report_filters_by_name.cycle.set_input(r.message[0].name);
 						frappe.query_report_filters_by_name.start_date.set_input(r.message[0].start_date);
 						frappe.query_report_filters_by_name.end_date.set_input(r.message[0].end_date);
 						report.trigger_refresh();		
 					}
 					else{
+						// frappe.throw("Please define Cycle from <b>VLCC Payment Cycle</b> ")
 						frappe.query_report_filters_by_name.start_date.set_input(frappe.datetime.get_today());
 						frappe.query_report_filters_by_name.end_date.set_input(frappe.datetime.get_today());
 						report.trigger_refresh();
-					}
+					}*/
 				}
 			})
 	}

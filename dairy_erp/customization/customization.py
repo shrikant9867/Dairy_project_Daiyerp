@@ -444,8 +444,9 @@ def check_if_dropship(doc):
 
 
 def mi_status_update(doc):
+	
 	item_doc = "Purchase Receipt Item" if doc.doctype == "Purchase Receipt" else "Delivery Note Item"
-	delivered_qty = 0
+	delivered_qty = 0.0
 
 	material_req_list = frappe.db.sql("""select sum(qty) as qty_sum, material_request from `tab{0}` 
 				where parent = '{1}' group by material_request""".format(item_doc, doc.name),as_dict=1)

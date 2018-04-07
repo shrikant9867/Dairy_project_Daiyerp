@@ -444,11 +444,11 @@ def check_if_dropship(doc):
 
 
 def mi_status_update(doc):
-
+	item_doc = "Purchase Receipt Item" if doc.doctype == "Purchase Receipt" else "Delivery Note Item"
 	delivered_qty = 0
 
-	material_req_list = frappe.db.sql("""select sum(qty) as qty_sum, material_request from `tabPurchase Receipt Item` 
-				where parent = '{0}' group by material_request""".format(doc.name),as_dict=1)
+	material_req_list = frappe.db.sql("""select sum(qty) as qty_sum, material_request from `tab{0}` 
+				where parent = '{1}' group by material_request""".format(item_doc, doc.name),as_dict=1)
 
 	for row in material_req_list:
 		mi = frappe.get_doc("Material Request",row.get('material_request'))
@@ -544,6 +544,7 @@ def validate_pr(doc,method=None):
 				if pr.docstatus == 0:
 					frappe.throw("Delivery note gets submit on acceptance of goods at Company <b>{0}</b>".format(doc.customer))
 
+	mi_status_update(doc)
 
 def set_co_warehouse_pr(doc,method=None):
 

@@ -6,10 +6,18 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 
 	"filters": [
 		{
+			"fieldname":"farmer",
+			"label": __("Farmer"),
+			"fieldtype": "Link",
+			"options":"Farmer",
+			"reqd":1
+		},
+		{
 			"fieldname":"cycle",
 			"label": __("Cycle"),
 			"fieldtype": "Link",
 			"options": "Farmer Date Computation",
+			"reqd":1,
 			"on_change":function(query_report){
 				frappe.call({	
 					method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_dates",
@@ -31,18 +39,15 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 				})
 			},
 			"get_query":function(){
+				var farmer = frappe.query_report_filters_by_name.farmer.get_value()
 				return{
-					query:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_settlement_per"	
+					query:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_settlement_per",
+					filters: {
+						"farmer": farmer
+					}
 				}
 
 			}
-		},
-		{
-			"fieldname":"farmer",
-			"label": __("Farmer"),
-			"fieldtype": "Link",
-			"options":"Farmer",
-			"reqd":1
 		},
 		{
 			"fieldname":"start_date",
@@ -79,7 +84,6 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 	onload: function(report) {
 
 		frappe.query_reports['Farmer Payment Settlement'].report_operation(report)
-		frappe.query_reports['Farmer Payment Settlement'].get_default_cycle(report)
 
 	},
 	report_operation: function(report){
@@ -99,6 +103,10 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 
 			if (frappe.selected_rows.length === 0){
 				frappe.throw("Please select records")
+			}
+			var end_date = frappe.query_report_filters_by_name.end_date.get_value()
+			if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
+				frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
 			}
 			frappe.query_reports['Farmer Payment Settlement'].get_summary_dialog(report)
 		});
@@ -187,6 +195,8 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 
 		dialog.set_primary_action(__("Submit"), function() {
 
+			frappe.query_reports['Farmer Payment Settlement'].validate_amount(dialog)
+
 			frappe.call({
 				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.make_payment",
 				args : {
@@ -201,24 +211,16 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			})
 		})
 	},
-	get_default_cycle:function(report){
-		frappe.call({
-				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_default_cycle",
-				callback : function(r){
-					if(r.message){
-						frappe.query_report_filters_by_name.cycle.set_input(r.message[0].name);
-						frappe.query_report_filters_by_name.start_date.set_input(r.message[0].start_date);
-						frappe.query_report_filters_by_name.end_date.set_input(r.message[0].end_date);
-						report.trigger_refresh();		
-					}
-					else{
-						frappe.query_report_filters_by_name.start_date.set_input(frappe.datetime.get_today());
-						frappe.query_report_filters_by_name.end_date.set_input(frappe.datetime.get_today());
-						report.trigger_refresh();
-					}
-				}
-			})
+	validate_amount:function(dialog){
+		var data = dialog.get_values()
+		if(data.set_amt && data.set_amt_manual && (data.set_amt_manual > (data.payble - data.set_amt))){		
+				frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
+					[data.set_amt_manual,data.payble-data.set_amt]))
+		}
+		else if(data.payble && !data.set_amt && (data.set_amt_manual > data.payble)){
+			frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
+				[data.set_amt_manual,data.payble]))
+		}
 	}
-
 }
 

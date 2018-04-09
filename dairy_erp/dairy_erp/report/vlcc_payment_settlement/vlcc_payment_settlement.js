@@ -11,7 +11,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 				"fieldtype": "Link",
 				"options":"Village Level Collection Centre",
 				"reqd":1
-				},
+			},
 			{
 				"fieldname":"cycle",
 				"label": __("Cycle"),
@@ -86,7 +86,6 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 	onload: function(report) {
 
 		frappe.query_reports['VLCC Payment Settlement'].report_operation(report)
-		// frappe.query_reports['VLCC Payment Settlement'].get_default_cycle(report)
 
 	},
 	report_operation: function(report){
@@ -225,30 +224,5 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 			frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
 				[data.set_amt_manual,data.payble]))
 		}
-
-
-	},
-	get_default_cycle:function(report){
-		frappe.call({
-				method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_default_cycle",
-				args:{
-					"filters":report.get_values()
-				},
-				callback : function(r){
-					/*if(r.message){
-						frappe.query_report_filters_by_name.cycle.set_input(r.message[0].name);
-						frappe.query_report_filters_by_name.start_date.set_input(r.message[0].start_date);
-						frappe.query_report_filters_by_name.end_date.set_input(r.message[0].end_date);
-						report.trigger_refresh();		
-					}
-					else{
-						// frappe.throw("Please define Cycle from <b>VLCC Payment Cycle</b> ")
-						frappe.query_report_filters_by_name.start_date.set_input(frappe.datetime.get_today());
-						frappe.query_report_filters_by_name.end_date.set_input(frappe.datetime.get_today());
-						report.trigger_refresh();
-					}*/
-				}
-			})
 	}
-
 }

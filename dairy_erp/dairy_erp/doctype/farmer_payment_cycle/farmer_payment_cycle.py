@@ -10,6 +10,7 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.accounts.utils import get_fiscal_year
 import calendar
 import datetime
+from frappe import _
 
 class FarmerPaymentCycle(Document):
 
@@ -22,16 +23,16 @@ class FarmerPaymentCycle(Document):
 			if day.idx == 1:
 				if day.start_day != 1:
 					frappe.throw("Cycle must be start with <b>1</b> for row <b>#{0}</b>".format(day.idx))
-				elif day.end_day <= day.start_day:
+				elif day.end_day < day.start_day:
 					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
 				
 			else: 
 				if self.cycles[day.idx-2].end_day + 1 != day.start_day:
 					frappe.throw("Cycle must be start with {0} in row#{1}".format(self.cycles[day.idx-2].end_day + 1,day.idx))
-				elif day.end_day <= day.start_day and day.idx != self.no_of_cycles:
+				elif day.end_day < day.start_day and day.idx != self.no_of_cycles:
 					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
-				elif day.idx == self.no_of_cycles and day.end_day != last_day:
-					frappe.throw("Cycle must be end with <b>{0}</b> for row <b>#{1}</b>".format(last_day,day.idx))
+				elif day.idx == self.no_of_cycles and day.end_day != 31:
+					frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
 
 
 	def on_update(self):
@@ -40,13 +41,15 @@ class FarmerPaymentCycle(Document):
 		
 		self.make_date_computation()
 
+		frappe.msgprint(_("Cycles have been generated for fiscal year <b>{0}</b>".format(self.fiscal_year)))
+
 	def delete_date_computation(self):
 
 		frappe.delete_doc("Farmer Date Computation", frappe.db.sql_list("""select name from `tabFarmer Date Computation`
-		where {0}""".format(self.get_conditions())), for_reload=True,ignore_permissions=True,force=True)
+		where fiscal_year = '{0}' {1}""".format(self.fiscal_year,self.get_conditions())), for_reload=True,ignore_permissions=True,force=True)
 
 	def get_conditions(self):
-		condn = "1=1"
+		condn = " and 1=1"
 		month = getdate(nowdate()).month
 		current_month = calendar.month_abbr[month]
 		if getdate(nowdate()).day > 10:
@@ -55,17 +58,9 @@ class FarmerPaymentCycle(Document):
 
 	def make_date_computation(self):
 
-		month_dict = {}
-		month = getdate(nowdate()).month
-		current_month = calendar.month_abbr[month]
-		fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
-		month_list = frappe.db.sql_list("""select month from `tabFarmer Date Computation`
-			where month = %s""",(current_month))
-
+		fy = self.fiscal_year.split("-")[0]
+		
 		month_end = {
-			    "01": "Jan",
-			    "02": 'Feb',
-			    "03": "Mar",
 			    "04": "Apr",
 			    "05": "May",
 			    "06": "Jun",
@@ -74,47 +69,34 @@ class FarmerPaymentCycle(Document):
 			    "09": "Sep",
 			    "10": "Oct",
 			    "11": "Nov",
-			    "12": "Dec"
+			    "12": "Dec",
+			    "01": "Jan",
+			    "02": 'Feb',
+			    "03": "Mar"
 		}
 
-		for data in self.cycles:
-			for i,val in sorted(month_end.items()):
-				if val not in month_list:
-					end_date = get_month_details(fiscal_year.get('name'),i).month_end_date
-					month_dict.update({i:end_date})
+		for i,val in month_end.items():
+			for data in self.cycles:
+				s_date = get_month_details(self.fiscal_year,i).month_start_date
+				e_date = get_month_details(self.fiscal_year,i).month_end_date
 
-					start_date = getdate(getdate(nowdate()).strftime("%Y") + "-"+i+ "-"+str(data.start_day))
+				if data.start_day <= e_date.day:
+					start_date = getdate(str(e_date.year) + "-"+str(e_date.month)+ "-"+str(data.start_day))
+				else:
+					continue
 
-					if data.end_day in [31,30,28,29]:
-						end_date = month_dict[i] 
-					elif data.end_day < cint(month_dict[i].day):
-						end_date = getdate(getdate(nowdate()).strftime("%Y") + "-"+i + "-"+str(data.end_day))
+				if data.end_day <= e_date.day:
+					end_date = getdate(str(e_date.year) + "-"+str(e_date.month)+ "-"+str(data.end_day))
+				else:
+					end_date = e_date
 
-					payble_amount = self.get_payble_amount(start_date,end_date)
-					credit_list = [i.get('credit') for i in payble_amount]
-				
-					date_computation = frappe.new_doc("Farmer Date Computation")
-					date_computation.start_date = start_date
-					date_computation.end_date = end_date 
-					date_computation.month = val
-					date_computation.amount = sum(credit_list)
-					date_computation.cycle = data.cycle
-					date_computation.doc_name = val + "-" +data.cycle
-					date_computation.flags.ignore_permissions = True
-					date_computation.save()
-
-
-	def get_payble_amount(self,start_date,end_date):
-
-		vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
-
-		return frappe.db.sql("""select sum(g.credit) as credit,g.voucher_no ,p.posting_date
-				from 
-					`tabGL Entry` g,`tabPurchase Invoice` p 
-				where 
-					g.party = 'vlcc1' and g.against_voucher_type in ('Purchase Invoice') 
-					and (g.party is not null and g.party != '') and 
-					g.docstatus < 2 and p.name = g.voucher_no and g.company = %s and
-					p.status!='Paid' and p.posting_date between %s and %s 
-					group by g.against_voucher, g.party having credit > 0""",(vlcc,start_date,end_date),as_dict=1)
+				date_computation = frappe.new_doc("Farmer Date Computation")
+				date_computation.start_date = start_date
+				date_computation.end_date = end_date 
+				date_computation.month = val
+				date_computation.cycle = data.cycle
+				date_computation.fiscal_year = self.fiscal_year
+				date_computation.doc_name = fy[2]+fy[3]+"-"+val + "-" +data.cycle
+				date_computation.flags.ignore_permissions = True
+				date_computation.save()
 

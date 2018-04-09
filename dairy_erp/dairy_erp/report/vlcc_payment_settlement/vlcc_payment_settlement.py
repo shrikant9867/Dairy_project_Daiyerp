@@ -130,10 +130,14 @@ def make_payment(data,row_data,filters):
 			recv_list.append(gl_doc.voucher_no)
 	
 	# set_payble_amt(filters=filters)
-	make_payble_payment(data=data,row_data=row_data,filters=filters,company=dairy,payble_list=payble_list)
-	make_receivable_payment(data=data,row_data=row_data,filters=filters,company=dairy,recv_list=recv_list)
-	make_manual_payment(data=data,row_data=row_data,filters=filters,company=dairy,payble_list=payble_list)
-	make_payment_log(data=data,filters=filters)
+	try:
+		make_payble_payment(data=data,row_data=row_data,filters=filters,company=dairy,payble_list=payble_list)
+		make_receivable_payment(data=data,row_data=row_data,filters=filters,company=dairy,recv_list=recv_list)
+		make_manual_payment(data=data,row_data=row_data,filters=filters,company=dairy,payble_list=payble_list)
+		make_payment_log(data=data,filters=filters)
+	except Exception,e: 
+		utils.make_dairy_log(title="Payment Entry Error",method="Payment Entry", status="Error",
+					 message=e, traceback=frappe.get_traceback())
 	# calculate_percentage(filters=filters)
 
 
@@ -168,29 +172,30 @@ def make_payment_log(**kwargs):
 		log_doc.flags.ignore_permissions = True
 		log_doc.save()
 	except Exception,e: 
-		utils.make_dairy_log(title="ZeroDivisionError-Dairy",method="set_percentage", status="Error",
+		utils.make_dairy_log(title="VLCC Payment Log Error",method="set_percentage", status="Error",
 					 message=e, traceback=frappe.get_traceback())
 
 def calculate_percentage(**kwargs):
+	pass
 
-	amt = 0.0
+	# amt = 0.0
 
-	logs = frappe.db.sql_list("""select name from `tabVLCC Payment Log` where cycle = %s""",(kwargs.get('filters').get('cycle')))
+	# logs = frappe.db.sql_list("""select name from `tabVLCC Payment Log` where cycle = %s""",(kwargs.get('filters').get('cycle')))
 
-	for log in logs:
-		l = frappe.get_doc("VLCC Payment Log",log)
-		payble_amt = flt(l.settled_amount)+flt(l.set_amt_manual) if l.set_amt_manual else flt(l.settled_amount)
-		amt += payble_amt
+	# for log in logs:
+	# 	l = frappe.get_doc("VLCC Payment Log",log)
+	# 	payble_amt = flt(l.settled_amount)+flt(l.set_amt_manual) if l.set_amt_manual else flt(l.settled_amount)
+	# 	amt += payble_amt
 
-	try:
-		date_doc = frappe.get_doc("Cyclewise Date Computation",kwargs.get('filters').get('cycle'))
-		date_doc.set_per = (amt/date_doc.amount) * 100
-		date_doc.outstanding_amount = date_doc.amount - amt
-		date_doc.flags.ignore_permissions = True
-		date_doc.save()
-	except Exception,e: 
-		utils.make_dairy_log(title="ZeroDivisionError-Dairy",method="set_percentage", status="Error",
-					 message=e, traceback=frappe.get_traceback())
+	# try:
+	# 	date_doc = frappe.get_doc("Cyclewise Date Computation",kwargs.get('filters').get('cycle'))
+	# 	date_doc.set_per = (amt/date_doc.amount) * 100
+	# 	date_doc.outstanding_amount = date_doc.amount - amt
+	# 	date_doc.flags.ignore_permissions = True
+	# 	date_doc.save()
+	# except Exception,e: 
+	# 	utils.make_dairy_log(title="ZeroDivisionError-Dairy",method="set_percentage", status="Error",
+	# 				 message=e, traceback=frappe.get_traceback())
 
 
 def set_payble_amt(filters):
@@ -342,7 +347,7 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 	if count:
 		limit_count = int(count[0].get('count')) + 1 
 
-		return frappe.db.sql("""select c.name,CONCAT(iFnull(max(round(l.set_per,2)),0),' %') as set_per,l.vlcc 
+		return frappe.db.sql("""select c.name,CONCAT(iFnull(round(l.set_per,2),0),' %') as set_per,l.vlcc 
 					from 
 						`tabCyclewise Date Computation` as c
 		 			left join 

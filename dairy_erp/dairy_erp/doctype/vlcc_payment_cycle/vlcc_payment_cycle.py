@@ -23,14 +23,14 @@ class VLCCPaymentCycle(Document):
 			if day.idx == 1:
 				if day.start_day != 1:
 					frappe.throw("Cycle must be start with <b>1</b> for row <b>#{0}</b>".format(day.idx))
-				elif day.end_day <= day.start_day:
+				elif day.end_day < day.start_day:
 					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
 				
 			else: 
 				if self.cycles[day.idx-2].end_day + 1 != day.start_day:
 					frappe.throw("Cycle must be start with {0} in row#{1}".format(self.cycles[day.idx-2].end_day + 1,day.idx))
-				# elif day.end_day <= day.start_day and day.idx != self.no_of_cycles:
-				# 	frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
+				elif day.end_day < day.start_day and day.idx != self.no_of_cycles:
+					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
 				elif day.idx == self.no_of_cycles and day.end_day != 31:
 					frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
 
@@ -50,16 +50,13 @@ class VLCCPaymentCycle(Document):
 
 	def get_conditions(self):
 		condn = " and 1=1"
-		month = getdate(nowdate()).month
-		current_month = calendar.month_abbr[month]
+		current_month = calendar.month_abbr[getdate(nowdate()).month]
 		if getdate(nowdate()).day > 10:
 			condn += " and month !='{0}'".format(current_month)
 		return condn
 
 	def make_date_computation(self):
 
-		month_dict = {}
-		current_month = calendar.month_abbr[getdate(nowdate()).month]
 		fy = self.fiscal_year.split("-")[0]
 		
 		month_end = {

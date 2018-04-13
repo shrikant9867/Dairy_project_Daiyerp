@@ -246,7 +246,7 @@ def make_receivable_payment(**kwargs):
 
 	if kwargs.get('data').get('set_amt'):
 		make_payment_entry(payment_type='Receive',args=kwargs,party_type='Customer',bank=default_bank_cash_account,
-					party_account=party_account,party_account_currency=party_account_currency,ref_no="Auto Receivable Settlement")
+					party_account=party_account,party_account_currency=party_account_currency,ref_no="Auto Receivable Settlement",)
 
 def make_manual_payment(**kwargs):
 
@@ -271,6 +271,7 @@ def make_payment_entry(**kwargs):
 	pe.party = kwargs.get('args').get('filters').get('farmer')
 	pe.paid_from = kwargs.get('party_account') if kwargs.get('payment_type')=="Receive" else kwargs.get('bank').account
 	pe.paid_to = kwargs.get('party_account') if kwargs.get('payment_type')=="Pay" else kwargs.get('bank').account
+	pe.flags.ignore_credit_validation = True if kwargs.get('payment_type') == 'Receive' else False
 	pe.paid_from_account_currency = kwargs.get('party_account_currency') \
 		if kwargs.get('payment_type')=="Receive" else kwargs.get('bank').account_currency
 	pe.paid_to_account_currency = kwargs.get('party_account_currency') \

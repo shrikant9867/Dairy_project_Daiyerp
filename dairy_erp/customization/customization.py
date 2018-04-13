@@ -452,28 +452,29 @@ def mi_status_update(doc):
 				where parent = '{1}' group by material_request""".format(item_doc, doc.name),as_dict=1)
 
 	for row in material_req_list:
-		mi = frappe.get_doc("Material Request",row.get('material_request'))
-		for data in mi.items:
-			for row in doc.items:
-				if data.item_code == row.item_code and data.parent == row.material_request:
-					data.completed_dn += row.qty
-					data.new_dn_qty = data.qty - data.completed_dn
-					delivered_qty += data.completed_dn
-		
-		mi.flags.ignore_permissions = True
-		mi.save()
+		if row.get('material_request'):
+			mi = frappe.get_doc("Material Request",row.get('material_request'))
+			for data in mi.items:
+				for row in doc.items:
+					if data.item_code == row.item_code and data.parent == row.material_request:
+						data.completed_dn += row.qty
+						data.new_dn_qty = data.qty - data.completed_dn
+						delivered_qty += data.completed_dn
+			
+			mi.flags.ignore_permissions = True
+			mi.save()
 
-		all_delivered = True
-		for i in mi.items:
-			if i.qty != i.completed_dn:
-				all_delivered = False
-		mi_status = "Delivered" if all_delivered else "Partially Delivered"
-		per_delivered = 100 if all_delivered else 99.99
-		mi.per_delivered = per_delivered
-		mi.set_status(status=mi_status)
-		mi.flags.ignore_permissions = True
-		mi.flags.ignore_validate_update_after_submit = True
-		mi.save()
+			all_delivered = True
+			for i in mi.items:
+				if i.qty != i.completed_dn:
+					all_delivered = False
+			mi_status = "Delivered" if all_delivered else "Partially Delivered"
+			per_delivered = 100 if all_delivered else 99.99
+			mi.per_delivered = per_delivered
+			mi.set_status(status=mi_status)
+			mi.flags.ignore_permissions = True
+			mi.flags.ignore_validate_update_after_submit = True
+			mi.save()
 
 def validate_qty(doc, method):
 	"""validate PR qty, must be equal to DN or less"""

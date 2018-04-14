@@ -85,12 +85,15 @@ def get_data(filters):
 
 def get_conditions(filters):
 
+
 	conditions = " and 1=1"
 
-	if filters.get('farmer'):
+	if filters.get('farmer') and filters.get('prev_transactions'):
 		farmer_name = frappe.db.get_value("Farmer",filters.get('farmer'),"full_name")
-		conditions += " and g1.party = '{farmer_name}'".format(farmer_name=farmer_name)
-	conditions += " and g1.posting_date between %(start_date)s and %(end_date)s"
+		conditions += " and g1.posting_date <= %(end_date)s and g1.party = '{farmer_name}'".format(farmer_name=farmer_name)
+	elif filters.get('farmer') and filters.get('cycle') and not filters.get('prev_transactions'):
+		farmer_name = frappe.db.get_value("Farmer",filters.get('farmer'),"full_name")
+		conditions += " and g1.party = '{farmer_name}' and g1.posting_date between %(start_date)s and %(end_date)s".format(farmer_name=farmer_name)
 
 	return conditions
 
@@ -132,17 +135,15 @@ def make_payment(data,row_data,filters):
 		elif gl_doc.voucher_type == 'Sales Invoice':
 			recv_list.append(gl_doc.voucher_no)
 	
-	# set_payble_amt(filters=filters)
 	try:
-		make_payble_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
-		make_receivable_payment(data=data,row_data=row_data,filters=filters,company=vlcc,recv_list=recv_list)
-		make_manual_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
+		payable = make_payble_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
+		receivable = make_receivable_payment(data=data,row_data=row_data,filters=filters,company=vlcc,recv_list=recv_list)
+		due_pay = make_manual_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
 		make_payment_log(data=data,filters=filters)
+		return {"payable":payable,"receivable":receivable,"due_pay":due_pay}
 	except Exception,e: 
 		utils.make_dairy_log(title="Payment Entry Error",method="Payment Entry", status="Error",
 					 message=e, traceback=frappe.get_traceback())
-
-	# calculate_percentage(filters=filters)
 
 
 def make_payment_log(**kwargs):
@@ -179,30 +180,6 @@ def make_payment_log(**kwargs):
 		utils.make_dairy_log(title="Farmer Payment Log Error",method="set_percentage", status="Error",
 					 message=e, traceback=frappe.get_traceback())
 
-	
-
-def calculate_percentage(**kwargs):
-
-	pass
-
-	# amt = 0.0
-
-	# logs = frappe.db.sql_list("""select name from `tabFarmer Payment Log` where cycle = %s""",(kwargs.get('filters').get('cycle')))
-
-	# for log in logs:
-	# 	l = frappe.get_doc("Farmer Payment Log",log)
-	# 	payble_amt = flt(l.settled_amount)+flt(l.set_amt_manual) if l.set_amt_manual else flt(l.settled_amount)
-	# 	amt += payble_amt
-
-	# try:
-	# 	date_doc = frappe.get_doc("Farmer Date Computation",kwargs.get('filters').get('cycle'))
-	# 	date_doc.set_per = (amt/date_doc.amount) * 100
-	# 	date_doc.outstanding_amount = date_doc.amount - amt
-	# 	date_doc.flags.ignore_permissions = True
-	# 	date_doc.save()
-	# except Exception,e: 
-	# 	utils.make_dairy_log(title="ZeroDivisionError-Dairy",method="set_percentage", status="Error",
-	# 				 message=e, traceback=frappe.get_traceback())
 
 
 def set_payble_amt(filters):
@@ -233,8 +210,9 @@ def make_payble_payment(**kwargs):
 	party_account_currency = get_account_currency(party_account)
 
 	if kwargs.get('data').get('set_amt'):
-		make_payment_entry(payment_type='Pay',args=kwargs,party_type='Supplier',bank=default_bank_cash_account,
+		amt = make_payment_entry(payment_type='Pay',args=kwargs,party_type='Supplier',bank=default_bank_cash_account,
 					party_account=party_account,party_account_currency=party_account_currency,ref_no="Auto Payble Settlement")
+		return amt
 	
 def make_receivable_payment(**kwargs):
 
@@ -245,8 +223,9 @@ def make_receivable_payment(**kwargs):
 	party_account_currency = get_account_currency(party_account)
 
 	if kwargs.get('data').get('set_amt'):
-		make_payment_entry(payment_type='Receive',args=kwargs,party_type='Customer',bank=default_bank_cash_account,
+		amt = make_payment_entry(payment_type='Receive',args=kwargs,party_type='Customer',bank=default_bank_cash_account,
 					party_account=party_account,party_account_currency=party_account_currency,ref_no="Auto Receivable Settlement",)
+		return amt
 
 def make_manual_payment(**kwargs):
 
@@ -257,8 +236,9 @@ def make_manual_payment(**kwargs):
 	party_account_currency = get_account_currency(party_account)
 
 	if kwargs.get('data').get('set_amt_manual'):
-		make_payment_entry(payment_type='Pay',args=kwargs,party_type='Supplier',bank=default_bank_cash_account,
+		amt = make_payment_entry(payment_type='Pay',args=kwargs,party_type='Supplier',bank=default_bank_cash_account,
 					party_account=party_account,party_account_currency=party_account_currency,is_manual=True)
+		return amt
 
 def make_payment_entry(**kwargs):
 
@@ -328,6 +308,7 @@ def make_payment_entry(**kwargs):
 	pe.total_allocated_amount = party_amount
 	pe.save()
 	pe.submit()
+	return pe.name
 
 
 @frappe.whitelist()
@@ -343,30 +324,88 @@ def get_dates(filters):
 def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 
 	farmer_name = frappe.db.get_value("Farmer",filters.get('farmer'),"full_name")
-	count = frappe.db.sql("""select count(1) as count from `tabFarmer Payment Log` where farmer = %s and 
-			set_per between 90 and 99""",(farmer_name),as_dict=1)
+
+	conditions = " 1=1"
+	cycle = frappe.db.get_singles_dict('Farmer Payment Cycle')
+	if cycle.get('min_set_per')  and cycle.get('min_set_per') != 100:
+		conditions += " and set_per between {0} and 99".format(cycle.get('min_set_per'))
+
+	count = frappe.db.sql("""select count(1) as count from `tabFarmer Payment Log` 
+		where {0} and farmer =  '{1}'
+		""".format(conditions,farmer_name),as_dict=1)
+
 
 	if count:
 		limit_count = int(count[0].get('count')) + 1 
 
-		return frappe.db.sql("""select * from 
-			(select c.name,CONCAT(iFnull(round(l.set_per,2),0),' %') as set_per,
-			l.farmer  
-			from  
-				`tabFarmer Date Computation` as c  
-			left join   
-				(select l1.farmer, l1.cycle,max(l1.set_per) as set_per   
-				from   
-					`tabFarmer Payment Log` l1   
-					group by l1.farmer, l1.cycle) 
-				as l on c.name = l.cycle   
-				where   
-					(l.farmer = '{0}' or l.farmer is NULL) and   
-					(l.set_per<100 or l.set_per is NULL) and  
-					c.end_date < curdate()  order by c.end_date limit {1}) 
-					as f where f.name is NOT NULL""".
-					format(farmer_name,limit_count),as_list=True)
+		if farmer_name:
+			return frappe.db.sql("""select c.name,CONCAT(iFnull(round(l.set_per,2),0),' %') as set_per,l.farmer 
+						from 
+							`tabFarmer Date Computation` as c
+			 			left join 
+			 				(select l1.farmer, l1.cycle,max(l1.set_per) as set_per 
+			 				from 
+			 					`tabFarmer Payment Log` l1 
+			 				group by l1.farmer, l1.cycle) as l on c.name = l.cycle 
+			 				where 
+			 				(l.farmer = '{0}' or l.farmer is NULL) and 
+			 				(l.set_per<100 or l.set_per is NULL) and 
+						c.end_date < curdate()
+						order by c.end_date limit {1}""".
+						format(farmer_name,limit_count),as_list=True)
 
 	return []
 
+@frappe.whitelist()
+def skip_cycle(row_data,filters):
 
+	row_data = json.loads(row_data)
+	filters = json.loads(filters)
+
+	farmer_name = frappe.db.get_value("Farmer",filters.get('farmer'),"full_name")
+
+	vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
+
+	pi = frappe.db.sql("""select name  
+		from    
+			`tabPurchase Invoice`  
+		where    
+			status in ('Overdue','Unpaid') and 
+			company = '{0}' and 
+			not isnull(name) and supplier = '{1}' and posting_date between '{2}' and '{3}'""".
+			format(vlcc,farmer_name,filters.get('start_date'),filters.get('end_date')),as_dict=True)
+
+	si = frappe.db.sql("""select name  
+		from    
+			`tabSales Invoice`  
+		where    
+			status in ('Overdue','Unpaid') and 
+			company = '{0}' and 
+			not isnull(name) and customer = '{1}' and posting_date between '{2}' and '{3}'""".
+			format(vlcc,farmer_name,filters.get('start_date'),filters.get('end_date')),as_dict=True)
+
+	pi_list = [d.name for d in pi]
+
+	si_list = [d.name for d in si]
+
+	invoice_list = pi_list+si_list
+
+
+	if farmer_name and filters.get('cycle'):
+		log = frappe.db.get_value("Farmer Payment Log",{"farmer":farmer_name,"cycle":filters.get('cycle')},"name")
+		if not log:
+			if invoice_list:
+				frappe.throw("You cannot skip the cycle because invoice are yet to settled.")
+			else:
+				log_doc = frappe.new_doc("Farmer Payment Log")
+				log_doc.start_date = filters.get('start_date') 
+				log_doc.end_date = filters.get('end_date') 
+				log_doc.cycle = filters.get('cycle')
+				log_doc.set_per = 100
+				log_doc.month = filters.get('cycle').split("-")[1]
+				log_doc.farmer = farmer_name
+				log_doc.flags.ignore_permissions = True
+				log_doc.save()
+				frappe.msgprint(_("Cycle has been skipped"))
+		else:
+			frappe.throw("You cannot skip the cycle because invoice are yet to settled.")

@@ -321,7 +321,7 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 
 	conditions = " 1=1"
 	cycle = frappe.db.get_singles_dict('VLCC Payment Cycle')
-	if cycle.get('min_set_per') != 100:
+	if cycle.get('min_set_per') and cycle.get('min_set_per') != 100:
 		conditions += " and set_per between {0} and 99".format(cycle.get('min_set_per'))
 
 	count = frappe.db.sql("""select count(1) as count from `tabVLCC Payment Log` 
@@ -343,7 +343,7 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 			 				where 
 			 				(l.vlcc = '{0}' or l.vlcc is NULL) and 
 			 				(l.set_per<100 or l.set_per is NULL) and 
-						c.end_date < '2018-05-01' 
+						c.end_date < curdate()
 						order by c.end_date limit {1}""".
 						format(filters.get('vlcc'),limit_count),as_list=True)
 	return []
@@ -397,5 +397,6 @@ def skip_cycle(row_data,filters):
 				log_doc.vlcc = filters.get('vlcc')
 				log_doc.flags.ignore_permissions = True
 				log_doc.save()
+				frappe.msgprint(_("Cycle has been skipped"))
 		else:
 			frappe.throw("You cannot skip the cycle because invoice are yet to settled.")

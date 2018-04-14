@@ -16,6 +16,12 @@ class VLCCPaymentCycle(Document):
 
 	def validate(self):
 
+		self.validate_data()
+		self.validate_cycle()
+		
+
+	def validate_cycle(self):
+
 		last_day = get_last_day(nowdate()).day
 
 		for day in self.cycles:
@@ -34,6 +40,11 @@ class VLCCPaymentCycle(Document):
 				elif day.idx == self.no_of_cycles and day.end_day != 31:
 					frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
 
+	def validate_data(self):
+
+		if self.no_of_cycles == 0:
+			frappe.throw("Number of cycles must be between 1-31")
+
 
 	def on_update(self):
 
@@ -50,15 +61,13 @@ class VLCCPaymentCycle(Document):
 
 			frappe.delete_doc("Cyclewise Date Computation", frappe.db.sql_list("""select name 
 							from `tabCyclewise Date Computation`
-							where  {1}""".format(self.fiscal_year,self.get_conditions()),debug=1), 
+							where  {0}""".format(self.get_conditions())), 
 						for_reload=True,ignore_permissions=True,force=True)
 
 
 	def get_conditions(self):
 
 		condn = " 1=1"
-		month_list = frappe.db.sql_list("select month from `tabCyclewise Date Computation` group by month")
-		months = "(" + ",".join([ "'{0}'".format(month) for month in month_list ])  +")"
 
 		current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 		current_month = calendar.month_abbr[getdate(nowdate()).month]
@@ -76,10 +85,9 @@ class VLCCPaymentCycle(Document):
 				condn += " and month !='{0}'".format(current_month)
 		else:
 			if getdate(nowdate()) > getdate(month_e_date):
-				condn += " and 1=2"#month != '{0}'".format(self.month)
+				condn += " and 1=2"
 			else:
 				condn += " and month = '{0}'".format(self.month)
-
 
 		return condn
 

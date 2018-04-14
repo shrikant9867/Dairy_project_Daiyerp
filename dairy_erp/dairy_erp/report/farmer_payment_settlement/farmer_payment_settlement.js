@@ -6,6 +6,12 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 
 	"filters": [
 		{
+				"fieldname":"select_all",
+				"label": __("Select All"),
+				"fieldtype": "Check",
+				"default":1
+		},
+		{
 			"fieldname":"farmer",
 			"label": __("Farmer"),
 			"fieldtype": "Link",
@@ -63,19 +69,24 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			"default": frappe.datetime.get_today(),
 			"read_only":1
 		},
-		/*{
+		{
 			"fieldname":"prev_transactions",
 			"label": __("Previous Transactions"),
 			"fieldtype": "Check"
-		},*/
+		}
 
 	],
 	formatter: function(row, cell, value, columnDef, dataContext,default_formatter) {
+		var me = frappe.container.page.query_report;
+		var select_all = frappe.query_report_filters_by_name.select_all.get_value()
 			if (columnDef.df.label=="") {
+				me.data[row].selected
+					= select_all ? true : false;
+
 				return repl("<input type='checkbox' \
 					data-row='%(row)s' %(checked)s>", {
 						row: row,
-						checked: (dataContext.selected ? "checked=\"checked\"" : "")
+						checked: select_all ? "checked=\"checked\"" : ""
 					});
 			}
 			value = default_formatter(row, cell, value, columnDef, dataContext);
@@ -109,6 +120,19 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 				frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
 			}
 			frappe.query_reports['Farmer Payment Settlement'].get_summary_dialog(report)
+		});
+
+		report.page.add_inner_button(__("Skip Cycle"), function() {
+
+			frappe.call({
+				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.skip_cycle",
+				args : {
+						"row_data":frappe.selected_rows,
+						"filters":report.get_values()
+						},
+				callback : function(r){			
+				}
+			})
 		});
 
 		$('body').on("click", "input[type='checkbox'][data-row]", function() {
@@ -205,6 +229,44 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 						"filters":report.get_values()
 						},
 				callback : function(r){
+					if (r.message){
+						var payable = r.message.payable
+						var receivable = r.message.receivable
+						var due_pay = r.message.due_pay
+						if (payable && receivable && due_pay){	
+							frappe.msgprint(__("Payment Entry {0}, {1}, {2} has been created",
+								[repl('<a href="#Form/Payment Entry/%(payable)s" class="strong">%(payable)s</a>', {
+									payable: payable
+								}),
+								repl('<a href="#Form/Payment Entry/%(receivable)s" class="strong">%(receivable)s</a>', {
+									receivable: receivable
+								}),
+								repl('<a href="#Form/Payment Entry/%(due_pay)s" class="strong">%(due_pay)s</a>', {
+									due_pay: due_pay
+								})]
+							));
+						}
+						else if(payable && receivable){
+							frappe.msgprint(__("Payment Entry {0}, {1} has been created",
+								[repl('<a href="#Form/Payment Entry/%(payable)s" class="strong">%(payable)s</a>', {
+									payable: payable
+								}),
+								repl('<a href="#Form/Payment Entry/%(receivable)s" class="strong">%(receivable)s</a>', {
+									receivable: receivable
+								})]
+							));
+
+						}
+						else if(due_pay){
+							frappe.msgprint(__("Payment Entry {0} has been created",
+								[repl('<a href="#Form/Payment Entry/%(due_pay)s" class="strong">%(due_pay)s</a>', {
+									due_pay: due_pay
+								})]
+							));
+
+						}
+			
+					}
 					
 					dialog.hide()
 				}
@@ -220,6 +282,12 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 		else if(data.payble && !data.set_amt && (data.set_amt_manual > data.payble)){
 			frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
 				[data.set_amt_manual,data.payble]))
+		}
+		if(data.set_amt_manual < 0){
+			frappe.throw(__("Payable Amount can not be negative"))
+		}
+		else if(data.set_amt_manual === 0){
+			frappe.throw(__("Payable Amount can not be zero"))
 		}
 	}
 }

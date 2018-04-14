@@ -16,6 +16,12 @@ class FarmerPaymentCycle(Document):
 
 	def validate(self):
 
+		self.validate_data()
+		self.validate_cycle()
+	
+
+	def validate_cycle(self):
+
 		last_day = get_last_day(nowdate()).day
 
 		for day in self.cycles:
@@ -34,6 +40,11 @@ class FarmerPaymentCycle(Document):
 				elif day.idx == self.no_of_cycles and day.end_day != 31:
 					frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
 
+	def validate_data(self):
+
+		if self.no_of_cycles == 0:
+			frappe.throw("Number of cycles must be between 1-31")
+
 
 	def on_update(self):
 
@@ -41,19 +52,41 @@ class FarmerPaymentCycle(Document):
 		
 		self.make_date_computation()
 
-		frappe.msgprint(_("Cycles have been generated for fiscal year <b>{0}</b>".format(self.fiscal_year)))
 
 	def delete_date_computation(self):
 
-		frappe.delete_doc("Farmer Date Computation", frappe.db.sql_list("""select name from `tabFarmer Date Computation`
-		where fiscal_year = '{0}' {1}""".format(self.fiscal_year,self.get_conditions())), for_reload=True,ignore_permissions=True,force=True)
+		current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
+
+		if self.fiscal_year == current_fiscal_year.get('name'):
+
+			frappe.delete_doc("Farmer Date Computation", frappe.db.sql_list("""select name from 
+			`tabFarmer Date Computation` where {0}""".format(self.get_conditions())), 
+			for_reload=True,ignore_permissions=True,force=True)
 
 	def get_conditions(self):
-		condn = " and 1=1"
-		month = getdate(nowdate()).month
-		current_month = calendar.month_abbr[month]
-		if getdate(nowdate()).day > 10:
-			condn += " and month !='{0}'".format(current_month)
+
+		condn = " 1=1"
+
+		current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
+		current_month = calendar.month_abbr[getdate(nowdate()).month]
+
+		e_date = frappe.db.get_value("Farmer Date Computation",
+			{"fiscal_year":current_fiscal_year.get('name'),
+			"month":current_month,"cycle":'Cycle 1'},"end_date")
+
+		month_e_date = frappe.db.get_value("Farmer Date Computation",
+			{"fiscal_year":current_fiscal_year.get('name'),
+			"month":self.month,"cycle":'Cycle 1'},"end_date")
+
+		if self.month == 'All':
+			if getdate(nowdate()) > getdate(e_date) :
+				condn += " and month !='{0}'".format(current_month)
+		else:
+			if getdate(nowdate()) > getdate(month_e_date):
+				condn += " and 1=2"
+			else:
+				condn += " and month = '{0}'".format(self.month)
+
 		return condn
 
 	def make_date_computation(self):
@@ -61,42 +94,60 @@ class FarmerPaymentCycle(Document):
 		fy = self.fiscal_year.split("-")[0]
 		
 		month_end = {
-			    "04": "Apr",
-			    "05": "May",
-			    "06": "Jun",
-			    "07": "Jul",
-			    "08": "Aug",
-			    "09": "Sep",
-			    "10": "Oct",
-			    "11": "Nov",
-			    "12": "Dec",
-			    "01": "Jan",
-			    "02": 'Feb',
-			    "03": "Mar"
+				    "Apr":"04", 
+				    "May":"05", 
+				    "Jun":"06", 
+				    "Jul":"07", 
+				    "Aug":"08", 
+				    "Sep":"09", 
+				    "Oct":"10", 
+				    "Nov":"11", 
+				    "Dec":"12", 
+				    "Jan":"01", 
+				    "Feb":"02", 
+				    "Mar":"03" 
 		}
 
-		for i,val in month_end.items():
+		if self.month == 'All':
+			for key,val in month_end.items():
+				for data in self.cycles:
+					self.make_monthwise_computation(key=key,val=val,data=data)
+			frappe.msgprint(_("Cycles have been generated"))
+		else:
 			for data in self.cycles:
-				s_date = get_month_details(self.fiscal_year,i).month_start_date
-				e_date = get_month_details(self.fiscal_year,i).month_end_date
+				self.make_monthwise_computation(key=self.month,val=month_end.get(self.month),data=data)
+			frappe.msgprint(_("Cycles have been generated"))
 
-				if data.start_day <= e_date.day:
-					start_date = getdate(str(e_date.year) + "-"+str(e_date.month)+ "-"+str(data.start_day))
-				else:
-					continue
 
-				if data.end_day <= e_date.day:
-					end_date = getdate(str(e_date.year) + "-"+str(e_date.month)+ "-"+str(data.end_day))
-				else:
-					end_date = e_date
+	def make_monthwise_computation(self,key,val,data):
 
+		fy = self.fiscal_year.split("-")[0]
+		current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
+		start_date = ""
+		end_date = ""
+		
+		s_date = get_month_details(self.fiscal_year,val).month_start_date
+		e_date = get_month_details(self.fiscal_year,val).month_end_date
+
+		if data.start_day <= e_date.day:
+			start_date = getdate(str(e_date.year) + "-"+str(e_date.month)+ "-"+str(data.start_day))
+		
+
+		if data.end_day <= e_date.day:
+			end_date = getdate(str(e_date.year) + "-"+str(e_date.month)+ "-"+str(data.end_day))
+		else:
+			end_date = e_date
+
+
+		if start_date and end_date:
+			if not frappe.db.exists('Farmer Date Computation', fy[2]+fy[3]+"-"+key + "-" +data.cycle):
 				date_computation = frappe.new_doc("Farmer Date Computation")
 				date_computation.start_date = start_date
 				date_computation.end_date = end_date 
-				date_computation.month = val
+				date_computation.month = key
 				date_computation.cycle = data.cycle
 				date_computation.fiscal_year = self.fiscal_year
-				date_computation.doc_name = fy[2]+fy[3]+"-"+val + "-" +data.cycle
+				date_computation.doc_name = fy[2]+fy[3]+"-"+key + "-" +data.cycle
 				date_computation.flags.ignore_permissions = True
 				date_computation.save()
 

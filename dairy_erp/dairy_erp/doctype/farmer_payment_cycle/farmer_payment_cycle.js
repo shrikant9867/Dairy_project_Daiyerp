@@ -3,6 +3,20 @@
 
 frappe.ui.form.on('Farmer Payment Cycle', {
 	refresh: function(frm) {
+		frappe.call({
+				method: "frappe.client.get_value",
+				async : false,
+				args: {
+					doctype: "User",
+					filters: {"name": frappe.session.user},
+					fieldname: ["company"]
+				},
+				callback: function(r){
+					if(r.message){
+						frm.set_value("vlcc",r.message.company)
+					}
+				}
+			});
 
 	},
 	no_of_cycles: function(frm){
@@ -25,6 +39,15 @@ frappe.ui.form.on('Farmer Payment Cycle', {
 		var cycle = frappe.meta.get_docfield('Farmer Payment Child', "cycle", frm.doc.name);
 		cycle.read_only = 1;
 		frm.refresh_field("cycles");	
+	},
+	min_set_per: function(frm){
+		if (frm.doc.min_set_per > 100){
+			frm.set_value("min_set_per","")
+			frappe.throw("Percentage can not be greater than 100")
+		}else if(frm.doc.min_set_per === 0){
+			frm.set_value("min_set_per","")
+			frappe.throw("Please Enter Percentage more than Zero")
+		}
 	}
 });
 

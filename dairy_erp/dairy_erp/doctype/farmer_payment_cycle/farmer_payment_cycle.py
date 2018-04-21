@@ -16,9 +16,18 @@ class FarmerPaymentCycle(Document):
 
 	def validate(self):
 
+		self.validate_def()
 		self.validate_data()
 		self.validate_cycle()
 	
+
+	def validate_def(self):
+		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
+
+		if self.is_new():
+			if frappe.db.sql_list("""select name from `tabFarmer Payment Cycle` 
+							where vlcc = %s""",(user_doc)):
+				frappe.throw("Please add cycles in the existing defination of cycle")
 
 	def validate_cycle(self):
 
@@ -138,16 +147,33 @@ class FarmerPaymentCycle(Document):
 		else:
 			end_date = e_date
 
-
 		if start_date and end_date:
-			if not frappe.db.exists('Farmer Date Computation', fy[2]+fy[3]+"-"+key + "-" +data.cycle):
+			company_abbr = frappe.db.get_value("Village Level Collection Centre",self.vlcc,"abbr")
+			if not frappe.db.exists('Farmer Date Computation', fy[2]+fy[3]+"-"+key + "-" +data.cycle+"-"+company_abbr):
 				date_computation = frappe.new_doc("Farmer Date Computation")
 				date_computation.start_date = start_date
 				date_computation.end_date = end_date 
 				date_computation.month = key
 				date_computation.cycle = data.cycle
+				date_computation.vlcc = self.vlcc
 				date_computation.fiscal_year = self.fiscal_year
-				date_computation.doc_name = fy[2]+fy[3]+"-"+key + "-" +data.cycle
+				date_computation.doc_name = fy[2]+fy[3]+"-"+key + "-" +data.cycle+"-"+company_abbr
 				date_computation.flags.ignore_permissions = True
 				date_computation.save()
 
+def farmer_permission_query(user):
+
+	roles = frappe.get_roles()
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},
+			  ['operator_type','company','branch_office'], as_dict =1)
+
+	cycle_list =['"%s"'%i.get('name') for i in frappe.db.sql("""select name from 
+				`tabFarmer Payment Cycle` 
+				where vlcc = %s""",(user_doc.get('company')),as_dict=True)]
+
+	if cycle_list:
+		if user != 'Administrator' and 'Vlcc Manager' in roles:
+			return """`tabFarmer Payment Cycle`.name in ({date})""".format(date=','.join(cycle_list))
+	else:
+		if user != 'Administrator':
+			return """`tabFarmer Payment Cycle`.name = 'Guest' """

@@ -25,6 +25,15 @@ frappe.ui.form.on('VLCC Payment Cycle', {
 		var cycle = frappe.meta.get_docfield('VLCC Payment Child', "cycle", frm.doc.name);
 		cycle.read_only = 1;
 		frm.refresh_field("cycles");	
+	},
+	min_set_per: function(frm){
+		if (frm.doc.min_set_per > 100){
+			frm.set_value("min_set_per","")
+			frappe.throw("Percentage can not be greater than 100")
+		}else if(frm.doc.min_set_per === 0){
+			frm.set_value("min_set_per","")
+			frappe.throw("Please Enter Percentage more than Zero")
+		}
 	}
 });
 

@@ -48,15 +48,12 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 			},
 			"get_query":function(query_report){
 				var vlcc = frappe.query_report_filters_by_name.vlcc.get_value()
-
 				return{
 					query:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.get_settlement_per",
 					filters: {
 						"vlcc": vlcc
 					}
-
 				}
-
 			}
 		},
 		{
@@ -125,8 +122,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 			if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
 				frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
 			}
-
-			frappe.query_reports['VLCC Payment Settlement'].get_summary_dialog(report)
+			frappe.query_reports['VLCC Payment Settlement'].check_cycle(report)
 		});
 
 		report.page.add_inner_button(__("Skip Cycle"), function() {
@@ -147,6 +143,22 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 					= this.checked ? true : false;
 		})
 
+	},
+	check_cycle: function(report){
+		frappe.call({
+				method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.check_cycle",
+				args : {
+						"row_data":frappe.selected_rows,
+						"filters":report.get_values()
+						},
+				callback : function(r){	
+					if (r.message){
+						frappe.throw(r.message)
+					}else{
+						frappe.query_reports['VLCC Payment Settlement'].get_summary_dialog(report)
+					}		
+				}
+			})
 	},
 	get_summary_dialog:function(report){
 		var dialog = new frappe.ui.Dialog({
@@ -220,64 +232,60 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 				dialog.get_field('sec_brk').refresh();
 			}
 		}
-	})
-		
-		dialog.show()
+	})		
+	dialog.show()
 
-		dialog.set_primary_action(__("Submit"), function() {
+	dialog.set_primary_action(__("Submit"), function() {
 
-			frappe.query_reports['VLCC Payment Settlement'].validate_amount(dialog)
+		frappe.query_reports['VLCC Payment Settlement'].validate_amount(dialog)
 
-			frappe.call({
-				method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.make_payment",
-				args : {
-						"data":dialog.get_values(),
-						"row_data":frappe.selected_rows,
-						"filters":report.get_values()
-						},
-				callback : function(r){
-					if (r.message){
-						var payable = r.message.payable
-						var receivable = r.message.receivable
-						var due_pay = r.message.due_pay
-						if (payable && receivable && due_pay){	
-							frappe.msgprint(__("Payment Entry {0}, {1}, {2} has been created",
-								[repl('<a href="#Form/Payment Entry/%(payable)s" class="strong">%(payable)s</a>', {
-									payable: payable
-								}),
-								repl('<a href="#Form/Payment Entry/%(receivable)s" class="strong">%(receivable)s</a>', {
-									receivable: receivable
-								}),
-								repl('<a href="#Form/Payment Entry/%(due_pay)s" class="strong">%(due_pay)s</a>', {
-									due_pay: due_pay
-								})]
-							));
-						}
-						else if(payable && receivable){
-							frappe.msgprint(__("Payment Entry {0}, {1} has been created",
-								[repl('<a href="#Form/Payment Entry/%(payable)s" class="strong">%(payable)s</a>', {
-									payable: payable
-								}),
-								repl('<a href="#Form/Payment Entry/%(receivable)s" class="strong">%(receivable)s</a>', {
-									receivable: receivable
-								})]
-							));
-
-						}
-						else if(due_pay){
-							frappe.msgprint(__("Payment Entry {0} has been created",
-								[repl('<a href="#Form/Payment Entry/%(due_pay)s" class="strong">%(due_pay)s</a>', {
-									due_pay: due_pay
-								})]
-							));
-
-						}
-			
+		frappe.call({
+			method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.make_payment",
+			args : {
+					"data":dialog.get_values(),
+					"row_data":frappe.selected_rows,
+					"filters":report.get_values()
+					},
+			callback : function(r){
+				if (r.message){
+					var payable = r.message.payable
+					var receivable = r.message.receivable
+					var due_pay = r.message.due_pay
+					if (payable && receivable && due_pay){	
+						frappe.msgprint(__("Payment Entry {0}, {1}, {2} has been created",
+							[repl('<a href="#Form/Payment Entry/%(payable)s" class="strong">%(payable)s</a>', {
+								payable: payable
+							}),
+							repl('<a href="#Form/Payment Entry/%(receivable)s" class="strong">%(receivable)s</a>', {
+								receivable: receivable
+							}),
+							repl('<a href="#Form/Payment Entry/%(due_pay)s" class="strong">%(due_pay)s</a>', {
+								due_pay: due_pay
+							})]
+						));
 					}
-					
-					dialog.hide()
-				}
-			})
+					else if(payable && receivable){
+						frappe.msgprint(__("Payment Entry {0}, {1} has been created",
+							[repl('<a href="#Form/Payment Entry/%(payable)s" class="strong">%(payable)s</a>', {
+								payable: payable
+							}),
+							repl('<a href="#Form/Payment Entry/%(receivable)s" class="strong">%(receivable)s</a>', {
+								receivable: receivable
+							})]
+						));
+
+					}
+					else if(due_pay){
+						frappe.msgprint(__("Payment Entry {0} has been created",
+							[repl('<a href="#Form/Payment Entry/%(due_pay)s" class="strong">%(due_pay)s</a>', {
+								due_pay: due_pay
+							})]
+						));
+					}
+				}		
+				dialog.hide()
+			}
+		})
 		})
 	},
 	validate_amount:function(dialog){

@@ -206,7 +206,10 @@ permission_query_conditions = {
     "Item Price":"dairy_erp.customization.customization.item_price_permission",
     "Price List":"dairy_erp.customization.customization.price_list_permission",
     "Veterinary AI Technician": "dairy_erp.dairy_erp.doctype.veterinary_ai_technician.veterinary_ai_technician.permission_query_condition",
-    "Stock Entry": "dairy_erp.customization.stock_entry.stock_entry.se_permission_query"
+    "Stock Entry": "dairy_erp.customization.stock_entry.stock_entry.se_permission_query",
+    "Farmer Payment Cycle": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle.farmer_payment_cycle.farmer_permission_query",
+    "Farmer Date Computation": "dairy_erp.dairy_erp.doctype.farmer_date_computation.farmer_date_computation.date_permission_query",
+    "Farmer Payment Log": "dairy_erp.dairy_erp.doctype.farmer_payment_log.farmer_payment_log.log_permission_query"
 }
 # Testing
 # -------

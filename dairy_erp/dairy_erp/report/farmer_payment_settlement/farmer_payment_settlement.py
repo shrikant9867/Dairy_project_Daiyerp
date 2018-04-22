@@ -192,38 +192,39 @@ def make_payment_log(**kwargs):
 def make_farmer_voucher_log(cycle, args):
 
 	try:
-		log_doc = frappe.new_doc("Farmer Payment Log")
-		log_doc.total_pay = args.get('total_pay')
-		log_doc.payble = args.get('payable')
-		log_doc.receivable = args.get('receivable')  
-		log_doc.start_date = args.get('start_date') 
-		log_doc.end_date = args.get('end_date') 
-		log_doc.cycle = cycle
-		log_doc.month = cycle.split("-")[1]
-		log_doc.farmer = args.get('farmer')
-		log_doc.vlcc = args.get('company')
-
 		sales_amount, purchase_amount = get_cycle_sales_purchase_paid_amt(args)
+		if sales_amount > 0 or purchase_amount > 0:
+			log_doc = frappe.new_doc("Farmer Payment Log")
+			log_doc.total_pay = args.get('total_pay')
+			log_doc.payble = args.get('payable')
+			log_doc.receivable = args.get('receivable')  
+			log_doc.start_date = args.get('start_date') 
+			log_doc.end_date = args.get('end_date') 
+			log_doc.cycle = cycle
+			log_doc.month = cycle.split("-")[1]
+			log_doc.farmer = args.get('farmer')
+			log_doc.vlcc = args.get('company')
 
-		auto, manual = 0, purchase_amount
-		if purchase_amount > sales_amount:
-			manual = purchase_amount - sales_amount
-			auto = sales_amount
-		elif sales_amount > purchase_amount:
-			manual = 0
-			auto = purchase_amount
 
-		log_doc.sales_amount = sales_amount
-		log_doc.purchase_amount = purchase_amount
-		log_doc.settled_amount = auto 
-		log_doc.set_amt_manual = manual
+			auto, manual = 0, purchase_amount
+			if purchase_amount > sales_amount:
+				manual = purchase_amount - sales_amount
+				auto = sales_amount
+			elif sales_amount > purchase_amount:
+				manual = 0
+				auto = purchase_amount
 
-		previous_amt = get_previous_amt(cycle, args.get('farmer'))
-		total_pay = auto + manual + previous_amt
+			log_doc.sales_amount = sales_amount
+			log_doc.purchase_amount = purchase_amount
+			log_doc.settled_amount = auto 
+			log_doc.set_amt_manual = manual
 
-		log_doc.set_per = (total_pay/args.get('total_pay')) * 100
-		log_doc.flags.ignore_permissions = True
-		log_doc.save()
+			previous_amt = get_previous_amt(cycle, args.get('farmer'))
+			total_pay = auto + manual + previous_amt
+
+			log_doc.set_per = (total_pay/args.get('total_pay')) * 100
+			log_doc.flags.ignore_permissions = True
+			log_doc.save()
 	except Exception, e:
 		utils.make_dairy_log(title="Farmer Payment Log Error",method="make_farmer_voucher_log", status="Error",
 							 message=e, traceback=frappe.get_traceback())
@@ -413,7 +414,7 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 
 	count = frappe.db.sql("""select count(1) as count from `tabFarmer Payment Log` 
 		where {0} and farmer =  '{1}' and vlcc = '{2}'
-		""".format(conditions,farmer_name,vlcc),as_dict=1,debug=1)
+		""".format(conditions,farmer_name,vlcc),as_dict=True)
 
 
 	if count:
@@ -427,14 +428,14 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 			 				(select l1.farmer, l1.cycle,max(l1.set_per) as set_per 
 			 				from 
 			 					`tabFarmer Payment Log` l1
-			 				where l1.farmer = '{farmer_name}'
+			 				where l1.farmer = '{farmer_name}' and l1.vlcc = '{vlcc}'
 			 				group by l1.farmer, l1.cycle) as l on c.name = l.cycle 
 			 				where 
 			 				(l.farmer = '{farmer_name}' or l.farmer is NULL) and 
 			 				(l.set_per<100 or l.set_per is NULL) and 
-						c.end_date < curdate()
+						c.end_date < curdate() and c.vlcc = '{vlcc}'
 						order by c.end_date limit {limit_count}""".
-						format(farmer_name=farmer_name,limit_count=limit_count),as_list=True,debug=1)
+						format(farmer_name=farmer_name,limit_count=limit_count,vlcc=vlcc),as_list=True)
 
 			cycle_list = frappe.db.sql_list("""select name from 
 				`tabFarmer Date Computation` where vlcc = %s""",(vlcc))
@@ -508,11 +509,16 @@ def check_cycle(row_data,filters):
 
 	row_data = json.loads(row_data)
 	filters = json.loads(filters)
+	month_list, receivable_list = [] , []
+	cycle_msg = ""
 
 	month_list = []
 
 	for d in row_data:
 		gl_doc = frappe.get_doc('GL Entry',d)
+
+		receivable_list.append(gl_doc.against_voucher_type)
+
 		if getdate(gl_doc.posting_date) < getdate(filters.get('start_date')):
 			month_list.append({calendar.month_abbr[getdate(gl_doc.posting_date).month]:gl_doc.fiscal_year})
 
@@ -524,4 +530,13 @@ def check_cycle(row_data,filters):
 				if cycle is None: 
 					months.append(month+"("+str(year)+")")
 		if months:
-			return "Please add cycle for <b>{0}</b>".format(",".join(months))
+			cycle_msg = "Please add cycle for <b>{0}</b>".format(",".join(months))
+
+	recv_msg = check_receivable(receivable_list)
+
+	return {"cycle_msg":cycle_msg,"recv_msg":recv_msg}
+
+def check_receivable(recv_list):
+	
+	if 'Sales Invoice' in recv_list and 'Purchase Invoice' not in recv_list:
+		return "You can not settle only Receivable Amount"

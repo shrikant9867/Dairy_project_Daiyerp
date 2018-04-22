@@ -10,6 +10,7 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.accounts.utils import get_fiscal_year
 import calendar
 import datetime
+import time
 from frappe import _
 
 class FarmerPaymentCycle(Document):
@@ -40,14 +41,39 @@ class FarmerPaymentCycle(Document):
 					frappe.throw("Cycle must be start with <b>1</b> for row <b>#{0}</b>".format(day.idx))
 				elif day.end_day < day.start_day:
 					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
+				else:
+					if self.month == 'All':
+						if day.end_day > 31:
+							frappe.throw("End day must be less than or equal to <b>31</b> for row <b>#{0}</b>".format(day.idx))
+					else:
+						month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
+						end_date = get_month_details(self.fiscal_year,month_num).month_end_date
+						if day.end_day > end_date.day:
+							frappe.throw("End day must be less than or equal to <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
 				
 			else: 
 				if self.cycles[day.idx-2].end_day + 1 != day.start_day:
-					frappe.throw("Cycle must be start with {0} in row#{1}".format(self.cycles[day.idx-2].end_day + 1,day.idx))
+					frappe.throw("Cycle must be start with <b>{0}</b> in row#{1}".format(self.cycles[day.idx-2].end_day + 1,day.idx))
 				elif day.end_day < day.start_day and day.idx != self.no_of_cycles:
 					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
-				elif day.idx == self.no_of_cycles and day.end_day != 31:
-					frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
+				elif day.idx != self.no_of_cycles:
+					if self.month == 'All':
+						if day.end_day > 31:
+							frappe.throw("End day must be less than or equal to <b>31</b> for row <b>#{0}</b>".format(day.idx))
+					else:
+						month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
+						end_date = get_month_details(self.fiscal_year,month_num).month_end_date
+						if day.end_day > end_date.day:
+							frappe.throw("End day must be less than or equal to <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
+				elif day.idx == self.no_of_cycles:
+					if self.month == 'All': 
+						if day.end_day != 31:
+							frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
+					else:
+						month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
+						end_date = get_month_details(self.fiscal_year,month_num).month_end_date
+						if day.end_day != end_date.day:
+							frappe.throw("Cycle must be end with <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
 
 	def validate_data(self):
 

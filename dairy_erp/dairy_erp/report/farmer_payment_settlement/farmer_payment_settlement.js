@@ -147,8 +147,10 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 						"filters":report.get_values()
 						},
 				callback : function(r){	
-					if (r.message){
-						frappe.throw(r.message)
+					if(r.message.recv_msg){
+						frappe.throw(r.message.recv_msg)
+					}else if (r.message.cycle_msg){
+						frappe.throw(r.message.cycle_msg)
 					}else{
 						frappe.query_reports['Farmer Payment Settlement'].get_summary_dialog(report)
 					}		

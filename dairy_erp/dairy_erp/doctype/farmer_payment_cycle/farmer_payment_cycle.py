@@ -10,15 +10,25 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.accounts.utils import get_fiscal_year
 import calendar
 import datetime
+import time
 from frappe import _
 
 class FarmerPaymentCycle(Document):
 
 	def validate(self):
 
+		self.validate_def()
 		self.validate_data()
 		self.validate_cycle()
 	
+
+	def validate_def(self):
+		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
+
+		if self.is_new():
+			if frappe.db.sql_list("""select name from `tabFarmer Payment Cycle` 
+							where vlcc = %s""",(user_doc)):
+				frappe.throw("Please add cycles in the existing defination of cycle")
 
 	def validate_cycle(self):
 
@@ -31,14 +41,39 @@ class FarmerPaymentCycle(Document):
 					frappe.throw("Cycle must be start with <b>1</b> for row <b>#{0}</b>".format(day.idx))
 				elif day.end_day < day.start_day:
 					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
+				else:
+					if self.month == 'All':
+						if day.end_day > 31:
+							frappe.throw("End day must be less than or equal to <b>31</b> for row <b>#{0}</b>".format(day.idx))
+					else:
+						month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
+						end_date = get_month_details(self.fiscal_year,month_num).month_end_date
+						if day.end_day > end_date.day:
+							frappe.throw("End day must be less than or equal to <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
 				
 			else: 
 				if self.cycles[day.idx-2].end_day + 1 != day.start_day:
-					frappe.throw("Cycle must be start with {0} in row#{1}".format(self.cycles[day.idx-2].end_day + 1,day.idx))
+					frappe.throw("Cycle must be start with <b>{0}</b> in row#{1}".format(self.cycles[day.idx-2].end_day + 1,day.idx))
 				elif day.end_day < day.start_day and day.idx != self.no_of_cycles:
 					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
-				elif day.idx == self.no_of_cycles and day.end_day != 31:
-					frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
+				elif day.idx != self.no_of_cycles:
+					if self.month == 'All':
+						if day.end_day > 31:
+							frappe.throw("End day must be less than or equal to <b>31</b> for row <b>#{0}</b>".format(day.idx))
+					else:
+						month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
+						end_date = get_month_details(self.fiscal_year,month_num).month_end_date
+						if day.end_day > end_date.day:
+							frappe.throw("End day must be less than or equal to <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
+				elif day.idx == self.no_of_cycles:
+					if self.month == 'All': 
+						if day.end_day != 31:
+							frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
+					else:
+						month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
+						end_date = get_month_details(self.fiscal_year,month_num).month_end_date
+						if day.end_day != end_date.day:
+							frappe.throw("Cycle must be end with <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
 
 	def validate_data(self):
 
@@ -138,16 +173,33 @@ class FarmerPaymentCycle(Document):
 		else:
 			end_date = e_date
 
-
 		if start_date and end_date:
-			if not frappe.db.exists('Farmer Date Computation', fy[2]+fy[3]+"-"+key + "-" +data.cycle):
+			company_abbr = frappe.db.get_value("Village Level Collection Centre",self.vlcc,"abbr")
+			if not frappe.db.exists('Farmer Date Computation', fy[2]+fy[3]+"-"+key + "-" +data.cycle+"-"+company_abbr):
 				date_computation = frappe.new_doc("Farmer Date Computation")
 				date_computation.start_date = start_date
 				date_computation.end_date = end_date 
 				date_computation.month = key
 				date_computation.cycle = data.cycle
+				date_computation.vlcc = self.vlcc
 				date_computation.fiscal_year = self.fiscal_year
-				date_computation.doc_name = fy[2]+fy[3]+"-"+key + "-" +data.cycle
+				date_computation.doc_name = fy[2]+fy[3]+"-"+key + "-" +data.cycle+"-"+company_abbr
 				date_computation.flags.ignore_permissions = True
 				date_computation.save()
 
+def farmer_permission_query(user):
+
+	roles = frappe.get_roles()
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},
+			  ['operator_type','company','branch_office'], as_dict =1)
+
+	cycle_list =['"%s"'%i.get('name') for i in frappe.db.sql("""select name from 
+				`tabFarmer Payment Cycle` 
+				where vlcc = %s""",(user_doc.get('company')),as_dict=True)]
+
+	if cycle_list:
+		if user != 'Administrator' and 'Vlcc Manager' in roles:
+			return """`tabFarmer Payment Cycle`.name in ({date})""".format(date=','.join(cycle_list))
+	else:
+		if user != 'Administrator':
+			return """`tabFarmer Payment Cycle`.name = 'Guest' """

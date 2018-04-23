@@ -40,6 +40,7 @@ def create_ls(data):
 	ls_obj.update_stock = 1
 	ls_obj.debit_to = frappe.db.get_value("Company",ls_obj.company, 'default_receivable_account')
 	ls_obj.update(data)
+	ls_obj.selling_price_list = get_price_list(ls_obj.customer_or_farmer)
 	ls_obj.flags.ignore_permissions = True
 	ls_obj.flags.ignore_mandatory = True
 	ls_obj.save()
@@ -91,3 +92,21 @@ def local_sale_list():
 	return response_dict
 
 
+def get_price_list(party_type):
+	user_company = frappe.db.get_value("User",frappe.session.user,'company','name')
+	
+	if party_type == "Farmer" and frappe.db.get_value("Price List","LFS-"+user_company,'name'):
+		return frappe.db.get_value("Price List","LFS-"+user_company)
+	
+	elif party_type == "Farmer" and frappe.db.get_value("Price List",'GTFS','name'):
+		return frappe.db.get_value("Price List",'GTFS','name')
+
+	elif party_type == "Vlcc Local Customer" and \
+	frappe.db.get_value("Price List","LCS-"+user_company,'name'):
+		return frappe.db.get_value("Price List","LCS-"+user_company)
+
+	elif party_type == "Vlcc Local Customer"  and frappe.db.get_value("Price List","GTCS","name"):
+		return frappe.db.get_value("Price List","GTCS","name")
+
+	else:
+		frappe.throw(_("No Material Price List Defined"))

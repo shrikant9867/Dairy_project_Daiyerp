@@ -83,6 +83,7 @@ def validate_local_sale(doc, method):
 
 	if doc.local_sale:
 		if doc.customer_or_farmer == "Farmer":
+			validate_price_list(doc)
 			doc.customer = frappe.db.get_value('Farmer',doc.farmer,'full_name')
 		elif doc.customer_or_farmer == "Vlcc Local Customer":
 			doc.customer = frappe.db.get_value("Customer",doc.company+"-"+"Local",'name')
@@ -229,3 +230,11 @@ def get_taxes_and_charges_template(doc, template):
 		if tax_template:
 			return tax_template[0][0]
 	return ''
+
+def validate_price_list(doc):
+	user_doc = frappe.db.get_value("User",frappe.session.user,'company')
+	if doc.customer_or_farmer == "Farmer" and doc.selling_price_list not in ["GTFS","LFS"+"-"+user_doc]:
+		frappe.throw(_("First Create Material Price list for <b>VLCC Local Farmer</b>"))
+	
+	if doc.customer_or_farmer == "Vlcc Local Customer" and doc.selling_price_list not in ["GTCS","LCS"+"-"+user_doc]:
+		frappe.throw(_("Please Create Material price List First for <b>Customer</b>"))

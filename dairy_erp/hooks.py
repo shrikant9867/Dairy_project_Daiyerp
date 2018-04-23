@@ -37,6 +37,7 @@ website_context = {
 
 doctype_js = {
     "Address":["customization/address.js"],
+    "Contact":["customization/contact/contact.js"],
     "Supplier":["customization/supplier.js"],
     "Material Request":["customization/material_request/material_request.js"],
     "Purchase Order":["customization/purchase_order/purchase_order.js"],
@@ -111,16 +112,19 @@ doc_events = {
         "after_insert": ["dairy_erp.customization.customization.validate_dairy_company","dairy_erp.customization.customization.make_account_and_warehouse", "dairy_erp.customization.address.address.create_manager_operator_user"],
         "on_update": "dairy_erp.customization.customization.update_warehouse",
         "validate": ["dairy_erp.customization.customization.validate_headoffice", 
-            "dairy_erp.customization.address.address.create_manager_operator_user", "dairy_erp.customization.address.address.check_camp_office_for_cc"]
+            "dairy_erp.customization.address.address.create_manager_operator_user", "dairy_erp.customization.address.address.check_camp_office_for_cc",
+            "dairy_erp.customization.address.address.set_vet_map"]
     },
     "Purchase Order":{
         "validate":["dairy_erp.customization.customization.set_co_warehouse_po",
-            "dairy_erp.customization.customization.set_page_break"],
+            "dairy_erp.customization.customization.set_page_break",
+            "dairy_erp.customization.purchase_order.purchase_order.validate_price_list"],
         "on_submit": "dairy_erp.customization.purchase_order.purchase_order.update_material_indent"
     },
     "Purchase Receipt":{
         "on_submit": "dairy_erp.customization.customization.on_submit_pr",
-        "validate": ["dairy_erp.customization.customization.set_co_warehouse_pr","dairy_erp.customization.customization.validate_qty"]
+        "validate": ["dairy_erp.customization.customization.set_co_warehouse_pr","dairy_erp.customization.customization.validate_qty",
+                        "dairy_erp.customization.purchase_receipt.purchase_receipt.validate_price_list"]
     },
     "Sales Order":{
         "on_submit":"dairy_erp.customization.customization.make_so_against_vlcc",
@@ -206,7 +210,9 @@ permission_query_conditions = {
     "Item Price":"dairy_erp.customization.customization.item_price_permission",
     "Price List":"dairy_erp.customization.customization.price_list_permission",
     "Veterinary AI Technician": "dairy_erp.dairy_erp.doctype.veterinary_ai_technician.veterinary_ai_technician.permission_query_condition",
-    "Stock Entry": "dairy_erp.customization.stock_entry.stock_entry.se_permission_query"
+    "Stock Entry": "dairy_erp.customization.stock_entry.stock_entry.se_permission_query",
+    "Address": "dairy_erp.customization.address.address.address_permission",
+    "Contact": "dairy_erp.customization.contact.contact.contact_permission"
 }
 # Testing
 # -------

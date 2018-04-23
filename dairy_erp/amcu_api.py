@@ -443,13 +443,13 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
 
 
 def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co):
-	print "____________________________",frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
 	try:
 		purchase_rec = frappe.new_doc("Purchase Receipt")
 		purchase_rec.supplier =  vlcc
 		purchase_rec.vlcc_milk_collection_record = vmrc
 		purchase_rec.company = company
-		purchase_rec.camp_office = co
+		purchase_rec.chilling_centre = frappe.db.get_value("Address", {"centre_id" : data.get('societyid')},'name')
+		# purchase_rec.camp_office = co
 		purchase_rec.append("items",
 			{
 				"item_code": item_.item_code,
@@ -494,7 +494,8 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 		pi_obj = frappe.new_doc("Purchase Invoice")
 		pi_obj.supplier =  vlcc
 		pi_obj.vlcc_milk_collection_record = vmrc
-		pi_obj.camp_office = co
+		pi_obj.chilling_centre = frappe.db.get_value("Address", \
+							{"centre_id" : data.get('societyid')}, 'name')
 		pi_obj.company = company
 		pi_obj.append("items",
 			{

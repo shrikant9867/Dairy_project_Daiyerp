@@ -59,6 +59,8 @@ class FarmerMilkCollectionRecord(Document):
 			frappe.throw(_("Duplicate Entry found - {0}".format(is_duplicate)))
 
 	def validate_society_id(self):
+		if not self.associated_vlcc:
+			frappe.throw(_("Please select Associated Vlcc"))
 		vlcc = frappe.db.exists("Village Level Collection Centre", self.associated_vlcc)
 		societyid = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": self.societyid}, "name")
 		if not vlcc or not societyid:

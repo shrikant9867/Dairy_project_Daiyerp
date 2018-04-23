@@ -774,7 +774,9 @@ def pi_permission(user):
 def get_pi_from_exp_head_ref(branch_office):
 	# check expense_head in PI Item and return distinct PI
 	exp_head = frappe.db.get_value("Address", branch_office, "expense_account")
+	print "$$$$$$$$$$$$$$",exp_head,branch_office
 	pi_list = frappe.db.get_all("Purchase Invoice Item", {"expense_account": exp_head}, "distinct parent")
+	print pi_list
 	pi_nos = ''
 	if pi_list:
 		pi_nos = "(" + ",".join([ "'{0}'".format(pi.get('parent')) for pi in pi_list ])  +")"

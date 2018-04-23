@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Village Level Collection Centre', {
 	refresh: function(frm) {
-	
+
 			if(in_list(frappe.user_roles,"Dairy Manager") || in_list(frappe.user_roles,"Dairy Operator")){
 				frm.add_custom_button(__("Dairy Dashboard"), function() {
 					frappe.set_route("dairy-dashboard");
@@ -14,6 +14,7 @@ frappe.ui.form.on('Village Level Collection Centre', {
 		frm.set_df_property("amcu_id", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("name1", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("camp_office", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("section_break_5","hidden", frm.doc.__islocal ? 1:0)
 	},
 	
 	onload: function(frm) {
@@ -47,9 +48,16 @@ frappe.ui.form.on('Village Level Collection Centre', {
 		frm.set_query("address", function () {
 			return {
 				"filters": {
-					"address_type" :  ["not in",["Camp Office", "Chilling Centre", "Head Office", "Plant"]]
+					"vlcc" : frm.doc.name  
 				}
 			};
+		});
+		frm.set_query("contact", function () {
+			return {
+				"filters": {
+					"vlcc" : frm.doc.name
+				}
+			}
 		});
 	},
 	

@@ -44,3 +44,32 @@ def create_user(doc, operator_manager,role=None):
 				add_all_roles_to(user.name)
 	except Exception as e:
 		frappe.throw("Unable to create User. Please contact System Administrator")
+
+def address_permission(user):
+	roles = frappe.get_roles()
+	user_comp = frappe.db.get_value("User", frappe.session.user, \
+		['company','operator_type','vet','branch_office'],as_dict=1)
+	
+	if ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) and \
+		user != 'Administrator':
+			return """(`tabAddress`.vlcc = '{0}')""".format(user_comp.get('company'))
+	if 'Vet/AI Technician' in roles and user != "Administrator":
+		return """(`tabAddress`.vet = '{0}')""".format(user_comp.get('vet'))
+	
+	if ('Camp Manager' in roles or 'Camp Operator' in roles) and \
+		user != "Administrator":
+			return """(`tabAddress`.associated_camp_office = '{0}' 
+			or `tabAddress`.name = '{0}')""".format(user_comp.get('branch_office'))
+	
+	if ('Chilling Center Manager' in roles or 'Chilling Center Operator' in roles) and \
+		user != "Administrator":
+		camp = frappe.db.get_value("Address", user_comp.get('branch_office'),\
+			'associated_camp_office')
+		return """(`tabAddress`.associated_camp_office = '{0}'
+			or `tabAddress`.name = '{0}')""".format(camp)
+
+
+def set_vet_map(doc, method = None):
+	if doc.address_type == "Veterinary AI Tech":
+		vlcc = frappe.db.get_value("Veterinary AI Technician",doc.vet,'vlcc')
+		doc.vlcc = vlcc

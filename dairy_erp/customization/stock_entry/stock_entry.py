@@ -46,23 +46,6 @@ def validate_camp_submission(doc, method):
 
 def drop_ship_opeartion(doc, method):
 	pass
-	# if doc.is_dropship:
-		# check_if_dropship(doc)
-		# is_dairy = frappe.db.get_value("Company",{"is_dairy":1},'name')
-		# pi_doc = frappe.new_doc("Purchase Invoice")
-		# pi_doc.company = is_dairy
-		# pi_doc.supplier = doc.dropship_supplier
-		# pi_doc.buying_price_list = "Standard Buying"
-		# for row in doc.items:
-		# 	pi_doc.append("items",{
-		# 		"item_code": row.item_code,
-		# 		"item_name": row.item_name
-		# 		})
-		# pi_doc.credit_to = "Creditors - "+frappe.db.get_value("Company",is_dairy,'abbr')
-		# pi_doc.flags.ignore_permissions = True
-		# pi_doc.flags.ignore_mandatory = True
-		# pi_doc.save()
-		# pi_doc.submit()
 
 
 def check_if_dropship(doc,method):
@@ -115,6 +98,7 @@ def make_pi_against_localsupp(po_doc,stock_doc):
 	pi.company = po_doc.company
 	# pi.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 	pi.camp_office = po_doc.camp_office
+	pi.buying_price_list = get_price_list()
 	if expense_account:
 		pi.remarks = "[#"+expense_account+"#]"
 	for row_ in stock_doc.items:
@@ -192,3 +176,29 @@ def se_permission_query(user):
 				st = "(" + ",".join([ "'{0}'".format(s[0]) for s in st_entries ]) + ")"
 				query += " or `tabStock Entry`.name in {0}".format(st)
 		return query
+
+
+def get_price_list():
+	user_attr = frappe.db.get_value("User",frappe.session.user,\
+				['operator_type', 'company', 'branch_office'],as_dict=1)
+	
+	if user_attr.get('operator_type') == "VLCC":
+		camp = frappe.db.get_value("Village Level Collection Center", \
+			user_attr.get('company'),'camp_office')
+		if frappe.db.exists("Price List", "LCOB-"+camp.get('camp_office')):
+			return "LCOB-"+camp
+		elif frappe.db.exists("Price List", "GTCOB"):
+			return "GTCOB"
+
+	if user_attr.get('operator_type') == "Chilling Centre":
+		camp = frappe.db.get_value("Address", user_attr.get('branch_office'), 'associated_camp_office')
+		if frappe.db.exists("Price List", "LCOB-"+camp):
+			return "LCOB-"+camp
+		elif frappe.db.exists("Price List","GTCOB"):
+			return "GTCOB"
+
+	if user_attr.get('operator_type') == "Camp Office":
+		if frappe.db.exists("Price List","LCOB-"+user_attr.get('branch_office')):
+			return "LCOB-"+camp
+		elif frappe.db.exists("Price List","GTCOB"):
+			return "GTCOB"

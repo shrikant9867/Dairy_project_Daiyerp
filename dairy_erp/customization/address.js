@@ -1,6 +1,6 @@
 frappe.ui.form.on("Address", {
 	refresh: function(frm) {
-		
+		frm.events.set_route_vlcc(frm)
 		if(!frm.doc.__islocal && in_list(['Head Office','Camp Office','Chilling Centre','Plant'], frm.doc.address_type)){
 			frm.add_custom_button(__("Dairy Dashboard"), function() {
 				frappe.set_route("dairy-dashboard");
@@ -45,6 +45,19 @@ frappe.ui.form.on("Address", {
 		frm.set_df_property("user", "reqd", frm.doc.different_operator);
 		frm.set_df_property("operator_name", "reqd", frm.doc.different_operator);
 		refresh_many(["operator_name", "user"])
+	},
+
+	set_route_vlcc: function(frm) {
+		//address filtering on vlcc form
+		if(frm.doc.__islocal){
+			var last_route = frappe.route_history.slice(-2, -1)[0];
+			if(last_route && last_route[1] == "Village Level Collection Centre"){
+				frm.set_value("vlcc", last_route[2])
+			}
+			if(last_route && last_route[1] == "Veterinary AI Technician") {
+				frm.set_value("vet", last_route[2])
+			}
+		}
 	}
 
 })

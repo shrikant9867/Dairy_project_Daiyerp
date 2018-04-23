@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Veterinary AI Technician', {
 	refresh: function(frm) {
-
+		frm.set_df_property("column_break_3","hidden", frm.doc.__islocal ? 1:0)
 	},
 	address: function(frm) {
 		erpnext.utils.get_address_display(frm, "address", "address_details");
@@ -21,7 +21,7 @@ frappe.ui.form.on('Veterinary AI Technician', {
 		frm.set_query("address", function () {
 			return {
 				"filters": {
-					"address_type": "Veterinary AI Tech"
+					"vet": frm.doc.name
 				}
 			};
 		});
@@ -47,7 +47,4 @@ get_session_user_company = function() {
 
 	return user
 }
-
-// cur_frm.fields_dict.address.get_query = function(doc) {
-// 	return {filters: { vlcc_name: doc.company}}
 

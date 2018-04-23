@@ -29,6 +29,7 @@ class VeterinaryAITechnician(Document):
 			ai_tech_obj.first_name = self.vet_or_ai_name
 			ai_tech_obj.mobile_no = self.contact
 			ai_tech_obj.company = self.vlcc
+			ai_tech_obj.vet = self.name
 			ai_tech_obj.operator_type = "Vet AI Technician"
 			ai_tech_obj.send_welcome_email = 0
 			ai_tech_obj.new_password = "admin"

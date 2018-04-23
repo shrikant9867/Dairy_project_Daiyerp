@@ -162,7 +162,7 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 		title: __("Payment Settlement"),
 		fields: [
 			{
-				"label": __("Payble Amount"),
+				"label": __("Payable Amount"),
 				"fieldname": "payble",
 				"fieldtype": "Currency",
 				"read_only": 1,

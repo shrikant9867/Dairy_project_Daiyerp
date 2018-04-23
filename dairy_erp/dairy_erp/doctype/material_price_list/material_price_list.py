@@ -11,6 +11,8 @@ class MaterialPriceList(Document):
 	def validate(self):
 
 		roles = frappe.get_roles()
+		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+		self.company = user_doc.get('company')
 
 		if self.price_template_type and not self.items:
 			frappe.throw("Please add items")
@@ -24,9 +26,9 @@ class MaterialPriceList(Document):
 	def get_conditions(self):
 
 		roles = frappe.get_roles()
-
+		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 		camp_office = self.camp_office if self.camp_office else ""
-		company = self.company if 'Vlcc Manager' in roles or 'Vlcc Operator' in roles else ""
+		company = user_doc.get('company') if 'Vlcc Manager' in roles or 'Vlcc Operator' in roles else ""
 
 		if self.price_template_type == 'Dairy Supplier' and frappe.db.get_value("Price List",{'name':'GTCOB'},"name") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
 			frappe.throw("Please add items in the existing Material Price List GTCOB")
@@ -81,8 +83,9 @@ class MaterialPriceList(Document):
 	def create_price_list(self):
 
 		roles = frappe.get_roles()
+		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 		camp_office = self.camp_office if self.camp_office else ""
-		company = self.company if 'Vlcc Manager' in roles or 'Vlcc Operator' in roles else ""
+		company = user_doc.get('company') if 'Vlcc Manager' in roles or 'Vlcc Operator' in roles else ""
 
 		if self.price_template_type == "Dairy Supplier" and not frappe.db.exists('Price List', "GTCOB") and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
 			self.price_list_doc(template_name='GTCOB',buying=1,selling=0)

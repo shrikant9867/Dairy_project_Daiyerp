@@ -225,7 +225,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 def on_submit_pr(doc,method=None):
 
 	submit_dn(doc)
-	validate_qty_against_mi(doc)
+	# validate_qty_against_mi(doc)
 	check_if_dropship(doc) 
 	
 def submit_dn(doc):
@@ -494,7 +494,9 @@ def validate_qty(doc, method):
 		for item in doc.items:
 			if item.material_request:
 				material_request = frappe.get_doc("Material Request",item.material_request)
-				mr_qty = qty_computation(material_request)
+				for i in material_request.items:
+					if i.item_code == item.item_code:
+						mr_qty += i.new_dn_qty
 				pr_qty += item.qty 
 
 		if mr_qty and pr_qty > mr_qty:

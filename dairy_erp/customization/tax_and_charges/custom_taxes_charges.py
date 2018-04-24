@@ -9,9 +9,10 @@ def autoname(doc, method):
 		doc.name = doc.title + " - " + vlcc_abbr
 
 def auto_create_vlcc_tax(doc, method=None):
-	temp_type = doc.doctype
-	vlcc_list = frappe.get_all("Village Level Collection Centre")
-	for vlcc in vlcc_list:
-		if frappe.db.exists("Company", vlcc.get('name')):
-			create_taxes_charges_template(temp_type, doc, vlcc.get('name'))
+	if not doc.flags.auto_created:
+		temp_type = doc.doctype
+		vlcc_list = frappe.get_all("Village Level Collection Centre")
+		for vlcc in vlcc_list:
+			if frappe.db.exists("Company", vlcc.get('name')):
+				create_taxes_charges_template(temp_type, doc, vlcc.get('name'))
 

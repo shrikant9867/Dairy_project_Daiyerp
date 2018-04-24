@@ -238,7 +238,6 @@ class VillageLevelCollectionCentre(Document):
 					where parent_account like 'Duties and Taxes - %'
 					and vlcc is null or vlcc = ''
 					""", as_dict=True)
-				print "duties_and_taxes_acc", duties_and_taxes_acc
 				vlcc_duties_acc = frappe.db.get_value("Account", {
 					"company": company,
 					"account_name": "Duties and Taxes"
@@ -310,6 +309,7 @@ def create_taxes_charges_template(type_, temp, company):
 		if taxes_added:
 			vlcc_temp.flags.ignore_permissions = True
 			vlcc_temp.flags.ignore_mandatory = True
+			vlcc_temp.flags.auto_created = True
 			vlcc_temp.insert()
 
 def create_account_head(acc_name, parent_acc, company):
@@ -319,7 +319,8 @@ def create_account_head(acc_name, parent_acc, company):
 	acc.update({
 		"company": company,
 		"account_name": acc_name,
-		"parent_account": parent_acc
+		"parent_account": parent_acc,
+		"vlcc": company
 	})
 	acc.flags.ignore_permissions = True
 	acc.insert()

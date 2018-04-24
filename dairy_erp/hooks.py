@@ -162,6 +162,12 @@ doc_events = {
     },
     "User": {
         "after_insert": "dairy_erp.customization.user.user.add_user_permission"
+    },
+    "Sales Taxes and Charges Template": {
+        "autoname": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.autoname"
+    },
+    "Purchase Taxes and Charges Template": {
+        "autoname": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.autoname"
     }
 }
 

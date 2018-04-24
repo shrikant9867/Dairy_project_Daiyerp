@@ -46,11 +46,16 @@ class VillageLevelCollectionCentre(Document):
 
 	def after_insert(self):
 		"""create company and w/h configure associated company"""
-		self.create_company()
-		self.create_warehouse()
-		self.create_supplier()
-		self.create_customer()
-		self.create_user()			
+		try:
+			company = self.create_company()
+			self.create_warehouse()
+			self.create_supplier()
+			self.create_customer()
+			self.create_user()
+			self.create_missing_accounts(company)
+			self.create_taxes_templates(company)
+		except Exception as e:
+			print frappe.get_traceback()
 
 	def on_update(self):
 		self.create_supplier()
@@ -62,7 +67,8 @@ class VillageLevelCollectionCentre(Document):
 		comp_doc.abbr = self.abbr
 		comp_doc.default_currency = "INR"
 		comp_doc.flags.ignore_permissions = True
-		comp_doc.save() 
+		comp_doc.save()
+		return comp_doc.name
 
 	def create_warehouse(self):
 
@@ -223,3 +229,72 @@ class VillageLevelCollectionCentre(Document):
 				})
 			custmer_doc_vlcc.flags.ignore_permissions = True		
 			custmer_doc_vlcc.save()
+
+	def create_missing_accounts(self, company):
+		try:
+			if company:
+				duties_and_taxes_acc = frappe.db.sql("""
+					select distinct account_name from `tabAccount` 
+					where parent_account like 'Duties and Taxes - %'
+					and vlcc is null or vlcc = ''
+					""", as_dict=True)
+				print "duties_and_taxes_acc", duties_and_taxes_acc
+				vlcc_duties_acc = frappe.db.get_value("Account", {
+					"company": company,
+					"account_name": "Duties and Taxes"
+				}, "name")
+				if vlcc_duties_acc:
+					for acc in duties_and_taxes_acc:
+						if not frappe.db.get_value("Account", {
+							"company": company,
+							"account_name": acc.get('account_name')
+						}, "name"):
+							account = frappe.new_doc("Account")
+							account.update({
+								"company": company,
+								"account_name": acc.get('account_name'),
+								"parent_account": vlcc_duties_acc,
+								"root_type": "Liability",
+								"account_type": "Tax"
+							})
+							account.flags.ignore_permissions = True
+							account.insert()
+		except Exception as e:
+			raise e
+
+	def create_taxes_templates(self, company):
+		try:
+			for type_ in ["Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
+				tax_temp = frappe.get_all(type_, {"vlcc": ""})
+				for temp in tax_temp:
+					create_taxes_charges_template(type_, temp, company)
+		except Exception as e:
+			print frappe.get_traceback()
+
+
+def create_taxes_charges_template(type_, temp, company):
+	temp = frappe.get_doc(type_,temp.get('name'))
+	if not frappe.db.get_value(type_, {
+		"vlcc": company,
+		"title": temp.title
+		}, "name"):
+		vlcc_temp = frappe.new_doc(type_)
+		vlcc_temp.company = company
+		vlcc_temp.title = temp.title
+		vlcc_temp.vlcc = company
+		for row in temp.taxes:
+			acc_name = frappe.db.get_value("Account", row.get('account_head'), "account_name")
+			vlcc_acc_head = frappe.db.get_value("Account", {
+				"company": company,
+				"account_name": acc_name
+			}, "name")
+			if vlcc_acc_head:
+				vlcc_temp.append("taxes", {
+					"charge_type": row.get("charge_type"),
+					"account_head": vlcc_acc_head,
+					"rate": row.get("rate"),
+					"description": row.get('description')
+				})
+		vlcc_temp.flags.ignore_permissions = True
+		vlcc_temp.flags.ignore_mandatory = True
+		vlcc_temp.insert()

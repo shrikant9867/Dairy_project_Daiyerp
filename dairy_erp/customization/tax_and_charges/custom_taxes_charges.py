@@ -16,3 +16,15 @@ def auto_create_vlcc_tax(doc, method=None):
 			if frappe.db.exists("Company", vlcc.get('name')):
 				create_taxes_charges_template(temp_type, doc, vlcc.get('name'))
 
+def sales_temp_permission(user):
+	return template_permission('Sales Taxes and Charges Template', user)
+
+def purchase_temp_permission(user):
+	return template_permission('Purchase Taxes and Charges Template', user)
+
+def template_permission(doctype,user=None):
+	if not user:
+		user = frappe.session.user
+	company = frappe.db.get_value("User", user, "company")
+	if user != 'Administrator':
+		return """`tab{0}`.company = '{1}' """.format(doctype,company)

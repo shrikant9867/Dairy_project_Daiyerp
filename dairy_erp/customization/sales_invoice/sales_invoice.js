@@ -13,7 +13,7 @@ frappe.ui.form.on("Sales Invoice", {
 			};
 		})
 
-		frm.set_value("effective_credit","")
+		// frm.set_value("effective_credit","")
 		user_ = get_session_user_type()
 		if(user_.operator_type != "VLCC"){
 			cur_frm.set_df_property('local_sale', 'hidden', 1);

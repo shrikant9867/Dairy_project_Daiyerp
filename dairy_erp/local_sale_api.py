@@ -12,12 +12,11 @@ from item_api import get_seesion_company_datails
 from frappe import _
 import api_utils as utils
 import json
-
+from customization.sales_invoice.sales_invoice import get_farmer_config
 
 @frappe.whitelist()
 def create_local_sale(data):
 	response_dict = {}
-	print data
 	data = json.loads(data)
 	try:
 		if data.get('items'):
@@ -41,6 +40,7 @@ def create_ls(data):
 	ls_obj.debit_to = frappe.db.get_value("Company",ls_obj.company, 'default_receivable_account')
 	ls_obj.update(data)
 	ls_obj.selling_price_list = get_price_list(ls_obj.customer_or_farmer)
+	ls_obj.effective_credit = get_farmer_config(data.get('farmer')).get('percent_eff_credit')
 	ls_obj.flags.ignore_permissions = True
 	ls_obj.flags.ignore_mandatory = True
 	ls_obj.save()
@@ -110,3 +110,4 @@ def get_price_list(party_type):
 
 	else:
 		frappe.throw(_("No Material Price List Defined"))
+

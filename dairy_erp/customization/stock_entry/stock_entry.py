@@ -41,7 +41,7 @@ def set_target_warehouse(doc,method):
 
 def validate_camp_submission(doc, method):
 	if frappe.db.get_value("User",frappe.session.user,'operator_type') == "Camp Office":
-		frappe.throw(_("Not allowed to Submit"))
+		frappe.throw(_("Stock Entry gets submit on acceptance of goods at {0}".format(doc.items[0].chilling_centre)))
 
 
 def drop_ship_opeartion(doc, method):
@@ -121,7 +121,7 @@ def make_pr_against_localsupp(po_doc,stock_doc):
 	pr_doc.company = po_doc.company
 	# pr_doc.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 	pr_doc.camp_office = po_doc.camp_office
-
+	pr_doc.buying_price_list = get_price_list()
 	for row_ in stock_doc.items:
 		print row_.__dict__
 		pr_doc.append("items",

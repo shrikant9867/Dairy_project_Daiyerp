@@ -85,15 +85,19 @@ $.extend(dairy.stock_entry, {
 		row = locals[cdt][cdn]
 		// validation for cc
 		is_cc = has_common(["Chilling Center Operator", "Chilling Center Manager"], frappe.user_roles)
-		if(is_cc && row.material_request && !row.is_dropship) {
-			if (row.accepted_qty > row.camp_qty || (row.original_qty - row.rejected_qty) > row.camp_qty) {
-				frappe.model.set_value(cdt, cdn, "accepted_qty", row.qty)
-				frappe.model.set_value(cdt, cdn, "rejected_qty", row.original_qty-row.accepted_qty)
-				frappe.throw("Accepted Quantity can not be greater than transferred quantity")
+		if(is_cc && row.material_request) {
+			if(row.camp_qty > 0){
+				if (row.accepted_qty > row.camp_qty && row.camp_qty > 0 || (row.original_qty - row.rejected_qty) > row.camp_qty) {
+					console.log(row.accepted_qty,row.camp_qty, row.original_qty,)
+					frappe.model.set_value(cdt, cdn, "accepted_qty", row.qty)
+					frappe.model.set_value(cdt, cdn, "rejected_qty", row.original_qty-row.accepted_qty)
+					frappe.throw("Accepted Quantity can not be greater than transferred quantity")
+				}
 			}
 		}
 		if (is_cc && row.material_request && (row.is_dropship || 1)){
 			if(row.accepted_qty == 0){
+				frappe.model.set_value(cdt, cdn, "qty", row.accepted_qty)
 				frappe.throw(("Accepted Quantity could not be zero"))
 			}
 		}

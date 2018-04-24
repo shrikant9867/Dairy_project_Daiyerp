@@ -164,10 +164,12 @@ doc_events = {
         "after_insert": "dairy_erp.customization.user.user.add_user_permission"
     },
     "Sales Taxes and Charges Template": {
-        "autoname": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.autoname"
+        "autoname": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.autoname",
+        "after_insert": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.auto_create_vlcc_tax"
     },
     "Purchase Taxes and Charges Template": {
-        "autoname": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.autoname"
+        "autoname": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.autoname",
+        "after_insert": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.auto_create_vlcc_tax"
     }
 }
 

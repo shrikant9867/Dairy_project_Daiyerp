@@ -293,7 +293,8 @@ def create_taxes_charges_template(type_, temp, company):
 					"charge_type": row.get("charge_type"),
 					"account_head": vlcc_acc_head,
 					"rate": row.get("rate"),
-					"description": row.get('description')
+					"tax_amount": row.get("tax_amount"),
+					"description": row.get("description")
 				})
 		vlcc_temp.flags.ignore_permissions = True
 		vlcc_temp.flags.ignore_mandatory = True

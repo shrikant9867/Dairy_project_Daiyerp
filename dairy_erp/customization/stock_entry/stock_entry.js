@@ -103,7 +103,7 @@ $.extend(dairy.stock_entry, {
 		}
 		if (row.original_qty) {
 			if(row.accepted_qty > row.original_qty || row.rejected_qty > row.original_qty) {
-				frappe.msgprint("Accepted Qty and Rejected Qty must be less than original qty")
+				frappe.msgprint("Accepted Quantity and Rejected Quantity must be less than requested qty")
 				frappe.model.set_value(cdt, cdn, "accepted_qty", 0)
 				frappe.model.set_value(cdt, cdn, "rejected_qty", 0)
 			}

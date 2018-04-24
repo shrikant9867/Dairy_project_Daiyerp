@@ -41,7 +41,7 @@ def set_target_warehouse(doc,method):
 
 def validate_camp_submission(doc, method):
 	if frappe.db.get_value("User",frappe.session.user,'operator_type') == "Camp Office":
-		frappe.throw(_("Stock Entry gets submit on acceptance of goods at {0}".format(doc.items[0].chilling_centre)))
+		frappe.throw(_("Stock Entry gets submit on acceptance of goods at <b>{0}</b>".format(doc.items[0].chilling_centre)))
 
 
 def drop_ship_opeartion(doc, method):

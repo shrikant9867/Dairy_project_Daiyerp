@@ -64,16 +64,14 @@ def sn_list():
 			effective_credit,case_details,taxes_and_charges,grand_total,apply_discount_on,
 			by_cash, by_credit, multimode_payment
 			from `tabSales Invoice` where company = '{0}' and service_note = 1 order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
-		print pr_list
-		if pr_list:
-			for row in pr_list:
-				row.update({"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabSales Invoice Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1)})
-				row.update({"diagnosis": frappe.db.sql("""select disease,description from `tabDisease Child` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
-				if row.get('taxes_and_charges'):
-					row.update({row.get('taxes_and_charges'): frappe.db.sql("""select charge_type,description,rate from `tabSales Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
-				else:
-					del row['taxes_and_charges']
-			response_dict.update({"status":"success","data":pr_list})
+		for row in pr_list:
+			row.update({"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabSales Invoice Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1)})
+			row.update({"diagnosis": frappe.db.sql("""select disease,description from `tabDisease Child` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
+			if row.get('taxes_and_charges'):
+				row.update({row.get('taxes_and_charges'): frappe.db.sql("""select charge_type,description,rate from `tabSales Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
+			else:
+				del row['taxes_and_charges']
+		response_dict.update({"status":"success","data":pr_list})
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict

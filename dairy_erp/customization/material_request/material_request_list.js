@@ -8,7 +8,10 @@ frappe.listview_settings['Material Request'] = {
 		}
 		else if(doc.docstatus==1 && flt(doc.per_ordered, 2) == 0 && flt(doc.per_delivered, 2) == 100) {
 			return [__("Delivered"), "green", "per_ordered,=,0|per_delivered,=,100"];
-		} else if(doc.docstatus==1 && flt(doc.per_ordered, 2) == 0) {
+		}else if(doc.docstatus==1 && flt(doc.per_ordered, 2) == 0 && flt(doc.per_delivered, 2) == 99.99) {
+			return [__("Partially Delivered"), "green", "per_ordered,=,0|per_delivered,=,99.99"];
+		} 
+		else if(doc.docstatus==1 && flt(doc.per_ordered, 2) == 0) {
 			return [__("Pending"), "orange", "per_ordered,=,0"];
 		}  else if(doc.docstatus==1 && flt(doc.per_ordered, 2) < 100) {
 			return [__("Partially ordered"), "yellow", "per_ordered,<,100"];

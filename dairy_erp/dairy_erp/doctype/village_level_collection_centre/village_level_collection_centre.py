@@ -271,7 +271,6 @@ class VillageLevelCollectionCentre(Document):
 		except Exception as e:
 			print frappe.get_traceback()
 
-
 def create_taxes_charges_template(type_, temp, company):
 	temp = frappe.get_doc(type_,temp.get('name'))
 	if not frappe.db.get_value(type_, {
@@ -282,13 +281,24 @@ def create_taxes_charges_template(type_, temp, company):
 		vlcc_temp.company = company
 		vlcc_temp.title = temp.title
 		vlcc_temp.vlcc = company
+		taxes_added = False
 		for row in temp.taxes:
-			acc_name = frappe.db.get_value("Account", row.get('account_head'), "account_name")
+			acc_name, parent_acc = frappe.db.get_value("Account", row.get('account_head'), ["account_name", "parent_account"])
 			vlcc_acc_head = frappe.db.get_value("Account", {
 				"company": company,
 				"account_name": acc_name
 			}, "name")
+			# create missing account if parent account found
+			if not vlcc_acc_head:
+				if parent_acc:
+					parent_acc = frappe.db.sql("""select name from `tabAccount` 
+						where account_name like '{0}%' and company = '{1}'
+					""".format(parent_acc.split(" -")[0], company))
+					if parent_acc:
+						vlcc_acc_head = create_account_head(acc_name, parent_acc[0][0], company)
+			# if account head add taxes row
 			if vlcc_acc_head:
+				taxes_added = True
 				vlcc_temp.append("taxes", {
 					"charge_type": row.get("charge_type"),
 					"account_head": vlcc_acc_head,
@@ -296,6 +306,21 @@ def create_taxes_charges_template(type_, temp, company):
 					"tax_amount": row.get("tax_amount"),
 					"description": row.get("description")
 				})
-		vlcc_temp.flags.ignore_permissions = True
-		vlcc_temp.flags.ignore_mandatory = True
-		vlcc_temp.insert()
+		# if taxes rows
+		if taxes_added:
+			vlcc_temp.flags.ignore_permissions = True
+			vlcc_temp.flags.ignore_mandatory = True
+			vlcc_temp.insert()
+
+def create_account_head(acc_name, parent_acc, company):
+	if not acc_name or not parent_acc:
+		return
+	acc = frappe.new_doc("Account")
+	acc.update({
+		"company": company,
+		"account_name": acc_name,
+		"parent_account": parent_acc
+	})
+	acc.flags.ignore_permissions = True
+	acc.insert()
+	return acc.name

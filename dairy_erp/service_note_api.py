@@ -41,18 +41,17 @@ def create_sn(data):
 	sn_obj.company = company
 	sn_obj.debit_to = frappe.db.get_value("Company",sn_obj.company, 'default_receivable_account')
 	customer = frappe.db.get_value("Farmer",data.get('farmer_id'), 'full_name')
-	if frappe.db.exists("Customer", customer):
-		sn_obj.farmer = data.get('farmer_id')
-		sn_obj.customer = customer
-		sn_obj.effective_credit = get_effective_credit(customer)
-		sn_obj.update(data)
-		for row in sn_obj.items:
-			row.cost_center = frappe.db.get_value("Company",company, 'cost_center')
-		sn_obj.flags.ignore_permissions = True
-		sn_obj.flags.ignore_mandatory = True
-		sn_obj.save()
-		sn_obj.submit()
-		return sn_obj.name
+	sn_obj.farmer = data.get('farmer_id')
+	sn_obj.customer = customer
+	sn_obj.effective_credit = get_effective_credit(customer)
+	sn_obj.update(data)
+	for row in sn_obj.items:
+		row.cost_center = frappe.db.get_value("Company",company, 'cost_center')
+	sn_obj.flags.ignore_permissions = True
+	sn_obj.flags.ignore_mandatory = True
+	sn_obj.save()
+	sn_obj.submit()
+	return sn_obj.name
 
 
 @frappe.whitelist()

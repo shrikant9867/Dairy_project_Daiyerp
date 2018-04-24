@@ -455,11 +455,9 @@ def mi_status_update(doc):
 		if row.get('material_request'):
 			mi = frappe.get_doc("Material Request",row.get('material_request'))
 			for data in mi.items:
-				for row in doc.items:
-					if data.item_code == row.item_code and data.parent == row.material_request:
-						data.completed_dn += row.qty
-						data.new_dn_qty = data.qty - data.completed_dn
-						delivered_qty += data.completed_dn
+				for i in doc.items:
+					if data.item_code == i.item_code and data.parent == i.material_request:
+						data.completed_dn += i.qty
 			
 			mi.flags.ignore_permissions = True
 			mi.save()
@@ -496,18 +494,19 @@ def validate_qty(doc, method):
 				material_request = frappe.get_doc("Material Request",item.material_request)
 				for i in material_request.items:
 					if i.item_code == item.item_code:
-						mr_qty += i.new_dn_qty
+						qty = i.qty - i.completed_dn
+						mr_qty += qty
 				pr_qty += item.qty 
 
 		if mr_qty and pr_qty > mr_qty:
 			frappe.throw("Quantity should not be greater than Requested Qty")
 
-def qty_computation(mr):
+# def qty_computation(mr):
 	
-	total_qty =0.0
-	for row in mr.items:
-		total_qty += row.new_dn_qty
-	return total_qty
+# 	total_qty =0.0
+# 	for row in mr.items:
+# 		total_qty += row.new_dn_qty
+# 	return total_qty
 
 
 def make_so_against_vlcc(doc,method=None):
@@ -1118,7 +1117,7 @@ def validate_dn(doc,method):
 			else:
 				for mi_items in mi.items:
 					if item.item_code == mi_items.item_code:
-						if item.qty > mi_items.new_dn_qty:
+						if item.qty > (mi_items.qty - mi_items.completed_dn):
 							frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
 
 

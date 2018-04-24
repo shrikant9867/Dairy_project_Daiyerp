@@ -54,10 +54,12 @@ frappe.ui.form.on('Farmer Payment Cycle', {
 
 frappe.ui.form.on('Farmer Payment Child', {
 
-	cycles_add:function(frm,cdt,cdn){
-		$.each(frm.doc.cycles,function(i,d){
-			cur_frm.get_field("cycles").grid.grid_rows[frm.doc.cycles.length-1].remove();
-		})
-		frappe.throw("You can not add cycles manually")
+	cycles_add: function(frm,cdt,cdn) {
+		frm.reload_doc();
+		frappe.msgprint("You can not add cycles manually")
+	},
+	cycles_remove: function(frm,cdt,cdn) {
+		frm.reload_doc();
+		frappe.msgprint("You can not remove cycles manually")
 	}
 });

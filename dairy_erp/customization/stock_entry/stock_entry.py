@@ -32,9 +32,6 @@ def set_target_warehouse(doc,method):
 	
 	if user_.get('operator_type') == "Chilling Centre":
 		for row in doc.items:
-			warehouse_qty = get_balance_qty_from_sle(row.item_code,row.s_warehouse)
-			if row.qty > warehouse_qty:
-				frappe.throw(_("<b>Warehouse Insufficent Stock </b>"))
 			chilling_centre = row.chilling_centre
 			row.s_warehouse = frappe.db.get_value("Address",doc.camp_office,'warehouse')
 			row.t_warehouse = frappe.db.get_value("Address",user_.get('branch_office'),'warehouse')

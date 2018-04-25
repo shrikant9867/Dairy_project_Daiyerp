@@ -32,41 +32,16 @@ class FarmerPaymentCycle(Document):
 
 	def validate_cycle(self):
 
-		last_day = get_last_day(nowdate()).day
-
 		for day in self.cycles:
-
-			if day.idx == 1:
-				if day.start_day != 1:
+			if self.no_of_cycles == 1:
+				if not day.start_day and not day.end_day:
+					frappe.throw("Please add start/end day")
+				elif day.start_day != 1:
 					frappe.throw("Cycle must be start with <b>1</b> for row <b>#{0}</b>".format(day.idx))
-				elif day.end_day < day.start_day:
+				elif day.end_day < day.start_day and day.end_day:
 					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
 				else:
 					if self.month == 'All':
-						if day.end_day > 31:
-							frappe.throw("End day must be less than or equal to <b>31</b> for row <b>#{0}</b>".format(day.idx))
-					else:
-						month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
-						end_date = get_month_details(self.fiscal_year,month_num).month_end_date
-						if day.end_day > end_date.day:
-							frappe.throw("End day must be less than or equal to <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
-				
-			else: 
-				if self.cycles[day.idx-2].end_day + 1 != day.start_day:
-					frappe.throw("Cycle must be start with <b>{0}</b> in row#{1}".format(self.cycles[day.idx-2].end_day + 1,day.idx))
-				elif day.end_day < day.start_day and day.idx != self.no_of_cycles:
-					frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
-				elif day.idx != self.no_of_cycles:
-					if self.month == 'All':
-						if day.end_day > 31:
-							frappe.throw("End day must be less than or equal to <b>31</b> for row <b>#{0}</b>".format(day.idx))
-					else:
-						month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
-						end_date = get_month_details(self.fiscal_year,month_num).month_end_date
-						if day.end_day > end_date.day:
-							frappe.throw("End day must be less than or equal to <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
-				elif day.idx == self.no_of_cycles:
-					if self.month == 'All': 
 						if day.end_day != 31:
 							frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
 					else:
@@ -74,6 +49,49 @@ class FarmerPaymentCycle(Document):
 						end_date = get_month_details(self.fiscal_year,month_num).month_end_date
 						if day.end_day != end_date.day:
 							frappe.throw("Cycle must be end with <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
+			else:
+				if day.idx == 1:
+					if not day.start_day and not day.end_day:
+						frappe.throw("Please add start/end day")
+					elif day.start_day != 1:
+						frappe.throw("Cycle must be start with <b>1</b> for row <b>#{0}</b>".format(day.idx))
+					elif day.end_day and day.end_day < day.start_day:
+						frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
+					else:
+						if self.month == 'All':
+							if day.end_day >= 31:
+								frappe.throw("End day must be less than <b>31</b> for row <b>#{0}</b>".format(day.idx))
+						else:
+							month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
+							end_date = get_month_details(self.fiscal_year,month_num).month_end_date
+							if day.end_day >= end_date.day:
+								frappe.throw("End day must be less than <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
+					
+				else:
+					if not day.start_day and not day.end_day:
+						frappe.throw("Please add start/end day") 
+					elif self.cycles[day.idx-2].end_day + 1 != day.start_day:
+						frappe.throw("Cycle must be start with <b>{0}</b> in row#{1}".format(self.cycles[day.idx-2].end_day + 1,day.idx))
+					elif day.end_day < day.start_day and day.idx != self.no_of_cycles:
+						frappe.throw("End day must be greater than start day for row <b>#{0}</b>".format(day.idx))
+					elif day.idx != self.no_of_cycles:
+						if self.month == 'All':
+							if day.end_day >= 31:
+								frappe.throw("End day must be less than <b>31</b> for row <b>#{0}</b>".format(day.idx))
+						else:
+							month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
+							end_date = get_month_details(self.fiscal_year,month_num).month_end_date
+							if day.end_day >= end_date.day:
+								frappe.throw("End day must be less than <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
+					elif day.idx == self.no_of_cycles:
+						if self.month == 'All': 
+							if day.end_day != 31:
+								frappe.throw("Cycle must be end with <b>31</b> for row <b>#{0}</b>".format(day.idx))
+						else:
+							month_num = "%02d" % time.strptime(self.month, "%b").tm_mon
+							end_date = get_month_details(self.fiscal_year,month_num).month_end_date
+							if day.end_day != end_date.day:
+								frappe.throw("Cycle must be end with <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
 
 	def validate_data(self):
 
@@ -127,6 +145,7 @@ class FarmerPaymentCycle(Document):
 	def make_date_computation(self):
 
 		fy = self.fiscal_year.split("-")[0]
+		current_month = calendar.month_abbr[getdate(nowdate()).month]
 		
 		month_end = {
 				    "Apr":"04", 
@@ -143,15 +162,41 @@ class FarmerPaymentCycle(Document):
 				    "Mar":"03" 
 		}
 
+		cycle_exist_all = frappe.db.sql("""select end_date from `tabFarmer Date Computation` 
+					where month=%s and fiscal_year = %s and cycle = 'Cycle 1'""",(current_month,self.fiscal_year),as_dict=True)
+
+		cycle_exist_month = frappe.db.sql("""select end_date from `tabFarmer Date Computation` 
+					where month=%s and fiscal_year = %s and cycle = 'Cycle 1' """,(self.month,self.fiscal_year),as_dict=True)
+
 		if self.month == 'All':
-			for key,val in month_end.items():
-				for data in self.cycles:
-					self.make_monthwise_computation(key=key,val=val,data=data)
-			frappe.msgprint(_("Cycles have been generated"))
+			if len(cycle_exist_all):
+				if getdate(nowdate()) < getdate(cycle_exist_all[0].get('end_date')):
+					for key,val in month_end.items():
+						for data in self.cycles:
+							self.make_monthwise_computation(key=key,val=val,data=data)
+					frappe.msgprint(_("Cycles have been generated"))
+				else:
+					for key,val in month_end.items():
+						for data in self.cycles:
+							if key != current_month:
+								self.make_monthwise_computation(key=key,val=val,data=data)
+					frappe.msgprint(_("Cycles have been generated"))
+			else:
+				for key,val in month_end.items():
+					for data in self.cycles:
+						self.make_monthwise_computation(key=key,val=val,data=data)
+				frappe.msgprint(_("Cycles have been generated"))
+
 		else:
-			for data in self.cycles:
-				self.make_monthwise_computation(key=self.month,val=month_end.get(self.month),data=data)
-			frappe.msgprint(_("Cycles have been generated"))
+			if len(cycle_exist_month):
+				if getdate(nowdate()) < getdate(cycle_exist_month[0].get('end_date')):
+					for data in self.cycles:
+						self.make_monthwise_computation(key=self.month,val=month_end.get(self.month),data=data)
+					frappe.msgprint(_("Cycles have been generated"))
+			else:
+				for data in self.cycles:
+						self.make_monthwise_computation(key=self.month,val=month_end.get(self.month),data=data)
+				frappe.msgprint(_("Cycles have been generated"))
 
 
 	def make_monthwise_computation(self,key,val,data):
@@ -175,17 +220,16 @@ class FarmerPaymentCycle(Document):
 
 		if start_date and end_date:
 			company_abbr = frappe.db.get_value("Village Level Collection Centre",self.vlcc,"abbr")
-			if not frappe.db.exists('Farmer Date Computation', fy[2]+fy[3]+"-"+key + "-" +data.cycle+"-"+company_abbr):
-				date_computation = frappe.new_doc("Farmer Date Computation")
-				date_computation.start_date = start_date
-				date_computation.end_date = end_date 
-				date_computation.month = key
-				date_computation.cycle = data.cycle
-				date_computation.vlcc = self.vlcc
-				date_computation.fiscal_year = self.fiscal_year
-				date_computation.doc_name = fy[2]+fy[3]+"-"+key + "-" +data.cycle+"-"+company_abbr
-				date_computation.flags.ignore_permissions = True
-				date_computation.save()
+			date_computation = frappe.new_doc("Farmer Date Computation")
+			date_computation.start_date = start_date
+			date_computation.end_date = end_date 
+			date_computation.month = key
+			date_computation.cycle = data.cycle
+			date_computation.vlcc = self.vlcc
+			date_computation.fiscal_year = self.fiscal_year
+			date_computation.doc_name = fy[2]+fy[3]+"-"+key + "-" +data.cycle+"-"+company_abbr
+			date_computation.flags.ignore_permissions = True
+			date_computation.save()
 
 def farmer_permission_query(user):
 

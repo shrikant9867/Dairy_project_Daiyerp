@@ -55,7 +55,8 @@ class VillageLevelCollectionCentre(Document):
 			self.create_missing_accounts(company)
 			self.create_taxes_templates(company)
 		except Exception as e:
-			print frappe.get_traceback()
+			make_dairy_log(title="Failed attribute for vlcc creation",method="create_fmrc", status="Error",
+			data = "data", message=e, traceback=frappe.get_traceback())
 
 	def on_update(self):
 		self.create_supplier()
@@ -257,7 +258,7 @@ class VillageLevelCollectionCentre(Document):
 								"account_type": "Tax"
 							})
 							account.flags.ignore_permissions = True
-							account.insert()
+							account.save()
 		except Exception as e:
 			raise e
 
@@ -310,7 +311,7 @@ def create_taxes_charges_template(type_, temp, company):
 			vlcc_temp.flags.ignore_permissions = True
 			vlcc_temp.flags.ignore_mandatory = True
 			vlcc_temp.flags.auto_created = True
-			vlcc_temp.insert()
+			vlcc_temp.save()
 
 def create_account_head(acc_name, parent_acc, company):
 	if not acc_name or not parent_acc:
@@ -323,5 +324,5 @@ def create_account_head(acc_name, parent_acc, company):
 		"vlcc": company
 	})
 	acc.flags.ignore_permissions = True
-	acc.insert()
+	acc.save()
 	return acc.name

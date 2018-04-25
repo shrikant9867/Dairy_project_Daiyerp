@@ -569,10 +569,11 @@ def set_co_warehouse_pr(doc,method=None):
 				item.warehouse = vlcc_wr.get('warehouse')
 				if item.rejected_qty:
 					item.rejected_warehouse = vlcc_wr.get('rejected_warehouse')
-				if item.material_request:
-					doc.buying_price_list = "LCOVLCCB"+"-"+co if frappe.db.get_value("Price List","LCOVLCCB"+"-"+co) else "GTCOVLCCB"
-				else:
-					doc.buying_price_list = "LVLCCB"+"-"+co if frappe.db.get_value("Price List","LVLCCB"+"-"+co) else "GTVLCCB"
+				if not doc.flags.ignore_material_price:
+					if item.material_request:
+						doc.buying_price_list = "LCOVLCCB"+"-"+co if frappe.db.get_value("Price List","LCOVLCCB"+"-"+co) else "GTCOVLCCB"
+					else:
+						doc.buying_price_list = "LVLCCB"+"-"+co if frappe.db.get_value("Price List","LVLCCB"+"-"+co) else "GTVLCCB"
 
 
 

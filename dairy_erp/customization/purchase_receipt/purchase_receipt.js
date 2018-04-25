@@ -11,6 +11,20 @@ frappe.ui.form.on("Purchase Receipt Item", {
 			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
 		 }
+	},
+	items_add: function(frm, cdt, cdn) {
+		if(frm.doc.is_delivery) {	
+			frappe.msgprint("You can not add items manually")
+			frm.reload_doc();
+		}
+	},
+	items_remove: function(frm, cdt, cdn) {
+		$.each(frm.doc.items, function (i,d) {
+			if (d.delivery_note){
+				frappe.msgprint("You can not remove items manually, set accepted qty as Zero instead")
+				frm.reload_doc();
+			}
+		})
 	}
 })
 

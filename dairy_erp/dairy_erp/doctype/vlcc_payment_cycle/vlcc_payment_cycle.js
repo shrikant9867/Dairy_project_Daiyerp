@@ -41,12 +41,12 @@ frappe.ui.form.on('VLCC Payment Cycle', {
 frappe.ui.form.on('VLCC Payment Child', {
 
 	cycles_add: function(frm,cdt,cdn) {
-		frm.reload_doc();
 		frappe.msgprint("You can not add cycles manually")
+		frm.reload_doc();
 	},
 	cycles_remove: function(frm,cdt,cdn) {
-		frm.reload_doc();
 		frappe.msgprint("You can not remove cycles manually")
+		frm.reload_doc();
 	}
 });
 

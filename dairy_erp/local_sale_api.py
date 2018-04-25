@@ -40,7 +40,8 @@ def create_ls(data):
 	ls_obj.debit_to = frappe.db.get_value("Company",ls_obj.company, 'default_receivable_account')
 	ls_obj.update(data)
 	ls_obj.selling_price_list = get_price_list(ls_obj.customer_or_farmer)
-	ls_obj.effective_credit = get_farmer_config(data.get('farmer')).get('percent_eff_credit')
+	ls_obj.effective_credit = get_farmer_config(data.get('farmer')).get('percent_eff_credit')  \
+							  if data.get('customer_or_farmer') == "Farmer" else ""
 	ls_obj.flags.ignore_permissions = True
 	ls_obj.flags.ignore_mandatory = True
 	ls_obj.save()

@@ -716,10 +716,11 @@ def pr_permission(user):
 		return """(`tabPurchase Receipt`.company = '{0}')""".format(user_doc.get('company'))
 
 	elif user_doc.get('operator_type') == "Camp Office":
-		query = "`tabPurchase Receipt`.camp_office = '{0}'".format(user_doc.get('branch_office'))
-		pr_nos = get_pr_from_warehouse_ref(user_doc.get('branch_office'))
+		#pr_nos = get_pr_from_warehouse_ref(user_doc.get('branch_office'))
 		if pr_nos:
-			query += """ or `tabPurchase Receipt`.name in {0}""".format(pr_nos)
+			query = """`tabPurchase Receipt`.name in {0}""".format(pr_nos)
+		else:
+			query = "1=2"
 		return query
 
 	elif user_doc.get('operator_type') == "Chilling Centre":

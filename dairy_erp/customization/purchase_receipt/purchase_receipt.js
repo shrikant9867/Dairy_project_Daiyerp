@@ -19,12 +19,10 @@ frappe.ui.form.on("Purchase Receipt Item", {
 		}
 	},
 	items_remove: function(frm, cdt, cdn) {
-		$.each(frm.doc.items, function (i,d) {
-			if (d.delivery_note){
-				frappe.msgprint("You can not remove items manually, set accepted qty as Zero instead")
-				frm.reload_doc();
-			}
-		})
+		if(frm.doc.is_delivery) {
+			frappe.msgprint("You can not remove items manually, set accepted qty as Zero instead")
+			frm.reload_doc();
+		}
 	}
 })
 

@@ -657,6 +657,7 @@ def make_purchase_receipt(doc,method=None):
 				mr_flag = 1
 		if mr_flag:		
 			purchase_rec = frappe.new_doc("Purchase Receipt")
+			purchase_rec.is_delivery = 1
 			purchase_rec.supplier =  branch_office.get('branch_office')
 			purchase_rec.company = doc.customer
 			purchase_rec.base_in_words = money_in_words(doc.base_rounded_total,doc.currency)

@@ -86,6 +86,7 @@ class FarmerMilkCollectionRecord(Document):
 		pr.farmer_milk_collection_record = self.name
 		pr.supplier =  frappe.db.get_value("Supplier", { "farmer": self.farmerid }, "name")
 		pr.company = self.associated_vlcc
+		pr.buying_price_list = "Standard Buying"
 		pr.append("items",
 			{
 				"item_code": item.item_code,
@@ -114,6 +115,7 @@ class FarmerMilkCollectionRecord(Document):
 		pi.supplier =  frappe.db.get_value("Supplier", {"farmer": self.farmerid}, "name")
 		pi.farmer_milk_collection_record = self.name
 		pi.company = self.associated_vlcc
+		pi.buying_price_list = "Standard Buying"
 		pi.append("items",
 			{
 				"item_code": item.item_code,

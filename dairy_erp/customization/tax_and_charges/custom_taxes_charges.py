@@ -10,11 +10,13 @@ def autoname(doc, method):
 
 def auto_create_vlcc_tax(doc, method=None):
 	if not doc.flags.auto_created:
-		temp_type = doc.doctype
-		vlcc_list = frappe.get_all("Village Level Collection Centre")
-		for vlcc in vlcc_list:
-			if frappe.db.exists("Company", vlcc.get('name')):
-				create_taxes_charges_template(temp_type, doc, vlcc.get('name'))
+		is_dairy = frappe.db.get_value("Company", doc.company, "is_dairy")
+		if is_dairy:
+			temp_type = doc.doctype
+			vlcc_list = frappe.get_all("Village Level Collection Centre")
+			for vlcc in vlcc_list:
+				if frappe.db.exists("Company", vlcc.get('name')):
+					create_taxes_charges_template(temp_type, doc, vlcc.get('name'))
 
 def sales_temp_permission(user):
 	return template_permission('Sales Taxes and Charges Template', user)

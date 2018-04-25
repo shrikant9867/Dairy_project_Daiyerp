@@ -264,7 +264,8 @@ class VillageLevelCollectionCentre(Document):
 	def create_taxes_templates(self, company):
 		try:
 			for type_ in ["Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
-				tax_temp = frappe.get_all(type_, {"vlcc": ""})
+				dairy_company = frappe.db.get_value("Company", {"is_dairy": 1}, "name")
+				tax_temp = frappe.get_all(type_, {"vlcc": "", "company": dairy_company})
 				for temp in tax_temp:
 					create_taxes_charges_template(type_, temp, company)
 		except Exception as e:

@@ -226,7 +226,7 @@ def get_taxes_and_charges_template(doc, template):
 			"Delivery Note": "Sales Taxes and Charges Template"
 		}
 		tax_template = frappe.db.sql("select name from `tab{0}` \
-			where name like '%{1}%' and company = '{2}'".format(tax_temp_map[doc.doctype], template, doc.company))
+			where name like '%{1}%' and company = '{2}'".format(tax_temp_map[doc.doctype], template.split(' - ')[0], doc.company))	
 		if tax_template:
 			return tax_template[0][0]
 	return ''

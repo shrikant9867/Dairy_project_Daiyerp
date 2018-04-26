@@ -295,7 +295,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 		var data = dialog.get_values()
 		if(data.set_amt && data.set_amt_manual && (data.set_amt_manual > (data.payble - data.set_amt))){		
 				frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
-					[data.set_amt_manual,data.payble-data.set_amt]))
+					[data.set_amt_manual,data.payble-data.set_amt.toFixed(2)]))
 		}
 		else if(data.payble && !data.set_amt && (data.set_amt_manual > data.payble)){
 			frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",

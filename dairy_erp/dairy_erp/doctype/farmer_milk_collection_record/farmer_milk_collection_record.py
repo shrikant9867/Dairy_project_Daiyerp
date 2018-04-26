@@ -104,6 +104,7 @@ class FarmerMilkCollectionRecord(Document):
 		pr.status = "Completed"
 		pr.per_billed = 100
 		pr.flags.ignore_permissions = True
+		pr.flags.ignore_material_price = True
 		pr.submit()
 		return pr.name
 
@@ -130,5 +131,6 @@ class FarmerMilkCollectionRecord(Document):
 			}
 		)
 		pi.flags.ignore_permissions = True
+		pi.flags.ignore_material_price = True
 		pi.submit()
 		return pi.name

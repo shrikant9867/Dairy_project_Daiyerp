@@ -163,10 +163,10 @@ class FarmerPaymentCycle(Document):
 		}
 
 		cycle_exist_all = frappe.db.sql("""select end_date from `tabFarmer Date Computation` 
-					where month=%s and fiscal_year = %s and cycle = 'Cycle 1'""",(current_month,self.fiscal_year),as_dict=True)
+					where month=%s and fiscal_year = %s and cycle = 'Cycle 1' and vlcc= %s""",(current_month,self.fiscal_year,self.vlcc),as_dict=True)
 
 		cycle_exist_month = frappe.db.sql("""select end_date from `tabFarmer Date Computation` 
-					where month=%s and fiscal_year = %s and cycle = 'Cycle 1' """,(self.month,self.fiscal_year),as_dict=True)
+					where month=%s and fiscal_year = %s and cycle = 'Cycle 1' and vlcc= %s """,(self.month,self.fiscal_year,self.vlcc),as_dict=True)
 
 		if self.month == 'All':
 			if len(cycle_exist_all):

@@ -36,6 +36,7 @@ def make_pr(data):
 	pr_obj.update(data)
 	for row in pr_obj.items:
 		row.rejected_qty = row.received_qty - row.qty
+	pr.buying_price_list = get_price_list()
 	pr_obj.flags.ignore_permissions = True
 	pr_obj.save()
 	pr_obj.submit()
@@ -104,6 +105,7 @@ def draft_pr(data):
 			for row in pr_doc.items:
 				row.delivery_note = dn_reference
 				row.rejected_qty = row.received_qty - row.qty
+			pr_doc.buying_price_list = get_price_list()
 			pr_doc.flags.ignore_permissions = True
 			pr_doc.flags.ignore_mandatory = True
 			pr_doc.save()
@@ -141,3 +143,20 @@ def update_received_qty(doc):
 					received_qty = po_i.received_qty + pr_i.qty
 					frappe.db.sql("update `tabPurchase Order Item` set received_qty = {0} \
 						where name = '{1}'".format(received_qty, po_i.name))
+
+def get_price_list():
+	user_doc = frappe.db.get_value("User",frappe.session.user,\
+			['company','operator_type','branch_office'],as_dict=1)
+	camp = frappe.db.get_value("Village Level Collection Centre",\
+		user_doc.get('company'),'camp_office') if user_doc.get('operator_type') == "VLCC" else ""
+	
+	if user_doc.get('operator_type') == "VLCC" and frappe.db.get_value("Price List",\
+											"LCOVLCCB-"+ camp, 'name'):
+		return "LCOVLCCB-"+ camp
+
+	elif user_doc.get('operator_type') == "VLCC" and frappe.db.get_value("Price List",\
+													"GTCOVLCCB", 'name'):
+		return "GTCOVLCCB"
+
+	else:
+		frappe.throw(_("Please Create Material Price List First"))

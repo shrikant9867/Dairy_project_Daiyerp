@@ -31,6 +31,7 @@ def create_po(data):
 def make_po(data):
 	po_obj = frappe.new_doc("Purchase Order")
 	po_obj.update(data)
+	po_obj.buying_price_list = get_price_list()
 	po_obj.flags.ignore_permissions = True
 	po_obj.save()
 	po_obj.submit()
@@ -48,4 +49,19 @@ def get_po_list():
 		response_dict.update({"status":"success","data":po_list})
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
-	return response_dict	
+	return response_dict
+
+
+def get_price_list():
+	user_doc = frappe.db.get_value("User",frappe.session.user,\
+			['company','operator_type','branch_office'],as_dict=1)
+	if user_doc.get('operator_type') == "VLCC" and frappe.db.get_value("Price List",\
+											"LVLCCB-"+user_doc.get('company'), 'name'):
+		return "LVLCCB-"+ user_doc.get('company')
+
+	elif user_doc.get('operator_type') == "VLCC" and frappe.db.get_value("Price List",\
+													"GTVLCCB", 'name'):
+		return "GTVLCCB"
+
+	else:
+		frappe.throw(_("Please Create Material Price List First"))

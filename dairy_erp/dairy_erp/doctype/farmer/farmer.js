@@ -7,6 +7,7 @@ frappe.ui.form.on('Farmer', {
 	},
 	onload: function(frm) {
 		var user_company = get_session_user_type()
+		frm.set_value("vlcc_name",user_company)
 		frm.set_query("vlcc_name", function () {
 			return {
 				"filters": {
@@ -14,9 +15,6 @@ frappe.ui.form.on('Farmer', {
 				}
 			};
 		});
-	},
-	onload: function(frm) {
-		var user_company = get_session_user_type()
 		frm.set_query("address", function () {
 			return {
 				"filters": {
@@ -25,6 +23,16 @@ frappe.ui.form.on('Farmer', {
 			};
 		});
 	},
+	/*onload: function(frm) {
+		var user_company = get_session_user_type()
+		frm.set_query("address", function () {
+			return {
+				"filters": {
+					"address_type": "Farmer",
+				}
+			};
+		});
+	},*/
 	address: function(frm) {
 		erpnext.utils.get_address_display(frm, "address", "address_details");
 	},

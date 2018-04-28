@@ -34,7 +34,7 @@ class FarmerPaymentCycle(Document):
 
 		for day in self.cycles:
 			if self.no_of_cycles == 1:
-				if not day.start_day and not day.end_day:
+				if not day.start_day or not day.end_day:
 					frappe.throw("Please add start/end day")
 				elif day.start_day != 1:
 					frappe.throw("Cycle must be start with <b>1</b> for row <b>#{0}</b>".format(day.idx))
@@ -51,7 +51,7 @@ class FarmerPaymentCycle(Document):
 							frappe.throw("Cycle must be end with <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
 			else:
 				if day.idx == 1:
-					if not day.start_day and not day.end_day:
+					if not day.start_day or not day.end_day:
 						frappe.throw("Please add start/end day")
 					elif day.start_day != 1:
 						frappe.throw("Cycle must be start with <b>1</b> for row <b>#{0}</b>".format(day.idx))
@@ -68,7 +68,7 @@ class FarmerPaymentCycle(Document):
 								frappe.throw("End day must be less than <b>{0}</b> for row <b>#{1}</b>".format(end_date.day,day.idx))
 					
 				else:
-					if not day.start_day and not day.end_day:
+					if not day.start_day or not day.end_day:
 						frappe.throw("Please add start/end day") 
 					elif self.cycles[day.idx-2].end_day + 1 != day.start_day:
 						frappe.throw("Cycle must be start with <b>{0}</b> in row#{1}".format(self.cycles[day.idx-2].end_day + 1,day.idx))
@@ -146,6 +146,7 @@ class FarmerPaymentCycle(Document):
 
 		fy = self.fiscal_year.split("-")[0]
 		current_month = calendar.month_abbr[getdate(nowdate()).month]
+		current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 		
 		month_end = {
 				    "Apr":"04", 
@@ -178,7 +179,7 @@ class FarmerPaymentCycle(Document):
 				else:
 					for key,val in month_end.items():
 						for data in self.cycles:
-							if key != current_month:
+							if key != current_month and self.fiscal_year == current_fiscal_year.get('name'):
 								self.make_monthwise_computation(key=key,val=val,data=data)
 					frappe.msgprint(_("Cycles have been generated"))
 			else:

@@ -1,4 +1,3 @@
-
 frappe.ui.form.on("Purchase Receipt Item", {
 	qty: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);

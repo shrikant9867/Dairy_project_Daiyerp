@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
 import json
 import re
-from frappe.utils import nowdate, cstr, flt, cint, now, getdate
+from frappe.utils import nowdate, cstr, flt, cint, now, getdate,now_datetime
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
@@ -550,6 +550,8 @@ def validate_pr(doc,method=None):
 	mi_status_update(doc)
 
 def set_co_warehouse_pr(doc,method=None):
+
+	doc.posting_time = now_datetime().strftime('%H:%M:%S')
 
 	branch_office = frappe.db.get_value("User",frappe.session.user,["branch_office","operator_type"],as_dict=1)
 	if branch_office.get('operator_type') == 'Camp Office':

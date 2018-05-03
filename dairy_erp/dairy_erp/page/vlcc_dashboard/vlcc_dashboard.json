@@ -4,7 +4,7 @@
  "docstatus": 0, 
  "doctype": "Page", 
  "idx": 0, 
- "modified": "2018-01-16 15:45:13.408228", 
+ "modified": "2018-05-03 18:45:44.810188", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "vlcc-dashboard", 
@@ -12,7 +12,7 @@
  "page_name": "vlcc dashboard", 
  "roles": [
   {
-   "role": "Vlcc Operator"
+   "role": "Vlcc Manager"
   }
  ], 
  "script": null, 

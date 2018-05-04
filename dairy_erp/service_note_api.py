@@ -62,7 +62,7 @@ def sn_list():
 			additional_discount_percentage,customer as farmer,discount_amount,grand_total,
 			effective_credit,case_details,taxes_and_charges,grand_total,apply_discount_on,
 			by_cash, by_credit, multimode_payment
-			from `tabSales Invoice` where company = '{0}' and service_note = 1 order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
+			from `tabSales Invoice` where company = '{0}' and service_note = 1 and owner = '{1}' order by creation desc limit 10 """.format(get_seesion_company_datails().get('company'), frappe.session.user),as_dict=1)
 		for row in pr_list:
 			row.update({"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabSales Invoice Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1)})
 			row.update({"diagnosis": frappe.db.sql("""select disease,description from `tabDisease Child` where parent = '{0}'""".format(row.get('name')),as_dict=1)})

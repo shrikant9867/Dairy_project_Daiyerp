@@ -114,8 +114,10 @@ ul#nav li a.selected {
     height: 35px;
     line-height: 35px;
     text-align: center;
+    color: #FF0000 ! important;
 }
 
 .refresh_btn {
     margin-top: 15px;
 }
+

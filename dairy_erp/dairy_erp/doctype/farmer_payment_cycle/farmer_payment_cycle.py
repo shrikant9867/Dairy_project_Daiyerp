@@ -17,18 +17,8 @@ class FarmerPaymentCycle(Document):
 
 	def validate(self):
 
-		self.validate_def()
 		self.validate_data()
 		self.validate_cycle()
-	
-
-	def validate_def(self):
-		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
-
-		if self.is_new():
-			if frappe.db.sql_list("""select name from `tabFarmer Payment Cycle` 
-							where vlcc = %s""",(user_doc)):
-				frappe.throw("Please add cycles in the existing defination of cycle")
 
 	def validate_cycle(self):
 
@@ -248,3 +238,14 @@ def farmer_permission_query(user):
 	else:
 		if user != 'Administrator':
 			return """`tabFarmer Payment Cycle`.name = 'Guest' """
+
+
+@frappe.whitelist()
+def check_record_exist():
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},
+			  ['operator_type','company','branch_office'], as_dict =1)
+	cycle = frappe.get_all("Farmer Payment Cycle",filters = {"vlcc":user_doc.get('company')})
+	if len(cycle):
+		return True
+	else:
+		return False

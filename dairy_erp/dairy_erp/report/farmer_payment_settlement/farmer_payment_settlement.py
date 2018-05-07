@@ -152,8 +152,11 @@ def make_payment(data,row_data,filters):
 
 def make_payment_log(**kwargs):
 
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},
+			  ['operator_type','company','branch_office'], as_dict =1)
+
 	cycle_list = frappe.get_all('Farmer Date Computation',
-		fields=["name", "start_date", "end_date"])
+		fields=["name", "start_date", "end_date"],filters = {"vlcc":user_doc.get('company')})
 
 	farmer_payment_log = {}
 	for d in kwargs.get('row_data'):

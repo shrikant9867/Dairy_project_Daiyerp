@@ -48,7 +48,18 @@ frappe.ui.form.on('Farmer Payment Cycle', {
 			frm.set_value("min_set_per","")
 			frappe.throw("Please Enter Percentage more than Zero")
 		}
-	}
+	},
+	onload: function(frm) {
+			frappe.call({	
+				method:"dairy_erp.dairy_erp.doctype.farmer_payment_cycle.farmer_payment_cycle.check_record_exist",	
+			callback:function(r){
+				if(r.message && frm.doc.__islocal){
+						frappe.msgprint("Please add cycles in the existing defination of cycle")
+						frappe.set_route("List","Farmer Payment Cycle")
+					}
+				}
+			})
+		}
 });
 
 

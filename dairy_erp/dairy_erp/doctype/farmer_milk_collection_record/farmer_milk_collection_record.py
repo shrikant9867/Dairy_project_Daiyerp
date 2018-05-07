@@ -46,17 +46,18 @@ class FarmerMilkCollectionRecord(Document):
 		uom_obj.save()
 
 	def validate_duplicate_entry(self):
-		is_duplicate = frappe.db.get_value(self.doctype, {
-			"societyid": self.societyid,
-			"collectiontime": self.collectiontime,
-			"collectiondate": self.collectiondate,
-			"rcvdtime": self.rcvdtime,
-			"shift": self.shift,
-			"farmerid": self.farmerid,
-			"milktype": self.milktype
-		}, "name")
-		if is_duplicate and is_duplicate != self.name:
-			frappe.throw(_("Duplicate Entry found - {0}".format(is_duplicate)))
+		if not self.flags.is_api:
+			is_duplicate = frappe.db.get_value(self.doctype, {
+				"societyid": self.societyid,
+				"collectiontime": self.collectiontime,
+				"collectiondate": self.collectiondate,
+				"rcvdtime": self.rcvdtime,
+				"shift": self.shift,
+				"farmerid": self.farmerid,
+				"milktype": self.milktype
+			}, "name")
+			if is_duplicate and is_duplicate != self.name:
+				frappe.throw(_("Duplicate Entry found - {0}".format(is_duplicate)))
 
 	def validate_society_id(self):
 		if not self.associated_vlcc:

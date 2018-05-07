@@ -126,7 +126,10 @@ def set_co_warehouse_po(doc,method=None):
 					country = chilling_centre_doc.country if chilling_centre_doc.country else ""
 					state = chilling_centre_doc.state if chilling_centre_doc.state else ""
 					address_ = addr1+","+addr2+","+city+","+country+","+state
-					item.address = frappe.db.get_value("Village Level Collection Centre",{"name":mr.company},"address_display") if not item.chilling_centre else address_
+					type_ = frappe.db.get_value("Address", item.chilling_centre, 'address_type')
+					if type_ != "Chilling Centre":
+						item.chilling_centre = ""
+					item.address = frappe.db.get_value("Village Level Collection Centre",{"name":mr.company},"address_display") if not item.chilling_centre  else address_
 	
 	if branch_office.get('operator_type') == 'VLCC':
 		vlcc = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"camp_office")
@@ -896,8 +899,17 @@ def supplier_permission(user):
 		
 
 	if user_doc.get('operator_type') == "VLCC":
-		supplier_list = frappe.db.sql("""select s.name as supp,p.company from `tabSupplier` s, `tabParty Account` 
-						p where p.parent = s.name and s.supplier_type in ('Dairy Type','Farmer','VLCC Local') and p.company = '{0}' group by s.name""".format(user_doc.get('company')),as_dict=1)
+		supplier_list = frappe.db.sql(
+					"""
+							select s.name as supp,p.company
+						from 
+							`tabSupplier` s, 
+							`tabParty Account` p 
+						where 
+						p.parent = s.name and s.supplier_type in 
+						('Dairy Type','Farmer','VLCC Local') and 
+						p.company = '{0}' group by s.name
+					""".format(user_doc.get('company')),as_dict=1)
 
 		supp = [ '"%s"'%sup.get("supp") for sup in supplier_list ]
 		if supp:

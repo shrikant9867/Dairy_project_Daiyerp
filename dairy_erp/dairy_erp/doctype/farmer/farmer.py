@@ -9,7 +9,7 @@ from frappe.utils import flt
 from frappe.model.document import Document
 
 class Farmer(Document):
-	def after_insert(self):
+	def on_submit(self):
 		"""create customer & supplier for A/C head"""
 		
 		self.create_supplier()

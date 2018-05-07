@@ -93,3 +93,4 @@ def get_filtered_company(doctype,text,searchfields,start,pagelen,filters):
 @frappe.whitelist()
 def get_filtered_company_(doctype,text,searchfields,start,pagelen,filters):
 	print "#################################"
+	pass

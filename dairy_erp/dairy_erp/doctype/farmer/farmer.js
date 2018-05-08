@@ -2,8 +2,18 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Farmer', {
-	refresh: function(frm) {
-
+	validate: function(frm) {
+		return new Promise(function(resolve, reject) {
+			if(frm.doc.__islocal){
+				frappe.confirm("Are you sure, you want to save farmer details ?" ,function() {
+					var negative = 'frappe.validated = false';
+					resolve(negative);
+				},
+				function() {
+					reject();
+				})
+			}
+		})
 	},
 	onload: function(frm) {
 		var user_company = get_session_user_type()
@@ -23,16 +33,6 @@ frappe.ui.form.on('Farmer', {
 			};
 		});
 	},
-	/*onload: function(frm) {
-		var user_company = get_session_user_type()
-		frm.set_query("address", function () {
-			return {
-				"filters": {
-					"address_type": "Farmer",
-				}
-			};
-		});
-	},*/
 	address: function(frm) {
 		erpnext.utils.get_address_display(frm, "address", "address_details");
 	},

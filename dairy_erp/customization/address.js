@@ -14,6 +14,7 @@ frappe.ui.form.on("Address", {
 	},
 	onload: function(frm){
 		frm.trigger("make_read_only");
+		frm.trigger("set_address_type_option");
 		frm.set_query("associated_camp_office", function () {
 			return {
 				"filters": {
@@ -71,8 +72,17 @@ frappe.ui.form.on("Address", {
 			frm.set_df_property("links", "read_only", 1)
 			frm.refresh_fields()
 		}
-	}
+	},
 
+	set_address_type_option: function(frm) {
+		// set specific address type for vlcc user's
+		vlcc_roles = ["Vlcc Manager", "Vlcc Operator"]
+		user_ = frappe.session.user
+		if(user_ != "Administrator" && has_common(frappe.user_roles, vlcc_roles)) {
+			addr_types = [ "","Vlcc", "Veterinary AI Tech", "Farmer", "Billing", "Shipping", "Other"]
+			frm.set_df_property("address_type", "options", addr_types);
+		}
+	}
 })
 
 get_session_user_type = function() {

@@ -127,6 +127,7 @@ def get_item_list():
 
 def get_item_prices(price_list):
 	""" item prices with per uom rate """
+	from operator import itemgetter
 	items = get_item_list()
 	items_ = {}
 	for i in items:
@@ -140,7 +141,8 @@ def get_item_prices(price_list):
 			items_[i.get('name')] = i
 		else:
 			items_[i.get('name')]['uom'].append({ 'uom':i.get('uom'), 'rate': i.pop('conversion_factor') * item_price })
-	return items_.values()
+	sorted_items = sorted(items_.values(), key=itemgetter('name'), reverse=False)
+	return sorted_items
 
 
 def get_uom():

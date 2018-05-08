@@ -13,6 +13,7 @@ frappe.ui.form.on("Address", {
 	
 	},
 	onload: function(frm){
+		frm.trigger("make_read_only");
 		frm.set_query("associated_camp_office", function () {
 			return {
 				"filters": {
@@ -57,6 +58,18 @@ frappe.ui.form.on("Address", {
 			if(last_route && last_route[1] == "Veterinary AI Technician") {
 				frm.set_value("vet", last_route[2])
 			}
+		}
+	},
+
+	make_read_only: function(frm) {
+		// vlcc , camp, chilling user's can't modify saved form
+		not_allowed_user = ["Vlcc Manager", "Chilling Center Manager", "Camp Manager", 
+			"Camp Operator", "Vlcc Operator","Chilling Center Operator"]
+		user_ = frappe.session.user
+		if(user_ != "Administrator" && !frm.doc.__islocal && has_common(frappe.user_roles, not_allowed_user)) {
+			frm.set_read_only()
+			frm.set_df_property("links", "read_only", 1)
+			frm.refresh_fields()
 		}
 	}
 

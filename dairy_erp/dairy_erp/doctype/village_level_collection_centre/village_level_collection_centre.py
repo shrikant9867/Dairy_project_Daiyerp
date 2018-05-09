@@ -54,6 +54,9 @@ class VillageLevelCollectionCentre(Document):
 			self.create_user()
 			self.create_missing_accounts(company)
 			self.create_taxes_templates(company)
+
+			# message for address
+			frappe.msgprint("Please add address details for <b>{0}</b>".format(self.name))
 		except Exception as e:
 			make_dairy_log(title="Failed attribute for vlcc creation",method="create_fmrc", status="Error",
 			data = "data", message=e, traceback=frappe.get_traceback())

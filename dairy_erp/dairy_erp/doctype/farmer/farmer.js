@@ -3,8 +3,8 @@
 
 frappe.ui.form.on('Farmer', {
 	validate: function(frm) {
-		return new Promise(function(resolve, reject) {
-			if(frm.doc.__islocal){
+		if(frm.doc.__islocal){
+			return new Promise(function(resolve, reject) {
 				frappe.confirm("Are you sure, you want to save farmer details ?" ,function() {
 					var negative = 'frappe.validated = false';
 					resolve(negative);
@@ -12,8 +12,8 @@ frappe.ui.form.on('Farmer', {
 				function() {
 					reject();
 				})
-			}
-		})
+			})
+		}
 	},
 	onload: function(frm) {
 		var user_company = get_session_user_type()

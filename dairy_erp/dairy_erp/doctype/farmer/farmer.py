@@ -11,9 +11,14 @@ from frappe.model.document import Document
 class Farmer(Document):
 	def on_submit(self):
 		"""create customer & supplier for A/C head"""
-		
-		self.create_supplier()
-		self.create_customer()
+		try:
+			self.create_supplier()
+			self.create_customer()
+		except Exception as e:
+			frappe.db.rollback();
+			print(frappe.get_traceback())
+			frappe.msgprint(e)
+
 	
 	def create_supplier(self):
 		supl_doc = frappe.new_doc("Supplier")
@@ -26,7 +31,6 @@ class Farmer(Document):
 			"company": self.vlcc_name,
 			"account": frappe.db.get_value("Company",self.vlcc_name, "default_payable_account")
 			})
-		supl_doc.farmer = self.name
 		supl_doc.insert()
 
 	def create_customer(self):
@@ -40,7 +44,6 @@ class Farmer(Document):
 			"company": self.vlcc_name,
 			"account": frappe.db.get_value("Company",self.vlcc_name, "default_receivable_account")
 			})
-		custmer_doc.farmer = self.name
 		custmer_doc.insert()
 
 	def validate(self):

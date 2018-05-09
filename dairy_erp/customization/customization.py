@@ -39,6 +39,12 @@ def validate_dairy_company(doc,method=None):
 	if doc.address_type == "Vlcc" and not doc.links:
 		frappe.throw(_("Please choose <b>vlcc company</b>"))
 
+	# set address as vlcc if vlcc user
+	if has_common(frappe.get_roles(), ["Vlcc Manager", "Vlcc Operator"]) and not doc.vlcc:
+		company = frappe.db.get_value("User", frappe.session.user, "company")
+		if company:
+			frappe.db.set_value("Address", doc.name, "vlcc", company)
+
 def make_account_and_warehouse(doc, method=None):
 	try:
 		if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
@@ -171,6 +177,7 @@ def validate_headoffice(doc, method):
 		for row in doc.links:
 			if row.get('link_doctype') != "Company":
 				frappe.throw(_("Row entry must be company"))
+
 
 
 def update_warehouse(doc, method):

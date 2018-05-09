@@ -3,6 +3,10 @@ frappe.ui.form.on("Company", {
 		frm.trigger("make_read_only");
 	},
 
+	refresh: function(frm) {
+		frm.trigger("make_read_only");
+	},
+
 	make_read_only: function(frm) {
 		// vlcc , camp, chilling user's can't modify saved form
 		not_allowed_user = ["Vlcc Manager", "Chilling Center Manager", "Camp Manager", 

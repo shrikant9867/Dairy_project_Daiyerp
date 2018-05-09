@@ -1,5 +1,6 @@
 frappe.ui.form.on("Address", {
 	refresh: function(frm) {
+		frm.trigger("make_read_only");
 		frm.events.set_route_vlcc(frm)
 		if(!frm.doc.__islocal && in_list(['Head Office','Camp Office','Chilling Centre','Plant'], frm.doc.address_type)){
 			frm.add_custom_button(__("Dairy Dashboard"), function() {
@@ -27,6 +28,8 @@ frappe.ui.form.on("Address", {
 		if (in_list(["Camp Office","VLCC"],operator.operator_type)){
 			frm.set_df_property("linked_with", "hidden", 1);
 		}
+
+		frm.trigger("show_links_section");
 	},
 	validate: function(frm) {
 		var user_ = get_session_user_type()
@@ -39,6 +42,14 @@ frappe.ui.form.on("Address", {
 		manager_reqd = has_common([frm.doc.address_type], ['Camp Office','Chilling Centre','Plant'])
 		frm.set_df_property("manager_email", "reqd", manager_reqd);
 		frm.set_df_property("manager_name", "reqd", manager_reqd);
+		frm.trigger("show_links_section");
+	},
+
+	show_links_section: function(frm) {
+		// if address type vlcc show links table
+		if(frm.doc.address_type == "Vlcc" && has_common(frappe.user_roles, ["Vlcc Manager"])) {
+			frm.set_df_property("linked_with", "hidden", 0);
+		}
 	},
 
 	different_operator: function(frm) {

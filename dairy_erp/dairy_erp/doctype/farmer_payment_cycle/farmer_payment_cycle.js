@@ -17,10 +17,12 @@ frappe.ui.form.on('Farmer Payment Cycle', {
 					}
 				}
 			});
+		frm.events.check_record_exist(frm)
 
 	},
 	no_of_cycles: function(frm){
 
+		frm.events.check_record_exist(frm)
 		if(frm.doc.no_of_cycles > 31){
 			frm.set_value("no_of_cycles",0)
 			frappe.throw("Number of cycles must be between 1-31")
@@ -41,6 +43,7 @@ frappe.ui.form.on('Farmer Payment Cycle', {
 		frm.refresh_field("cycles");	
 	},
 	min_set_per: function(frm){
+		frm.events.check_record_exist(frm)
 		if (frm.doc.min_set_per > 100){
 			frm.set_value("min_set_per","")
 			frappe.throw("Percentage can not be greater than 100")
@@ -49,17 +52,22 @@ frappe.ui.form.on('Farmer Payment Cycle', {
 			frappe.throw("Please Enter Percentage more than Zero")
 		}
 	},
-	onload: function(frm) {
+	validate: function(frm) {
+		frm.events.check_record_exist(frm)
+	},
+	check_record_exist: function(frm){
+		if(frm.doc.__islocal){	
 			frappe.call({	
 				method:"dairy_erp.dairy_erp.doctype.farmer_payment_cycle.farmer_payment_cycle.check_record_exist",	
-			callback:function(r){
-				if(r.message && frm.doc.__islocal){
+				callback:function(r){
+					if(r.message){
 						frappe.msgprint("Please add cycles in the existing defination of cycle")
 						frappe.set_route("List","Farmer Payment Cycle")
 					}
 				}
 			})
 		}
+	}
 });
 
 
@@ -74,3 +82,4 @@ frappe.ui.form.on('Farmer Payment Child', {
 		frm.reload_doc();
 	}
 });
+

@@ -126,9 +126,9 @@ def set_co_warehouse_po(doc,method=None):
 					country = chilling_centre_doc.country if chilling_centre_doc.country else ""
 					state = chilling_centre_doc.state if chilling_centre_doc.state else ""
 					address_ = addr1+","+addr2+","+city+","+country+","+state
-					type_ = frappe.db.get_value("Address", item.chilling_centre, 'address_type')
-					if type_ != "Chilling Centre":
-						item.chilling_centre = ""
+					# type_ = frappe.db.get_value("Address", item.chilling_centre, 'address_type')
+					# if type_ != "Chilling Centre":
+					# 	item.chilling_centre = ""
 					item.address = frappe.db.get_value("Village Level Collection Centre",{"name":mr.company},"address_display") if not item.chilling_centre  else address_
 	
 	if branch_office.get('operator_type') == 'VLCC':

@@ -125,18 +125,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Farmer Payment Cycle",
 					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Dairy Log",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Mobile App Log",
-					"description": _(" "),
 				}
-
 			]
 		},
 		{
@@ -188,6 +177,27 @@ def get_data():
 					"description": _(" "),
 				}
 
+			]
+		},
+		{
+			"label": _("Settings"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "VLCC Settings",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Dairy Log",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Mobile App Log",
+					"description": _(" "),
+				}
 			]
 		},
 		{

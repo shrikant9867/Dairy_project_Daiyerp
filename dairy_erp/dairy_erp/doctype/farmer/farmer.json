@@ -260,7 +260,7 @@
   }, 
   {
    "allow_bulk_edit": 0, 
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
@@ -330,7 +330,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-05-08 16:37:29.882189", 
+ "modified": "2018-05-09 20:02:47.859294", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "Farmer", 

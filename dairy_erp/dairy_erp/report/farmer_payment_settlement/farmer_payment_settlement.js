@@ -113,10 +113,10 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			if (frappe.selected_rows.length === 0){
 				frappe.throw("Please select records")
 			}
-			var end_date = frappe.query_report_filters_by_name.end_date.get_value()
-			if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
+			// var end_date = frappe.query_report_filters_by_name.end_date.get_value()
+			/*if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
 				frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
-			}
+			}*/
 			frappe.query_reports['Farmer Payment Settlement'].check_cycle(report)
 			
 		});
@@ -147,7 +147,9 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 						"filters":report.get_values()
 						},
 				callback : function(r){	
-					if(r.message.recv_msg){
+					if(r.message.msg){
+						frappe.throw(r.message.msg)
+					}else if(r.message.recv_msg){
 						frappe.throw(r.message.recv_msg)
 					}else if (r.message.cycle_msg){
 						frappe.throw(r.message.cycle_msg)

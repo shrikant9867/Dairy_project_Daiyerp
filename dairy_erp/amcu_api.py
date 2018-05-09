@@ -12,6 +12,7 @@ import time
 from frappe import _
 from amcu_update_api import update_fmcr
 from amcu_delete_api import delete_fmcr
+from amcu_resv_farmer_api import make_stock_receipt
 import dairy_utils as utils
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 import requests
@@ -55,59 +56,64 @@ def make_fmrc(data, response_dict):
 			if i == "collectionEntryList":
 				for row in v:
 					try:
+						vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},"name")
+						resv_farmer = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},['farmer_id1','farmer_id2'],as_dict=True)
 						if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
 							if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') \
 								and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('transactionid'):
-								if row.get('operation') == 'CREATE':
-									response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): []})
-									fmrc_entry = validate_fmrc_entry(data,row)
-									if not fmrc_entry:
-										if validate_society_exist(data):
-											if farmer_associate_vlcc(data,row):
-												vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
-												farmer = frappe.db.get_value("Farmer",{"vlcc_name": vlcc},'name')
-												farmer_supplier = frappe.db.get_value("Farmer",row.get('farmerid'),'full_name')
-												row.update(
-													{
-														"collectiontime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000)),
-														"qualitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
-														"quantitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000))
-													}
-												)
-												fmrc_doc = frappe.new_doc("Farmer Milk Collection Record")
-												fmrc_doc.farmer = farmer_supplier
-												fmrc_doc.id = data.get('id')
-												fmrc_doc.associated_vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
-												fmrc_doc.imeinumber = data.get('imeinumber')
-												fmrc_doc.rcvdtime = data.get('rcvdtime')
-												fmrc_doc.processedstatus = data.get('processedstatus')
-												fmrc_doc.societyid = data.get('societyid')
-												fmrc_doc.collectiondate =  time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
-												fmrc_doc.shift = data.get('shift')
-												fmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
-												fmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
-												fmrc_doc.endshift = 1 if data.get('endshift') == True else 0
-							 					fmrc_doc.update(row)
-												fmrc_doc.flags.ignore_permissions = True
-												fmrc_doc.flags.is_api = True
-												fmrc_doc.submit()
-												response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"fmrc": fmrc_doc.name})
-												if row.get('status') == "Accept":
-													pr = make_purchase_receipt_vlcc(data, row, vlcc, farmer_supplier, response_dict, fmrc_doc.name )
-													purchase_invoice_against_farmer(data, row, vlcc,  farmer_supplier, pr.get('item_'), response_dict, pr.get('pr_obj'), fmrc_doc.name)
-											else:
-												traceback = "farmer does not exist"
-												frappe.throw(_("farmer does not exist"))
-										
-										else :
-											traceback = "vlcc does not exist!" 
-											frappe.throw(_("vlcc does not exist!"))					
-									else:
-										response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"success","response":"Record already created please check on server,if any exception check 'Dairy log'."})
-								elif row.get('operation') == 'UPDATE':
-									update_fmcr(data,response_dict)
-								elif row.get('operation') == 'DELETE':
-									delete_fmcr(data,response_dict)
+								if row.get('farmerid') not in (resv_farmer.get('farmer_id1'),resv_farmer.get('farmer_id2')):
+									if row.get('operation') == 'CREATE':
+										response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): []})
+										fmrc_entry = validate_fmrc_entry(data,row)
+										if not fmrc_entry:
+											if validate_society_exist(data):
+												if farmer_associate_vlcc(data,row):
+													vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
+													farmer = frappe.db.get_value("Farmer",{"vlcc_name": vlcc},'name')
+													farmer_supplier = frappe.db.get_value("Farmer",row.get('farmerid'),'full_name')
+													row.update(
+														{
+															"collectiontime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000)),
+															"qualitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
+															"quantitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000))
+														}
+													)
+													fmrc_doc = frappe.new_doc("Farmer Milk Collection Record")
+													fmrc_doc.farmer = farmer_supplier
+													fmrc_doc.id = data.get('id')
+													fmrc_doc.associated_vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
+													fmrc_doc.imeinumber = data.get('imeinumber')
+													fmrc_doc.rcvdtime = data.get('rcvdtime')
+													fmrc_doc.processedstatus = data.get('processedstatus')
+													fmrc_doc.societyid = data.get('societyid')
+													fmrc_doc.collectiondate =  time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
+													fmrc_doc.shift = data.get('shift')
+													fmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
+													fmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
+													fmrc_doc.endshift = 1 if data.get('endshift') == True else 0
+								 					fmrc_doc.update(row)
+													fmrc_doc.flags.ignore_permissions = True
+													fmrc_doc.flags.is_api = True
+													fmrc_doc.submit()
+													response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"fmrc": fmrc_doc.name})
+													if row.get('status') == "Accept":
+														pr = make_purchase_receipt_vlcc(data, row, vlcc, farmer_supplier, response_dict, fmrc_doc.name )
+														purchase_invoice_against_farmer(data, row, vlcc,  farmer_supplier, pr.get('item_'), response_dict, pr.get('pr_obj'), fmrc_doc.name)
+												else:
+													traceback = "farmer does not exist"
+													frappe.throw(_("farmer does not exist"))
+											
+											else :
+												traceback = "vlcc does not exist!" 
+												frappe.throw(_("vlcc does not exist!"))					
+										else:
+											response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"success","response":"Record already created please check on server,if any exception check 'Dairy log'."})
+									elif row.get('operation') == 'UPDATE':
+										update_fmcr(data,response_dict)
+									elif row.get('operation') == 'DELETE':
+										delete_fmcr(data,response_dict)
+								elif row.get('farmerid') in (resv_farmer.get('farmer_id1'),resv_farmer.get('farmer_id2')):
+									make_stock_receipt(data,row,response_dict)
 							else:
 								traceback = "data missing"
 								response_dict.update({"status":"Error","response":"Data Missing","message": "farmerid,milktype,collectiontime,milkquantity,rate, status must be one of Accept or Reject are manadatory"})

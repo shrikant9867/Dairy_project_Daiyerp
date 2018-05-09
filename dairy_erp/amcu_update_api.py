@@ -15,18 +15,19 @@ import json
 
 
 def update_fmcr(data, response_dict):
-	config_hrs = frappe.db.get_singles_dict('Dairy Settings')
 
 	for i,v in data.items():
 			if i == "collectionEntryList":
 				for row in v:
-					try:
-						max_time = get_datetime(data.get('rcvdtime')) +  timedelta(hours=int(config_hrs.get('hours')))
-						if now_datetime() < max_time: 
-							fmcr = frappe.db.get_value('Farmer Milk Collection Record',
-									{"transactionid":row.get('transactionid')},"name")
-							if fmcr:
-								fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
+					try: 
+						vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},"name")
+						config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'hours')
+						fmcr = frappe.db.get_value('Farmer Milk Collection Record',
+								{"transactionid":row.get('transactionid')},"name")
+						if fmcr:
+							fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
+							max_time = get_datetime(fmcr_doc.rcvdtime) +  timedelta(hours=int(config_hrs))
+							if now_datetime() < max_time: 
 								if fmcr_doc.amount < row.get('amount'):
 									update_fmcr_amt(fmcr_doc, data,response_dict)
 								elif fmcr_doc.amount > row.get('amount'):
@@ -44,9 +45,9 @@ def update_fmcr(data, response_dict):
 										je = create_debit_note(data.get('societyid'), row, debit_amount,fmcr_doc)
 									response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["Journal Entry '{0}' created against FMCR '{1}'".format(je,fmcr_doc.name)]})
 							else:
-								response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["There are no documents present with the transaction id {0}".format(row.get('transactionid'))]})
+								response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["You can not update {0}".format(fmcr_doc.name)]})
 						else:
-							response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["You can not update FMCR with the transaction id {0}".format(row.get('transactionid'))]})
+							response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["There are no transactions present with the transaction id {0}".format(row.get('transactionid'))]})
 					except Exception,e:
 						frappe.db.rollback()
 						utils.make_dairy_log(title="Sync failed for Data push",method="update_fmcr", status="Error",

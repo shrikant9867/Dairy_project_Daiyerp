@@ -45,8 +45,8 @@ class Farmer(Document):
 
 	def validate(self):
 		self.validate_eff_credit_percent()
-		if len(self.farmer_id) != 4:
-			frappe.throw(_("Only <b>4</b> Digits Farmer ID Allowed"))
+		# if len(self.farmer_id) != 4:
+		# 	frappe.throw(_("Only <b>4</b> Digits Farmer ID Allowed"))
 
 	def validate_eff_credit_percent(self):
 		# eff-credit % must be between 0-99

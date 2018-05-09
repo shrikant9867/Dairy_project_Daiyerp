@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import nowdate, cstr, flt, cint, now, getdate
+from frappe.utils import nowdate, cstr, flt, cint, now, getdate,add_days
 from erpnext.accounts.doctype.journal_entry.journal_entry \
 	import get_average_exchange_rate, get_default_bank_cash_account
 from erpnext.accounts.party import get_party_account
@@ -512,8 +512,11 @@ def check_cycle(row_data,filters):
 
 	row_data = json.loads(row_data)
 	filters = json.loads(filters)
+	vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
+	get_config = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'cycle_hours')
 	month_list, receivable_list = [] , []
-	cycle_msg = ""
+	cycle_msg,msg = "" , ""
+	days = 0
 
 	month_list = []
 
@@ -535,9 +538,15 @@ def check_cycle(row_data,filters):
 		if months:
 			cycle_msg = "Please add cycle for <b>{0}</b>".format(",".join(months))
 
+	days = int(get_config)/24
+	settlement_day = add_days(getdate(filters.get('end_date')),days)
+
+	if getdate(nowdate()) < getdate(settlement_day):
+		msg = "Settlement can be done after <b>{0}</b>".format(settlement_day)
+
 	recv_msg = check_receivable(receivable_list)
 
-	return {"cycle_msg":cycle_msg,"recv_msg":recv_msg}
+	return {"cycle_msg":cycle_msg,"recv_msg":recv_msg,"msg":msg}
 
 def check_receivable(recv_list):
 	

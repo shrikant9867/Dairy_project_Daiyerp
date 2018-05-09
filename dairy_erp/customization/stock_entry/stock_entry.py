@@ -15,34 +15,35 @@ from erpnext.stock.stock_balance import get_balance_qty_from_sle
 
 
 def set_target_warehouse(doc,method):
-	chilling_centre = ""
-	doc.purpose = "Material Transfer"
-	target_warhouse = ""
-	user_ = frappe.db.get_value("User", frappe.session.user, ['branch_office','operator_type'],as_dict=1)
-	if user_.get('operator_type') == "Camp Office":
-		for row in doc.items:
-			row.camp_qty = row.qty
-			chilling_centre = row.chilling_centre
-			row.s_warehouse = frappe.db.get_value("Address",user_.get('branch_office'),'warehouse')
-			row.t_warehouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
-		target_warhouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
-	
-	if target_warhouse and user_.get('operator_type') == "Camp Office":
-		doc.to_warehouse = target_warhouse
-	
-	if user_.get('operator_type') == "Chilling Centre":
-		for row in doc.items:
-			chilling_centre = row.chilling_centre
-			row.s_warehouse = frappe.db.get_value("Address",doc.camp_office,'warehouse')
-			row.t_warehouse = frappe.db.get_value("Address",user_.get('branch_office'),'warehouse')
-			if row.accepted_qty:
-				row.qty = row.accepted_qty
-				row.rejected_qty = row.original_qty - row.accepted_qty
+	if not doc.flags.is_api:
+		chilling_centre = ""
+		doc.purpose = "Material Transfer"
+		target_warhouse = ""
+		user_ = frappe.db.get_value("User", frappe.session.user, ['branch_office','operator_type'],as_dict=1)
+		if user_.get('operator_type') == "Camp Office":
+			for row in doc.items:
+				row.camp_qty = row.qty
+				chilling_centre = row.chilling_centre
+				row.s_warehouse = frappe.db.get_value("Address",user_.get('branch_office'),'warehouse')
+				row.t_warehouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
+			target_warhouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
+		
+		if target_warhouse and user_.get('operator_type') == "Camp Office":
+			doc.to_warehouse = target_warhouse
+		
+		if user_.get('operator_type') == "Chilling Centre":
+			for row in doc.items:
+				chilling_centre = row.chilling_centre
+				row.s_warehouse = frappe.db.get_value("Address",doc.camp_office,'warehouse')
+				row.t_warehouse = frappe.db.get_value("Address",user_.get('branch_office'),'warehouse')
+				if row.accepted_qty:
+					row.qty = row.accepted_qty
+					row.rejected_qty = row.original_qty - row.accepted_qty
 	
 
 
 def validate_camp_submission(doc, method):
-	if frappe.db.get_value("User",frappe.session.user,'operator_type') == "Camp Office":
+	if frappe.db.get_value("User",frappe.session.user,'operator_type') == "Camp Office" and not doc.flags.is_api:
 		frappe.throw(_("Stock Entry gets submit on acceptance of goods at <b>{0}</b>".format(doc.items[0].chilling_centre)))
 
 
@@ -59,7 +60,7 @@ def check_if_dropship(doc,method):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 
-	if user_doc.get("operator_type") == 'Chilling Centre':
+	if user_doc.get("operator_type") == 'Chilling Centre' and not doc.flags.is_api:
 		for item in doc.items:
 			if item.material_request:
 				mr_list.append(str(item.material_request))
@@ -140,21 +141,22 @@ def make_pr_against_localsupp(po_doc,stock_doc):
 
 def update_mi_status(doc, method=None):
 	# update MI delivery status
-	update_received_stock_qty(doc)
-	mi_list = frappe.db.get_all("Stock Entry Detail", {"parent": doc.name}, "material_request as mi")
-	for mi in mi_list:
-		mi = frappe.get_doc("Material Request", mi.get('mi'))
-		all_received = True
-		for i in mi.items:
-			if i.qty != i.received_stock_qty:
-				all_received = False
-		mi_status = "Delivered" if all_received else "Partially Delivered"
-		per_delivered = 100 if all_received else 99.99
-		mi.per_delivered = per_delivered
-		mi.set_status(status=mi_status)
-		mi.flags.ignore_permissions = True
-		mi.flags.ignore_validate_update_after_submit = True
-		mi.save()
+	if not doc.flags.is_api:
+		update_received_stock_qty(doc)
+		mi_list = frappe.db.get_all("Stock Entry Detail", {"parent": doc.name}, "material_request as mi")
+		for mi in mi_list:
+			mi = frappe.get_doc("Material Request", mi.get('mi'))
+			all_received = True
+			for i in mi.items:
+				if i.qty != i.received_stock_qty:
+					all_received = False
+			mi_status = "Delivered" if all_received else "Partially Delivered"
+			per_delivered = 100 if all_received else 99.99
+			mi.per_delivered = per_delivered
+			mi.set_status(status=mi_status)
+			mi.flags.ignore_permissions = True
+			mi.flags.ignore_validate_update_after_submit = True
+			mi.save()
 
 def update_received_stock_qty(doc):
 	for st_i in doc.items:

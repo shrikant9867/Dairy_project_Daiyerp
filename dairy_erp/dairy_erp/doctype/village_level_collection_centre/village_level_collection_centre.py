@@ -277,6 +277,10 @@ class VillageLevelCollectionCentre(Document):
 
 def create_taxes_charges_template(type_, temp, company):
 	temp = frappe.get_doc(type_,temp.get('name'))
+	cost_center = frappe.db.get_value("Cost Center", {
+		"cost_center_name": "Main",
+		"company": company
+	}, "name")
 	if not frappe.db.get_value(type_, {
 		"vlcc": company,
 		"title": temp.title
@@ -306,7 +310,7 @@ def create_taxes_charges_template(type_, temp, company):
 				vlcc_temp.append("taxes", {
 					"charge_type": row.get("charge_type"),
 					"account_head": vlcc_acc_head,
-					"cost_center": "",
+					"cost_center": cost_center or "",
 					"rate": row.get("rate"),
 					"tax_amount": row.get("tax_amount"),
 					"description": row.get("description")

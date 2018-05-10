@@ -35,7 +35,8 @@ def make_pr(data):
 	pr_obj = frappe.new_doc("Purchase Receipt")
 	pr_obj.update(data)
 	for row in pr_obj.items:
-		row.rejected_qty = row.received_qty - row.qty
+		if row.received_qty and row.qty:
+			row.rejected_qty = row.received_qty - row.qty
 	pr_obj.buying_price_list = get_price_list()
 	pr_obj.flags.ignore_permissions = True
 	pr_obj.save()

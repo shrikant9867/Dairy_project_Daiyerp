@@ -50,7 +50,8 @@ def make_stock_receipt(data, row,response_dict):
 					"uom": "Litre",
 					"qty": row.get('milkquantity'),
 					"t_warehouse": vlcc.get('warehouse'),
-					"cost_center":company_details.get('cost_center')
+					"cost_center":company_details.get('cost_center'),
+					"basic_rate": row.get('rate')
 				}
 			)
 			stock_doc.flags.ignore_permissions = True

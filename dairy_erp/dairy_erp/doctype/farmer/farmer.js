@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Farmer', {
+	refresh: function(frm) {
+		frm.trigger("make_read_only");
+	},
+
 	validate: function(frm) {
 		if(frm.doc.__islocal){
 			return new Promise(function(resolve, reject) {
@@ -17,7 +21,9 @@ frappe.ui.form.on('Farmer', {
 	},
 	onload: function(frm) {
 		var user_company = get_session_user_type()
-		frm.set_value("vlcc_name",user_company)
+		if(!frm.doc.vlcc_name) {
+			frm.set_value("vlcc_name",user_company)
+		}
 		frm.set_query("vlcc_name", function () {
 			return {
 				"filters": {
@@ -32,16 +38,21 @@ frappe.ui.form.on('Farmer', {
 				}
 			};
 		});
+
+		frm.trigger("make_read_only")
 	},
-	address: function(frm) {
-		erpnext.utils.get_address_display(frm, "address", "address_details");
-	},
+
 	percent_effective_credit: function(frm) {
 		if(frm.doc.percent_effective_credit < 0 || frm.doc.percent_effective_credit > 99) {
 			frm.set_value("percent_effective_credit", 0)
 			refresh_field("percent_effective_credit")
 			frappe.msgprint(__("Percent Of Effective Credit must be between 0 to 99"))
 		}
+	},
+
+	make_read_only: function(frm) {
+		frm.toggle_enable("full_name", frm.doc.__islocal ? 1:0);
+		frm.toggle_enable("vlcc_name", frm.doc.__islocal ? 1:0);
 	}
 });
 

@@ -9,14 +9,14 @@ from frappe.utils import flt
 from frappe.model.document import Document
 
 class Farmer(Document):
-	def on_submit(self):
+
+	def after_insert(self):
 		"""create customer & supplier for A/C head"""
 		try:
 			self.create_supplier()
 			self.create_customer()
 		except Exception as e:
 			frappe.db.rollback();
-			print(frappe.get_traceback())
 			frappe.msgprint(e)
 
 	
@@ -47,6 +47,14 @@ class Farmer(Document):
 		custmer_doc.insert()
 
 	def validate(self):
+		# validate existing supplier/customer
+		farmer_exist = frappe.db.get_value("Farmer", {
+			"full_name": self.full_name,
+			"name": ["!=", self.name]
+		}, "name")
+		if farmer_exist:
+			frappe.throw("Farmer name already exist")
+
 		self.validate_eff_credit_percent()
 		# if len(self.farmer_id) != 4:
 		# 	frappe.throw(_("Only <b>4</b> Digits Farmer ID Allowed"))

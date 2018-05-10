@@ -17,22 +17,15 @@ frappe.ui.form.on('VLCC Settings', {
 			frappe.msgprint("Hours can not negative")
 			frm.set_value("hours",24)
 			frm.reload_doc();
+		} else if(frm.doc.cycle_hours && frm.doc.hours > frm.doc.cycle_hours){
+			frappe.msgprint("FMCR Edition Hours must be less than Farmer Payment Settlement Hours")
 		}
 	},
 	cycle_hours: function(frm) {
-		if(frm.doc.cycle_hours % 24 != 0){
-			frappe.msgprint("Please add Hours in multiples of 24")
-			frm.set_value("cycle_hours",24)
-			frm.reload_doc();
-		} else if(frm.doc.cycle_hours == 0){
-			frappe.msgprint("Hours can not be zero")
-			frm.set_value("cycle_hours",24)
-			frm.reload_doc();
-		} else if(frm.doc.hours && (frm.doc.cycle_hours < frm.doc.hours)){
-			frappe.msgprint("Configurable Hours for Farmer Payment Settlement must be greater than FMCR Edition")
-			frm.set_value("cycle_hours",24)
-			frm.reload_doc();
-		}
+		frm.events.validate_cycle_hours(frm)	
+	},
+	validate: function(frm) {
+		frm.events.validate_cycle_hours(frm)
 	},
 	set_vlcc: function(frm){
 		frappe.call({
@@ -62,6 +55,21 @@ frappe.ui.form.on('VLCC Settings', {
 					}
 				}
 			})
+		}
+	},
+	validate_cycle_hours: function(frm) {
+		if(frm.doc.cycle_hours % 24 != 0){
+			frappe.msgprint("Please add Hours in multiples of 24")
+			frm.set_value("cycle_hours",24)
+			frm.reload_doc();
+		} else if(frm.doc.cycle_hours == 0){
+			frappe.msgprint("Hours can not be zero")
+			frm.set_value("cycle_hours",24)
+			frm.reload_doc();
+		} else if(frm.doc.hours && (frm.doc.cycle_hours < frm.doc.hours)){
+			frappe.msgprint("Configurable Hours for Farmer Payment Settlement must be greater than FMCR Edition Hours")
+			frm.set_value("cycle_hours",24)
+			frm.reload_doc();
 		}
 	}
 });

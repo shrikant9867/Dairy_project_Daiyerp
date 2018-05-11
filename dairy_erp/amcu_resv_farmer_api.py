@@ -66,12 +66,12 @@ def make_stock_receipt(message,method,data, row,response_dict,qty,warehouse,soci
 			if method == 'handling_loss_gain':
 				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Stock Receipt": stock_doc.name})
 			else:
-				response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): [{"Stock Receipt": stock_doc.name}]})
+				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Stock Receipt": stock_doc.name})
 		else:
-			response_dict.update({row.get('farmerid')+"-"+row.get('milktype'):[{"status":"success","response":"Record already created please check on server,if any exception check 'Dairy log'."}]})
+			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"success","response":"Record already created please check on server,if any exception check 'Dairy log'."})
 
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method=method, status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
-		response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
+		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})
 	return response_dict

@@ -56,6 +56,7 @@ class Farmer(Document):
 			frappe.throw("Farmer name already exist")
 
 		self.validate_eff_credit_percent()
+		self.check_reserved_farmer()
 		# if len(self.farmer_id) != 4:
 		# 	frappe.throw(_("Only <b>4</b> Digits Farmer ID Allowed"))
 
@@ -64,3 +65,11 @@ class Farmer(Document):
 		eff_credit_percent = flt(self.percent_effective_credit)
 		if not self.ignore_effective_credit_percent and (eff_credit_percent < 0 or eff_credit_percent > 99):
 			frappe.throw(_("Percent Of Effective Credit must be between 0 to 99"))
+
+	def check_reserved_farmer(self):
+		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+		vlcc_settings = frappe.db.get_value("VLCC Settings",
+			{"vlcc":user_doc.get('company')},['farmer_id1','farmer_id2'],as_dict=1)
+		if vlcc_settings:
+			if self.farmer_id in [vlcc_settings.get('farmer_id1'),vlcc_settings.get('farmer_id2')]:
+				frappe.throw("You can not create farmer id <b>{0}</b> as it is reserved farmer id".format(self.farmer_id))

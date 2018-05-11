@@ -14,46 +14,43 @@ import requests
 import json
 
 
-def update_fmcr(data, response_dict):
+def update_fmcr(data, row,response_dict):
 
-	for i,v in data.items():
-			if i == "collectionEntryList":
-				for row in v:
-					try: 
-						vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},"name")
-						config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'hours')
-						fmcr = frappe.db.get_value('Farmer Milk Collection Record',
-								{"transactionid":row.get('transactionid')},"name")
-						if fmcr:
-							fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
-							max_time = get_datetime(fmcr_doc.rcvdtime) +  timedelta(hours=int(config_hrs))
-							if now_datetime() < max_time: 
-								if fmcr_doc.amount < row.get('amount'):
-									update_fmcr_amt(fmcr_doc, data,response_dict)
-								elif fmcr_doc.amount > row.get('amount'):
+	try: 
+		vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},"name")
+		config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'hours')
+		fmcr = frappe.db.get_value('Farmer Milk Collection Record',
+				{"transactionid":row.get('transactionid')},"name")
+		if fmcr:
+			fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
+			max_time = get_datetime(fmcr_doc.rcvdtime) +  timedelta(hours=int(config_hrs))
+			if now_datetime() < max_time: 
+				if fmcr_doc.amount <= row.get('amount'):
+					update_fmcr_amt(fmcr_doc, data,response_dict)
+				elif fmcr_doc.amount > row.get('amount'):
 
-									debit_amount = fmcr_doc.amount - row.get('amount')
-									je_exist = frappe.db.get_value("Journal Entry",
-												{"farmer_milk_collection_record":fmcr_doc.name,
-												"docstatus": ["!=", 2]},"name")
+					debit_amount = fmcr_doc.amount - row.get('amount')
+					je_exist = frappe.db.get_value("Journal Entry",
+								{"farmer_milk_collection_record":fmcr_doc.name,
+								"docstatus": ["!=", 2]},"name")
 
-									if je_exist:
-										je_doc = frappe.get_doc("Journal Entry",je_exist)
-										je_doc.cancel()
-										je = create_debit_note(data.get('societyid'), row, debit_amount,fmcr_doc)
-									else:
-										je = create_debit_note(data.get('societyid'), row, debit_amount,fmcr_doc)
-									response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["Journal Entry '{0}' created against FMCR '{1}'".format(je,fmcr_doc.name)]})
-							else:
-								response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["You can not update {0}".format(fmcr_doc.name)]})
-						else:
-							response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["There are no transactions present with the transaction id {0}".format(row.get('transactionid'))]})
-					except Exception,e:
-						frappe.db.rollback()
-						utils.make_dairy_log(title="Sync failed for Data push",method="update_fmcr", status="Error",
-						data = "data", message=e, traceback=frappe.get_traceback())
-						response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
-					return response_dict
+					if je_exist:
+						je_doc = frappe.get_doc("Journal Entry",je_exist)
+						je_doc.cancel()
+						je = create_debit_note(data.get('societyid'), row, debit_amount,fmcr_doc)
+					else:
+						je = create_debit_note(data.get('societyid'), row, debit_amount,fmcr_doc)
+						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Journal Entry '{0}' created against FMCR '{1}'".format(je,fmcr_doc.name)})
+			else:
+				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "You can not update {0}".format(fmcr_doc.name)})
+		else:
+			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
+	except Exception,e:
+		frappe.db.rollback()
+		utils.make_dairy_log(title="Sync failed for Data push",method="update_fmcr", status="Error",
+		data = "data", message=e, traceback=frappe.get_traceback())
+		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})	
+	return response_dict
 	
 def update_fmcr_amt(fmcr_doc,data,response_dict):
 
@@ -93,7 +90,6 @@ def make_fmcr(data,response_dict):
 							if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') \
 								and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('transactionid'):
 								if row.get('operation') == 'UPDATE':
-									response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): []})
 									fmrc_entry = amcu_api.validate_fmrc_entry(data,row)
 									if not fmrc_entry:
 										if amcu_api.validate_society_exist(data):

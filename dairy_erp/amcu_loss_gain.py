@@ -33,7 +33,7 @@ def handling_loss_gain(data,row,response_dict):
 
 	if len(fmcr_record):
 		for fmcr in fmcr_record:
-			fmcr_list = fmcr.get('fmcr').split(",") or []
+			fmcr_list = fmcr.get('fmcr').split(",") if fmcr else []
 
 			if fmcr.get('qty') > row.get('milkquantity'):
 				qty = fmcr.get('qty') - row.get('milkquantity')
@@ -55,8 +55,9 @@ def handling_loss_gain(data,row,response_dict):
 
 def set_flag_fmcr(fmcr_list,is_stock_settled):
 
-	for data in fmcr_list:
-		fmcr_doc = frappe.get_doc('Farmer Milk Collection Record',data)
-		fmcr_doc.is_stock_settled = is_stock_settled
-		fmcr_doc.flags.ignore_permissions = True
-		fmcr_doc.save()
+	if fmcr_list:
+		for data in fmcr_list:
+			fmcr_doc = frappe.get_doc('Farmer Milk Collection Record',data)
+			fmcr_doc.is_stock_settled = is_stock_settled
+			fmcr_doc.flags.ignore_permissions = True
+			fmcr_doc.save()

@@ -77,7 +77,7 @@ def make_stock_adjust(purpose,message,vlcc,data,qty,t_warehouse,s_warehouse):
 		company_details = frappe.db.get_value("Company",{"name":vlcc},['default_payable_account','abbr','cost_center'],as_dict=1)
 		remarks,response_dict = {} ,{}
 		item_code = ""
-		fmcr = data.get('fmcr').split(',') or []
+		fmcr = data.get('fmcr').split(',') if data else []
 
 
 		amcu_api.create_item(data)
@@ -124,8 +124,9 @@ def make_stock_adjust(purpose,message,vlcc,data,qty,t_warehouse,s_warehouse):
 
 def set_flag_fmcr(fmcr_list,is_fmcr_updated):
 
-	for data in fmcr_list:
-		fmcr_doc = frappe.get_doc('Farmer Milk Collection Record',data)
-		fmcr_doc.is_fmrc_updated = is_fmcr_updated
-		fmcr_doc.flags.ignore_permissions = True
-		fmcr_doc.save()
+	if fmcr_list:
+		for data in fmcr_list:
+			fmcr_doc = frappe.get_doc('Farmer Milk Collection Record',data)
+			fmcr_doc.is_fmrc_updated = is_fmcr_updated
+			fmcr_doc.flags.ignore_permissions = True
+			fmcr_doc.save()

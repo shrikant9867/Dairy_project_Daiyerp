@@ -52,19 +52,23 @@ def make_fmrc(data, response_dict):
 		no of field = 56(enum), update row 40 type field in one row to make one FMCR : VLCC 
 	"""
 	traceback = ""
+	farmer1,farmer2 = "",""
 	if data.get('societyid'):
 		for i,v in data.items():
 			if i == "collectionEntryList":
 				for row in v:
 					try:
 						vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},"name")
-						resv_farmer = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},['farmer_id1','farmer_id2'],as_dict=True) or {}
+						resv_farmer = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},['farmer_id1','farmer_id2'],as_dict=True) 
+						if resv_farmer:
+							farmer1 = resv_farmer.get('farmer_id1')
+							farmer2 = resv_farmer.get('farmer_id2')
+						response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): []})
 						if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
 							if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') \
 								and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('transactionid'):	
-								if row.get('farmerid') not in (resv_farmer.get('farmer_id1'),resv_farmer.get('farmer_id2')):
+								if row.get('farmerid') not in [farmer1,farmer2]:
 									if row.get('operation') == 'CREATE':
-										response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): []})
 										fmrc_entry = validate_fmrc_entry(data,row)
 										if not fmrc_entry:
 											if validate_society_exist(data):
@@ -110,9 +114,9 @@ def make_fmrc(data, response_dict):
 										else:
 											response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"success","response":"Record already created please check on server,if any exception check 'Dairy log'."})
 									elif row.get('operation') == 'UPDATE':
-										update_fmcr(data,response_dict)
+										update_fmcr(data,row,response_dict)
 									elif row.get('operation') == 'DELETE':
-										delete_fmcr(data,response_dict)
+										delete_fmcr(data,row,response_dict)
 								elif row.get('farmerid') in (resv_farmer.get('farmer_id1'),resv_farmer.get('farmer_id2')):
 									wh = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},["name","warehouse"],as_dict=True)
 									make_stock_receipt(message="Material Receipt for Reserved Farmer",method="create_fmrc",
@@ -129,6 +133,7 @@ def make_fmrc(data, response_dict):
 						utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 						data = data, message=e, traceback=frappe.get_traceback())
 						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})		
+					return response_dict
 
 	else:
 		response_dict.update({"status":"Error","response":"society id missing"})

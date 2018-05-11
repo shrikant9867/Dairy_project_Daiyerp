@@ -12,27 +12,24 @@ from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 import requests
 import json
 
-def delete_fmcr(data, response_dict):
+def delete_fmcr(data, row,response_dict):
+	
+	try:
+		fmcr = frappe.db.get_value('Farmer Milk Collection Record',
+				{"transactionid":row.get('transactionid')},"name")
+		if fmcr:
+			fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
+			delete_linked_doc(fmcr_doc)
+			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Documents against FMCR '{0}' are deleted".format(fmcr_doc.name)})
+		else:
+			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no documents present with the transaction id {0} for deletion".format(row.get('transactionid'))})
 
-	for i,v in data.items():
-			if i == "collectionEntryList":
-				for row in v:
-					try:
-						fmcr = frappe.db.get_value('Farmer Milk Collection Record',
-								{"transactionid":row.get('transactionid')},"name")
-						if fmcr:
-							fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
-							delete_linked_doc(fmcr_doc)
-							response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["Documents against FMCR '{0}' are deleted".format(fmcr_doc.name)]})
-						else:
-							response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): ["There are no documents present with the transaction id {0}".format(row.get('transactionid'))]})
-
-					except Exception,e:
-						frappe.db.rollback()
-						utils.make_dairy_log(title="Sync failed for Data push",method="delete_fmcr", status="Error",
-						data = "data", message=e, traceback=frappe.get_traceback())
-						response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
-					return response_dict
+	except Exception,e:
+		frappe.db.rollback()
+		utils.make_dairy_log(title="Sync failed for Data push",method="delete_fmcr", status="Error",
+		data = "data", message=e, traceback=frappe.get_traceback())
+		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})	
+	return response_dict
 
 
 def delete_linked_doc(fmcr_doc):

@@ -170,6 +170,7 @@ def update_received_stock_qty(doc):
 
 def se_permission_query(user):
 	roles = frappe.get_roles()
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 	if has_common(["Chilling Center Operator", "Chilling Center Manager"], roles) and user != 'Administrator':
 		query = """`tabStock Entry`.owner = '{0}'""".format(user)
 		branch_office = frappe.db.get_value("User", user, "branch_office")
@@ -180,6 +181,8 @@ def se_permission_query(user):
 				st = "(" + ",".join([ "'{0}'".format(s[0]) for s in st_entries ]) + ")"
 				query += " or `tabStock Entry`.name in {0}".format(st)
 		return query
+	elif has_common(['Vlcc Manager',"Vlcc Operator"],roles) and user != 'Administrator':
+		return """`tabStock Entry`.company = '{0}'""".format(user_doc.get('company'))
 
 
 def get_price_list():

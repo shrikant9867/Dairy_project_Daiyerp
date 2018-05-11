@@ -82,17 +82,18 @@ class VlccMilkCollectionRecord(Document):
 
 	def check_stock(self):
 		"""check stock is available for transactions"""
-		item = self.milktype+" Milk"
-		vlcc_warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "warehouse")
-		if not vlcc_warehouse:
-			frappe.throw(_("Warehouse is not present on VLCC"))
-		stock_qty = frappe.db.get_value("Bin", {
-			"warehouse": vlcc_warehouse,
-			"item_code": item
-		},"actual_qty") or 0
-		if not stock_qty or stock_qty < self.milkquantity:
-			frappe.throw(_("The dispatched quantity of <b>{0}</b> should be less than or \
-				equal to stock <b>{1}</b> available at <b>{2}</b> warehouse".format(item, stock_qty, vlcc_warehouse)))
+		if not self.flags.is_api:
+			item = self.milktype+" Milk"
+			vlcc_warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "warehouse")
+			if not vlcc_warehouse:
+				frappe.throw(_("Warehouse is not present on VLCC"))
+			stock_qty = frappe.db.get_value("Bin", {
+				"warehouse": vlcc_warehouse,
+				"item_code": item
+			},"actual_qty") or 0
+			if not stock_qty or stock_qty < self.milkquantity:
+				frappe.throw(_("The dispatched quantity of <b>{0}</b> should be less than or \
+					equal to stock <b>{1}</b> available at <b>{2}</b> warehouse".format(item, stock_qty, vlcc_warehouse)))
 
 	def calculate_amount(self):
 		if self.milkquantity and self.rate:

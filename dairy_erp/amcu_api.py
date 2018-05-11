@@ -13,6 +13,7 @@ from frappe import _
 from amcu_update_api import update_fmcr
 from amcu_delete_api import delete_fmcr
 from amcu_resv_farmer_api import make_stock_receipt
+from amcu_loss_gain import handling_loss_gain
 import dairy_utils as utils
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 import requests
@@ -57,10 +58,10 @@ def make_fmrc(data, response_dict):
 				for row in v:
 					try:
 						vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},"name")
-						resv_farmer = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},['farmer_id1','farmer_id2'],as_dict=True)
+						resv_farmer = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},['farmer_id1','farmer_id2'],as_dict=True) or {}
 						if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
 							if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') \
-								and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('transactionid'):
+								and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('transactionid'):	
 								if row.get('farmerid') not in (resv_farmer.get('farmer_id1'),resv_farmer.get('farmer_id2')):
 									if row.get('operation') == 'CREATE':
 										response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): []})
@@ -113,7 +114,11 @@ def make_fmrc(data, response_dict):
 									elif row.get('operation') == 'DELETE':
 										delete_fmcr(data,response_dict)
 								elif row.get('farmerid') in (resv_farmer.get('farmer_id1'),resv_farmer.get('farmer_id2')):
-									make_stock_receipt(data,row,response_dict)
+									wh = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},["name","warehouse"],as_dict=True)
+									make_stock_receipt(message="Material Receipt for Reserved Farmer",method="create_fmrc",
+													data=data,row=row,response_dict=response_dict,qty=row.get('milkquantity'),
+													warehouse=wh.get('warehouse'),
+													societyid=data.get('societyid'))
 							else:
 								traceback = "data missing"
 								response_dict.update({"status":"Error","response":"Data Missing","message": "farmerid,milktype,collectiontime,milkquantity,rate, status must be one of Accept or Reject are manadatory"})
@@ -134,7 +139,7 @@ def validate_fmrc_entry(data, row):
 	"""validate for duplicate entry for Farmer Milk Record Collection"""
 	
 	return frappe.db.get_value('Farmer Milk Collection Record',
-			{"transactionid":row.get('transactionid')},"name")
+			{"transactionid":row.get('transactionid'),"docstatus":['<',2] },"name")
 
 
 def validate_society_exist(data):
@@ -314,6 +319,7 @@ def make_vmrc(data, response_dict):
 											vlcc = validate_vlcc(row)
 											if row.get('status') == "Accept":
 												make_purchase_receipt_dairy(data, row, vlcc_name, response_dict, vmrc_doc.name)
+												handling_loss_gain(data,row,response_dict)
 										else:
 											traceback = "vlcc does not exist"
 											frappe.throw(_("Vlcc Does not exist"))
@@ -354,7 +360,6 @@ def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
 	"""make Purchase receipt at Dairy Level if status accepted at VMCR"""
 
 	co = frappe.db.get_value("Village Level Collection Centre",{'name':vlcc},"camp_office")
-	print co,"vlccc....\n\n"
 	item_code = ""
 	
 	try:
@@ -395,7 +400,6 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 		delivry_obj.customer = customer
 		delivry_obj.vlcc_milk_collection_record = vmrc
 		delivry_obj.company = vlcc
-		print "________________",cost_center
 		delivry_obj.append("items",
 		{
 			"item_code": item_.item_code,

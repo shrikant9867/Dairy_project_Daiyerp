@@ -39,9 +39,14 @@ def delete_linked_doc(fmcr_doc):
 
 	pi = frappe.db.get_value("Purchase Invoice",{"farmer_milk_collection_record":fmcr_doc.name},"name")
 	pr = frappe.db.get_value("Purchase Receipt",{"farmer_milk_collection_record":fmcr_doc.name},"name")
+
 	je_exist = frappe.db.get_value("Journal Entry",
 				{"farmer_milk_collection_record":fmcr_doc.name,
 				"docstatus": ["!=", 2]},"name")
+
+	je_ = frappe.db.sql("""select name from `tabJournal Entry` where 
+					farmer_milk_collection_record = %s and docstatus = 2""",
+					(fmcr_doc.name),as_dict=1)
 
 	if pi:
 		pi_doc = frappe.get_doc("Purchase Invoice",pi)
@@ -52,9 +57,16 @@ def delete_linked_doc(fmcr_doc):
 		pr_doc.cancel()
 		frappe.delete_doc("Purchase Receipt", pr_doc.name)
 
+	if len(je_):
+		for je in je_:
+			je_doc = frappe.get_doc("Journal Entry",je)
+			frappe.delete_doc("Journal Entry", je_doc.name)
+
 	if je_exist:
-		je_doc = frappe.get_doc("Journal Entry",je_exist)
-		je_doc.cancel()
+		je_doc_ = frappe.get_doc("Journal Entry",je_exist)
+		je_doc_.cancel()
+		frappe.delete_doc("Journal Entry", je_doc_.name)
+
 
 	fmcr_doc.cancel()
 	frappe.delete_doc("Farmer Milk Collection Record", fmcr_doc.name)

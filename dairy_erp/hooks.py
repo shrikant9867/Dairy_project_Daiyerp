@@ -177,23 +177,12 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-#   "all": [
-#       "dairy_erp.tasks.all"
-#   ],
-#   "daily": [
-#       "dairy_erp.tasks.daily"
-#   ],
-#   "hourly": [
-#       "dairy_erp.tasks.hourly"
-#   ],
-#   "weekly": [
-#       "dairy_erp.tasks.weekly"
-#   ]
-#   "monthly": [
-#       "dairy_erp.tasks.monthly"
-#   ]
-# }
+scheduler_events = {
+ 
+  "hourly": [
+      "dairy_erp.amcu_loss_gain_hourly.get_fmcr_hourly"
+  ]
+}
 fixtures=['Property Setter','Custom Field','Print Format']
 
 

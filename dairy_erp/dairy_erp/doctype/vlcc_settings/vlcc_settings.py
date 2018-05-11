@@ -7,7 +7,10 @@ import frappe
 from frappe.model.document import Document
 
 class VLCCSettings(Document):
-	pass
+	def validate(self):
+		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},
+			  ['operator_type','company','branch_office'], as_dict =1)
+		self.vlcc = user_doc.get('company')
 
 @frappe.whitelist()
 def check_record_exist():

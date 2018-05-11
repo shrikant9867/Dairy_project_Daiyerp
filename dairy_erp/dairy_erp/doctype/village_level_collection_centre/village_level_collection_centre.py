@@ -49,6 +49,7 @@ class VillageLevelCollectionCentre(Document):
 		try:
 			company = self.create_company()
 			self.create_warehouse()
+			self.create_lossgain_warehouse()
 			self.create_supplier()
 			self.create_customer()
 			self.create_user()
@@ -91,6 +92,31 @@ class VillageLevelCollectionCentre(Document):
 		rej_wr_doc.save()
 		self.rejected_warehouse =rej_wr_doc.name
 		self.save()
+
+	def create_lossgain_warehouse(self):
+
+		wh_name = self.wh_creation(warehouse="Handling Loss")
+		self.handling_loss = wh_name
+
+		wh_name = self.wh_creation(warehouse="Calibration Gain")
+		self.calibration_gain = wh_name
+
+		wh_name = self.wh_creation(warehouse="Edited Loss")
+		self.edited_loss = wh_name
+
+		wh_name = self.wh_creation(warehouse="Edited Gain")
+		self.edited_gain = wh_name
+
+		self.save()
+
+	def wh_creation(self,warehouse):
+
+		wr_hs_doc = frappe.new_doc("Warehouse")
+		wr_hs_doc.warehouse_name = warehouse
+		wr_hs_doc.company = self.vlcc_name
+		wr_hs_doc.flags.ignore_permissions = True
+		wr_hs_doc.save()
+		return wr_hs_doc.name
 
 	def create_supplier(self):
 		"""Supplier specific to company for inter-company transaction(stock and accounts)

@@ -148,7 +148,6 @@ def make_fmcr(data,response_dict):
 						utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 						data = data, message=e, traceback=frappe.get_traceback())
 						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})		
-
 	else:
 		response_dict.update({"status":"Error","response":"society id missing"})
 	return response_dict

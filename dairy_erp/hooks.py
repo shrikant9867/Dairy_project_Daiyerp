@@ -216,7 +216,8 @@ permission_query_conditions = {
     "Farmer Payment Log": "dairy_erp.dairy_erp.doctype.farmer_payment_log.farmer_payment_log.log_permission_query",
     "Sales Taxes and Charges Template": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.sales_temp_permission",
     "Purchase Taxes and Charges Template": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.purchase_temp_permission",
-    "VLCC Settings": "dairy_erp.dairy_erp.doctype.vlcc_settings.vlcc_settings.vlcc_setting_permission"
+    "VLCC Settings": "dairy_erp.dairy_erp.doctype.vlcc_settings.vlcc_settings.vlcc_setting_permission",
+    "Journal Entry": "dairy_erp.customization.journal_entry.journal_entry.je_permission"
 }
 # Testing
 # -------

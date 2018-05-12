@@ -108,6 +108,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Stock Entry",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Journal Entry",
+					"description": _(" "),
 				}
 			
 			]

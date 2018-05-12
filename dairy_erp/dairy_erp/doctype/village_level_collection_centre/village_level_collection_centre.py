@@ -17,6 +17,7 @@ class VillageLevelCollectionCentre(Document):
 		self.validate_email_user()
 		self.validate_comp_exist()
 		self.validate_global_eff_credit_percent()
+		self.create_different_op()
 
 	def validate_comp_exist(self):
 		if self.name == frappe.db.get_value("Company",{"is_dairy":1},'name'):
@@ -245,6 +246,21 @@ class VillageLevelCollectionCentre(Document):
 			agent.save()
 			agent.add_roles("Vlcc Operator")
 			# add_all_roles_to(agent.name)
+
+	def create_different_op(self):
+		
+		if self.operator_same_as_agent and not frappe.db.exists('User', self.operator_email_id) and not self.is_new():
+			agent = frappe.new_doc("User")
+			agent.email = self.operator_email_id
+			agent.first_name = self.operator_name
+			agent.operator_type = "VLCC"
+			agent.new_password = "admin"
+			agent.company = self.name
+			agent.send_welcome_email = 0
+			agent.flags.ignore_permissions = True
+			agent.flags.ignore_mandatory = True
+			agent.save()
+			agent.add_roles("Vlcc Operator")
 
 	def local_customer_vlcc(self):
 		#local supplier specification for data analytics

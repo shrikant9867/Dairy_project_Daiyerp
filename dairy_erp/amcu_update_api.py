@@ -39,6 +39,7 @@ def update_fmcr(data, row,response_dict):
 						je_doc = frappe.get_doc("Journal Entry",je_exist)
 						je_doc.cancel()
 						je = create_debit_note(data.get('societyid'), row, debit_amount,fmcr_doc)
+						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Journal Entry '{0}' created against FMCR '{1}'".format(je,fmcr_doc.name)})
 					else:
 						je = create_debit_note(data.get('societyid'), row, debit_amount,fmcr_doc)
 						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Journal Entry '{0}' created against FMCR '{1}'".format(je,fmcr_doc.name)})

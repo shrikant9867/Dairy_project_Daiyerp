@@ -63,7 +63,10 @@ def make_fmrc(data, response_dict):
 						if resv_farmer:
 							farmer1 = resv_farmer.get('farmer_id1')
 							farmer2 = resv_farmer.get('farmer_id2')
-						response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): []})
+						if response_dict.get(row.get('farmerid')+"-"+row.get('milktype')):
+							response_dict.get(row.get('farmerid')+"-"+row.get('milktype'))
+						else:
+							response_dict.update({row.get('farmerid')+"-"+row.get('milktype'): []})
 						if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
 							if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') \
 								and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('transactionid'):	
@@ -133,8 +136,6 @@ def make_fmrc(data, response_dict):
 						utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 						data = data, message=e, traceback=frappe.get_traceback())
 						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})		
-					return response_dict
-
 	else:
 		response_dict.update({"status":"Error","response":"society id missing"})
 	return response_dict

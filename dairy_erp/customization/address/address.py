@@ -49,17 +49,24 @@ def address_permission(user):
 	roles = frappe.get_roles()
 	user_comp = frappe.db.get_value("User", frappe.session.user, \
 		['company','operator_type','vet','branch_office'],as_dict=1)
+	head_office = frappe.db.get_value("Address", {"address_type": "Head Office"}, "name")
 	
 	if ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) and \
 		user != 'Administrator':
-			return """(`tabAddress`.vlcc = '{0}')""".format(user_comp.get('company'))
+		vlcc_addr = frappe.db.get_value("Address", {"vlcc":user_comp.get('company'),"address_type":"Vlcc"}, "name")
+		vet_addr = frappe.db.get_value("Address", {"vlcc":user_comp.get('company'),"address_type":"Veterinary AI Tech"}, "name")
+		addresses = list(frappe.db.get_value("Village Level Collection Centre", user_comp.get('company'), 
+						["plant_office", "camp_office", "chilling_centre"]))
+		addresses.extend([head_office, vlcc_addr,vet_addr])
+		return """(`tabAddress`.name in {0})""".format("(" + ",".join(["'{0}'".format(a) for a in addresses ]) + ")")
 	if 'Vet/AI Technician' in roles and user != "Administrator":
 		return """(`tabAddress`.vet = '{0}')""".format(user_comp.get('vet'))
 	
 	if ('Camp Manager' in roles or 'Camp Operator' in roles) and \
 		user != "Administrator":
-			return """(`tabAddress`.associated_camp_office = '{0}' 
-			or `tabAddress`.name = '{0}')""".format(user_comp.get('branch_office'))
+			return """(`tabAddress`.name = '{0}')""".format(user_comp.get('branch_office'))
+			# return """(`tabAddress`.associated_camp_office = '{0}' 
+			# or `tabAddress`.name = '{0}')""".format(user_comp.get('branch_office'))
 	
 	if ('Chilling Center Manager' in roles or 'Chilling Center Operator' in roles) and \
 		user != "Administrator":
@@ -67,6 +74,7 @@ def address_permission(user):
 			'associated_camp_office')
 		return """(`tabAddress`.associated_camp_office = '{0}'
 			or `tabAddress`.name = '{0}')""".format(camp)
+
 
 
 def set_vet_map(doc, method = None):

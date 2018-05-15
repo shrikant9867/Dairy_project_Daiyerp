@@ -20,6 +20,7 @@ frappe.ui.form.on('Purchase Order', {
 			frm.set_value("supplier","")
 			frappe.throw(__("Supplier Type Cannot be Farmer"))
 		}
+		erpnext.utils.get_party_details(frm);
 	}
 })
 $.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));

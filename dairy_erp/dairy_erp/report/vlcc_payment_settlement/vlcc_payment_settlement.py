@@ -409,7 +409,10 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 		limit_count = int(count[0].get('count')) + 1 
 
 		if filters.get('vlcc'):
-			cycles = frappe.db.sql("""select c.name,CONCAT(iFnull(round(l.set_per,2),0),' %') as set_per,l.vlcc 
+			cycles = frappe.db.sql("""select cy.name, 
+						CONCAT(iFnull(round(cy.set_per,2),0),' %') as set_per, 
+						cy.vlcc from 
+						(select c.name,CONCAT(iFnull(round(l.set_per,2),0),' %') as set_per,l.vlcc 
 						from 
 							`tabCyclewise Date Computation` as c
 			 			left join 
@@ -422,8 +425,8 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 			 				(l.vlcc = '{vlcc}' or l.vlcc is NULL) and 
 			 				(l.set_per<100 or l.set_per is NULL) and 
 						c.end_date < curdate()
-						order by c.end_date limit {limit_count}""".
-						format(vlcc=filters.get('vlcc'),limit_count=limit_count),as_list=True)
+						order by c.end_date limit {limit_count}) as cy where cy.name like '{txt}'""".
+						format(vlcc=filters.get('vlcc'),limit_count=limit_count,txt= "%%%s%%" % txt),as_list=True)
 
 			cycle_list = frappe.db.sql_list("""select name from 
 				`tabCyclewise Date Computation`""")

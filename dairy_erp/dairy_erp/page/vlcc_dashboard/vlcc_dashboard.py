@@ -107,7 +107,7 @@ def format_data(dt, data):
 	return {
 		"label": dt,
 		"records": [{
-			row.get('name'): get_address_display(row.get('address')) for row in data 
+			row.get('name'): row.get('address') for row in data
 		}],
 		"doctype": dt,
 		"add_type": ""

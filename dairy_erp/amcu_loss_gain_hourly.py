@@ -15,7 +15,7 @@ def get_fmcr_hourly():
 				 	`tabFarmer Milk Collection Record`
 				where 
 					is_fmrc_updated = 0
-				group by societyid,rcvdtime,shift,milktype""",as_dict=True)
+				group by societyid,date(rcvdtime),shift,milktype""",as_dict=True)
 
 
 	if len(fmcr):

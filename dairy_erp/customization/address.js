@@ -90,7 +90,7 @@ frappe.ui.form.on("Address", {
 		vlcc_roles = ["Vlcc Manager", "Vlcc Operator"]
 		user_ = frappe.session.user
 		if(user_ != "Administrator" && has_common(frappe.user_roles, vlcc_roles)) {
-			addr_types = [ "","Vlcc", "Veterinary AI Tech", "Farmer", "Billing", "Shipping", "Other"]
+			addr_types = [ "","Vlcc", "Veterinary AI Tech","Billing", "Shipping", "Other"]
 			frm.set_df_property("address_type", "options", addr_types);
 		}
 	}

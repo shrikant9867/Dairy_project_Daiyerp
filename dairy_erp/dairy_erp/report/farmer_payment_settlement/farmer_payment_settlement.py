@@ -513,7 +513,7 @@ def check_cycle(row_data,filters):
 	row_data = json.loads(row_data)
 	filters = json.loads(filters)
 	vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
-	get_config = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'cycle_hours')
+	get_config = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'cycle_hours') or 0
 	month_list, receivable_list = [] , []
 	cycle_msg,msg = "" , ""
 	days = 0

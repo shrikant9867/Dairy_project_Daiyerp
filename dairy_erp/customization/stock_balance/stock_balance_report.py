@@ -53,8 +53,8 @@ def get_filtered_warehouse(doctype,text,searchfields,start,pagelen,filters):
 						from
 							`tabWarehouse`
 						where
-							company = %s and 
+							company = '{comp}' and 
 							name like '{text}'""".
-							format(text= "%%%s%%" % text),(branch_office.get('company')))
+							format(comp=branch_office.get('company'),text= "%%%s%%" % text))
 
 

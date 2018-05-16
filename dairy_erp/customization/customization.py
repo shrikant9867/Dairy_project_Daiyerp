@@ -905,7 +905,7 @@ def supplier_permission(user):
 			return """tabSupplier.supplier_type = 'Guest' """
 		
 
-	if user_doc.get('operator_type') == "VLCC":
+	elif user_doc.get('operator_type') == "VLCC":
 		supplier_list = frappe.db.sql(
 					"""
 							select s.name as supp,p.company

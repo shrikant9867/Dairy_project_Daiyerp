@@ -8,7 +8,7 @@ frappe.ui.form.on('Farmer Milk Collection Record', {
 
 	onload: function(frm) {
 		// set user's company as associated vlcc
-		if(frm.doc.__islocal || !frm.doc.associated_vlcc) {
+		if(frm.doc.__islocal) {
 			frappe.call({
 				method: "frappe.client.get_value",
 				args: {
@@ -20,10 +20,27 @@ frappe.ui.form.on('Farmer Milk Collection Record', {
 				callback: function(r){
 					if(r.message){
 						frm.set_value("associated_vlcc", r.message.company)
+						frm.events.get_societyid(frm,r.message.company)
 					}
 				}
 			});
 		}
+	},
+
+	get_societyid: function(frm,company){
+			frappe.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Village Level Collection Centre",
+					filters: {"name": company},
+					fieldname: ["amcu_id"]
+				},
+				callback: function(r){
+					if(r.message){
+						frm.set_value("societyid", r.message.amcu_id)
+					}
+				}
+			});
 	},
 
 	milkquantity: function(frm) {

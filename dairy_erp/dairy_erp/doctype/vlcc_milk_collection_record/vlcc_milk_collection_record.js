@@ -21,5 +21,14 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 		else {
 			frm.set_value("amount", 0)
 		}
+	},
+	onload: function(frm) {
+		if (has_common(frappe.user_roles, ["Chilling Center Manager", "Chilling Center Operator"])){		
+			frappe.db.get_value("User",frappe.session.user,"branch_office", function(v){
+				frappe.db.get_value("Address",v['branch_office'],"centre_id", function(c){
+					frm.set_value("societyid", c['centre_id'])	
+				})
+			})
+		}
 	}
 });

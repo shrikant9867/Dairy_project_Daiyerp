@@ -11,6 +11,15 @@ class VLCCSettings(Document):
 		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},
 			  ['operator_type','company','branch_office'], as_dict =1)
 		self.vlcc = user_doc.get('company')
+		self.check_farmer_exist()
+
+	def check_farmer_exist(self):
+		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
+		farmer_id = frappe.db.get_value("Farmer",
+			{"vlcc_name":user_doc.get('company')},"farmer_id")
+		if farmer_id:
+			if self.farmer_id1 == farmer_id or self.farmer_id2 == farmer_id:
+				frappe.throw("Please enter differnet farmer id as it is linked with farmer <a href='#Form/Farmer/{0}'><b>{0}</b></a>".format(farmer_id))
 
 @frappe.whitelist()
 def check_record_exist():

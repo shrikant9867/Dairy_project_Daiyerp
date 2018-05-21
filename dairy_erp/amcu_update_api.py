@@ -16,37 +16,23 @@ import json
 
 def update_fmcr(data, row,response_dict):
 
-
 	try: 
 		vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},"name")
 		config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'hours')
 		fmcr = frappe.db.get_value('Farmer Milk Collection Record',
 				{"transactionid":row.get('transactionid'),"farmerid":row.get('farmerid')},"name")
-		if fmcr:
-			fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
-			max_time = get_datetime(fmcr_doc.rcvdtime) +  timedelta(hours=int(config_hrs))
-			if now_datetime() < max_time: 
-				if fmcr_doc.amount <= row.get('amount'):
+		if config_hrs:
+			if fmcr:
+				fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
+				max_time = get_datetime(fmcr_doc.rcvdtime) +  timedelta(hours=int(config_hrs))
+				if now_datetime() < max_time: 
 					update_fmcr_amt(fmcr_doc, data,row,response_dict)
-				elif fmcr_doc.amount > row.get('amount'):
-
-					debit_amount = fmcr_doc.amount - row.get('amount')
-					je_exist = frappe.db.get_value("Journal Entry",
-								{"farmer_milk_collection_record":fmcr_doc.name,
-								"docstatus": ["!=", 2]},"name")
-
-					if je_exist:
-						je_doc = frappe.get_doc("Journal Entry",je_exist)
-						je_doc.cancel()
-						je = create_debit_note(data.get('societyid'), row, debit_amount,fmcr_doc)
-						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Journal Entry '{0}' created against FMCR '{1}'".format(je,fmcr_doc.name)})
-					else:
-						je = create_debit_note(data.get('societyid'), row, debit_amount,fmcr_doc)
-						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Journal Entry '{0}' created against FMCR '{1}'".format(je,fmcr_doc.name)})
+				else:
+					response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "You can not update {0}".format(fmcr_doc.name)})
 			else:
-				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "You can not update {0}".format(fmcr_doc.name)})
+				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
 		else:
-			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
+			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Please set configurable hours in VLCC Settings for FMCR Updation"})
 	except Exception,e:
 		frappe.db.rollback()
 		utils.make_dairy_log(title="Sync failed for Data push",method="update_fmcr", status="Error",
@@ -58,9 +44,6 @@ def update_fmcr_amt(fmcr_doc,data,row,response_dict):
 
 	pi = frappe.db.get_value("Purchase Invoice",{"farmer_milk_collection_record":fmcr_doc.name},"name")
 	pr = frappe.db.get_value("Purchase Receipt",{"farmer_milk_collection_record":fmcr_doc.name},"name")
-	je_exist = frappe.db.get_value("Journal Entry",
-				{"farmer_milk_collection_record":fmcr_doc.name,
-				"docstatus": ["!=", 2]},"name")
 
 	if pi:
 		pi_doc = frappe.get_doc("Purchase Invoice",pi)
@@ -71,12 +54,7 @@ def update_fmcr_amt(fmcr_doc,data,row,response_dict):
 		pr_doc.cancel()
 		frappe.delete_doc("Purchase Receipt", pr_doc.name)
 
-	if je_exist:
-		je_doc = frappe.get_doc("Journal Entry",je_exist)
-		je_doc.cancel()
-
 	fmcr_doc.cancel()
-	frappe.delete_doc("Farmer Milk Collection Record", fmcr_doc.name)
 
 	make_fmcr(data,row,response_dict)
 
@@ -142,38 +120,3 @@ def make_fmcr(data,row,response_dict):
 		data = data, message=e, traceback=frappe.get_traceback())
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})		
 	return response_dict
-
-	
-def create_debit_note(societyid, row, debit_amount, fmcr_doc):
-
-	vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":societyid},"name")
-	def_pay_acc = frappe.db.get_value("Company",{"name":vlcc},['default_payable_account','abbr','cost_center'],as_dict=1)
-	
-	je_entry = frappe.new_doc("Journal Entry")
-	je_entry.company = vlcc
-	je_entry.voucher_type = "Debit Note"
-	je_entry.farmer_milk_collection_record = fmcr_doc.name
-	je_entry.posting_date = nowdate()
-	je_entry.append('accounts',
-		{
-			"account": def_pay_acc.get('default_payable_account'),
-			"party_type": "Supplier",
-			"cost_center": def_pay_acc.get('cost_center'),
-			"party": frappe.db.get_value("Farmer",row.get('farmerid'),'full_name'),
-			"debit_in_account_currency": debit_amount,
-			"reference_type": "Purchase Invoice",
-			"reference_name": frappe.db.get_value("Purchase Invoice",\
-							{"farmer_milk_collection_record" : fmcr_doc.name}, 'name')
-		})
-	#subsequent entry -credetors
-	je_entry.append('accounts',
-		{
-			"account": "Sales Expenses"+" - "+def_pay_acc.get('abbr'),
-			"cost_center":def_pay_acc.get('cost_center'),
-			"credit_in_account_currency": debit_amount
-		})
-	je_entry.flags.ignore_permissions = True
-	je_entry.flags.ignore_mandatory = True
-	je_entry.save()
-	je_entry.submit()
-	return je_entry.name

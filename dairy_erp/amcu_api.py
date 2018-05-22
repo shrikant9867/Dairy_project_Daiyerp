@@ -145,7 +145,7 @@ def validate_fmrc_entry(data, row):
 	"""validate for duplicate entry for Farmer Milk Record Collection"""
 	
 	return frappe.db.get_value('Farmer Milk Collection Record',
-			{"transactionid":row.get('transactionid'),"docstatus":['<',2] },"name")
+			{"transactionid":row.get('transactionid'),"docstatus":['=',1] },"name")
 
 
 def validate_society_exist(data):

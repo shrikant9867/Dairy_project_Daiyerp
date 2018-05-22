@@ -25,7 +25,7 @@ def handling_loss_gain(data,row,response_dict):
 							where 
 								shift = '{0}' and milktype = '{1}' and 
 								date(rcvdTime) = '{2}' and societyid = '{3}' 
-								and docstatus < 2 and is_stock_settled = 0
+								and docstatus = 1 and is_stock_settled = 0
 			""".format(data.get('shift'),row.get('milktype'),
 				get_datetime(data.get('rcvdTime')).date(),
 				row.get('farmerid')),as_dict=1)

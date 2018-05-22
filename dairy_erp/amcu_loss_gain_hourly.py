@@ -14,7 +14,7 @@ def get_fmcr_hourly():
 			 	from 
 				 	`tabFarmer Milk Collection Record`
 				where 
-					is_fmrc_updated = 0
+					is_fmrc_updated = 0 and docstatus = 1
 				group by societyid,date(rcvdtime),shift,milktype""",as_dict=True)
 
 
@@ -27,7 +27,7 @@ def get_fmcr_hourly():
 		 					where 
 		 						shift = '{0}' and milktype = '{1}' and 
 		 						date(rcvdTime) = '{2}' and farmerid = '{3}' and
-		 						docstatus < 2
+		 						docstatus = 1
 		 					group by farmerid
 		 	""".format(data.get('shift'),data.get('milktype'),
 		 		get_datetime(data.get('rcvdtime')).date(),

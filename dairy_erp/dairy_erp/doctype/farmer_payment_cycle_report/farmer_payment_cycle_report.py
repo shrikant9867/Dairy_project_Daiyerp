@@ -11,10 +11,9 @@ from dairy_erp.dairy_utils import make_dairy_log
 class FarmerPaymentCycleReport(Document):
 	
 	def validate(self):
-		pass
-		# if frappe.db.get_value("Farmer Payment Cycle Report",{'cycle':self.cycle,\
-		# 	 'vlcc_name':self.vlcc_name, 'farmer_id':self.farmer_id},'name'):
-		# 	frappe.throw(_("FPCR has been generated for this cycle"))
+		if frappe.db.get_value("Farmer Payment Cycle Report",{'cycle':self.cycle,\
+			 'vlcc_name':self.vlcc_name, 'farmer_id':self.farmer_id},'name'):
+			frappe.throw(_("FPCR has been generated for this cycle"))
 		
 	
 	def before_submit(self):
@@ -24,30 +23,97 @@ class FarmerPaymentCycleReport(Document):
 	
 	def advance_operation(self):
 		for row in self.advance_child:
-			pass
+			if not frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
+						'farmer_advance':row.adv_id }, 'name'):
+				self.validate_advance(row)
+				self.create_si(row, "Advance", "Advance Emi", row.adv_id)
+				self.update_advance(row)
 	
 	def loan_operation(self):
 		for row in self.loan_child:
 			if not frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
 						'farmer_advance':row.loan_id }, 'name'):
-				self.create_si(row,)
+				self.validate_loan(row)
+				self.create_si(row,"Loan","Loan Emi", row.loan_id)
+				self.update_loan(row)
 
-	def create_si(self, data):
+	
+	def validate_advance(self, row):
+		adv_doc = frappe.get_doc("Farmer Advance",row.adv_id)
+		if not row.amount:
+			frappe.throw(_("Please Enter amount against <b>{0}</b>".format(row.adv_id)))
+		if row.amount > row.outstanding:
+			frappe.throw(_("Amount can not be greater than  outstanding for <b>{0}</b>".format(row.adv_id)))
+		if (int(row.no_of_instalment) + int(adv_doc.extension)) - row.paid_instalment == 1 and \
+			(row.amount < adv_doc.emi_amount or row.outstanding != adv_doc.emi_amount):
+			frappe.throw(_("Please Use Extension for <b>{0}</b>".format(row.adv_id)))
+	
+	
+	def validate_loan(self, row):
+		loan_doc = frappe.get_doc("Farmer Loan",row.loan_id)
+		if not row.amount:
+			frappe.throw(_("Please Enter amount against <b>{0}</b>".format(row.loan_id)))
+		if row.amount > row.outstanding:
+			frappe.throw(_("Amount can not be greater than  outstanding for <b>{0}</b>".format(row.loan_id)))
+		if (int(row.no_of_instalment) + int(loan_doc.extension)) - loan_doc.paid_instalment == 1 and \
+			(float(row.amount) < float(loan_doc.emi_amount) or float(row.outstanding) != float(loan_doc.emi_amount)):
+			frappe.throw(_("Please Use Extension <b>{0}</b>".format(row.loan_id)))
+	
+	
+	def create_si(self, row, type_, item, doc_id):
 		si_doc = frappe.new_doc("Sales Invoice")
-		si_doc.type = "Loan"
+		si_doc.type = type_
 		si_doc.customer = self.farmer_name
 		si_doc.company = self.vlcc_name
-		si_doc.farmer_advance = row.get('name')
+		si_doc.farmer_advance = doc_id
 		si_doc.cycle_ = self.cycle
 		si_doc.append("items",{
-			"item_code":"Milk Incentives",
+			"item_code": item,
 			"qty": 1,
-			"rate": amount,
+			"rate": row.amount,
 			"cost_center": frappe.db.get_value("Company", self.vlcc_name, "cost_center")
 			})
 		si_doc.flags.ignore_permissions = True
 		si_doc.save()
 		si_doc.submit()
+
+	
+	def update_loan(self, row):
+		instalment = 0
+		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+			,filters={'farmer_advance':row.loan_id})
+		
+		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
+		loan_doc.append("cycle", {"cycle": self.cycle})
+		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
+		for i in loan_doc.cycle:
+			instalment += 1
+		loan_doc.paid_instalment = instalment
+		if loan_doc.outstanding_amount > 0:
+			loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
+		if loan_doc.outstanding_amount == 0:
+			loan_doc.status = "Paid"
+			loan_doc.emi_amount = 0
+		loan_doc.flags.ignore_permissions = True
+		loan_doc.save()
+
+	def update_advance(self, row):
+		instalment = 0
+		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+			,filters={'farmer_advance':row.adv_id})
+		adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
+		adv_doc.append("cycle", {"cycle": self.cycle})
+		adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
+		for i in adv_doc.cycle:
+			instalment +=1
+		adv_doc.paid_instalment = instalment
+		if adv_doc.outstanding_amount > 0 :
+			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
+		if adv_doc.outstanding_amount == 0:
+			adv_doc.status = "Paid"
+			adv_doc.emi_amount = 0
+		adv_doc.flags.ignore_permissions =True
+		adv_doc.save()
 
 
 @frappe.whitelist()
@@ -230,7 +296,7 @@ def req_cycle_computation_advance(data):
 			`tabFarmer Date Computation`
 		where
 			'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
-		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1)
+		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=1)
 	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 	
 	instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
@@ -270,7 +336,7 @@ def get_loans_child(start_date, end_date, vlcc, farmer_id, cycle=None):
 def get_advance_child(start_date, end_date, vlcc, farmer_id, cycle=None):
 	advance_ = frappe.db.sql("""
 				select name,farmer_id,outstanding_amount,emi_amount,advance_amount,
-				no_of_instalment,paid_instalment,paid_instalment,emi_deduction_start_cycle,
+				no_of_instalment,paid_instalment,emi_deduction_start_cycle,
 				extension,date_of_disbursement,vlcc
 			from 
 				`tabFarmer Advance`
@@ -279,6 +345,7 @@ def get_advance_child(start_date, end_date, vlcc, farmer_id, cycle=None):
 			""".format(farmer_id),as_dict=1)
 	advance = []
 	for row in advance_:
+		print "#################",req_cycle_computation_advance(row),advance_
 		if cycle in req_cycle_computation_advance(row):
 			advance.append(row)
 	return advance

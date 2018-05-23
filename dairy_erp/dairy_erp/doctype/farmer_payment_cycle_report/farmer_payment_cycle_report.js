@@ -14,13 +14,13 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 		frm.events.add_cycle_child(frm)		
 	},
 	cycle: function(frm) {
-		frm.fields_dict['cycle'].get_query = function(doc) {
-			console.log(doc.vlcc_name)
-			return {
-				"query": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_cycle",
-				filters: {'vlcc': doc.vlcc_name}
-			}
-		}
+		// frm.fields_dict['cycle'].get_query = function(doc) {
+		// 	console.log(doc.vlcc_name)
+		// 	return {
+		// 		"query": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_cycle",
+		// 		filters: {'vlcc': doc.vlcc_name}
+		// 	}
+		// }
 		if(frm.doc.cycle) {
 			frappe.call({
 				method: "frappe.client.get_value",
@@ -77,6 +77,10 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 							row.principle = d.advance_amount
 							row.emi_amount = d.emi_amount
 							row.outstanding = d.outstanding_amount
+							row.extension = d.extension
+							row.paid_instalment = d.paid_instalment
+							row.no_of_instalment = d.no_of_instalments
+
 						});
 						$.each(r.message.child_advance, function(i, d) {
 							var row = frappe.model.add_child(cur_frm.doc, "Advance Child", "advance_child");
@@ -85,6 +89,9 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 							row.principle = d.advance_amount
 							row.emi_amount = d.emi_amount
 							row.outstanding = d.outstanding_amount
+							row.extension = d.extension
+							row.paid_instalment = d.paid_instalment
+							row.no_of_instalment = d.no_of_instalment
 						})
 						frm.set_value("total_amount", total)
 						frm.set_value("incentives", r.message.incentive)
@@ -96,6 +103,7 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 						frm.refresh_fields();
 					}
 					else{
+						console.log("######")
 						frm.set_value("fmcr_details","")
 						frm.set_value("total_amount",0)
 						frm.set_value("loan_child","")

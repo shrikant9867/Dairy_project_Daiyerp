@@ -14,13 +14,7 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 		frm.events.add_cycle_child(frm)		
 	},
 	cycle: function(frm) {
-		frm.fields_dict['cycle'].get_query = function(doc) {
-			console.log(doc.vlcc_name)
-			return {
-				"query": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_cycle",
-				filters: {'vlcc': doc.vlcc_name}
-			}
-		}
+		
 		if(frm.doc.cycle) {
 			frappe.call({
 				method: "frappe.client.get_value",
@@ -121,4 +115,9 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 	}
 });
 
-
+cur_frm.fields_dict['cycle'].get_query = function(doc) {
+			return {
+				"query": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_cycle",
+				filters: {'vlcc': doc.vlcc_name}
+			}
+		}

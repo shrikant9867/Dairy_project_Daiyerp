@@ -180,8 +180,10 @@ doc_events = {
 scheduler_events = {
  
   "hourly": [
-      "dairy_erp.amcu_loss_gain_hourly.get_fmcr_hourly"
-  ]
+      "dairy_erp.amcu_loss_gain_hourly.get_fmcr_hourly",
+      "dairy_erp.customization.farmer_loan.farmer_loan.create_si",
+      "dairy_erp.customization.farmer_advance.farmer_advance.create_si"
+    ]
 }
 fixtures=['Property Setter','Custom Field','Print Format']
 

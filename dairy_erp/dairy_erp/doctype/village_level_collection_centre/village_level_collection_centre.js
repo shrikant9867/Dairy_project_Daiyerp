@@ -18,9 +18,10 @@ frappe.ui.form.on('Village Level Collection Centre', {
 
 		frm.set_df_property("operator_email_id", "read_only", frm.doc.__islocal || !frm.doc.operator_email_id ? 0:1);
 		frm.set_df_property("operator_name", "read_only", frm.doc.__islocal || !frm.doc.operator_name ? 0:1);
-
+		frm.set_df_property("vlcc_type","read_only", frm.doc.__islocal ? 0:1)
 		// address mandatory after save
 		frm.toggle_reqd("address", frm.doc.__islocal ? 0:1)
+		frm.events.set_dynamic_cc(frm)
 	},
 	
 	onload: function(frm) {
@@ -70,7 +71,10 @@ frappe.ui.form.on('Village Level Collection Centre', {
 	address: function(frm) {
 		erpnext.utils.get_address_display(frm, "address", "address_display");
 	},
-	
+	vlcc_type: function(frm) {
+		frm.events.set_dynamic_cc(frm)
+		frm.events.bmc_set_query(frm)
+	},
 	vlcc_name: function(frm) {
 		if(frm.doc.__islocal) {
 			let parts = frm.doc.vlcc_name.split();
@@ -103,6 +107,38 @@ frappe.ui.form.on('Village Level Collection Centre', {
 			frm.set_value("global_percent_effective_credit", 0)
 			refresh_field("global_percent_effective_credit")
 			frappe.msgprint(__("Global Percent Effective Credit must be between 0 to 99"))
+		}
+	},
+	set_dynamic_cc: function(frm) {
+		if(frm.doc.vlcc_type == 'Traditional'){
+			frm.set_df_property("chilling_centre", "reqd", 1);
+			frm.set_df_property("bmc_chilling_centre", "hidden", 1);
+			frm.set_df_property("chilling_centre", "hidden", 0);
+			frm.set_df_property("sec_brek_77", "hidden", 1);
+		}else if(frm.doc.vlcc_type == 'Hybrid'){
+			frm.set_df_property("chilling_centre", "reqd", 0);
+			frm.set_df_property("bmc_chilling_centre", "read_only", 1);
+			frm.set_df_property("bmc_chilling_centre", "hidden", 0);
+			frm.set_df_property("chilling_centre", "hidden", 1);
+			frm.set_df_property("sec_brek_77", "hidden", 1);
+		}else if(frm.doc.vlcc_type == 'Clustered Society'){
+			frm.set_df_property("chilling_centre", "reqd", 0);
+			frm.set_df_property("bmc_chilling_centre", "read_only", 0);
+			frm.set_df_property("bmc_chilling_centre", "hidden", 0);
+			frm.set_df_property("bmc_chilling_centre", "reqd", 1);
+			frm.set_df_property("chilling_centre", "hidden", 1);
+			frm.set_df_property("sec_brek_77", "hidden", 0);
+		}
+	},
+	bmc_set_query: function(frm) {
+		if(frm.doc.vlcc_type == 'Clustered Society'){
+			frm.set_query("bmc_chilling_centre", function () {
+				return {
+					"filters": {
+						"vlcc_type" : "Hybrid"
+					}
+				}
+			});
 		}
 	}
 });

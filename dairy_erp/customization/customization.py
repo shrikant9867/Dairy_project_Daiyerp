@@ -223,6 +223,10 @@ def create_supplier_type():
 		supp_doc = frappe.new_doc("Supplier Type")
 		supp_doc.supplier_type = "Farmer"
 		supp_doc.save()
+	if not frappe.db.exists('Supplier Type', "General"):
+		supp_doc = frappe.new_doc("Supplier Type")
+		supp_doc.supplier_type = "General"
+		supp_doc.save()
 
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
@@ -856,6 +860,9 @@ def vlcc_permission(user):
 
 	if user_doc.get('operator_type') == "Vet AI Technician":
 		return """(`tabVillage Level Collection Centre`.name = '{0}')""".format(user_doc.get('company'))
+
+	if user_doc.get('operator_type') == 'Chilling Centre':
+		return """(`tabVillage Level Collection Centre`.chilling_centre = '{0}')""".format(user_doc.get('branch_office'))
 
 def fmrc_permission(user):
 

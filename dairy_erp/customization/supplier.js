@@ -17,11 +17,20 @@ frappe.ui.form.on('Supplier', {
 				}
 			});		
 		}
-		else if(operator.operator_type == 'VLCC'){
+		else if (has_common(frappe.user_roles, ["Vlcc Operator"])) {
 			cur_frm.set_query("supplier_type", function () {
 				return {
 					"filters": {
 						"supplier_type":  ["in",['Dairy Type','Farmer','VLCC Local']]
+					}
+				}
+			});	
+		}
+		else if (has_common(frappe.user_roles, ["Vlcc Manager"])) {
+			cur_frm.set_query("supplier_type", function () {
+				return {
+					"filters": {
+						"supplier_type":  ["in",['Dairy Type','Farmer','VLCC Local','General']]
 					}
 				}
 			});	

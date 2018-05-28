@@ -8,7 +8,7 @@ from frappe.utils import has_common
 
 def get_associated_vlcc(doctype,text,searchfields,start,pagelen,filters):
 
-	if has_common(frappe.get_roles(), ["Camp Manager"]):
+	if has_common(frappe.get_roles(), ["Camp Manager"]) and frappe.session.user != 'Administrator':
 		user_details = frappe.db.get_value("User", frappe.session.user, ['branch_office','company'],as_dict=True)
 		
 		comp = frappe.db.sql_list("""
@@ -28,13 +28,21 @@ def get_associated_vlcc(doctype,text,searchfields,start,pagelen,filters):
 							name like '{text}'""".
 							format("(" + ",".join(["'{0}'".format(a) for a in comp ]) + ")",
 							text= "%%%s%%" % text))
+	else:
+		return frappe.db.sql("""select name 
+						from
+							`tabCompany`
+						where
+							name like '{text}'""".
+							format(text= "%%%s%%" % text))
+
 
 
 def get_filtered_warehouse(doctype,text,searchfields,start,pagelen,filters):
 
 	branch_office = frappe.db.get_value("User", frappe.session.user, ['branch_office','company'],as_dict=True)
 
-	if has_common(frappe.get_roles(), ["Camp Manager", "Camp Operator"]):
+	if has_common(frappe.get_roles(), ["Camp Manager", "Camp Operator"]) and frappe.session.user != 'Administrator':
 		camp_wh = frappe.db.get_value("Address",branch_office.get('branch_office'), 'warehouse')
 		vlcc_wh = frappe.db.sql_list("""select warehouse from `tabVillage Level Collection Centre` 
 						where camp_office = %s""",(branch_office.get('branch_office')))
@@ -48,7 +56,7 @@ def get_filtered_warehouse(doctype,text,searchfields,start,pagelen,filters):
 							format("(" + ",".join(["'{0}'".format(a) for a in vlcc_wh ]) + ")",
 							text= "%%%s%%" % text))
 
-	if has_common(frappe.get_roles(), ["Vlcc Manager", "Vlcc Operator"]):
+	elif has_common(frappe.get_roles(), ["Vlcc Manager", "Vlcc Operator"]) and frappe.session.user != 'Administrator':
 		return frappe.db.sql("""select name 
 						from
 							`tabWarehouse`
@@ -56,5 +64,13 @@ def get_filtered_warehouse(doctype,text,searchfields,start,pagelen,filters):
 							company = '{comp}' and 
 							name like '{text}'""".
 							format(comp=branch_office.get('company'),text= "%%%s%%" % text))
+	else:
+		return frappe.db.sql("""select name 
+						from
+							`tabWarehouse`
+						where
+							name like '{text}'""".
+							format(text= "%%%s%%" % text))
+
 
 

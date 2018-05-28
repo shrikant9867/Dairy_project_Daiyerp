@@ -227,6 +227,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Local Sales Report",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Vlcc Net Pay Off",
 					"doctype": "Village Level Collection Centre",
 					"is_query_report": True
@@ -270,6 +276,18 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Profit and Loss Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Trial Balance",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Balance Sheet",
 					"doctype": "GL Entry",
 					"is_query_report": True
 				}		

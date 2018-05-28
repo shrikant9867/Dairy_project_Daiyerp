@@ -57,10 +57,15 @@ class VillageLevelCollectionCentre(Document):
 			self.create_missing_accounts(company)
 			self.create_taxes_templates(company)
 
+			#hybrid chilling centre is of own
+			self.bmc_chilling_centre = self.name
+			self.save()
+
 			# message for address
 			frappe.msgprint("Please add address details for <b>{0}</b>".format(self.name))
 		except Exception as e:
-			make_dairy_log(title="Failed attribute for vlcc creation",method="create_fmrc", status="Error",
+			frappe.db.rollback()
+			make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",
 			data = "data", message=e, traceback=frappe.get_traceback())
 
 	def on_update(self):
@@ -108,6 +113,9 @@ class VillageLevelCollectionCentre(Document):
 		wh_name = self.wh_creation(warehouse="Edited Gain")
 		self.edited_gain = wh_name
 
+		wh_name = self.wh_creation(warehouse="BMC Warehouse")
+		self.bmc_warehouse = wh_name
+
 		self.save()
 
 	def wh_creation(self,warehouse):
@@ -124,7 +132,8 @@ class VillageLevelCollectionCentre(Document):
 		   Reconfigurable camp/plant-check for supplier existence and A/C head	
 		"""
 		if not frappe.db.exists('Supplier', self.vlcc_name):
-			comp = frappe.get_doc("Address", self.chilling_centre)
+			comp = frappe.db.get_value("Company",{"is_dairy":1},
+				['name','default_payable_account'],as_dict=1)#frappe.get_doc("Address", self.chilling_centre)
 			supl_doc = frappe.new_doc("Supplier")
 			supl_doc.supplier_name = self.vlcc_name
 			supl_doc.camp_office = self.camp_office
@@ -133,8 +142,8 @@ class VillageLevelCollectionCentre(Document):
 				# supl_doc.company = comp.links[0].link_name 
 				supl_doc.append("accounts",
 					{
-					"company": comp.links[0].link_name,
-					"account": frappe.db.get_value("Company",comp.links[0].link_name, "default_payable_account")
+					"company": comp.get('name'), #comp.links[0].link_name,
+					"account": comp.get('default_payable_account') #frappe.db.get_value("Company",comp.links[0].link_name, "default_payable_account")
 					}) 
 			supl_doc.flags.ignore_permissions = True
 			supl_doc.save()
@@ -172,7 +181,8 @@ class VillageLevelCollectionCentre(Document):
 		"""
 		
 		if not frappe.db.exists('Customer', self.vlcc_name):
-			comp = frappe.get_doc("Address", self.chilling_centre)
+			comp = frappe.db.get_value("Company",{"is_dairy":1},
+				['name','default_receivable_account'],as_dict=1)#frappe.get_doc("Address", self.chilling_centre)
 			custmer_doc = frappe.new_doc("Customer")
 			custmer_doc.customer_name = self.vlcc_name
 			custmer_doc.camp_office = self.camp_office
@@ -181,8 +191,8 @@ class VillageLevelCollectionCentre(Document):
 				custmer_doc.company = comp.links[0].link_name
 				custmer_doc.append("accounts",
 				{
-					"company": comp.links[0].link_name,
-					"account": frappe.db.get_value("Company",comp.links[0].link_name, "default_receivable_account")
+					"company": comp.get('name'), #comp.links[0].link_name,
+					"account": comp.get('default_receivable_account')#frappe.db.get_value("Company",comp.links[0].link_name, "default_receivable_account")
 				})
 			custmer_doc.flags.ignore_permissions = True		
 			custmer_doc.save()

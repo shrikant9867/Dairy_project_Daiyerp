@@ -23,11 +23,7 @@ class FarmerLoan(Document):
 		
 
 	def on_update_after_submit(self):
-		if self.emi_amount > self.outstanding_amount:
-			frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
-		if (self.no_of_instalments - self.paid_instalment) == 1 and self.emi_amount != self.outstanding_amount and int(self.extension) == 0:
-				frappe.throw(_("EMI must be equal to outstanding in last instalment please use extension"))
- 
+		pass
 
 def farmer_loan_permission(user):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)

@@ -4,7 +4,7 @@ from frappe.model.document import Document
 from frappe.utils import flt, cstr, cint
 from frappe.utils.data import to_timedelta
 import time
-from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime
+from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate
 from frappe import _
 import dairy_utils as utils
 from datetime import timedelta
@@ -18,21 +18,30 @@ def update_fmcr(data, row,response_dict):
 
 	try: 
 		vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},"name")
-		config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'hours')
+		config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'hours') or 0
 		fmcr = frappe.db.get_value('Farmer Milk Collection Record',
 				{"transactionid":row.get('transactionid'),"farmerid":row.get('farmerid')},"name")
-		if config_hrs:
-			if fmcr:
-				fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
-				max_time = get_datetime(fmcr_doc.rcvdtime) +  timedelta(hours=int(config_hrs))
-				if now_datetime() < max_time: 
-					update_fmcr_amt(fmcr_doc, data,row,response_dict)
-				else:
-					response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "You can not update {0}".format(fmcr_doc.name)})
+		min_rcvdtm_fmcr = frappe.db.sql("""select min(rcvdtime) as min_time
+							from  
+								`tabFarmer Milk Collection Record` 
+							where 
+								societyid = %s and 
+								milktype = %s and 
+								shift = %s and 
+								docstatus =1 and 
+								date(rcvdtime) = %s""",
+								(data.get('societyid'),row.get('milktype'),
+								data.get('shift'),getdate(data.get('rcvdtime'))),
+							as_dict=True,debug=0)
+		if fmcr:
+			fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
+			max_time = get_datetime(min_rcvdtm_fmcr[0].get('min_time')) +  timedelta(hours=int(config_hrs))
+			if now_datetime() < max_time: 
+				update_fmcr_amt(fmcr_doc, data,row,response_dict)
 			else:
-				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
+				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Allowed updation time has been elapsed for {0}".format(fmcr_doc.name)})
 		else:
-			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Please set configurable hours in VLCC Settings for FMCR Updation"})
+			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
 	except Exception,e:
 		frappe.db.rollback()
 		utils.make_dairy_log(title="Sync failed for Data push",method="update_fmcr", status="Error",

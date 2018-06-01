@@ -340,7 +340,7 @@ def make_vmrc(data, response_dict):
 											vlcc = validate_vlcc(row)
 											if row.get('status') == "Accept":
 												make_purchase_receipt_dairy(data, row, vlcc_name, response_dict, vmrc_doc.name)
-												handling_loss_gain(data,row,response_dict)
+												handling_loss_gain(data,row,vmrc_doc,response_dict)
 										else:
 											traceback = "vlcc does not exist"
 											frappe.throw(_("Vlcc Does not exist"))

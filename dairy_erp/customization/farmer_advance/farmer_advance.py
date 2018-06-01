@@ -90,7 +90,7 @@ def get_current_cycle(data):
 			`tabFarmer Date Computation`
 		where
 			vlcc = %s and now() between start_date and end_date
-		""",(data.get('vlcc'))as_dict=1)
+		""",(data.get('vlcc')),as_dict=1)
 
 
 def req_cycle_computation(data):
@@ -112,7 +112,7 @@ def req_cycle_computation(data):
 				`tabFarmer Date Computation`
 			where
 				'{date}' < start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
-			""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc')
+			""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
 				instalment = instalment),as_dict=1)
 		
 		req_cycl_list = [i.get('name') for i in req_cycle]

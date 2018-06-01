@@ -15,7 +15,7 @@ import json
 
 
 
-def make_stock_receipt(message,method,data, row,response_dict,qty,warehouse,societyid):
+def make_stock_receipt(message,method,data, row,response_dict,qty,warehouse,societyid,vmcr_doc=None):
 
 	try:
 		vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":societyid},["name","warehouse"],as_dict=True)
@@ -40,6 +40,7 @@ def make_stock_receipt(message,method,data, row,response_dict,qty,warehouse,soci
 			stock_doc.purpose =  "Material Receipt"
 			stock_doc.company = vlcc.get('name')
 			stock_doc.transaction_id = row.get('transactionid')
+			stock_doc.vmcr = vmcr_doc.name if method == 'handling_loss_gain' else ""
 			if row.get('transactionid'):
 				remarks.update({"Farmer ID":row.get('farmerid'),"Transaction Id":row.get('transactionid'),
 					"Rcvd Time":data.get('rcvdtime'),"Message": message,"shift":data.get('shift')})
@@ -73,5 +74,5 @@ def make_stock_receipt(message,method,data, row,response_dict,qty,warehouse,soci
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method=method, status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
-		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})
+		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": frappe.get_traceback()})
 	return response_dict

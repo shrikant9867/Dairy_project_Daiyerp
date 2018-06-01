@@ -302,8 +302,12 @@ def get_data():
 					"name": "Cash Flow",
 					"doctype": "GL Entry",
 					"is_query_report": True
-				}			
-
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Payment Cycle Report",
+					"description": _(" "),
+				}
 			]
 		}				
 	]			

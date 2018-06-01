@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime
 from frappe.utils import flt
 from frappe.model.document import Document
 
@@ -19,6 +20,9 @@ class Farmer(Document):
 			frappe.db.rollback();
 			frappe.msgprint(e)
 
+	def on_update(self):
+		pass
+		# self.update_date = self.modified
 	
 	def create_supplier(self):
 		supl_doc = frappe.new_doc("Supplier")
@@ -54,7 +58,7 @@ class Farmer(Document):
 		}, "name")
 		if farmer_exist:
 			frappe.throw("Farmer name already exist")
-
+		# self.registration_date = now_datetime()
 		self.validate_eff_credit_percent()
 		self.check_reserved_farmer()
 		# if len(self.farmer_id) != 4:

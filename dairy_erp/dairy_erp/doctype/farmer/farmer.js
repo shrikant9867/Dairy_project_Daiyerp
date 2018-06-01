@@ -11,12 +11,16 @@ frappe.ui.form.on('Farmer', {
 			return new Promise(function(resolve, reject) {
 				frappe.confirm("Are you sure, you want to save farmer details ?" ,function() {
 					var negative = 'frappe.validated = false';
+					frm.set_value('registration_date',frappe.datetime.now_datetime())
 					resolve(negative);
 				},
 				function() {
 					reject();
 				})
 			})
+		}
+		else if(frm.doc.modified) {
+			frm.set_value("update_date",frappe.datetime.now_datetime())
 		}
 	},
 	onload: function(frm) {

@@ -211,7 +211,7 @@ def make_purchase_receipt_vlcc(data, row, vlcc, farmer, response_dict, fmrc):
 @frappe.whitelist()
 def create_farmer(data):
 	"""Separate API(client req), should have been merge in main(future scope) : VLCC"""
-
+	print "##########################",data
 	response_dict = {}
 	traceback = ""
 	api_data = json.loads(data)
@@ -223,17 +223,24 @@ def create_farmer(data):
 					vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
 					if vlcc :
 						if not frappe.db.sql("select full_name from `tabFarmer` where full_name=%s",(row.get("full_name"))):
-							if not frappe.db.exists("Farmer",row.get("farmer_id")):
-								farmer_obj = frappe.new_doc("Farmer")
-								farmer_obj.full_name = row.get('full_name')
-								farmer_obj.farmer_id = row.get('farmer_id')
-								farmer_obj.contact_number = row.get('contact_no')
-								farmer_obj.vlcc_name = vlcc
-								farmer_obj.insert()
-								response_dict.get(row.get('farmer_id')).append({"status": "success","name":farmer_obj.name})
+							if  reserved_farmer_exist(row,vlcc):
+								if  not frappe.db.exists("Farmer",row.get("farmer_id")):
+									farmer_obj = frappe.new_doc("Farmer")
+									farmer_obj.full_name = row.get('full_name')
+									farmer_obj.farmer_id = row.get('farmer_id')
+									farmer_obj.contact_number = row.get('contact_no')
+									farmer_obj.vlcc_name = vlcc
+									farmer_obj.registration_date = row.get('registration_date')
+									farmer_obj.update_date = row.get('updation_date')
+									farmer_obj.cattle_type = row.get('cattle_type')
+									farmer_obj.insert()
+									response_dict.get(row.get('farmer_id')).append({"status": "success","name":farmer_obj.name})
+								else:
+									traceback = " Farmer ID Exist"
+									frappe.throw(_("Id Exist"))
 							else:
-								traceback = " Farmer ID Exist"
-								frappe.throw(_("Id Exist"))
+									traceback = "Can not use this id, this is reserverd  id"
+									frappe.throw(_("an not use this id, this is reserverd  id"))
 						else:
 							traceback = "Farmer Exist with same name"
 							frappe.throw("Farmer Exist with same name")
@@ -251,6 +258,14 @@ def create_farmer(data):
 				# response_dict.get(row('farmer_id')).append(farmer_obj.name)
 
 	return response_dict		
+
+def reserved_farmer_exist(data,vlcc):
+	apnd_list = []
+	apnd_list.append(frappe.db.get_value("VLCC Settings", vlcc, 'farmer_id1'))
+	apnd_list.append(frappe.db.get_value("VLCC Settings", vlcc, 'farmer_id2'))
+	if data.get('farmer_id') in apnd_list:
+		return False
+	return True
 
 
 @frappe.whitelist()

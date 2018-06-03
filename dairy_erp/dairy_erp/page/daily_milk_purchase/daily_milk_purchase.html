@@ -19,12 +19,12 @@
 						<td></td>
 					</tr>
 					<tr>   
-						<td style="text-align: center;">193</td>
-						<td style="text-align: center;">39.7</td>
-						<td style="text-align: right;">144</td>
-						<td style="text-align: center;">1221</td>
-						<td style="text-align: center;">32.6</td>
-						<td style="text-align: center;">4564.3</td>
+						<td style="text-align: center;">{%= count_data[0].qty %}</td>
+						<td style="text-align: center;">{%= local_sale[0].qty %}</td>
+						<td style="text-align: right;">{%= local_sale[0].amt %}</td>
+						<td style="text-align: center;">{%= count_data[0].qty - local_sale[0].qty %}</td>
+						<td style="text-align: center;">{%= count_data[0].avg_fat  %}</td>
+						<td style="text-align: center;">{%= count_data[0].avg_snf %}</td>
 						<td></td>
 					</tr>
 				</tbody>
@@ -105,7 +105,7 @@
 		</tbody>
 		<tfoot>
 		    <tr>
-		      <td style="text-align: center;font-weight: bold;">{%= count_data %}</td>
+		      <td style="text-align: center;font-weight: bold;">{%= count_data[0].count %}</td>
 		      <td></td>
 	       	  <td style="text-align: center;font-weight: bold;">{%= qty %}</td>
 	       	  <td></td>
@@ -124,15 +124,15 @@
 		<div class="col-xs-12">
 			<div class="col-xs-3">
 				<div class="col-xs-7">Members:</div>
-				<div class="col-xs-2">30</div>
+				<div class="col-xs-2"></div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Qty:</div>
-				<div class="col-xs-2">187.500</div>
+				<div class="col-xs-2"></div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Amount:</div>
-				<div class="col-xs-2">6871.46</div>
+				<div class="col-xs-2"></div>
 			</div>
 		</div>
 	</div>
@@ -141,15 +141,15 @@
 		<div class="col-xs-12">
 			<div class="col-xs-3">
 				<div class="col-xs-7">Non Members:</div>
-				<div class="col-xs-2">2</div>
+				<div class="col-xs-2"></div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Qty:</div>
-				<div class="col-xs-2">5.500</div>
+				<div class="col-xs-2"></div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Amount:</div>
-				<div class="col-xs-2">205.94</div>
+				<div class="col-xs-2"></div>
 			</div>
 		</div>
 	</div>
@@ -158,19 +158,19 @@
 		<div class="col-xs-12">
 			<div class="col-xs-3">
 				<div class="col-xs-7">Avg fat:</div>
-				<div class="col-xs-2">5.4</div>
+				<div class="col-xs-2">{%= count_data[0].avg_fat  %}</div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Avg CLR:</div>
-				<div class="col-xs-2">24</div>
+				<div class="col-xs-2">{%= count_data[0].avg_clr  %}</div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Avg SNF:</div>
-				<div class="col-xs-2">7.6</div>
+				<div class="col-xs-2">{%= count_data[0].avg_snf  %}</div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Avg Rate:</div>
-				<div class="col-xs-2">36.63</div>
+				<div class="col-xs-2">{%= count_data[0].avg_rate  %}</div>
 			</div>
 		</div>
 	</div>	

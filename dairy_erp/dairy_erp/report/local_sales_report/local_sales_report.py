@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import has_common
 
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
@@ -41,3 +42,24 @@ def get_conditions(filters):
 		conditions += " and posting_date between %(from_date)s and %(to_date)s"
 
 	return conditions
+
+def get_customer(doctype,text,searchfields,start,pagelen,filters):
+	branch_office = frappe.db.get_value("User", frappe.session.user, ['branch_office','company'],as_dict=True)
+	if has_common(frappe.get_roles(), ["Vlcc Manager", "Vlcc Operator"]) and frappe.session.user != 'Administrator':
+		return frappe.db.sql("""select name, customer_group,company
+							from
+								`tabCustomer`
+							where
+								customer_group not in ('Dairy','Vlcc') and 
+								name like '{text}' and company = '{comp}'""".
+								format(text= "%%%s%%" % text,comp = branch_office.get('company')))
+	elif frappe.session.user == 'Administrator':
+		return frappe.db.sql("""select name, customer_group,company
+							from
+								`tabCustomer`
+							where
+								customer_group not in ('Dairy','Vlcc') and 
+								name like '{text}' """.
+								format(text= "%%%s%%" % text)) 
+
+	

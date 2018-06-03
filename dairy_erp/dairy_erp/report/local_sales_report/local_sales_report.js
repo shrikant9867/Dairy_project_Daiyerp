@@ -8,7 +8,12 @@ frappe.query_reports["Local Sales Report"] = {
 			"fieldname":"customer",
 			"label": __("Customer"),
 			"fieldtype": "Link",
-			"options":"Customer"
+			"options":"Customer",
+			"get_query": function (query_report) {
+				return{
+					query:"dairy_erp.dairy_erp.report.local_sales_report.local_sales_report.get_customer"
+				}
+			}
 		},
 		{
 			"fieldname":"from_date",

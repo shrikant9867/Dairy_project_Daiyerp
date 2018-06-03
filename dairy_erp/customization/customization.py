@@ -714,7 +714,7 @@ def make_purchase_receipt(doc,method=None):
 def set_company(doc, method):
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
-	if user_doc.get('operator_type') == "VLCC" and doc.supplier_type == "VLCC Local":
+	if user_doc.get('operator_type') == "VLCC" and doc.supplier_type in ["VLCC Local"]:
 		doc.company = user_doc.get('company')
 
 def mr_permission(user):
@@ -902,7 +902,6 @@ def pe_permission(user):
 
 def supplier_permission(user):
 
-
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 	dairy_mgr = frappe.db.sql("select distinct u.name from `tabUser` u left join `tabHas Role` r on r.parent = u.name where r.role = 'Dairy Manager'")
 	dairy_mgr = "(" + ",".join([ "'{0}'".format(d[0]) for d in dairy_mgr ]) + ")"
@@ -930,7 +929,7 @@ def supplier_permission(user):
 							`tabParty Account` p 
 						where 
 						p.parent = s.name and s.supplier_type in 
-						('Dairy Type','Farmer','VLCC Local') and 
+						('Dairy Type','Farmer','VLCC Local','General') and 
 						p.company = '{0}' group by s.name
 					""".format(user_doc.get('company')),as_dict=1)
 
@@ -1109,7 +1108,7 @@ def set_camp(doc, method):
 def set_supp_company(doc,method):
 
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
-	if (user_doc.get('operator_type') == "Camp Office" and doc.supplier_type == "Dairy Local") or (user_doc.get('operator_type') == "VLCC" and doc.supplier_type == "VLCC Local"):
+	if (user_doc.get('operator_type') == "Camp Office" and doc.supplier_type == "Dairy Local") or (user_doc.get('operator_type') == "VLCC" and doc.supplier_type in ["VLCC Local", "General"]):
 		doc.append("accounts",
 			{
 			"company": user_doc.get('company'),

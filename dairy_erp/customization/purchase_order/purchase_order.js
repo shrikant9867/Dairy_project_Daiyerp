@@ -19,7 +19,7 @@ frappe.ui.form.on('Purchase Order', {
 		(get_supplier_type(frm.doc.supplier) == "Farmer" ||
 		get_supplier_type(frm.doc.supplier) == "General")) {
 			frm.set_value("supplier","")
-			frappe.throw(__("Supplier Type Cannot be Farmer"))
+			frappe.throw(__("Supplier Type Cannot be Farmer/General"))
 		}
 		erpnext.utils.get_party_details(frm);
 	}

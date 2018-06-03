@@ -239,7 +239,7 @@ def create_farmer(data):
 									traceback = " Farmer ID Exist"
 									frappe.throw(_("Id Exist"))
 							else:
-									traceback = "Can not use this id, this is reserverd  id"
+									traceback = "This is reserved farmer id,you can not use"
 									frappe.throw(_("an not use this id, this is reserverd  id"))
 						else:
 							traceback = "Farmer Exist with same name"

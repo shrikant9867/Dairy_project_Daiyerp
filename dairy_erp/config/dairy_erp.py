@@ -307,6 +307,12 @@ def get_data():
 					"type": "doctype",
 					"name": "Farmer Payment Cycle Report",
 					"description": _(" "),
+				},
+				{
+					"type": "report",
+					"name": "General Ledger",
+					"doctype": "GL Entry",
+					"is_query_report": True
 				}
 			]
 		}				

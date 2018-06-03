@@ -16,7 +16,8 @@ frappe.ui.form.on('Purchase Order', {
 	
 	supplier: function(frm) {
 		if(get_session_user_type().operator_type == 'VLCC' && 
-		get_supplier_type(frm.doc.supplier) == "Farmer") {
+		(get_supplier_type(frm.doc.supplier) == "Farmer" ||
+		get_supplier_type(frm.doc.supplier) == "General")) {
 			frm.set_value("supplier","")
 			frappe.throw(__("Supplier Type Cannot be Farmer"))
 		}

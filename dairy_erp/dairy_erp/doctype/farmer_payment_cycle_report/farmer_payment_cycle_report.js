@@ -46,8 +46,9 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 				callback:function(r){
 					if(r.message){
 						frm.set_value("fmcr_details", "")
+						console.log(r.message)
 						total = 0
-						$.each(r.message, function(i, d) {
+						$.each(r.message.fmcr, function(i, d) {
 							var row = frappe.model.add_child(cur_frm.doc, "FMCR Table", "fmcr_details");
 							total += d.amount
 							row.date = d.rcvdtime;
@@ -59,8 +60,13 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 							row.rate = d.rate
 						});
 						refresh_field("fmcr_details");
-						frm.set_value("total_amount",total)
+						frm.set_value("total_amount", total)
+						frm.set_value("incentives", r.message.incentive)
 					
+					}
+					else{
+						frm.set_value("fmcr_details","")
+						frm.set_value("total_amount",0)
 					}
 				}
 			})

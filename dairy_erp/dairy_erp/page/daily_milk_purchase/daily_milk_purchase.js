@@ -23,7 +23,6 @@ frappe.daily_milk_purchase = Class.extend({
             args: {
                 "curr_date":date
             },
-            async:true,
             callback: function(r){
                 if(r.message){
                     $(me.page).find(".render-table").empty();
@@ -68,6 +67,9 @@ frappe.daily_milk_purchase = Class.extend({
             render_input: true
         });
         me.curr_date.set_value(frappe.datetime.str_to_obj(frappe.datetime.get_today()))
+        me.wrapper_page.set_primary_action(__("Refresh"),function() { 
+            window.location.reload();
+        })
     },
     curr_date_change: function(date){
         var me =this;

@@ -15,21 +15,19 @@ def get_data(curr_date=None):
 										clr,fat,snf,rate,amount
 								from
 									`tabFarmer Milk Collection Record`
-								where {0}
-								""".format(get_conditions(curr_date_)),as_dict=True,debug=0)
+								where 
+									docstatus = 1 {0}
+								""".format(get_conditions(curr_date_)),as_dict=True)
 	data = frappe.db.sql("""select count(name) as count,
-								ifnull(sum(milkquantity),0) as qty,
-								ifnull(sum(fat),0) as fat,
-								ifnull(sum(snf),0) as snf, 
-								ifnull(sum(rate),0) as rate,
-								ifnull(sum(clr),0) as clr,
-								ifnull(round((fat/count(name)),2),0) as avg_fat,
-								ifnull(round((snf/count(name)),2),0) as avg_snf,
-								ifnull(round((clr/count(name)),2),0) as avg_clr,
-								ifnull(round((rate/count(name)),2),0) as avg_rate
+								ifnull(sum(milkquantity),0) as qty ,
+								ifnull(round(avg(fat),2),0) as avg_fat,
+								ifnull(round(avg(clr),2),0) as avg_clr,
+								ifnull(round(avg(snf),2),0) as avg_snf,
+								ifnull(round(avg(rate),2),0) as avg_rate 
 							from 
 								`tabFarmer Milk Collection Record`
-							where {0}
+							where 
+								docstatus = 1 {0}
 		""".format(get_conditions(curr_date_)),as_dict=True)
 	local_sale = frappe.db.sql("""select ifnull(sum(si.qty),0) as qty, 
 								ifnull(sum(s.grand_total),0) as amt 
@@ -38,12 +36,14 @@ def get_data(curr_date=None):
 						`tabSales Invoice` s 
 					where 
 						s.name= si.parent and 
-						local_sale = 1 {0}""".format(local_sale_condn(curr_date_)),as_dict=True)
+						s.docstatus = 1 and
+						si.item_code in ('COW Milk','BUFFALO Milk') and
+						s.local_sale = 1 {0}""".format(local_sale_condn(curr_date_)),as_dict=True)
 	
 	return {"fmcr_data":fmcr_data,"data":data,"local_sale":local_sale}
 
 def get_conditions(curr_date=None):
-	conditions = " 1=1"
+	conditions = " and 1=1"
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
 
 	if frappe.session.user != 'Administrator':
@@ -58,8 +58,8 @@ def local_sale_condn(curr_date=None):
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
 
 	if frappe.session.user != 'Administrator':
-		conditions += " and company = '{0}'".format(vlcc)
+		conditions += " and s.company = '{0}'".format(vlcc)
 	if curr_date:
-		conditions += " and posting_date = '{0}'".format(curr_date)
+		conditions += " and s.posting_date = '{0}'".format(curr_date)
 
 	return conditions

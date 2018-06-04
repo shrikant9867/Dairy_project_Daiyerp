@@ -211,7 +211,6 @@ def make_purchase_receipt_vlcc(data, row, vlcc, farmer, response_dict, fmrc):
 @frappe.whitelist()
 def create_farmer(data):
 	"""Separate API(client req), should have been merge in main(future scope) : VLCC"""
-	print "##########################",data
 	response_dict = {}
 	traceback = ""
 	api_data = json.loads(data)
@@ -219,7 +218,7 @@ def create_farmer(data):
 		for row in api_data:
 			response_dict.update({row.get('farmer_id'):[]})
 			try:
-				if row.get('society_id') and row.get('farmer_id') and row.get('full_name'):
+				if row.get('society_id') and row.get('farmer_id') and row.get('full_name') and row.get('mode') == "CREATE":
 					vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
 					if vlcc :
 						if not frappe.db.sql("select full_name from `tabFarmer` where full_name=%s",(row.get("full_name"))):
@@ -247,8 +246,14 @@ def create_farmer(data):
 					else:
 						traceback = "Society ID(VLCC-amcu id) does not exist"
 						frappe.throw(_("Society does not exist"))
+				elif  row.get('farmer_id')  and row.get('mode') == "UPDATE" and row.get('updation_date'):
+					if update_farmer(row, response_dict, traceback):
+						response_dict.get(row.get('farmer_id')).append({"status": "successfully updated","name": row.get('farmer_id')})
+					else:
+						traceback = "Farmer Does Not exist, for more info check dairy log"
+						frappe.throw(_("Farmer does not exist"))
 				else:
-					traceback = "Society ID, Full Name, Farmer ID are manadatory data"
+					traceback = "Society ID, Full Name, Farmer ID, society id, mode are manadatory data"
 					frappe.throw(_("Society ID, full_name, farmerid  does not exist(Vlcc at ERP)"))
 	
 			except Exception,e:
@@ -258,6 +263,20 @@ def create_farmer(data):
 				# response_dict.get(row('farmer_id')).append(farmer_obj.name)
 
 	return response_dict		
+
+def update_farmer(data, response_dict, traceback):
+	#update farmer only(cattle type and contact)
+	if  frappe.db.exists("Farmer",data.get("farmer_id")):
+		farmer_doc = frappe.get_doc("Farmer",data.get('farmer_id'))
+		if data.get('contact_no'):
+			farmer_doc.contact_number = data.get('contact_no')
+		if data.get('cattle_type'):
+			farmer_doc.cattle_type = data.get('cattle_type')
+		farmer_doc.save()
+		return True
+	else:
+		return False
+
 
 def reserved_farmer_exist(data,vlcc):
 	apnd_list = []

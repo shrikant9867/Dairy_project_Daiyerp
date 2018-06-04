@@ -41,7 +41,8 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 					"start_date": frm.doc.collection_from,
 					"end_date": frm.doc.collection_to,
 					"vlcc": frm.doc.vlcc_name,
-					"farmer_id": frm.doc.farmer_id
+					"farmer_id": frm.doc.farmer_id,
+					"cycle": frm.doc.cycle,
 				},
 				callback:function(r){
 					if(r.message){
@@ -62,7 +63,11 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 						refresh_field("fmcr_details");
 						frm.set_value("total_amount", total)
 						frm.set_value("incentives", r.message.incentive)
-					
+						frm.set_value("advance_outstanding", r.message.advance)
+						frm.set_value("loan_outstanding", r.message.loan)
+						frm.set_value("total_bill",flt(frm.doc.total_amount) + flt(frm.doc.incentives))
+						frm.set_value("feed_and_fodder",r.message.fodder)
+						frm.set_value("veterinary_services", r.message.vet)
 					}
 					else{
 						frm.set_value("fmcr_details","")

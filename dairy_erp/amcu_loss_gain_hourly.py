@@ -17,7 +17,8 @@ def get_fmcr_hourly():
 				 	`tabFarmer Milk Collection Record`
 				where 
 					is_fmrc_updated = 0 and docstatus = 1
-				group by societyid,date(rcvdtime),shift,milktype""",as_dict=True,debug=0)
+				group by societyid,date(rcvdtime),shift,milktype
+				order by rcvdtime""",as_dict=True,debug=0)
 
 	if len(fmcr):
 		for data in fmcr:
@@ -39,7 +40,8 @@ def get_fmcr_hourly():
 		 						shift = '{0}' and milktype = '{1}' and 
 		 						date(rcvdtime) = '{2}' and farmerid = '{3}' and
 		 						docstatus = 1 and is_scheduler = 0
-		 					group by societyid
+		 					group by societyid 
+		 					order by rcvdtime
 		 	""".format(data.get('shift'),data.get('milktype'),
 		 		getdate(data.get('rcvdtime')),
 		 		data.get('societyid')),as_dict=1,debug=0)
@@ -50,6 +52,7 @@ def get_fmcr_hourly():
 					["warehouse","edited_gain","edited_loss"],as_dict=1) or {}
 		 	config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'hours') or 0
 		 	min_time = get_datetime(data.get('min_time')) + timedelta(hours=int(config_hrs))
+		 	fmcr = data.get('fmcr').split(',') if data else []
 		 	if now_datetime() < min_time: 
 		 		pass
 		 	elif now_datetime() > min_time: 
@@ -66,6 +69,8 @@ def get_fmcr_hourly():
 			 				vlcc=vlcc,data=data,qty=qty,vmcr=vmcr[0].get('name'),
 			 				t_warehouse=vlcc_wh.get('edited_gain'),
 			 				s_warehouse=vlcc_wh.get('warehouse'))
+			 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
+						set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
 
 			 		elif data.get('qty') < loss_gain_qty:
 			 			qty = loss_gain_qty - data.get('qty')
@@ -84,12 +89,20 @@ def get_fmcr_hourly():
 			 				t_warehouse=vlcc_wh.get('warehouse'),
 			 				s_warehouse=vlcc_wh.get('edited_loss'))
 
+			 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
+						set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
+
+			 		elif data.get('qty') == loss_gain_qty:
+			 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
+						set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
+						utils.make_dairy_log(title="Quantity Balanced",method="make_stock_adjust", status="Success",
+							data="Qty" ,message= "Quantity is Balanced so stock entry is not created" , traceback="Scheduler")
+
 def make_stock_adjust(purpose,message,vlcc,data,qty,vmcr,t_warehouse,s_warehouse):
 	try:
 		company_details = frappe.db.get_value("Company",{"name":vlcc},['default_payable_account','abbr','cost_center'],as_dict=1)
 		remarks,response_dict = {} ,{}
 		item_code = ""
-		fmcr = data.get('fmcr').split(',') if data else []
 
 		amcu_api.create_item(data)
 		amcu_api.make_uom_config("Nos")
@@ -122,10 +135,7 @@ def make_stock_adjust(purpose,message,vlcc,data,qty,vmcr,t_warehouse,s_warehouse
 		)
 		stock_doc.flags.ignore_permissions = True
 		stock_doc.flags.is_api = True
-		stock_doc.submit()
-
-		set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-		set_flag_vmcr(vmcr=vmcr,is_scheduler=1)	
+		stock_doc.submit()	
 
 		utils.make_dairy_log(title="Stock Entry Created",method="make_stock_adjust", status="Success",
 		data=stock_doc.name ,message= "Stock Adjustment" , traceback="Scheduler")

@@ -28,7 +28,7 @@ def handling_loss_gain(data,row,vmcr_doc,response_dict):
 								and docstatus = 1 and is_stock_settled = 0
 			""".format(data.get('shift'),row.get('milktype'),
 				getdate(data.get('rcvdtime')),
-				row.get('farmerid')),as_dict=1,debug=1)
+				row.get('farmerid')),as_dict=1)
 
 	if len(fmcr_record):
 		for fmcr in fmcr_record:

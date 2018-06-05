@@ -196,7 +196,8 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			{
 				"label": __("Cheque/Reference No"),
 				"fieldname": "ref_no",
-				"fieldtype": "Data"
+				"fieldtype": "Data",
+				"reqd":1
 			},
 			{fieldtype: "Column Break"},
 			{
@@ -204,6 +205,7 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 				"fieldname": "ref_date",
 				"fieldtype": "Date",
 				"default": frappe.datetime.get_today(),
+				"reqd":1
 			}
 		]
 	});

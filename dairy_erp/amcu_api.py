@@ -272,6 +272,8 @@ def update_farmer(data, response_dict, traceback):
 			farmer_doc.contact_number = data.get('contact_no')
 		if data.get('cattle_type'):
 			farmer_doc.cattle_type = data.get('cattle_type')
+		if data.get('updation_date'):
+			farmer_doc.update_date = data.get('updation_date')
 		farmer_doc.save()
 		return True
 	else:

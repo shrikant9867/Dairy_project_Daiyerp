@@ -57,46 +57,66 @@ def get_fmcr_hourly():
 		 		pass
 		 	elif now_datetime() > min_time: 
 			 	if len(vmcr):
-	 				se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr[0].get('name')},'name')
-	 				se_qty = frappe.db.get_value('Stock Entry Detail',{'parent':se},'qty') or 0
-		 			loss_gain_qty = se_qty + vmcr[0].get('qty')
-			 		if data.get('qty') > loss_gain_qty:
-			 			qty = data.get('qty') - loss_gain_qty
+	 				se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr[0].get('name')},['name','wh_type'],as_dict=1)
+ 					se_qty = frappe.db.get_value('Stock Entry Detail',{'parent':se.get('name')},'qty') or 0
 
-			 			gain = make_stock_adjust(
+ 					if se.get('wh_type') == 'Loss':
+ 						loss_gain_qty = data.get('qty') - se_qty
+ 						if loss_gain_qty > vmcr[0].get('qty'):
+ 							qty = loss_gain_qty - vmcr[0].get('qty')
+ 							gain = make_stock_adjust(
 			 				purpose='Material Transfer',
 			 				message="Stock Transfer to Edited Gain",
 			 				vlcc=vlcc,data=data,qty=qty,vmcr=vmcr[0].get('name'),
 			 				t_warehouse=vlcc_wh.get('edited_gain'),
 			 				s_warehouse=vlcc_wh.get('warehouse'))
-			 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-						set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
+			 				set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
+							set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
 
-			 		elif data.get('qty') < loss_gain_qty:
-			 			qty = loss_gain_qty - data.get('qty')
+ 						elif loss_gain_qty < vmcr[0].get('qty'):
+ 							qty = vmcr[0].get('qty') - loss_gain_qty
+			 				loss = make_stock_adjust(
+			 				purpose='Material Receipt',
+			 				message="Stock In to Edited Loss",
+			 				vlcc=vlcc,data=data,qty=qty,vmcr=vmcr[0].get('name'),
+			 				t_warehouse=vlcc_wh.get('edited_loss'),
+			 				s_warehouse=None)
+			 				set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
+							set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
 
-			 			loss = make_stock_adjust(
+						elif loss_gain_qty == vmcr[0].get('qty'):
+				 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
+							set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
+							utils.make_dairy_log(title="Quantity Balanced",method="make_stock_adjust", status="Success",
+								data="Qty" ,message= "Quantity is Balanced so stock entry is not created" , traceback="Scheduler")
+
+ 					elif se.get('wh_type') == 'Gain':
+ 						loss_gain_qty = data.get('qty') + se_qty
+ 						if loss_gain_qty > vmcr[0].get('qty'):
+ 							qty = loss_gain_qty - vmcr[0].get('qty')
+ 							gain = make_stock_adjust(
+			 				purpose='Material Transfer',
+			 				message="Stock Transfer to Edited Gain",
+			 				vlcc=vlcc,data=data,qty=qty,vmcr=vmcr[0].get('name'),
+			 				t_warehouse=vlcc_wh.get('edited_gain'),
+			 				s_warehouse=vlcc_wh.get('warehouse'))
+			 				set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
+							set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
+
+ 						elif loss_gain_qty < vmcr[0].get('qty'):
+ 							qty = vmcr[0].get('qty') - loss_gain_qty
+ 							loss = make_stock_adjust(
 			 				purpose='Material Receipt',
 			 				message="Stock In to Edited Loss",
 			 				vlcc=vlcc,data=data,qty=qty,vmcr=vmcr[0].get('name'),
 			 				t_warehouse=vlcc_wh.get('edited_loss'),
 			 				s_warehouse=None)
 
-			 			loss_transfer = make_stock_adjust(
-			 				purpose='Material Transfer',
-			 				message="Stock Transfer to Main Warehouse",
-			 				vlcc=vlcc,data=data,qty=loss,vmcr=vmcr[0].get('name'),
-			 				t_warehouse=vlcc_wh.get('warehouse'),
-			 				s_warehouse=vlcc_wh.get('edited_loss'))
-
-			 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-						set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
-
-			 		elif data.get('qty') == loss_gain_qty:
-			 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-						set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
-						utils.make_dairy_log(title="Quantity Balanced",method="make_stock_adjust", status="Success",
-							data="Qty" ,message= "Quantity is Balanced so stock entry is not created" , traceback="Scheduler")
+				 		elif loss_gain_qty == vmcr[0].get('qty'):
+				 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
+							set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
+							utils.make_dairy_log(title="Quantity Balanced",method="make_stock_adjust", status="Success",
+								data="Qty" ,message= "Quantity is Balanced so stock entry is not created" , traceback="Scheduler")
 
 def make_stock_adjust(purpose,message,vlcc,data,qty,vmcr,t_warehouse,s_warehouse):
 	try:

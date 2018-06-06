@@ -42,6 +42,7 @@ def get_total_counts(dt, vlcc=None):
 			from 
 				`tab%s`
 			where 
+				docstatus = 1 and
 				date(rcvdtime) between '%s' and '%s'
 				and status = 'Accept'
 		"""%(dt, start, end)

@@ -36,7 +36,7 @@ def get_conditions(filters):
 def get_data(filters):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 	data = frappe.db.sql("""select farmerid,farmer,rcvdtime,shift,milktype,milkquantity,amount
-				from `tabFarmer Milk Collection Record` where
+				from `tabFarmer Milk Collection Record` where docstatus = 1 and
 				associated_vlcc = '{0}' {1}""".format(
 					user_doc.get('company'),
 					get_conditions(filters)),as_list=True)

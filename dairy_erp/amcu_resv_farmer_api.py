@@ -40,7 +40,8 @@ def make_stock_receipt(message,method,data, row,response_dict,qty,warehouse,soci
 			stock_doc.purpose =  "Material Receipt"
 			stock_doc.company = vlcc.get('name')
 			stock_doc.transaction_id = row.get('transactionid')
-			stock_doc.vmcr = vmcr_doc.name if method == 'handling_loss_gain' else ""
+			stock_doc.vmcr = vmcr_doc.name if method == 'handling_loss' or method == 'handling_gain' else ""
+			stock_doc.wh_type = 'Loss' if method == 'handling_loss' else 'Gain'
 			if row.get('transactionid'):
 				remarks.update({"Farmer ID":row.get('farmerid'),"Transaction Id":row.get('transactionid'),
 					"Rcvd Time":data.get('rcvdtime'),"Message": message,"shift":data.get('shift')})
@@ -64,7 +65,7 @@ def make_stock_receipt(message,method,data, row,response_dict,qty,warehouse,soci
 			stock_doc.flags.ignore_permissions = True
 			stock_doc.flags.is_api = True
 			stock_doc.submit()
-			if method == 'handling_loss_gain':
+			if method == 'handling_loss' or method == 'handling_gain':
 				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Stock Receipt": stock_doc.name})
 			else:
 				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Stock Receipt": stock_doc.name})

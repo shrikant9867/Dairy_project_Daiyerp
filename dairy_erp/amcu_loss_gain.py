@@ -38,7 +38,7 @@ def handling_loss_gain(data,row,vmcr_doc,response_dict):
 				if fmcr.get('qty') > row.get('milkquantity'):
 					qty = fmcr.get('qty') - row.get('milkquantity')
 					make_stock_receipt(
-						message="Material Receipt for Handling Loss",method="handling_loss_gain",
+						message="Material Receipt for Handling Loss",method="handling_loss",
 						data=data,row=row,response_dict=response_dict,
 						qty=qty,warehouse=vlcc.get('handling_loss'),
 						societyid=row.get('farmerid'),vmcr_doc=vmcr_doc)
@@ -46,7 +46,7 @@ def handling_loss_gain(data,row,vmcr_doc,response_dict):
 					qty = row.get('milkquantity') - fmcr.get('qty')
 					make_stock_receipt(
 						message="Material Receipt for Calibration Gain",
-						method="handling_loss_gain",data=data,row=row,
+						method="handling_gain",data=data,row=row,
 						response_dict=response_dict,
 						qty=qty,warehouse=vlcc.get('calibration_gain'),
 						societyid=row.get('farmerid'),vmcr_doc=vmcr_doc)

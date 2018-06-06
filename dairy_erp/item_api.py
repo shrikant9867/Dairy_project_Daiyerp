@@ -64,7 +64,9 @@ def get_masters():
 				"total_cow_milk": get_milk_attr('COW Milk'),
 				"total_buffalo_milk": get_milk_attr('BUFFALO Milk'),
 				"farmer_prices": { "items": get_party_item_prices("Farmer") },
-				"customer_prices": { "items": get_party_item_prices("Customer") }
+				"customer_prices": { "items": get_party_item_prices("Customer") },
+				"mi_reference": get_mi_references(),
+				"po_reference": get_po_references()
 			})
 		else:
 			frappe.throw(_("User cannot be administrator"))
@@ -269,3 +271,41 @@ def get_milk_attr(item):
 		return get_balance_qty_from_sle(item, warehouse)
 	else:
 		frappe.throw(_("Item Does Not Exist"))
+
+
+def get_mi_references():
+	mr_list = frappe.db.sql("""
+			select name,schedule_date,camp_office as supplier
+		from 
+			`tabMaterial Request` 
+		where 
+			company = '{0}' and status = 'Ordered' and is_dropship =1"""
+		.format(get_seesion_company_datails().get('company')),as_dict=1)
+	for row in mr_list:
+		row.update({
+			"items": frappe.db.sql("""
+				select item_code,qty,uom 
+			from 
+				`tabMaterial Request Item` 
+			where
+				parent = '{0}'""".format(row.get('name')),as_dict=1)})
+	return mr_list
+
+
+def get_po_references():
+	po_list = frappe.db.sql("""
+			select name,schedule_date,supplier
+		from 
+			`tabPurchase Order`
+		where 
+			status in ('To Receive and Bill') 
+			and company = '{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)
+	for row in po_list:
+		row.update({
+			"items": frappe.db.sql("""
+				select item_code,rate,(qty - received_qty) as qty,uom
+			from 
+				`tabPurchase Order Item` 
+			where 
+			parent = '{0}'""".format(row.get('name')),as_dict=1)})
+	return po_list

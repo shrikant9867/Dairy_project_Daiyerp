@@ -6,7 +6,9 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 
 	},
 	onload: function(frm) {
-		frm.set_value("date",frappe.datetime.get_today())
+		if(!frm.doc.date) {
+			frm.set_value("date",frappe.datetime.get_today())
+		}
 	},
 	vlcc_name: function(frm) {
 		frm.events.add_cycle_child(frm)		

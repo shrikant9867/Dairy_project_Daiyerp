@@ -43,6 +43,7 @@ def make_si(data,cur_cycl=None):
 			si_doc.customer = data.get('farmer_name')
 			si_doc.company = data.get('vlcc')
 			si_doc.farmer_advance = data.get('name')
+			si_doc.cycle_ = cur_cycl
 			si_doc.append("items",{
 				"item_code":"Milk Incentives",
 				"qty": 1,

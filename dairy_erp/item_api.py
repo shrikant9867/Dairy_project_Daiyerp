@@ -279,12 +279,12 @@ def get_mi_references():
 		from 
 			`tabMaterial Request` 
 		where 
-			company = '{0}' and status = 'Ordered' and is_dropship =1"""
+			company = '{0}' and status in ('Ordered','Partially Delivered') and is_dropship =1"""
 		.format(get_seesion_company_datails().get('company')),as_dict=1)
 	for row in mr_list:
 		row.update({
 			"items": frappe.db.sql("""
-				select item_code,qty,uom 
+				select item_code,(qty - completed_dn)qty,uom 
 			from 
 				`tabMaterial Request Item` 
 			where

@@ -29,6 +29,8 @@ def create_pr(data):
 				response_dict.update({"status":"error", "response":"client id, camp office , item are required "})
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
+		utils.make_dairy_log(title="Sync failed for Data push",method="get_items", status="Error",
+			data = row.get('name'), message=e, traceback=frappe.get_traceback())
 	return response_dict
 
 def make_pr(data):
@@ -123,17 +125,19 @@ def draft_pr(data):
 def update_po(pr_obj):
 	update_received_qty(pr_obj)
 	po_nos = frappe.db.get_all("Purchase Receipt Item", { "parent": pr_obj.name }, "purchase_order as po")
+
 	for po in po_nos:
-		po = frappe.get_doc("Purchase Order", po.get('po'))
-		all_received = True
-		for i in po.items:
-			if i.qty != i.received_qty:
-				all_received = False
-		po_status = "To Bill" if all_received else "To Receive and Bill"
-		frappe.db.sql("update `tabPurchase Order` set status = '{0}' \
-			where name = '{1}'".format(po_status, po.name))
-		po.flags.ignore_permissions = True
-		po.save()
+		if po.get('po'):
+			po = frappe.get_doc("Purchase Order", po.get('po'))
+			all_received = True
+			for i in po.items:
+				if i.qty != i.received_qty:
+					all_received = False
+			po_status = "To Bill" if all_received else "To Receive and Bill"
+			frappe.db.sql("update `tabPurchase Order` set status = '{0}' \
+				where name = '{1}'".format(po_status, po.name))
+			po.flags.ignore_permissions = True
+			po.save()
 
 def update_received_qty(doc):
 	for pr_i in doc.items:

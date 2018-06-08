@@ -16,20 +16,21 @@ frappe.daily_milk_purchase = Class.extend({
         this.wrapper = $(wrapper).find('.page-content');
         this.set_fields()
     },
-    render_layout: function(date) {
+    render_layout: function(date_) {
         var me = this;
         frappe.call({
             method: "dairy_erp.dairy_erp.page.daily_milk_purchase.daily_milk_purchase.get_data",
             args: {
-                "curr_date":date
+                "curr_date":date_
             },
             callback: function(r){
                 if(r.message){
+                    me.table_data = r.message
                     $(me.page).find(".render-table").empty();
                     me.print = frappe.render_template("daily_milk_purchase",{
-                            "data":r.message.fmcr_data,
-                            "count_data":r.message.data,
-                            "local_sale":r.message.local_sale
+                            "data":me.table_data.fmcr_data,
+                            "count_data":me.table_data.data,
+                            "local_sale":me.table_data.local_sale
                             })
                     $(me.page).find(".render-table").append(me.print)
                 }
@@ -68,24 +69,31 @@ frappe.daily_milk_purchase = Class.extend({
         });
         me.curr_date.set_value(frappe.datetime.str_to_obj(frappe.datetime.get_today()))
         me.wrapper_page.set_primary_action(__("Print"), function () {
-            me.create_pdf()
+            me.create_pdf(me.curr_date.get_value())
         })
         me.wrapper_page.set_secondary_action(__("Refresh"),function() { 
             window.location.reload();
         })
     },
-    curr_date_change: function(date){
+    curr_date_change: function(date_){
         var me =this;
             $(me.page).find(".render-table").empty();
-            me.render_layout(date);
+            me.render_layout(date_);
     },
-    create_pdf: function(){
+    create_pdf: function(date_){
         var me = this;
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
         var html = frappe.render_template("pdf",{
-            content:$(me.page).find(".render-table").html(),
-            title:__("Daily Milk Purchase Report"),
+            content: frappe.render_template("daily_milk_purchase_print",{
+                            "data":me.table_data.fmcr_data,
+                            "count_data":me.table_data.data,
+                            "local_sale":me.table_data.local_sale,
+                            "vlcc":me.table_data.vlcc,
+                            "vlcc_addr":me.table_data.vlcc_addr,
+                            "date_":frappe.datetime.str_to_user(date_)
+                            }),
+            title:__("daily_milk_purchase_report_"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,
             print_css: print_css
         });

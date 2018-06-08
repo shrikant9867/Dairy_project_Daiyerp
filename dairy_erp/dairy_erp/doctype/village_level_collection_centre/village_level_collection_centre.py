@@ -113,8 +113,9 @@ class VillageLevelCollectionCentre(Document):
 		wh_name = self.wh_creation(warehouse="Edited Gain")
 		self.edited_gain = wh_name
 
-		wh_name = self.wh_creation(warehouse="BMC Warehouse")
-		self.bmc_warehouse = wh_name
+		if self.vlcc_type == 'Hybrid':
+			wh_name = self.wh_creation(warehouse="BMC Warehouse")
+			self.bmc_warehouse = wh_name
 
 		self.save()
 
@@ -187,8 +188,8 @@ class VillageLevelCollectionCentre(Document):
 			custmer_doc.customer_name = self.vlcc_name
 			custmer_doc.camp_office = self.camp_office
 			custmer_doc.customer_group = "Vlcc"
-			if comp.links:
-				custmer_doc.company = comp.links[0].link_name
+			if comp:
+				custmer_doc.company = comp.get('name')
 				custmer_doc.append("accounts",
 				{
 					"company": comp.get('name'), #comp.links[0].link_name,

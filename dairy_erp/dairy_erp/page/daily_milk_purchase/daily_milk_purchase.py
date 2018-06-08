@@ -6,10 +6,9 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getda
 
 @frappe.whitelist()
 def get_data(curr_date=None):
-	if curr_date:
-		curr_date_ = getdate(curr_date)
-	else:
-		curr_date_ = ""
+	curr_date_ = getdate(curr_date) if curr_date else ""
+	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
+	vlcc_addr = frappe.db.get_value("Village Level Collection Centre",vlcc,"address_display")
 	
 	fmcr_data = frappe.db.sql("""select farmerid,name,milkquantity,
 										clr,fat,snf,rate,amount
@@ -30,7 +29,7 @@ def get_data(curr_date=None):
 								docstatus = 1 {0}
 		""".format(get_conditions(curr_date_)),as_dict=True)
 	local_sale = frappe.db.sql("""select ifnull(sum(si.qty),0) as qty, 
-								ifnull(sum(s.grand_total),0) as amt 
+								ifnull(sum(si.amount),0) as amt 
 					from 
 						`tabSales Invoice Item` si,
 						`tabSales Invoice` s 
@@ -40,7 +39,7 @@ def get_data(curr_date=None):
 						si.item_code in ('COW Milk','BUFFALO Milk') and
 						s.local_sale = 1 {0}""".format(local_sale_condn(curr_date_)),as_dict=True)
 	
-	return {"fmcr_data":fmcr_data,"data":data,"local_sale":local_sale}
+	return {"fmcr_data":fmcr_data,"data":data,"local_sale":local_sale,"vlcc":vlcc,"vlcc_addr":vlcc_addr}
 
 def get_conditions(curr_date=None):
 	conditions = " and 1=1"

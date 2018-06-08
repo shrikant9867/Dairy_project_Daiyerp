@@ -1,0 +1,23 @@
+[
+ {
+  "allow_negative_stock": 1, 
+  "auto_indent": 1, 
+  "auto_insert_price_list_rate_if_missing": 1, 
+  "automatically_set_serial_nos_based_on_fifo": 1, 
+  "default_warehouse": "Stores - D", 
+  "docstatus": 0, 
+  "doctype": "Stock Settings", 
+  "item_group": null, 
+  "item_naming_by": "Item Code", 
+  "modified": "2018-05-10 17:01:11.267347", 
+  "name": "Stock Settings", 
+  "reorder_email_notify": 0, 
+  "show_barcode_field": 1, 
+  "stock_auth_role": null, 
+  "stock_frozen_upto": null, 
+  "stock_frozen_upto_days": 0, 
+  "stock_uom": "Nos", 
+  "tolerance": 0.0, 
+  "valuation_method": "FIFO"
+ }
+]

@@ -11,31 +11,47 @@ from dairy_erp.dairy_utils import make_dairy_log
 class FarmerPaymentCycleReport(Document):
 	
 	def validate(self):
-		if frappe.db.get_value("Farmer Payment Cycle Report",{'cycle':self.cycle,\
-			 'vlcc_name':self.vlcc_name, 'farmer_id':self.farmer_id},'name'):
-			frappe.throw(_("FPCR has been generated for this cycle"))
+		pass
+		# if frappe.db.get_value("Farmer Payment Cycle Report",{'cycle':self.cycle,\
+		# 	 'vlcc_name':self.vlcc_name, 'farmer_id':self.farmer_id},'name'):
+		# 	frappe.throw(_("FPCR has been generated for this cycle"))
 		
 	
 	def before_submit(self):
-		loans = frappe.db.sql("""
-				select name,farmer_id,outstanding_amount,emi_amount,no_of_instalments,paid_instalment
+		loans_ = frappe.db.sql("""
+				select name,farmer_id,outstanding_amount,
+				emi_amount,no_of_instalments,paid_instalment,
+				emi_deduction_start_cycle,extension,date_of_disbursement,vlcc
 			from 
 				`tabFarmer Loan`
 			where
 				farmer_id = '{0}' and outstanding_amount != 0 and date_of_disbursement < now()	
 			""".format(self.farmer_id),as_dict=1)
+		loans = []
+		for row in loans_:
+			req_cycle = req_cycle_computation(row)
+			if self.cycle in req_cycle_computation(row):
+				loans.append(row)
 
-		advance = frappe.db.sql("""
+		advance_ = frappe.db.sql("""
 				select name,farmer_id,outstanding_amount,emi_amount,
-				no_of_instalment,paid_instalment
+				no_of_instalment,paid_instalment,paid_instalment,emi_deduction_start_cycle,
+				extension,date_of_disbursement,vlcc
 			from 
 				`tabFarmer Advance`
 			where
 				farmer_id = '{0}' and outstanding_amount != 0 and date_of_disbursement < now()	
 			""".format(self.farmer_id),as_dict=1)
+		advance = []
+		for row in advance_:
+			req_cycle = req_cycle_computation_advance(row)
+			print req_cycle_computation_advance(row)
+			if self.cycle in req_cycle_computation_advance(row):
+				advance.append(row)
+		print '##############',loans,advance
 		
-		total_advances = get_total_emi_advance(self)
-		total_emi = self.get_total_emi()
+		total_advances = get_total_emi_advance(self,advance)
+		total_emi = self.get_total_emi(loans)
 		if len(loans):
 			self.validate_loan(total_emi, loans)
 			self.calc_proportinate_emi(total_emi, loans)
@@ -65,8 +81,10 @@ class FarmerPaymentCycleReport(Document):
 					frappe.throw(_("Please Use extension for {0}".format(row.get('name'))))
 	
 	
-	def get_total_emi(self):
-		
+	def get_total_emi(self,loans):
+		total = 0
+		for row in loans:
+			total += float(row.get('emi_amount'))
 		total_emi = frappe.db.sql("""
 				select ifnull(sum(emi_amount),0) as total_emi
 			from 
@@ -74,9 +92,10 @@ class FarmerPaymentCycleReport(Document):
 			where
 				farmer_id = '{0}' and outstanding_amount != 0		
 			""".format(self.farmer_id),as_dict=1)
-		if len(total_emi):
-			return total_emi[0].get('total_emi') if total_emi[0].get('total_emi') != None else 0
-		else: return 0
+		# if len(total_emi):
+		# 	return total_emi[0].get('total_emi') if total_emi[0].get('total_emi') != None else 0
+		# else: return 0
+		return total
 
 	
 	def calc_proportinate_emi(self, total_emi, loans):
@@ -363,17 +382,20 @@ def vet_service_amnt(start_date, end_date, farmer_id, vlcc=None):
 
 #### Advance Part ##########
 
-def get_total_emi_advance(self):
+def get_total_emi_advance(self,advance):
 	total_emi = frappe.db.sql("""
 				select ifnull(sum(emi_amount),0) as total_emi
 			from 
 				`tabFarmer Advance`
 			where
 				farmer_id = '{0}' and outstanding_amount != 0		
-			""".format(self.farmer_id),as_dict=1,debug=1)
-	if len(total_emi):
-		return total_emi[0].get('total_emi') if total_emi[0].get('total_emi') != None else 0
-	else: return 0
+			""".format(self.farmer_id),as_dict=1)
+	total = 0
+	for row in advance:
+		total += float(row.get('emi_amount'))
+	# if len(total_emi):
+	# 	return total_emi[0].get('total_emi') if total_emi[0].get('total_emi') != None else 0
+	return total
 
 
 @frappe.whitelist()
@@ -384,4 +406,64 @@ def get_cycle(doctype,text,searchfields,start,pagelen,filters):
 			`tabFarmer Date Computation`
 		where
 			 now() between start_date and end_date and vlcc = '{0}'
-		""".format(filters.get('vlcc')),debug=1)
+		""".format(filters.get('vlcc')))
+
+def req_cycle_computation(data):
+	
+	not_req_cycl = frappe.db.sql("""
+			select name
+		from
+			`tabFarmer Date Computation`
+		where
+			'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=1)
+	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
+	instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
+	if len(not_req_cycl):
+		req_cycle = frappe.db.sql("""
+				select name
+			from
+				`tabFarmer Date Computation`
+			where
+				'{date}' < start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
+			""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
+				instalment = instalment),as_dict=1,debug=1)
+		
+		req_cycl_list = [i.get('name') for i in req_cycle]
+		return req_cycl_list
+	return []
+
+def get_current_cycle(data):
+	return frappe.db.sql("""
+			select name 
+		from
+			`tabFarmer Date Computation`
+		where
+			vlcc = %s and now() between start_date and end_date
+		""",(data.get('vlcc')),as_dict=1)
+
+def req_cycle_computation_advance(data):
+	
+	not_req_cycl = frappe.db.sql("""
+			select name
+		from
+			`tabFarmer Date Computation`
+		where
+			'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=1)
+	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
+	
+	instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
+	if len(not_req_cycl):
+		req_cycle = frappe.db.sql("""
+				select name
+			from
+				`tabFarmer Date Computation`
+			where
+				'{date}' < start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
+			""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
+				instalment = instalment),as_dict=1)
+		
+		req_cycl_list = [i.get('name') for i in req_cycle]
+		return req_cycl_list
+	return []

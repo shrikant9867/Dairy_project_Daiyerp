@@ -12,13 +12,15 @@ class FarmerPaymentCycleReport(Document):
 	
 	def validate(self):
 		if frappe.db.get_value("Farmer Payment Cycle Report",{'cycle':self.cycle,\
-			 'vlcc_name':self.vlcc_name, 'farmer_id':self.farmer_id},'name'):
+			 'vlcc_name':self.vlcc_name, 'farmer_id':self.farmer_id},'name') and self.is_new():
 			frappe.throw(_("FPCR has been generated for this cycle"))
 		
 	
 	def before_submit(self):
 		self.advance_operation()
 		self.loan_operation()
+		if self.incentives:
+			self.create_incentive()
 
 	
 	def advance_operation(self):
@@ -42,10 +44,10 @@ class FarmerPaymentCycleReport(Document):
 		adv_doc = frappe.get_doc("Farmer Advance",row.adv_id)
 		if not row.amount:
 			frappe.throw(_("Please Enter amount against <b>{0}</b>".format(row.adv_id)))
-		if row.amount > row.outstanding:
+		if float(row.amount) > float(row.outstanding):
 			frappe.throw(_("Amount can not be greater than  outstanding for <b>{0}</b>".format(row.adv_id)))
 		if (int(row.no_of_instalment) + int(adv_doc.extension)) - row.paid_instalment == 1 and \
-			(row.amount < adv_doc.emi_amount or row.outstanding != adv_doc.emi_amount):
+			(float(row.amount) < float(adv_doc.emi_amount) or float(row.outstanding) != float(adv_doc.emi_amount)):
 			frappe.throw(_("Please Use Extension for <b>{0}</b>".format(row.adv_id)))
 	
 	
@@ -53,7 +55,7 @@ class FarmerPaymentCycleReport(Document):
 		loan_doc = frappe.get_doc("Farmer Loan",row.loan_id)
 		if not row.amount:
 			frappe.throw(_("Please Enter amount against <b>{0}</b>".format(row.loan_id)))
-		if row.amount > row.outstanding:
+		if float(row.amount) > float(row.outstanding):
 			frappe.throw(_("Amount can not be greater than  outstanding for <b>{0}</b>".format(row.loan_id)))
 		if (int(row.no_of_instalment) + int(loan_doc.extension)) - loan_doc.paid_instalment == 1 and \
 			(float(row.amount) < float(loan_doc.emi_amount) or float(row.outstanding) != float(loan_doc.emi_amount)):
@@ -114,6 +116,23 @@ class FarmerPaymentCycleReport(Document):
 			adv_doc.emi_amount = 0
 		adv_doc.flags.ignore_permissions =True
 		adv_doc.save()
+
+	def create_incentive(self):
+		pi = frappe.new_doc("Purchase Invoice")
+		pi.supplier = self.farmer_name
+		pi.company = self.vlcc_name
+		pi.pi_type = "Incentive"
+		pi.append("items",
+			{
+				"qty":1,
+				"item_code": "Milk Incentives",
+				"rate": self.incentives,
+				"amount": self.incentives,
+				"cost_center": frappe.db.get_value("Company", self.vlcc_name, "cost_center")
+			})
+		pi.flags.ignore_permissions = True
+		pi.save()
+		pi.submit()
 
 
 @frappe.whitelist()
@@ -226,24 +245,6 @@ def vet_service_amnt(start_date, end_date, farmer_id, vlcc=None):
 	else: return 0
 
 
-#### Advance Part ##########
-
-def get_total_emi_advance(self,advance):
-	total_emi = frappe.db.sql("""
-				select ifnull(sum(emi_amount),0) as total_emi
-			from 
-				`tabFarmer Advance`
-			where
-				farmer_id = '{0}' and outstanding_amount != 0		
-			""".format(self.farmer_id),as_dict=1)
-	total = 0
-	for row in advance:
-		total += float(row.get('emi_amount'))
-	# if len(total_emi):
-	# 	return total_emi[0].get('total_emi') if total_emi[0].get('total_emi') != None else 0
-	return total
-
-
 @frappe.whitelist()
 def get_cycle(doctype,text,searchfields,start,pagelen,filters):
 	return frappe.db.sql("""
@@ -345,7 +346,6 @@ def get_advance_child(start_date, end_date, vlcc, farmer_id, cycle=None):
 			""".format(farmer_id),as_dict=1)
 	advance = []
 	for row in advance_:
-		print "#################",req_cycle_computation_advance(row),advance_
 		if cycle in req_cycle_computation_advance(row):
 			advance.append(row)
 	return advance

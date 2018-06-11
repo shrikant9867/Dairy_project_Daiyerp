@@ -638,13 +638,14 @@ def create_item_group(args=None):
 
 
 def create_item():
-	if not frappe.db.exists("Item","Milk Incentives"):
-		item_doc = frappe.new_doc("Item")
-		item_doc.item_code = "Milk Incentives"
-		item_doc.item_group = "Others/Miscellaneous"
-		item_doc.flags.ignore_permissions = True
-		item_doc.flags.ignore_mandatory = True
-		item_doc.save()
+	for i in ['Milk Incentives', 'Loan Emi', 'Advance Emi']:
+		if not frappe.db.exists("Item",i):
+			item_doc = frappe.new_doc("Item")
+			item_doc.item_code = i
+			item_doc.item_group = "Others/Miscellaneous"
+			item_doc.flags.ignore_permissions = True
+			item_doc.flags.ignore_mandatory = True
+			item_doc.save()
 
 def create_customer_group():
 

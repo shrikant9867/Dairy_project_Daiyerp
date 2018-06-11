@@ -701,7 +701,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -1074,7 +1074,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-06-14 19:16:35.632467", 
+ "modified": "2018-06-16 12:18:53.072208", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "Farmer Payment Cycle Report", 

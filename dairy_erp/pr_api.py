@@ -30,7 +30,7 @@ def create_pr(data):
 	except Exception,e:
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 		utils.make_dairy_log(title="Sync failed for Data push",method="get_items", status="Error",
-			data = row.get('name'), message=e, traceback=frappe.get_traceback())
+			data = "", message=e, traceback=frappe.get_traceback())
 	return response_dict
 
 def make_pr(data):
@@ -136,8 +136,8 @@ def update_po(pr_obj):
 			po_status = "To Bill" if all_received else "To Receive and Bill"
 			frappe.db.sql("update `tabPurchase Order` set status = '{0}' \
 				where name = '{1}'".format(po_status, po.name))
-			po.flags.ignore_permissions = True
-			po.save()
+			# po.flags.ignore_permissions = True
+			# po.save()
 
 def update_received_qty(doc):
 	for pr_i in doc.items:

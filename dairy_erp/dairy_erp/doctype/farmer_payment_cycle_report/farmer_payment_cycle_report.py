@@ -29,7 +29,7 @@ class FarmerPaymentCycleReport(Document):
 	def loan_operation(self):
 		for row in self.loan_child:
 			if not frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
-						'farmer_advance':row.loan_id }, 'name')
+						'farmer_advance':row.loan_id }, 'name'):
 				self.create_si(row,)
 
 	def create_si(self, data):

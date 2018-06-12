@@ -556,3 +556,64 @@ def check_receivable(recv_list):
 	
 	if 'Sales Invoice' in recv_list and 'Purchase Invoice' not in recv_list:
 		return "You can not settle only Receivable Amount"
+
+
+@frappe.whitelist()
+def generate_incentive(filters):
+	filters = json.loads(filters)
+	farmer_name = frappe.db.get_value("Farmer",filters.get('farmer'), 'full_name')
+	if not frappe.db.get_value("Purchase Invoice", {'cycle':filters.get('cycle'),\
+		 'supplier': farmer_name, 'company': get_vlcc()},'name'):
+		fmcr =  frappe.db.sql("""
+			select ifnull(sum(amount),0) as total,
+			ifnull(sum(milkquantity),0) as qty
+		from 
+			`tabFarmer Milk Collection Record`
+		where 
+			associated_vlcc = '{0}' and rcvdtime between '{1}' and '{2}' and farmerid= '{3}'
+			""".format(get_vlcc(), filters.get('start_date'), filters.get('end_date'), filters.get('farmer')),as_dict=1)
+		if fmcr[0].get('total') != 0:
+			incentive = get_incentives(fmcr[0].get('total'), fmcr[0].get('qty'))
+			create_pi(filters, incentive)
+			frappe.msgprint(_("Incentive Generated"))
+	else:
+		frappe.throw(_("Incentive already generated for this cycle"))
+
+def create_pi(filters, total):
+	pi = frappe.new_doc("Purchase Invoice")
+	pi.supplier = frappe.db.get_value("Farmer",filters.get('farmer'), 'full_name')  
+	pi_posting_date = filters.get('end_date')
+	pi.company = get_vlcc()
+	pi.cycle = filters.get('cycle')
+	pi.pi_type = "Incentive"
+	pi.append("items",
+		{
+			"qty":1,
+			"item_code": "Milk Incentives",
+			"rate": total,
+			"amount": total,
+			"cost_center": frappe.db.get_value("Company", get_vlcc(), "cost_center")
+		})
+	pi.flags.ignore_permissions = True
+	pi.save()
+	pi.submit()
+
+def get_incentives(amount, qty, vlcc=None):
+	if vlcc and amount and qty:
+		incentive = 0
+		name = frappe.db.get_value("Farmer Settings", {'vlcc':vlcc}, 'name')
+		farmer_settings = frappe.get_doc("Farmer Settings",name)
+		if farmer_settings.enable_local_setting and not farmer_settings.enable_per_litre:
+			incentive = (float(farmer_settings.local_farmer_incentive ) * float(amount)) / 100	
+		if farmer_settings.enable_local_setting and farmer_settings.enable_per_litre:
+			incentive = (float(farmer_settings.local_per_litre) * float(qty))
+		if not farmer_settings.enable_local_setting and not farmer_settings.enable_per_litre:
+			incentive = (float(farmer_settings.farmer_incentives) * float(farmer_settings)) / 100
+		if not farmer_settings.enable_local_setting and farmer_settings.enable_per_litre:
+			incentive = (float(farmer_settings.per_litre) * float(qty))
+		return incentive
+
+
+
+def get_vlcc():
+	return frappe.db.get_value("User",frappe.session.user,'company')

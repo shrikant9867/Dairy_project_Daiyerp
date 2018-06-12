@@ -133,6 +133,17 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 				}
 			})
 		});
+		report.page.add_inner_button(__("Generate Incentive"), function() {
+
+			frappe.call({
+				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.generate_incentive",
+				args : {
+						"filters":report.get_values()
+						},
+				callback : function(r){			
+				}
+			})
+		});
 
 		$('body').on("click", "input[type='checkbox'][data-row]", function() {
 			me.data[$(this).attr('data-row')].selected
@@ -196,16 +207,14 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			{
 				"label": __("Cheque/Reference No"),
 				"fieldname": "ref_no",
-				"fieldtype": "Data",
-				"reqd":1
+				"fieldtype": "Data"
 			},
 			{fieldtype: "Column Break"},
 			{
 				"label": __("Cheque/Reference Date"),
 				"fieldname": "ref_date",
 				"fieldtype": "Date",
-				"default": frappe.datetime.get_today(),
-				"reqd":1
+				"default": frappe.datetime.get_today()
 			}
 		]
 	});

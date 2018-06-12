@@ -122,6 +122,7 @@ class FarmerPaymentCycleReport(Document):
 		pi.supplier = self.farmer_name
 		pi.company = self.vlcc_name
 		pi.pi_type = "Incentive"
+		pi.cycle = self.cycle
 		pi.append("items",
 			{
 				"qty":1,
@@ -324,7 +325,7 @@ def get_loans_child(start_date, end_date, vlcc, farmer_id, cycle=None):
 			from 
 				`tabFarmer Loan`
 			where
-				farmer_id = '{0}' and outstanding_amount != 0 and date_of_disbursement < now()	
+				farmer_id = '{0}' and outstanding_amount != 0 and date_of_disbursement < now()	and docstatus =1
 				""".format(farmer_id),as_dict=1)
 	loans = []
 	for row in loans_:
@@ -342,7 +343,7 @@ def get_advance_child(start_date, end_date, vlcc, farmer_id, cycle=None):
 			from 
 				`tabFarmer Advance`
 			where
-				farmer_id = '{0}' and outstanding_amount != 0 and date_of_disbursement < now()	
+				farmer_id = '{0}' and outstanding_amount != 0 and date_of_disbursement < now() and docstatus =1	
 			""".format(farmer_id),as_dict=1)
 	advance = []
 	for row in advance_:

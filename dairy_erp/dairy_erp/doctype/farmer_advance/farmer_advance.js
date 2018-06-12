@@ -6,6 +6,11 @@ frappe.ui.form.on('Farmer Advance', {
 		frm.set_df_property("no_of_instalment", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("advance_amount", "read_only", frm.doc.__islocal ? 0:1);
 	},
+	onload: function(frm) {
+		if(!frm.doc.vlcc){
+			get_vlcc(frm)
+		}
+	},
 	no_of_instalment: function(frm) {
 		emi_amount = frm.doc.advance_amount / frm.doc.no_of_instalment
 		if(emi_amount > 0 && emi_amount != 'Infinity') {
@@ -37,3 +42,17 @@ frappe.ui.form.on('Farmer Advance', {
 		}
 	}
 });
+
+get_vlcc =  function(frm) {
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "User",
+				filters: {"name": frappe.session.user},
+				fieldname: ["company"]
+			},
+			callback: function(r){
+				frm.set_value("vlcc",r.message.company)
+			}
+		})
+}

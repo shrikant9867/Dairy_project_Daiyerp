@@ -6,7 +6,9 @@ frappe.ui.form.on('Farmer Loan', {
 		frm.set_df_property("no_of_instalments", "read_only", frm.doc.__islocal ? 0:1);
 	},
 	onload: function(frm) {
-		// frm.set_value('date_of_disbursement', frappe.datetime.get_today())
+		if(!frm.doc.vlcc){
+			get_vlcc(frm)
+		}
 	},
 	no_of_instalments: function(frm) {
 		emi_amount = (cint(frm.doc.principle) + cint(frm.doc.interest)) / frm.doc.no_of_instalments
@@ -51,3 +53,18 @@ frappe.ui.form.on('Farmer Loan', {
 	}
 
 });
+
+
+get_vlcc =  function(frm) {
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "User",
+				filters: {"name": frappe.session.user},
+				fieldname: ["company"]
+			},
+			callback: function(r){
+				frm.set_value("vlcc",r.message.company)
+			}
+		})
+}

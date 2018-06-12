@@ -9,6 +9,9 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 		if(!frm.doc.date) {
 			frm.set_value("date",frappe.datetime.get_today())
 		}
+		if(!frm.doc.vlcc_name){
+			get_vlcc(frm)
+		}
 	},
 	vlcc_name: function(frm) {
 		frm.events.add_cycle_child(frm)		
@@ -34,7 +37,11 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 		}
 	},
 	farmer_id: function(frm) {
-		frm.events.add_cycle_child(frm)		
+		frm.events.add_cycle_child(frm)
+		frm.events.calculate_total_ami(frm)
+		frm.events.calculate_total_outstanding(frm)
+		frm.events.calculate_advance_emi(frm)
+		frm.events.calculate_advance_outstanding(frm)	
 	},
 	add_cycle_child: function(frm) {
 		if(frm.doc.collection_from && frm.doc.collection_to && frm.doc.vlcc_name && frm.doc.farmer_id) {
@@ -89,12 +96,17 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 						})
 						frm.set_value("total_amount", total)
 						frm.set_value("incentives", r.message.incentive)
-						frm.set_value("advance_outstanding", r.message.advance)
-						frm.set_value("loan_outstanding", r.message.loan)
+						// frm.set_value("advance_outstanding", r.message.advance)
+						// frm.set_value("loan_outstanding", r.message.loan)
 						frm.set_value("total_bill",flt(frm.doc.total_amount) + flt(frm.doc.incentives))
 						frm.set_value("feed_and_fodder",r.message.fodder)
 						frm.set_value("veterinary_services", r.message.vet)
 						frm.refresh_fields();
+						frm.events.calculate_total_ami(frm)
+						frm.events.calculate_total_outstanding(frm)
+						frm.events.calculate_advance_emi(frm)
+						frm.events.calculate_advance_outstanding(frm)
+
 					}
 					else{
 						console.log("######")
@@ -111,7 +123,38 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 			frm.set_value("total_amount",0)
 			frm.set_value("loan_child","")
 			frm.set_value("advance_child","")
+			frm.set_value("incentives",0)
+			frm.set_value("total_bill",0)
 		}
+	},
+	calculate_total_ami: function(frm) {
+		emi = 0
+		$.each(frm.doc.loan_child, function(i, d) {
+			emi += flt(d.emi_amount)				
+		});
+		frm.set_value("loan_emi", emi)
+	},
+	calculate_total_outstanding: function(frm) {
+		outstanding = 0
+		$.each(frm.doc.loan_child, function(i, d) {
+			outstanding += flt(d.outstanding)
+		});
+		frm.set_value("loan_outstanding", outstanding)
+	},
+	calculate_advance_emi: function(frm) {
+		emi = 0
+		$.each(frm.doc.advance_child, function(i, d) {
+			console.log()
+			emi += flt(d.emi_amount)				
+		});
+		frm.set_value("advance_emi", emi)
+	},
+	calculate_advance_outstanding: function(frm) {
+		outstanding = 0
+		$.each(frm.doc.advance_child, function(i, d) {
+			outstanding += flt(d.outstanding)				
+		});
+		frm.set_value("advance_outstanding", outstanding)
 	}
 });
 
@@ -121,3 +164,17 @@ cur_frm.fields_dict['cycle'].get_query = function(doc) {
 				filters: {'vlcc': doc.vlcc_name}
 			}
 		}
+
+get_vlcc =  function(frm) {
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "User",
+				filters: {"name": frappe.session.user},
+				fieldname: ["company"]
+			},
+			callback: function(r){
+				frm.set_value("vlcc_name",r.message.company)
+			}
+		})
+}

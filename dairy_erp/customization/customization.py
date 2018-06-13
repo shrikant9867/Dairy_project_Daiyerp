@@ -1172,9 +1172,14 @@ def item_permissions(user):
 
 	operator_type = frappe.db.get_value("User",user,'operator_type')
 	if operator_type == "Vet AI Technician":
-		return """tabItem.item_group in ('Veterinary Services','Medicines') """
+		return """tabItem.item_group in ('Veterinary Services','Medicines')and tabItem.name not 
+				in ('Advance Emi', 'Loan Emi', 'Milk Incentives') """
 	elif operator_type == "Chilling Centre":
-		return """tabItem.item_group = 'Stationary'"""
+		return """tabItem.item_group = 'Stationary' and tabItem.name not 
+				in ('Advance Emi', 'Loan Emi', 'Milk Incentives')"""
 	elif operator_type == "VLCC":
 		return """tabItem.item_group != 'Stationary' and tabItem.name not 
 				in ('Advance Emi', 'Loan Emi', 'Milk Incentives')"""
+	elif operator_type == "Camp Office":
+		return """tabItem.name not in
+		 ('Advance Emi', 'Loan Emi', 'Milk Incentives')"""

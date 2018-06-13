@@ -211,7 +211,7 @@ def get_loans(start_date, end_date, vlcc, farmer_id, cycle = None):
 def get_fodder_amount(start_date, end_date, farmer_id, vlcc=None):
 	
 	fodder = frappe.db.sql("""
-			select ifnull(sum(s.grand_total),0) as amt 
+			select ifnull(sum(si.amount),0) as amt 
 		from 
 			`tabSales Invoice Item` si,
 			`tabSales Invoice` s 
@@ -230,7 +230,7 @@ def get_fodder_amount(start_date, end_date, farmer_id, vlcc=None):
 def vet_service_amnt(start_date, end_date, farmer_id, vlcc=None): 
 	
 	vet_amnt = frappe.db.sql("""
-			select ifnull(sum(s.grand_total),0) as amt 
+			select ifnull(sum(si.amount),0) as amt 
 		from 
 			`tabSales Invoice Item` si,
 			`tabSales Invoice` s 

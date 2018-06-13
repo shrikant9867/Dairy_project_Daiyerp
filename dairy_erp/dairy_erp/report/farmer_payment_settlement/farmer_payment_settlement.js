@@ -207,14 +207,16 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			{
 				"label": __("Cheque/Reference No"),
 				"fieldname": "ref_no",
-				"fieldtype": "Data"
+				"fieldtype": "Data",
+				"reqd":1
 			},
 			{fieldtype: "Column Break"},
 			{
 				"label": __("Cheque/Reference Date"),
 				"fieldname": "ref_date",
 				"fieldtype": "Date",
-				"default": frappe.datetime.get_today()
+				"default": frappe.datetime.get_today(),
+				"reqd":1
 			}
 		]
 	});
@@ -234,6 +236,10 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 				dialog.get_field('set_amt_manual').refresh();
 				dialog.get_field('mode_of_payment').df.hidden = 1;
 				dialog.get_field('mode_of_payment').refresh();
+				dialog.get_field('ref_no').df.reqd = 0;
+				dialog.get_field('ref_no').refresh();
+				dialog.get_field('ref_date').df.reqd = 0;
+				dialog.get_field('ref_date').refresh();
 				dialog.get_field('ref_no').df.hidden = 1;
 				dialog.get_field('ref_no').refresh();
 				dialog.get_field('ref_date').df.hidden = 1;

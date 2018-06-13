@@ -44,7 +44,9 @@ frappe.ui.form.on('Farmer Loan', {
 				args : {
 						"name": frm.doc.name,
 						"total": frm.doc.advance_amount,
-						"no_of_instalments": frm.doc.no_of_instalments
+						"no_of_instalments": frm.doc.no_of_instalments,
+						"extension": frm.doc.extension,
+						"paid_instalment": frm.doc.paid_instalment
 						},
 				callback : function(r){			
 					frm.set_value('emi_amount',r.message)
@@ -52,6 +54,9 @@ frappe.ui.form.on('Farmer Loan', {
 				}
 			})
 		}
+	},
+	extension: function(frm) {
+		frm.events.calculate_updated_ami(frm)
 	}
 
 });

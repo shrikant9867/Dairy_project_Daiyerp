@@ -45,7 +45,7 @@ def get_si_amount(data):
 	else: return 0
 
 @frappe.whitelist()
-def get_emi(name = None, total = None, no_of_instalments = None):
+def get_emi(name = None, total = None, no_of_instalments = None, extension=None, paid_instalment = None):
 	if name:
-		emi = (float(total) - float(get_si_amount(name))) / float(no_of_instalments)
+		emi = (float(total) - float(get_si_amount(name))) / (float(no_of_instalments) + float(extension))
 		return emi if emi else 0 

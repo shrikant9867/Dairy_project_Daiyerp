@@ -13,7 +13,7 @@ class FarmerPaymentCycleReport(Document):
 	def validate(self):
 		if frappe.db.get_value("Farmer Payment Cycle Report",{'cycle':self.cycle,\
 			 'vlcc_name':self.vlcc_name, 'farmer_id':self.farmer_id},'name') and self.is_new():
-			frappe.throw(_("FPCR has been generated for this cycle"))
+			frappe.throw(_("FPCR has already been generated for this cycle"))
 		
 	
 	def before_submit(self):

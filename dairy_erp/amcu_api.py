@@ -217,6 +217,8 @@ def create_farmer(data):
 	if api_data:
 		for row in api_data:
 			response_dict.update({row.get('farmer_id'):[]})
+			vlcc_ = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
+			farmer_ = frappe.db.get_value("Farmer",row.get('farmer_id'),'name')
 			try:
 				if row.get('society_id') and row.get('farmer_id') and row.get('full_name') and row.get('mode') == "CREATE":
 					vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
@@ -246,12 +248,27 @@ def create_farmer(data):
 					else:
 						traceback = "Society ID(VLCC-amcu id) does not exist"
 						frappe.throw(_("Society does not exist"))
-				elif  row.get('farmer_id')  and row.get('mode') == "UPDATE" and row.get('updation_date'):
+				elif  row.get('farmer_id')  and row.get('mode') == "UPDATE" and row.get('updation_date') and farmer_:
 					if update_farmer(row, response_dict, traceback):
 						response_dict.get(row.get('farmer_id')).append({"status": "successfully updated","name": row.get('farmer_id')})
 					else:
 						traceback = "Farmer Does Not exist, for more info check dairy log"
 						frappe.throw(_("Farmer does not exist"))
+				elif row.get('farmer_id')  and row.get('mode') == "UPDATE" and row.get('updation_date') and not farmer_ :
+					if vlcc_:
+						if  not frappe.db.sql("select full_name from `tabFarmer` where full_name=%s",(row.get("full_name"))):
+							if reserved_farmer_exist(row,vlcc_):
+								create_farmer_mode(row,vlcc_)
+								response_dict.get(row.get('farmer_id')).append({"status": "successfully created","name": row.get('farmer_id')})
+							else:
+								traceback = "This is reserved farmer id,you can not use"
+								frappe.throw(_("can not use this id, this is reserverd  id"))
+						else:
+							traceback = "Farmer Exist with same name"
+							frappe.throw("Farmer Exist with same name")
+					else:
+						traceback = "Society ID(VLCC-amcu id) does not exist"
+						frappe.throw(_("Society ID(VLCC-amcu id) does not exist"))
 				else:
 					traceback = "Society ID, Full Name, Farmer ID, society id, mode are manadatory data"
 					frappe.throw(_("Society ID, full_name, farmerid  does not exist(Vlcc at ERP)"))
@@ -279,6 +296,16 @@ def update_farmer(data, response_dict, traceback):
 	else:
 		return False
 
+def create_farmer_mode(row, vlcc):
+	farmer_obj = frappe.new_doc("Farmer")
+	farmer_obj.full_name = row.get('full_name')
+	farmer_obj.farmer_id = row.get('farmer_id')
+	farmer_obj.contact_number = row.get('contact_no')
+	farmer_obj.vlcc_name = vlcc
+	farmer_obj.registration_date = row.get('registration_date')
+	farmer_obj.update_date = row.get('updation_date')
+	farmer_obj.cattle_type = row.get('cattle_type')
+	farmer_obj.insert()
 
 def reserved_farmer_exist(data,vlcc):
 	apnd_list = []

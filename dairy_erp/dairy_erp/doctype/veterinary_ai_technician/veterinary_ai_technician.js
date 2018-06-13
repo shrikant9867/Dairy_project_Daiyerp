@@ -9,6 +9,10 @@ frappe.ui.form.on('Veterinary AI Technician', {
 		erpnext.utils.get_address_display(frm, "address", "address_details");
 	},
 	onload: function(frm) {
+		if(!frm.doc.vlcc) {
+			console.log()
+			frm.set_value("vlcc", get_session_user_company())
+		}
 		var user_company = get_session_user_company()
 		frm.set_query("vlcc", function () {
 			return {

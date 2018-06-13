@@ -19,7 +19,7 @@ class FarmerPaymentCycleReport(Document):
 	def before_submit(self):
 		self.advance_operation()
 		self.loan_operation()
-		if self.incentives:
+		if float(self.incentives) != 0:
 			self.create_incentive()
 
 	

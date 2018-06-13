@@ -645,11 +645,11 @@ def create_item_group(args=None):
 
 
 def create_item():
-	for i in ['Milk Incentives', 'Loan Emi', 'Advance Emi']:
+	for i in ['Milk Incentives', 'Loan Emi', 'Advance Emi', 'COW Milk', 'BUFFALO Milk']:
 		if not frappe.db.exists("Item",i):
 			item_doc = frappe.new_doc("Item")
 			item_doc.item_code = i
-			item_doc.item_group = "Others/Miscellaneous"
+			item_doc.item_group = "Others/Miscellaneous" if i in ['Milk Incentives', 'Loan Emi', 'Advance Emi'] else 'Milk & Products'
 			item_doc.flags.ignore_permissions = True
 			item_doc.flags.ignore_mandatory = True
 			item_doc.save()
@@ -1176,4 +1176,5 @@ def item_permissions(user):
 	elif operator_type == "Chilling Centre":
 		return """tabItem.item_group = 'Stationary'"""
 	elif operator_type == "VLCC":
-		return """tabItem.item_group != 'Stationary'"""
+		return """tabItem.item_group != 'Stationary' and tabItem.name not 
+				in ('Advance Emi', 'Loan Emi', 'Milk Incentives')"""

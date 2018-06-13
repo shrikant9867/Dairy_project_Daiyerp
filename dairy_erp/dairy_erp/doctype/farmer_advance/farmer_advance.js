@@ -5,6 +5,11 @@ frappe.ui.form.on('Farmer Advance', {
 	refresh: function(frm) {
 		frm.set_df_property("no_of_instalment", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("advance_amount", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("extension", "hidden", 1);
+		if(cint(frm.doc.no_of_instalment)+cint(frm.doc.extension) - cint(frm.doc.paid_instalment) == 1){
+			console.log(frm.doc.no_of_instalments,frm.doc.extension,frm.doc.paid_instalment,cint(frm.doc.no_of_instalments)+cint(frm.doc.extension) - cint(frm.doc.paid_instalment))
+			frm.set_df_property("extension", "hidden", 0);
+		}
 	},
 	onload: function(frm) {
 		if(!frm.doc.vlcc){
@@ -32,7 +37,9 @@ frappe.ui.form.on('Farmer Advance', {
 				args : {
 						"name": frm.doc.name,
 						"total": frm.doc.advance_amount,
-						"no_of_instalments": frm.doc.no_of_instalment
+						"no_of_instalments": frm.doc.no_of_instalment,
+						"extension": frm.doc.extension,
+						"paid_instalment": frm.doc.paid_instalment
 						},
 				callback : function(r){			
 					frm.set_value('emi_amount',r.message)
@@ -40,6 +47,9 @@ frappe.ui.form.on('Farmer Advance', {
 				}
 			})
 		}
+	},
+	extension: function(frm) {
+		frm.events.calculate_updated_ami(frm)
 	}
 });
 

@@ -40,10 +40,11 @@ def farmer_advance_permission(user):
 
 
 @frappe.whitelist()
-def get_emi(name = None, total = None, no_of_instalments = None):
-	print "###########################",type(total),get_si_amount(name)
+def get_emi(name = None, total = None, no_of_instalments = None,extension = None, paid_instalment=None):
 	if name:
-		emi = (float(total) - float(get_si_amount(name))) / float(no_of_instalments)
+		outstanding_amount = (float(total) - float(get_si_amount(name)))
+		instalment = (float(no_of_instalments) + float(extension)) - float(paid_instalment)
+		emi = outstanding_amount / instalment
 		return emi if emi else 0 
 
 

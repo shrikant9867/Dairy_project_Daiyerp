@@ -259,11 +259,12 @@ def submit_dn(doc):
 			dn_doc.flags.ignore_permissions = True
 			dn_doc.submit()
 
-			make_si(dn_doc) 	#Sales Invoice @CO use case 1
+			pi = make_pi(doc,is_camp_office=True) 	#Purchase Invoice @VLCC use case 1
+			si = make_si(dn_doc,pi) 	#Sales Invoice @CO use case 1
+			frappe.db.set_value("Purchase Invoice",pi,"sales_invoice",si)
 
-			make_pi(doc,is_camp_office=True) 	#Purchase Invoice @VLCC use case 1
 
-def make_si(dn):
+def make_si(dn,pi):
 	"""Make auto sales invoice on submit of DN @Camp (DN gets submit on submit of PR)"""
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)
 	co = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
@@ -272,6 +273,7 @@ def make_si(dn):
 	si = frappe.new_doc("Sales Invoice")
 	si.customer = dn.customer
 	si.company = dn.company
+	si.purchase_invoice = pi
 	si.selling_price_list = "LCOS" if frappe.db.get_value("Price List","LCOS") else "GTCOS"
 	si.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 	if dn.taxes_and_charges:
@@ -293,6 +295,7 @@ def make_si(dn):
 	si.flags.ignore_permissions = True
 	si.save()
 	si.submit()
+	return si.name
 
 def make_pi(doc,is_camp_office):
 	"""Make auto PI on submit of PR @VLCC"""
@@ -322,6 +325,7 @@ def make_pi(doc,is_camp_office):
 		pi.flags.ignore_permissions = True
 		pi.save()
 		pi.submit()
+		return pi.name
 
 
 def make_pi_against_localsupp(po_doc,pr_doc):
@@ -417,6 +421,8 @@ def check_if_dropship(doc):
 			if po:
 				po_data = [data.get('name') for data in po]
 
+				pi_name = make_pi(doc,is_camp_office=False)			#Purchase Invoice @VLCC in use case 2
+
 				for data in set(po_data):
 					po_doc = frappe.get_doc("Purchase Order",data)
 
@@ -425,6 +431,7 @@ def check_if_dropship(doc):
 					if po_doc.is_dropship == 1:
 						si = frappe.new_doc("Sales Invoice")
 						si.customer = doc.company
+						si.purchase_invoice = pi_name
 						si.company = frappe.db.get_value("Company",{"is_dairy":1},"name")
 						si.camp_office = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.get('company')},"camp_office")
 						if doc.taxes_and_charges:
@@ -447,13 +454,13 @@ def check_if_dropship(doc):
 				si.flags.ignore_permissions = True  		#Sales Invoice @CO in use case 2
 				si.save()
 				si.submit()
+				frappe.db.set_value("Purchase Invoice",pi_name,"sales_invoice",si)
 				
 				if pi:
 					pi.flags.ignore_permissions = True  		#Purchase Invoice @CO in use case 2
 					pi.save()
 					pi.submit()
 
-				make_pi(doc,is_camp_office=False)			#Purchase Invoice @VLCC in use case 2
 				mi_status_update(doc)
 
 

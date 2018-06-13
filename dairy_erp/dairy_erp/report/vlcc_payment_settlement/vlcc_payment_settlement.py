@@ -9,6 +9,7 @@ from erpnext.accounts.doctype.journal_entry.journal_entry \
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_outstanding_reference_documents
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from dairy_erp import dairy_utils as utils
 from frappe import _
 import json
@@ -376,9 +377,98 @@ def make_payment_entry(**kwargs):
 		pe.total_allocated_amount = party_amount
 		pe.save()
 		pe.submit()
+
+		make_pe_against_invoice(pe.name,kwargs)
+
 		return pe.name
 	except Exception,e: 
 		utils.make_dairy_log(title="Payment Entry Creation Error in VLCC Payment",method="make_payment_entry", status="Error",
+					 message=e, traceback=frappe.get_traceback())
+
+def make_pe_against_invoice(pe,kwargs):
+	dairy = frappe.db.get_value("Company",{"is_dairy":1},'name')
+	pe_doc = frappe.get_doc("Payment Entry",pe)
+	for row in pe_doc.references:
+		if row.reference_doctype == 'Purchase Invoice':
+			pi_doc = frappe.get_doc("Purchase Invoice",row.reference_name)
+			si = frappe.db.get_value("Sales Invoice",
+					{"vlcc_milk_collection_record":pi_doc.vlcc_milk_collection_record},"name")
+			if si:
+				si_doc = frappe.get_doc("Sales Invoice",si)
+				create_payment_entry(si_doc,row,kwargs)
+		elif row.reference_doctype == 'Sales Invoice':
+			si_doc = frappe.get_doc("Sales Invoice",row.reference_name)
+			
+			if si_doc.purchase_invoice:
+				pi_doc = frappe.get_doc("Purchase Invoice",si_doc.purchase_invoice)
+				create_payment_entry(pi_doc,row,kwargs)
+
+def create_payment_entry(doc,row,kwargs):
+
+	party_type = ""
+	if row.reference_doctype == 'Purchase Invoice':
+		party_account = get_party_account("Customer", doc.customer, doc.company)
+		party_type = "Customer"
+		party = doc.customer
+		ref_doc = "Sales Invoice"
+		payment_type = "Receive"
+		ref_no = 'Auto Settlement on PI'
+		default_bank_cash_account = get_default_bank_cash_account(doc.company, "Bank")
+		if not default_bank_cash_account:
+			default_bank_cash_account = get_default_bank_cash_account(doc.company, "Cash")
+		party_account_currency = get_account_currency(party_account)
+	elif row.reference_doctype == 'Sales Invoice':
+		party_account = get_party_account("Supplier", doc.supplier, doc.company)
+		party_type = "Supplier"
+		party = doc.supplier
+		ref_doc = "Purchase Invoice"
+		payment_type = "Pay"
+		ref_no = 'Auto Settlement on SI'
+		default_bank_cash_account = get_default_bank_cash_account(doc.company, "Bank")
+		if not default_bank_cash_account:
+			default_bank_cash_account = get_default_bank_cash_account(doc.company, "Cash")
+		party_account_currency = get_account_currency(party_account)
+	
+	try:
+		pe = frappe.new_doc("Payment Entry")
+		pe.payment_type = payment_type
+		pe.company = doc.company
+		pe.posting_date = nowdate()
+		pe.mode_of_payment = kwargs.get('args').get('data').get('mode_of_payment')
+		pe.party_type = party_type
+		pe.party = party
+		pe.paid_from = party_account if payment_type=="Receive" else default_bank_cash_account.account
+		pe.paid_to = party_account if payment_type=="Pay" else default_bank_cash_account.account
+		pe.paid_from_account_currency = party_account_currency \
+			if payment_type=="Receive" else default_bank_cash_account.account_currency
+		pe.paid_to_account_currency = party_account_currency \
+			if payment_type=="Pay" else default_bank_cash_account.account_currency
+		
+		pe.paid_amount = row.allocated_amount
+		pe.received_amount = row.allocated_amount
+
+		pe.allocate_payment_amount = 1	
+		party_amount = pe.paid_amount if pe.payment_type=="Receive" else pe.received_amount
+
+		pe.append('references', {
+			"reference_doctype": ref_doc,
+			"reference_name": doc.name,
+			"due_date":doc.due_date,
+			"total_amount": doc.grand_total,
+			"outstanding_amount": doc.outstanding_amount,
+			"allocated_amount":row.allocated_amount
+		})
+		
+		pe.reference_no = ref_no
+		pe.reference_date = nowdate()
+		pe.flags.ignore_permissions = True
+		pe.flags.ignore_mandatory = True
+		pe.total_allocated_amount = party_amount
+		pe.save()
+		pe.submit()
+
+	except Exception,e: 
+		utils.make_dairy_log(title="Payment Entry Creation Error Against SI in VLCC Payment",method="make_payment_entry", status="Error",
 					 message=e, traceback=frappe.get_traceback())
 
 

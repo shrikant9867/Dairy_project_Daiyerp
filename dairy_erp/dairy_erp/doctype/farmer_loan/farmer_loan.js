@@ -4,6 +4,8 @@
 frappe.ui.form.on('Farmer Loan', {
 	refresh: function(frm) {
 		frm.set_df_property("no_of_instalments", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("principle", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("interest", "read_only", frm.doc.__islocal ? 0:1);
 	},
 	onload: function(frm) {
 		if(!frm.doc.vlcc){

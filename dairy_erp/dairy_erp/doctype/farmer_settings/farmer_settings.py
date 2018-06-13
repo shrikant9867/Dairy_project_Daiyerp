@@ -5,10 +5,13 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe import _
+
 
 class FarmerSettings(Document):
 	def validate(self):
-		pass	
+		if frappe.db.get_value("Farmer Settings", {'vlcc': get_vlcc()}, 'name')	and self.is_new():
+			frappe.throw(_("Please Update in existing farmer seetings record"))
 	
 	def after_insert(self):
 		self.create_vlcc_copy()
@@ -51,3 +54,6 @@ def farmer_settings_permission(user):
 	
 	if user != 'Administrator' and "Dairy Manager" in roles:
 		return """(`tabFarmer Settings`.is_global = 1)"""
+
+def get_vlcc():
+	return frappe.db.get_value("User", frappe.session.user, 'company')

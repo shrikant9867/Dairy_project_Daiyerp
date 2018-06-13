@@ -99,8 +99,8 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 						// frm.set_value("advance_outstanding", r.message.advance)
 						// frm.set_value("loan_outstanding", r.message.loan)
 						frm.set_value("total_bill",flt(frm.doc.total_amount) + flt(frm.doc.incentives))
-						frm.set_value("feed_and_fodder",r.message.fodder)
-						frm.set_value("veterinary_services", r.message.vet)
+						frm.set_value("feed_and_fodder",r.message.fodder.toFixed(2))
+						frm.set_value("veterinary_services", r.message.vet.toFixed(2))
 						frm.refresh_fields();
 						frm.events.calculate_total_ami(frm)
 						frm.events.calculate_total_outstanding(frm)
@@ -109,7 +109,6 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 
 					}
 					else{
-						console.log("######")
 						frm.set_value("fmcr_details","")
 						frm.set_value("total_amount",0)
 						frm.set_value("loan_child","")
@@ -132,14 +131,14 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 		$.each(frm.doc.loan_child, function(i, d) {
 			emi += flt(d.emi_amount)				
 		});
-		frm.set_value("loan_emi", emi)
+		frm.set_value("loan_emi", emi.toFixed(2))
 	},
 	calculate_total_outstanding: function(frm) {
 		outstanding = 0
 		$.each(frm.doc.loan_child, function(i, d) {
 			outstanding += flt(d.outstanding)
 		});
-		frm.set_value("loan_outstanding", outstanding)
+		frm.set_value("loan_outstanding", outstanding.toFixed(2))
 	},
 	calculate_advance_emi: function(frm) {
 		emi = 0
@@ -147,14 +146,14 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 			console.log()
 			emi += flt(d.emi_amount)				
 		});
-		frm.set_value("advance_emi", emi)
+		frm.set_value("advance_emi", emi.toFixed(2))
 	},
 	calculate_advance_outstanding: function(frm) {
 		outstanding = 0
 		$.each(frm.doc.advance_child, function(i, d) {
 			outstanding += flt(d.outstanding)				
 		});
-		frm.set_value("advance_outstanding", outstanding)
+		frm.set_value("advance_outstanding", outstanding.toFixed(2))
 	}
 });
 

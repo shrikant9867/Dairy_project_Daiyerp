@@ -167,6 +167,21 @@ def get_data():
 					"type": "doctype",
 					"name": "Veterinary AI Technician",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Settings",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Loan",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Advance",
+					"description": _(" "),
 				}
 				
 			]

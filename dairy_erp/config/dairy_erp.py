@@ -113,12 +113,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Journal Entry",
 					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Advance",
-					"description": _(" "),
-				}		
+				}	
 			]
 		},
 		{

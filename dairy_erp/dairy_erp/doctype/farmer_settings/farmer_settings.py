@@ -13,6 +13,15 @@ class FarmerSettings(Document):
 	def after_insert(self):
 		self.create_vlcc_copy()
 
+	def on_update(self):
+
+		roles = frappe.get_roles()
+		vlcc = frappe.get_all("Village Level Collection Centre")
+		for row in vlcc:
+			farmer_setting = frappe.db.get_value("Farmer Settings",{'vlcc':row.get('name')},'name')
+			if farmer_setting and "Dairy Manager" in roles:
+				frappe.db.set_value("Farmer Settings", {'vlcc': row.get('name')}, 'farmer_incentives', self.farmer_incentives)
+
 	def create_vlcc_copy(self):
 		roles = frappe.get_roles()
 		vlcc = frappe.get_all("Village Level Collection Centre")
@@ -27,14 +36,9 @@ class FarmerSettings(Document):
 					farmer_setting.flags.ignore_permissions = True
 					farmer_setting.save()
 				
-				elif farmer_setting and "Dairy Manager" in roles:
-					doc_obj = frappe.get_doc("Farmer Settings",farmer_setting)
-					doc_obj.update(self.__dict__)
-					doc_obj.flags.ignore_permissions = True
-					doc_obj.save()
-		
-		if 'Dairy Manager' in roles:
+		if 'Dairy Manager' in roles and not self.vlcc:
 			self.is_global = 1
+			self.save()
 
 
 

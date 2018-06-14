@@ -294,7 +294,9 @@ def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
 		"advance": get_advances(start_date, end_date, vlcc, farmer_id, cycle) or 0,
 		"loan": get_loans(start_date, end_date, vlcc, farmer_id, cycle) or 0,
 		"fodder": get_fodder_amount(start_date, end_date, farmer_id, vlcc) or 0,
-		"vet": vet_service_amnt(start_date, end_date, farmer_id, vlcc) or 0
+		"vet": vet_service_amnt(start_date, end_date, farmer_id, vlcc) or 0,
+		"child_loan": get_loans_child(start_date, end_date, vlcc, farmer_id,cycle),
+		"child_advance": get_advance_child(start_date, end_date, vlcc, farmer_id, cycle)
 	}
 
 
@@ -416,7 +418,7 @@ def req_cycle_computation(data):
 			`tabFarmer Date Computation`
 		where
 			'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
-		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=1)
+		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1)
 	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 	instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
 	if len(not_req_cycl):
@@ -427,7 +429,7 @@ def req_cycle_computation(data):
 			where
 				'{date}' < start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
 			""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
-				instalment = instalment),as_dict=1,debug=1)
+				instalment = instalment),as_dict=1)
 		
 		req_cycl_list = [i.get('name') for i in req_cycle]
 		return req_cycl_list
@@ -450,7 +452,7 @@ def req_cycle_computation_advance(data):
 			`tabFarmer Date Computation`
 		where
 			'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
-		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=1)
+		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1)
 	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 	
 	instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
@@ -467,3 +469,38 @@ def req_cycle_computation_advance(data):
 		req_cycl_list = [i.get('name') for i in req_cycle]
 		return req_cycl_list
 	return []
+
+
+def get_loans_child(start_date, end_date, vlcc, farmer_id, cycle=None):
+	loans_ = frappe.db.sql("""
+				select name,farmer_id,outstanding_amount,
+				emi_amount,no_of_instalments,paid_instalment,advance_amount,
+				emi_deduction_start_cycle,extension,date_of_disbursement,vlcc
+			from 
+				`tabFarmer Loan`
+			where
+				farmer_id = '{0}' and outstanding_amount != 0 and date_of_disbursement < now()	
+				""".format(farmer_id),as_dict=1)
+	loans = []
+	for row in loans_:
+		req_cycle = req_cycle_computation(row)
+		if cycle in req_cycle_computation(row):
+			loans.append(row)
+	return loans
+
+
+def get_advance_child(start_date, end_date, vlcc, farmer_id, cycle=None):
+	advance_ = frappe.db.sql("""
+				select name,farmer_id,outstanding_amount,emi_amount,advance_amount,
+				no_of_instalment,paid_instalment,paid_instalment,emi_deduction_start_cycle,
+				extension,date_of_disbursement,vlcc
+			from 
+				`tabFarmer Advance`
+			where
+				farmer_id = '{0}' and outstanding_amount != 0 and date_of_disbursement < now()	
+			""".format(farmer_id),as_dict=1)
+	advance = []
+	for row in advance_:
+		if cycle in req_cycle_computation_advance(row):
+			advance.append(row)
+	return advance

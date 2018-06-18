@@ -24,6 +24,13 @@ frappe.ui.form.on('VLCC Settings', {
 	cycle_hours: function(frm) {
 		frm.events.validate_cycle_hours(frm)	
 	},
+	months_to_member: function(frm){
+		if(frm.doc.months_to_member >999) {
+			frappe.msgprint("Months can not be greater than 999")
+			frm.set_value("months_to_member",0)
+			frm.reload_doc();
+		}
+	},
 	validate: function(frm) {
 		frm.events.validate_cycle_hours(frm)
 	},
@@ -38,7 +45,9 @@ frappe.ui.form.on('VLCC Settings', {
 				},
 				callback: function(r){
 					if(r.message){
-						frm.set_value("vlcc",r.message.company)
+						if(!frm.doc.vlcc){
+							frm.set_value("vlcc",r.message.company)
+						}
 						frm.events.check_record_exist(frm)
 					}
 				}

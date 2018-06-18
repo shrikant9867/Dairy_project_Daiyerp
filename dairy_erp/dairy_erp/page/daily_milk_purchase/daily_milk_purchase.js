@@ -30,7 +30,13 @@ frappe.daily_milk_purchase = Class.extend({
                     me.print = frappe.render_template("daily_milk_purchase",{
                             "data":me.table_data.fmcr_data,
                             "count_data":me.table_data.data,
-                            "local_sale":me.table_data.local_sale
+                            "local_sale":me.table_data.local_sale,
+                            "non_member_count":me.table_data.non_member_count,
+                            "member_count": me.table_data.member_count,
+                            "non_member_qty":me.table_data.non_member_qty,
+                            "member_qty":me.table_data.member_qty,
+                            "non_member_amt":me.table_data.non_member_amt,
+                            "member_amt":me.table_data.member_amt
                             })
                     $(me.page).find(".render-table").append(me.print)
                 }
@@ -91,7 +97,13 @@ frappe.daily_milk_purchase = Class.extend({
                             "local_sale":me.table_data.local_sale,
                             "vlcc":me.table_data.vlcc,
                             "vlcc_addr":me.table_data.vlcc_addr,
-                            "date_":frappe.datetime.str_to_user(date_)
+                            "date_":frappe.datetime.str_to_user(date_),
+                            "non_member_count":me.table_data.non_member_count,
+                            "member_count": me.table_data.member_count,
+                            "non_member_qty":me.table_data.non_member_qty,
+                            "member_qty":me.table_data.member_qty,
+                            "non_member_amt":me.table_data.non_member_amt,
+                            "member_amt":me.table_data.member_amt
                             }),
             title:__("daily_milk_purchase_report_"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,

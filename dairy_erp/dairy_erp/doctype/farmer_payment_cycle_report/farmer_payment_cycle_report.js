@@ -12,6 +12,9 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 		if(!frm.doc.vlcc_name){
 			get_vlcc(frm)
 		}
+		if(!frm.doc.address) {
+			get_address(frm)
+		}
 	},
 	vlcc_name: function(frm) {
 		frm.events.add_cycle_child(frm)		
@@ -96,8 +99,6 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 						})
 						frm.set_value("total_amount", total)
 						frm.set_value("incentives", r.message.incentive)
-						// frm.set_value("advance_outstanding", r.message.advance)
-						// frm.set_value("loan_outstanding", r.message.loan)
 						frm.set_value("total_bill",flt(frm.doc.total_amount) + flt(frm.doc.incentives))
 						frm.set_value("feed_and_fodder",r.message.fodder.toFixed(2))
 						frm.set_value("veterinary_services", r.message.vet.toFixed(2))
@@ -154,6 +155,10 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 			outstanding += flt(d.outstanding)				
 		});
 		frm.set_value("advance_outstanding", outstanding.toFixed(2))
+	},
+	address: function(frm) {
+		erpnext.utils.get_address_display(frm, "address", "address_display");
+		frm.refresh_field("address_display")
 	}
 });
 
@@ -174,6 +179,40 @@ get_vlcc =  function(frm) {
 			},
 			callback: function(r){
 				frm.set_value("vlcc_name",r.message.company)
+				get_address(frm)
+
 			}
 		})
+}
+
+frappe.ui.form.on('Loan Child', 'pay_full_loan', function(frm, cdt, cdn) {
+	var row = locals[cdt][cdn]
+	frappe.call({
+		method: "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.update_full_loan",
+		args: {
+			"loan": row.loan_id
+		},
+		callback: function(r){
+			if(r.message){	
+			
+			}
+		}
+	});
+
+});
+
+get_address =  function(frm) {
+	frappe.call({
+		method: "frappe.client.get_value",
+		args: {
+			doctype: "Village Level Collection Centre",
+			filters: {"name": frm.doc.vlcc_name},
+			fieldname: "address"
+		},
+		callback: function(r){
+			if(r.message){
+				frm.set_value("address",r.message.address)
+			}
+		}
+	})
 }

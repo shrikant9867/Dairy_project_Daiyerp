@@ -25,11 +25,16 @@ class FarmerPaymentCycleReport(Document):
 	
 	def advance_operation(self):
 		for row in self.advance_child:
-			if not frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
-						'farmer_advance':row.adv_id }, 'name'):
+			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
+						'farmer_advance':row.adv_id }, 'name')
+			if not si_exist:
 				self.validate_advance(row)
 				self.create_si(row, "Advance", "Advance Emi", row.adv_id)
 				self.update_advance(row)
+			
+			elif si_exist:
+				
+
 	
 	def loan_operation(self):
 		for row in self.loan_child:
@@ -263,8 +268,8 @@ def req_cycle_computation(data):
 		from
 			`tabFarmer Date Computation`
 		where
-			'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
-		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1)
+			'{0}' < start_date and vlcc = '{1}' order by start_date {2}""".
+		format(data.get('date_of_disbursement'),data.get('vlcc'),get_conditions(data)),as_dict=1,debug=0)
 	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 	instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
 	if len(not_req_cycl):
@@ -273,13 +278,27 @@ def req_cycle_computation(data):
 			from
 				`tabFarmer Date Computation`
 			where
-				'{date}' < start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
-			""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
-				instalment = instalment),as_dict=1)
+				'{date}' < start_date {cond} and vlcc = '{vlcc}' order by start_date limit {instalment}
+			""".format(date=data.get('date_of_disbursement'), cond = get_cycle_cond(data,not_req_cycl_list),vlcc = data.get('vlcc'),
+				instalment = instalment),as_dict=1,debug=0)
 		
 		req_cycl_list = [i.get('name') for i in req_cycle]
 		return req_cycl_list
 	return []
+
+def get_conditions(data):
+	conditions = " and 1=1"
+	if data.get('emi_deduction_start_cycle'):
+		conditions += ' limit {0}'.format(data.get('emi_deduction_start_cycle'))
+	return conditions
+
+def get_cycle_cond(data,not_req_cycl_list):
+	conditions = " and 1=1"
+	if data.get('emi_deduction_start_cycle'):
+		conditions += ' and name not in ({cycle})'.format(cycle = ','.join(not_req_cycl_list))
+	else:
+		conditions += ' and name in ({cycle})'.format(cycle = ','.join(not_req_cycl_list))
+	return conditions
 
 def get_current_cycle(data):
 	return frappe.db.sql("""
@@ -298,7 +317,7 @@ def req_cycle_computation_advance(data):
 			`tabFarmer Date Computation`
 		where
 			'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
-		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=1)
+		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
 	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 	
 	instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
@@ -350,3 +369,12 @@ def get_advance_child(start_date, end_date, vlcc, farmer_id, cycle=None):
 		if cycle in req_cycle_computation_advance(row):
 			advance.append(row)
 	return advance
+
+
+@frappe.whitelist()
+def update_full_loan(loan=None):
+	loan_doc = frappe.get_doc("Farmer Loan", loan)
+	paid_amnt = float(loan_doc.advance_amount) - float(loan_doc.outstanding_amount)
+	instlment = int(loan_doc.no_of_instalments) + int(loan_doc.extension) 
+	instlment_brkup = float(loan_doc.interest) / instlment
+	principle_paid = float(paid_amnt) - float(instlment_brkup) 

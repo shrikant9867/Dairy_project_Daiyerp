@@ -28,7 +28,7 @@ def create_si():
 		child_cycl = frappe.db.sql("""select cycle from `tabFarmer Cycle` where parent =%s""",(row.get('name')),as_dict=1)
 		cc = [i.get('cycle') for i in child_cycl]	
 		if len(cur_cycl):
-			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc and not frappe.db.get_value("Farmer Settings",{'vlcc': row.get('vlcc')}, 'is_fpcr'):
+			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
 				make_si(row,cur_cycl[0].get('name'))
 
 
@@ -40,6 +40,7 @@ def make_si(data, cur_cycl=None):
 			si_doc.customer = data.get('farmer_name')
 			si_doc.company = data.get('vlcc')
 			si_doc.farmer_advance = data.get('name')
+			si_doc.cycle_ = cur_cycl
 			si_doc.append("items",{
 				"item_code":"Milk Incentives",
 				"qty": 1,

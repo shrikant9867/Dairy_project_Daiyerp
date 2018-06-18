@@ -11,7 +11,7 @@ from frappe import _
 class FarmerSettings(Document):
 	def validate(self):
 		if frappe.db.get_value("Farmer Settings", {'vlcc': get_vlcc()}, 'name')	and self.is_new():
-			frappe.throw(_("Please Update in existing farmer seetings record"))
+			frappe.throw(_("Please Update in existing farmer settings record"))
 	
 	def after_insert(self):
 		self.create_vlcc_copy()
@@ -24,6 +24,8 @@ class FarmerSettings(Document):
 			farmer_setting = frappe.db.get_value("Farmer Settings",{'vlcc':row.get('name')},'name')
 			if farmer_setting and "Dairy Manager" in roles:
 				frappe.db.set_value("Farmer Settings", {'vlcc': row.get('name')}, 'farmer_incentives', self.farmer_incentives)
+				frappe.db.set_value("Farmer Settings", {'vlcc': row.get('name')}, 'per_litre', self.per_litre)
+				frappe.db.set_value("Farmer Settings", {'vlcc': row.get('name')}, 'enable_per_litre', self.enable_per_litre)
 
 	def create_vlcc_copy(self):
 		roles = frappe.get_roles()

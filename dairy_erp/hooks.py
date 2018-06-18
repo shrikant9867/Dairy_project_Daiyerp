@@ -221,7 +221,8 @@ permission_query_conditions = {
     "Journal Entry": "dairy_erp.customization.journal_entry.journal_entry.je_permission",
     "Farmer Settings": "dairy_erp.dairy_erp.doctype.farmer_settings.farmer_settings.farmer_settings_permission",
     "Farmer Advance": "dairy_erp.dairy_erp.doctype.farmer_advance.farmer_advance.farmer_advance_permission",
-    "Farmer Loan": "dairy_erp.dairy_erp.doctype.farmer_loan.farmer_loan.farmer_loan_permission"
+    "Farmer Loan": "dairy_erp.dairy_erp.doctype.farmer_loan.farmer_loan.farmer_loan_permission",
+    "Farmer Payment Cycle Report": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.fpcr_permission"
 }
 # Testing
 # -------

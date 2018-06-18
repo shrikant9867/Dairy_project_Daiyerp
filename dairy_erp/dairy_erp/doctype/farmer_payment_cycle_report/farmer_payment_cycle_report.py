@@ -25,19 +25,27 @@ class FarmerPaymentCycleReport(Document):
 	
 	def advance_operation(self):
 		for row in self.advance_child:
-			if not frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
-						'farmer_advance':row.adv_id }, 'name'):
+			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
+						'farmer_advance':row.adv_id }, 'name')
+			if not si_exist:
 				self.validate_advance(row)
 				self.create_si(row, "Advance", "Advance Emi", row.adv_id)
 				self.update_advance(row)
+			elif si_exist:
+				self.update_si(row, self.cycle, si_exist)
+				self.update_advance_fpcr(row)
 	
 	def loan_operation(self):
 		for row in self.loan_child:
-			if not frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
-						'farmer_advance':row.loan_id }, 'name'):
+			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
+						'farmer_advance':row.loan_id }, 'name')
+			if not si_exist:
 				self.validate_loan(row)
 				self.create_si(row,"Loan","Loan Emi", row.loan_id)
 				self.update_loan(row)
+			elif si_exist:
+				self.update_si(row, self.cycle, si_exist)
+				self.update_loan_fpcr(row)
 
 	
 	def validate_advance(self, row):
@@ -116,6 +124,50 @@ class FarmerPaymentCycleReport(Document):
 			adv_doc.emi_amount = 0
 		adv_doc.flags.ignore_permissions =True
 		adv_doc.save()
+
+	
+	def update_advance_fpcr(self, row):
+		instalment = 0
+		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+			,filters={'farmer_advance':row.adv_id})
+		adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
+		adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
+		for i in adv_doc.cycle:
+			instalment +=1
+		adv_doc.paid_instalment = instalment
+		if adv_doc.outstanding_amount > 0 :
+			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
+		if adv_doc.outstanding_amount == 0:
+			adv_doc.status = "Paid"
+			adv_doc.emi_amount = 0
+		adv_doc.flags.ignore_permissions =True
+		adv_doc.save()
+
+	def update_loan_fpcr(self, row):
+		instalment = 0
+		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+			,filters={'farmer_advance':row.loan_id})
+		
+		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
+		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
+		for i in loan_doc.cycle:
+			instalment += 1
+		loan_doc.paid_instalment = instalment
+		if loan_doc.outstanding_amount > 0:
+			loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
+		if loan_doc.outstanding_amount == 0:
+			loan_doc.status = "Paid"
+			loan_doc.emi_amount = 0
+		loan_doc.flags.ignore_permissions = True
+		loan_doc.save()
+
+	
+	def update_si(self, row, cycle, si_no):
+		item_row = frappe.db.get_value("Sales Invoice Item", {'parent':si_no}, 'name')
+		frappe.db.set_value("Sales Invoice Item", item_row, 'rate', row.amount)
+		frappe.db.set_value("Sales Invoice Item", item_row, 'amount', row.amount)
+		frappe.db.set_value("Sales Invoice", si_no, 'grand_total', row.amount)
+
 
 	def create_incentive(self):
 		pi = frappe.new_doc("Purchase Invoice")
@@ -373,3 +425,12 @@ def update_full_loan(loan=None):
 	instlment = int(loan_doc.no_of_instalments) + int(loan_doc.extension) 
 	instlment_brkup = float(loan_doc.interest) / instlment
 	principle_paid = float(paid_amnt) - float(instlment_brkup) 
+
+
+
+
+def fpcr_permission(user):
+	roles = frappe.get_roles(user)
+	
+	if user != 'Administrator' and "Vlcc Manager" in roles:
+		return """(`tabFarmer Payment Cycle Report`.vlcc_name = '{0}')""".format(user_doc.get('company'))

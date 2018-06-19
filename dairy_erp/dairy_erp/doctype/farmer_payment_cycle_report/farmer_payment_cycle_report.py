@@ -431,6 +431,7 @@ def update_full_loan(loan=None):
 
 def fpcr_permission(user):
 	roles = frappe.get_roles(user)
-	
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+
 	if user != 'Administrator' and "Vlcc Manager" in roles:
 		return """(`tabFarmer Payment Cycle Report`.vlcc_name = '{0}')""".format(user_doc.get('company'))

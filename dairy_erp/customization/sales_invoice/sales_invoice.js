@@ -3,7 +3,9 @@ frappe.ui.form.on("Sales Invoice", {
 	onload: function(frm) {	
 		if (get_session_user_type().operator_type == "Vet AI Technician")
 		{
-			frm.set_value("service_note",1)
+			// frm.set_value("service_note",1)
+			cur_frm.set_df_property('service_note', 'hidden', 1);
+
 		}
 		frm.set_query("farmer", function () {
 			return {

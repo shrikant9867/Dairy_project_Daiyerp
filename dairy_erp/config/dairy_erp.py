@@ -162,23 +162,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Veterinary AI Technician",
 					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Settings",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Loan",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Advance",
-					"description": _(" "),
 				}
-				
 			]
 		},
 		{
@@ -312,11 +296,6 @@ def get_data():
 					"name": "Cash Flow",
 					"doctype": "GL Entry",
 					"is_query_report": True
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Payment Cycle Report",
-					"description": _(" "),
 				},
 				{
 					"type": "report",

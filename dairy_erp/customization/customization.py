@@ -823,7 +823,6 @@ def dn_permission(user):
 		return """(`tabDelivery Note`.company = '{0}')""".format(user_doc.get('company'))
 
 def si_permission(user):
-
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 
 	if user_doc.get('operator_type') == "Camp Office":

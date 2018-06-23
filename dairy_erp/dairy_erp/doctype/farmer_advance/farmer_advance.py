@@ -5,45 +5,56 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt, today, getdate
 from frappe.model.document import Document
 
 class FarmerAdvance(Document):
 	
 	def on_submit(self):
-		not_req_cycl = frappe.db.sql("""
-				select name
-			from
-				`tabFarmer Date Computation`
-			where
-				'{0}' < start_date order by start_date limit {1}""".
-			format(self.date_of_disbursement,self.emi_deduction_start_cycle),as_dict=1)
-		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
+		if flt(self.emi_amount) > flt(self.outstanding_amount):
+			frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
 
-		req_cycle = frappe.db.sql("""
-				select name,start_date
-			from
-				`tabFarmer Date Computation`
-			where
-				'{date}' < start_date and name not in ({cycle}) order by start_date limit {instalment}
-			""".format(date=self.date_of_disbursement, cycle = ','.join(not_req_cycl_list),
-				instalment = self.no_of_instalment),as_dict=1,debug=1)
-		for row in req_cycle:
-			self.create_recur_si(row)
-
-	def create_recur_si(self,data):
-		si_rec = frappe.new_doc("Recurring Sales Invoice Log")
-		si_rec.start_date = data.get('start_date')
-		si_rec.emi_amount = self.emi_amount
-		si_rec.type = "Advance"
-		si_rec.farmer_id = self.farmer_id
-		si_rec.farmer_name = self.farmer_name
-		si_rec.vlcc = self.vlcc
-		si_rec.farmer_advance = self.name
-		si_rec.status = "Pending"
-		si_rec.flags.ignore_permissions = True
-		si_rec.save()
-		si_rec.submit()
 
 	def validate(self):
+		self.status = "Unpaid"
+		self.outstanding_amount = self.advance_amount
+		self.date_of_disbursement = today()
 		if self.advance_amount <= 0:
 			frappe.throw(_("Advance Amount cannot be zero"))
+
+
+	def on_update_after_submit(self):
+		pass
+		# if self.emi_amount > self.outstanding_amount:
+		# 	frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
+		# if (self.no_of_instalment - self.paid_instalment) == 1 and self.emi_amount != self.outstanding_amount and int(self.extension) == 0:
+		# 		frappe.throw(_("EMI must be equal to outstanding in last instalment please use extension"))
+
+def farmer_advance_permission(user):
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
+	roles = frappe.get_roles(user)
+	
+	if user != 'Administrator' and "Vlcc Manager" in roles:
+		return """(`tabFarmer Advance`.vlcc = '{0}')""".format(user_doc.get('company'))
+	
+
+
+@frappe.whitelist()
+def get_emi(name = None, total = None, no_of_instalments = None):
+	print "###########################",type(total),get_si_amount(name)
+	if name:
+		emi = (float(total) - float(get_si_amount(name))) / float(no_of_instalments)
+		return emi if emi else 0 
+
+
+def get_si_amount(data):
+	sum_ = frappe.db.sql("""
+			select ifnull(sum(grand_total),0) as total
+		from 
+			`tabSales Invoice` 
+		where 
+		farmer_advance =%s and total is not null""",(data),as_dict=1)
+	
+	if len(sum_):
+		return sum_[0].get('total') if sum_[0].get('total') != None else 0
+	else: return 0

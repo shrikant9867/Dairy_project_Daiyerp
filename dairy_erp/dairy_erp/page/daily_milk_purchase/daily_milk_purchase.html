@@ -1,0 +1,47 @@
+<table class="table table-bordered">
+	<thead>
+		<tr style="background-color: #eaedf2;">
+			<th style="width: 10%;text-align: center;">{%= __("Customer No") %}</th>
+			<th style="width: 13%;text-align: center;">{%= __("Sample No") %}</th>
+			<th style="width: 8%;text-align: center;">{%= __("Milk Quantity") %}</th>
+			<th style="width: 8%;text-align: center;">{%= __("CLR") %}</th>
+			<th style="width: 8%;text-align: center;">{%= __("FAT") %}</th>
+			<th style="width: 8%;text-align: center;">{%= __("SNF") %}</th>
+			<th style="width: 10%;text-align: center;">{%= __("Rate") %}</th>
+			<th style="width: 10%;text-align: center;">{%= __("Amount") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% var qty = 0; %}
+		{% var amt = 0; %}
+		{% for(var i=0, l=data.length; i < l; i++) { %}
+			<tr>
+				<td style="text-align: center">{%= data[i].farmerid %}</td>
+				<td style="text-align: center">{%= data[i].name %}</td>
+				<td style="text-align: center">{%= data[i].milkquantity %}</td>
+				<td style="text-align: center">{%= data[i].clr %}</td>
+				<td style="text-align: center">{%= data[i].fat %}</td>
+				<td style="text-align: center">{%= data[i].snf %}</td>
+				<td style="text-align: right">{%= data[i].rate %}</td>
+				<td style="text-align: right">{%= data[i].amount %}</td>
+			 	{% qty += data[i].milkquantity; %}
+			 	{% amt += data[i].amount; %}
+			</tr>
+		
+		{% } %}
+	</tbody>
+	<tfoot>
+	    <tr>
+	      <td style="text-align: center;font-weight: bold;">{%= count_data %}</td>
+	      <td></td>
+       	  <td style="text-align: center;font-weight: bold;">{%= qty %}</td>
+       	  <td></td>
+       	  <td></td>
+       	  <td></td>
+       	  <td></td>
+       	  <td style="text-align: right;font-weight: bold;">{%= format_currency(amt,"INR") %}</td>
+
+
+	    </tr>
+   </tfoot>
+</table>

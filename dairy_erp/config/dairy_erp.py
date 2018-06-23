@@ -153,6 +153,12 @@ def get_data():
 					"description": _(" "),
 				},
 				{
+					"type": "page",
+					"name": "daily-milk-purchase",
+					"label": "Daily Milk Purchase Report",
+					"description": _(" "),
+				},
+				{
 					"type": "doctype",
 					"name": "Farmer Milk Collection Record",
 					"description": _(" "),
@@ -290,7 +296,13 @@ def get_data():
 					"name": "Balance Sheet",
 					"doctype": "GL Entry",
 					"is_query_report": True
-				}		
+				},
+				{
+					"type": "report",
+					"name": "Cash Flow",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				}			
 
 			]
 		}				

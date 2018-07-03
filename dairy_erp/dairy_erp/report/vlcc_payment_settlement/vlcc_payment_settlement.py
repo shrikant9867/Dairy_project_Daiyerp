@@ -612,6 +612,75 @@ def check_cycle(row_data,filters):
 
 	return {"cycle_msg":cycle_msg,"recv_msg":recv_msg}
 
+
+@frappe.whitelist()
+def generate_incentive(filters):
+	filters = json.loads(filters)
+	dairy = frappe.db.get_value("Company",{'is_dairy':1},'name')
+	if not frappe.db.get_value("Purchase Invoice", {'cycle':filters.get('cycle'),\
+		 'supplier': filters.get('vlcc'), 'company': dairy},'name'):
+		vmcr =  frappe.db.sql("""
+			select ifnull(sum(amount),0) as total,
+			ifnull(sum(milkquantity),0) as qty
+		from 
+			`tabVlcc Milk Collection Record`
+		where 
+			associated_vlcc = '{0}' and rcvdtime between '{1}' and '{2}'
+			""".format(filters.get('vlcc'), filters.get('start_date'), filters.get('end_date')),as_dict=1)
+		if vmcr[0].get('total') != 0:
+			incentive = get_incentives(vmcr[0].get('total'), vmcr[0].get('qty'), filters)
+			if incentive:
+				create_pi(filters, incentive,dairy)
+				frappe.msgprint(_("Purchase Invoice against incentive has been created for this cycle"))
+			else: frappe.msgprint(_("Incentive calculation is zero please check <b>Dairy Setting</b>"))
+	else:
+		frappe.throw(_("Incentive already generated for this cycle"))
+
+def create_pi(filters, incentive, company):
+	pi = frappe.new_doc("Purchase Invoice")
+	pi.supplier = filters.get('vlcc')
+	pi.company = company
+	pi.pi_type = "Incentive"
+	pi.cycle = filters.get('cycle')
+	pi.append("items",
+		{
+			"qty":1,
+			"item_code": "Milk Incentives",
+			"rate": incentive,
+			"amount": incentive,
+			"cost_center": frappe.db.get_value("Company", pi.company, "cost_center")
+		})
+	pi.flags.ignore_permissions = True
+	pi.save()
+	pi.submit()
+	
+	#updating date for current cycle
+	gl_stock = frappe.db.get_value("Company", pi.company, 'stock_received_but_not_billed')
+	gl_credit = frappe.db.get_value("Company", pi.company, 'default_payable_account')
+	gl_name = frappe.db.get_value("GL Entry",{'account':gl_credit,'voucher_no':pi.name},'name')
+	frappe.db.set_value("Purchase Invoice", pi.name, 'posting_date', filters.get('end_date'))
+	frappe.db.set_value("GL Entry",{'account': gl_stock,'voucher_no':pi.name}, 'posting_date', filters.get('end_date'))
+	frappe.db.get_value("GL Entry",gl_name, 'posting_date', filters.get('end_date'))
+	frappe.db.sql("""update `tabGL Entry` set posting_date = '{0}' where name = '{1}'
+		""".format(filters.get('end_date'),gl_name))
+
+
+def get_incentives(amount, qty, filters=None):
+	if filters.get('vlcc') and amount and qty:
+		incentive = 0
+		dairy_setting = frappe.get_doc("Dairy Setting")
+		if dairy_setting.enable_per_litre and dairy_setting.per_litre:
+			incentive = (float(dairy_setting.per_litre) * float(qty))
+		elif not dairy_setting.enable_per_litre and dairy_setting.vlcc_incentives:
+			incentive = (float(dairy_setting.vlcc_incentives) * float(amount)) / 100
+		return incentive
+
+@frappe.whitelist()
+def get_vlcc(doctype,txt,searchfields,start,pagelen,filters):
+	return frappe.db.sql("""select name,vlcc_type from 
+		`tabVillage Level Collection Centre`""")
+
+
 def check_receivable(recv_list):
 	
 	if 'Sales Invoice' in recv_list and 'Purchase Invoice' not in recv_list:

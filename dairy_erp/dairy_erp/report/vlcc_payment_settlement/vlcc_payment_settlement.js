@@ -105,6 +105,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 		frappe.selected_rows = []
 
 		report.page.add_inner_button(__("Payment Settlement"), function() {
+			filters = report.get_values()
 			frappe.call({
 				method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.is_vpcr_generated",
 				args : {
@@ -145,6 +146,17 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 				method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.skip_cycle",
 				args : {
 						"row_data":frappe.selected_rows,
+						"filters":report.get_values()
+						},
+				callback : function(r){			
+				}
+			})
+		});
+		report.page.add_inner_button(__("Generate Incentive"), function() {
+
+			frappe.call({
+				method:"dairy_erp.dairy_erp.report.vlcc_payment_settlement.vlcc_payment_settlement.generate_incentive",
+				args : {
 						"filters":report.get_values()
 						},
 				callback : function(r){			

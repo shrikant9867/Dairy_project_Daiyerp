@@ -10,6 +10,7 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getda
 def get_fmcr_hourly():
 
 	check_hourly_dairy_log()
+	message = ""
 	try:
 		fmcr = frappe.db.sql("""select name,sum(milkquantity) as qty,rate,societyid,
 								rcvdtime,shift,milktype,farmerid,GROUP_CONCAT(name) as fmcr
@@ -60,7 +61,7 @@ def get_fmcr_hourly():
 			 		pass
 			 	elif now_datetime() > min_time: 
 				 	if len(vmcr):
-		 				se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr[0].get('name')},['name','wh_type'],as_dict=1)
+		 				se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr[0].get('name')},['name','wh_type'],as_dict=1) or {}
 	 					se_qty = frappe.db.get_value('Stock Entry Detail',{'parent':se.get('name')},'qty') or 0
 
 	 					if se.get('wh_type') == 'Loss':

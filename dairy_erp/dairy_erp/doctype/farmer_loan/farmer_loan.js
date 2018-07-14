@@ -6,6 +6,12 @@ frappe.ui.form.on('Farmer Loan', {
 		frm.set_df_property("no_of_instalments", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("principle", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("interest", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("extension", "hidden", 1);
+		if(cint(frm.doc.no_of_instalments)+cint(frm.doc.extension) - cint(frm.doc.paid_instalment) == 1){
+			console.log(frm.doc.no_of_instalments,frm.doc.extension,frm.doc.paid_instalment,cint(frm.doc.no_of_instalments)+cint(frm.doc.extension) - cint(frm.doc.paid_instalment))
+			frm.set_df_property("extension", "hidden", 0);
+		}
+
 	},
 	onload: function(frm) {
 		if(!frm.doc.vlcc){

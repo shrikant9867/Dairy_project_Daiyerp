@@ -44,8 +44,11 @@ def get_si_amount(data):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
 	else: return 0
 
+
 @frappe.whitelist()
 def get_emi(name = None, total = None, no_of_instalments = None, extension=None, paid_instalment = None):
 	if name:
-		emi = (float(total) - float(get_si_amount(name))) / (float(no_of_instalments) + float(extension))
+		outstanding_amount = (float(total) - float(get_si_amount(name)))
+		instalment = (float(no_of_instalments) + float(extension)) - float(paid_instalment)
+		emi = outstanding_amount / instalment
 		return emi if emi else 0 

@@ -6,12 +6,13 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, cstr, cint, has_common
+from frappe.utils import nowdate,flt, cstr, cint, has_common
 import time
 from frappe import _
 import api_utils as utils
 import requests
 import json
+from dairy_erp.report.farmer_net_payoff.farmer_net_payoff import get_data
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
 from customization.price_list.price_list_customization import validate_price_list
 #from dairy_erp.customization.sales_invoice.sales_invoice import get_effective_credit
@@ -45,7 +46,7 @@ def get_item_qty(item):
 
 @frappe.whitelist()
 def get_masters():
-	#generic
+	#generic: master paramenters as json object
 	response_dict = {}
 	try:
 		if frappe.session.user != "Administrator":
@@ -66,7 +67,9 @@ def get_masters():
 				"farmer_prices": { "items": get_party_item_prices("Farmer") },
 				"customer_prices": { "items": get_party_item_prices("Customer") },
 				"mi_reference": get_mi_references(),
-				"po_reference": get_po_references()
+				"po_reference": get_po_references(),
+				"global_percent_effective_credit": frappe.db.get_value("Village Level Collection Centre", \
+								vlcc_details.get('name'), 'global_percent_effective_credit')
 			})
 		else:
 			frappe.throw(_("User cannot be administrator"))
@@ -160,11 +163,28 @@ def get_camp_office():
 
 def get_farmer():
 	company = get_seesion_company_datails()
-	farmer = frappe.db.sql("""select name as id,full_name ,vlcc_name from `tabFarmer` where vlcc_name ='{0}'""".format(company.get('company')),as_dict =1)
+	farmer = frappe.db.sql("""
+		select name as id,full_name ,vlcc_name, ignore_effective_credit_percent,percent_effective_credit 
+	from `tabFarmer` 
+	where 
+		vlcc_name ='{0}'""".format(company.get('company')),as_dict =1)
 	for row in farmer:
+		get_net_off(row)
 		row.update({"effective_credit": calculate_effective_credit(row.get('id'))})
 	return farmer
 
+
+def get_net_off(row):
+	#filters are must as it is net off report data retrival
+	fliters = {
+	"ageing_based_on": "Posting Date",
+	"report_date": nowdate(),
+	"company": row.get('vlcc_name'),
+	"farmer": row.get('id')
+	}
+	if len(get_data(fliters)):
+		row.update({"farmer_net_off": round(get_data(fliters)[0][10],2)})
+	else: row.update({"farmer_net_off": 0.00})
 
 def terms_condition():
 	return frappe.db.sql("""select name,terms from `tabTerms and Conditions` where vlcc ='{0}'""".format(get_seesion_company_datails().get('company')),as_dict=1)

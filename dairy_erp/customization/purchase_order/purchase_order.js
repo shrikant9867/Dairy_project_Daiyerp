@@ -21,6 +21,12 @@ frappe.ui.form.on('Purchase Order', {
 			frm.set_value("supplier","")
 			frappe.throw(__("Supplier Type Cannot be Farmer/General"))
 		}
+		else if(get_session_user_type().operator_type == 'Camp Office' && 
+		get_supplier_type(frm.doc.supplier) == "Vlcc Type") {
+			frm.set_value("supplier","")
+			frappe.throw(__("Supplier Type Cannot be <b>Vlcc Type</b>"))
+		}
+
 		erpnext.utils.get_party_details(frm);
 	}
 })

@@ -595,8 +595,10 @@ def set_co_warehouse_pr(doc,method=None):
 				if not doc.flags.ignore_material_price:
 					if item.material_request:
 						doc.buying_price_list = "LCOVLCCB"+"-"+co if frappe.db.get_value("Price List","LCOVLCCB"+"-"+co) else "GTCOVLCCB"
+					elif item.delivery_note:
+						doc.buying_price_list = "LCOVLCCB"+"-"+co if frappe.db.get_value("Price List","LCOVLCCB"+"-"+co) else "GTCOVLCCB"
 					else:
-						doc.buying_price_list = "LVLCCB"+"-"+co if frappe.db.get_value("Price List","LVLCCB"+"-"+co) else "GTVLCCB"
+						doc.buying_price_list = "LVLCCB-"+doc.company if frappe.db.get_value("Price List","LVLCCB"+"-"+doc.company) else "GTVLCCB"
 
 
 
@@ -1128,13 +1130,21 @@ def set_supp_company(doc,method):
 
 
 def company_permission(user):
-
+	roles = frappe.get_roles()
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 
 	if user_doc.get('operator_type') == "VLCC":
 		return """(`tabCompany`.name = '{0}')""".format(user_doc.get('company'))
 	elif user_doc.get('operator_type') == "Vet AI Technician":
 		return """(`tabCompany`.name = '{0}')""".format(user_doc.get('company'))
+	elif user != 'Administrator' and ('Camp Manager' in roles or 'Camp Operator' in roles):
+		vlcc_list = frappe.get_all("Village Level Collection Centre", {"camp_office":user_doc.get('branch_office')}, 'name')
+		vlcc_list = [ '"%s"'%vlcc.get("name") for vlcc in vlcc_list ]
+		if vlcc_list:
+			return """tabCompany.name in ({vlcc_list})"""\
+				.format(vlcc_list=','.join(vlcc_list))
+		else:
+			return """tabCompany.name = 'Guest' """
 
 def warehouse_permission(user):
 
@@ -1169,7 +1179,8 @@ def validate_dn(doc,method):
 
 
 def item_permissions(user):
-
+	
+	roles = frappe.get_roles()
 	operator_type = frappe.db.get_value("User",user,'operator_type')
 	if operator_type == "Vet AI Technician":
 		return """tabItem.item_group in ('Veterinary Services','Medicines')and tabItem.name not 
@@ -1181,5 +1192,9 @@ def item_permissions(user):
 		return """tabItem.item_group != 'Stationary' and tabItem.name not 
 				in ('Advance Emi', 'Loan Emi', 'Milk Incentives')"""
 	elif operator_type == "Camp Office":
+		return """tabItem.name not in
+		 ('Advance Emi', 'Loan Emi', 'Milk Incentives')"""
+
+	elif user != 'Administrator' and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
 		return """tabItem.name not in
 		 ('Advance Emi', 'Loan Emi', 'Milk Incentives')"""

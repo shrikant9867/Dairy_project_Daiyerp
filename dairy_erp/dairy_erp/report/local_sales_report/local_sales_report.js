@@ -62,7 +62,8 @@ frappe.query_reports["Local Sales Report"] = {
 			callback: function(r) {
 				if(!r.exc && r.message && !in_list(["Administrator", "Guest"], frappe.session.user)){
 					if(has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
-						$('body').find("[data-fieldname=vlcc]").val(r.message.company)
+						// $('body').find("[data-fieldname=vlcc]").val(r.message.company)
+						frappe.query_report_filters_by_name.vlcc.set_input(r.message.company);
 					}
 					query_report.trigger_refresh();
 				}

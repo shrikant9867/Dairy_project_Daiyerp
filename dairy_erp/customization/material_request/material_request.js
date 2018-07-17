@@ -32,10 +32,6 @@ frappe.ui.form.on('Material Request', {
 			camp = address_attr(get_session_user_type().branch_office)
 			frm.set_value("camp_office",camp.camp_office)
 		}
-		if (get_session_user_type().operator_type == "Camp Office"){
-			// camp = address_attr(get_session_user_type().branch_office)
-			frm.set_df_property("schedule_date", "read_only", 1)
-		}
 	},
 	close_material_request: function(frm){
 		this.update_status("Close", "Closed",frm)
@@ -177,6 +173,7 @@ frappe.ui.form.on("Material Request Item", {
 
 	qty: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
+		child.qty = Math.floor(child.qty)
 		frappe.model.set_value(cdt, cdn, "new_dn_qty",parseFloat(child.qty));			
 		cur_frm.refresh_fields('items');
 	},

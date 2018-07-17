@@ -15,7 +15,7 @@ def get_columns():
 	columns = [
 		_("Date") + ":Date:90", _("Customer") + ":Link/Customer:150",
 		 _("Sales Invoice") + ":Link/Sales Invoice:150",
-		_("Amount") + ":Float:100"
+		_("Amount") + ":Currency:100"
 	]
 
 	return columns

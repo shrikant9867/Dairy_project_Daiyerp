@@ -79,8 +79,8 @@ def get_data(curr_date=None):
 			"member_count":member_count if member_count else 0,
 			"non_member_qty":non_member_qty if non_member_qty else 0,
 			"member_qty":member_qty if member_qty else 0,
-			"member_amt":member_amt if member_amt else 0,
-			"non_member_amt":non_member_amt if non_member_amt else 0
+			"member_amt":round(member_amt,2) if member_amt else 0,
+			"non_member_amt":round(non_member_amt,2) if non_member_amt else 0
 			}
 
 def get_conditions(curr_date=None):

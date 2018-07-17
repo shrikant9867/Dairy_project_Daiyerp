@@ -1,0 +1,38 @@
+<br>
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+<h4 class="text-center">{%= filters.vlcc%} </h4>
+<h5 class="text-center">
+			{%= __("From Date") %}
+	{%= dateutil.str_to_user(filters.from_date) %}
+		{%= __("To Date") %}
+	{%= dateutil.str_to_user(filters.to_date) %}
+</h5>
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 14%">{%= __("Date") %}</th>
+			<th style="width: 14%">{%= __("Customer") %}</th>
+			<th style="width: 14%">{%= __("Sales Invoice") %}</th>	
+			<th style="width: 14%">{%= __("Amount") %}</th>	
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+				{% if(data[i][__("Date")] || data[i][__("Customer")]) { %}
+					<td>{%= data[i][__("Date")] %}</td>
+					<td>{%= data[i][__("Customer")] %}</td>
+					<td>{%= data[i][__("Sales Invoice")] %}</td>
+					<td style="text-align: right">{%= format_currency(data[i][__("Amount")], data[i]["currency"]) %}</td>
+				{% } else { %}
+					<td></td>
+					<td></td>
+					<td><b>{%= __("Total") %}</b></td>
+					<td style="text-align: right">{%= format_currency(data[i][__("Amount")], data[i]["currency"]) %}</td>
+				{% } %}
+			</tr>
+		{% } %}
+
+	</tbody>
+</table>

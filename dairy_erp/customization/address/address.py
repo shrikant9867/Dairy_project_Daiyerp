@@ -7,18 +7,20 @@ def create_manager_operator_user(doc, method=None):
 	if not doc.is_new() and doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		if doc.manager_name and doc.manager_email:
 			# make manager user
-			role_manager = {"Chilling Centre": "Chilling Center Manager","Camp Office": "Camp Manager","Plant": "Camp Manager"}
+			role_manager = {"Chilling Centre": "Chilling Center Manager","Camp Office": "Camp Manager","Plant": "Plant Manager"}
 			create_user(doc, "Manager", role_manager[doc.address_type])
 			
 		if doc.different_operator and doc.operator_name and doc.user:
 			# make operator user
-			role_manager = {"Chilling Centre": "Chilling Center Operator","Camp Office": "Camp Operator","Plant": ""}
+			role_manager = {"Chilling Centre": "Chilling Center Operator","Camp Office": "Camp Operator","Plant": "Plant Operator"}
 			create_user(doc, "Operator", role_manager[doc.address_type])
 
 def check_camp_office_for_cc(doc, method=None):
 	# camp office should be mandatory for CC
 	if doc.address_type == "Chilling Centre" and not doc.associated_camp_office:
 		frappe.throw("Associated Camp Office is mandatory for Address type Chilling Centre")
+	if doc.address_type in ['Chilling Centre', 'Camp Office', 'Plant'] and (not doc.manager_name or not doc.manager_email):
+		frappe.throw("<b>Manager Name</b> and <b>Manager Email</b> are manadatory")
 
 
 def create_user(doc, operator_manager,role=None):

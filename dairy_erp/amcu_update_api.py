@@ -69,6 +69,7 @@ def update_fmcr_amt(fmcr_doc,data,row,response_dict):
 
 def make_fmcr(data,row,response_dict):
 	
+	traceback = ""
 	try:
 		if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
 			if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') \

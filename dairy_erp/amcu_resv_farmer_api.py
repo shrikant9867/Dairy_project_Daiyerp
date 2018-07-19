@@ -15,7 +15,7 @@ import json
 
 
 
-def make_stock_receipt(message,method,data, row,response_dict,qty,warehouse,societyid,vmcr_doc=None):
+def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,societyid,vmcr_doc=None):
 
 	try:
 		vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":societyid},["name","warehouse"],as_dict=True)
@@ -43,6 +43,14 @@ def make_stock_receipt(message,method,data, row,response_dict,qty,warehouse,soci
 			stock_doc.vmcr = vmcr_doc.name if method == 'handling_loss' or method == 'handling_gain' else ""
 			stock_doc.wh_type = 'Loss' if method == 'handling_loss' else 'Gain'
 			if row.get('transactionid'):
+				stock_doc.shift = data.get('shift')
+				stock_doc.milktype = row.get('milktype')
+				stock_doc.societyid = data.get('societyid')
+				stock_doc.is_reserved_farmer = 1
+				stock_doc.farmer_id = row.get('farmerid')
+				stock_doc.fat = row.get('fat')
+				stock_doc.snf = row.get('snf')
+				stock_doc.clr = row.get('clr')
 				remarks.update({"Farmer ID":row.get('farmerid'),"Transaction Id":row.get('transactionid'),
 					"Rcvd Time":data.get('rcvdtime'),"Message": message,"shift":data.get('shift')})
 			else:

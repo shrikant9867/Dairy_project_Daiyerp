@@ -10,6 +10,7 @@ import dairy_utils as utils
 from datetime import timedelta
 import amcu_api as amcu_api
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate
 import requests
 import json
 
@@ -38,6 +39,7 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,socie
 
 			stock_doc = frappe.new_doc("Stock Entry")
 			stock_doc.purpose =  "Material Receipt"
+			stock_doc.posting_date = getdate(data.get('rcvdtime'))
 			stock_doc.company = vlcc.get('name')
 			stock_doc.transaction_id = row.get('transactionid')
 			stock_doc.vmcr = vmcr_doc.name if method == 'handling_loss' or method == 'handling_gain' else ""

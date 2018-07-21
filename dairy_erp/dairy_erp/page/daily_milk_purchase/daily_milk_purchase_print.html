@@ -41,12 +41,12 @@
 						<td></td>
 					</tr>
 					<tr>   
-						<td style="text-align: center;">{%= count_data[0].qty %}</td>
-						<td style="text-align: center;">{%= local_sale[0].qty %}</td>
-						<td style="text-align: right;">{%= local_sale[0].amt %}</td>
-						<td style="text-align: center;">{%= count_data[0].qty - local_sale[0].qty %}</td>
-						<td style="text-align: center;">{%= count_data[0].avg_fat  %}</td>
-						<td style="text-align: center;">{%= count_data[0].avg_snf %}</td>
+						<td style="text-align: center;">{%= avg_data.milkqty %}</td>
+						<td style="text-align: center;">{%= local_sale_data.qty %}</td>
+						<td style="text-align: right;">{%= local_sale_data.amt %}</td>
+						<td style="text-align: center;">{%= (avg_data.milkqty - local_sale_data.qty) || 0 %}</td>
+						<td style="text-align: center;">{%= avg_data.avg_fat  %}</td>
+						<td style="text-align: center;">{%= avg_data.avg_snf %}</td>
 						<td></td>
 					</tr>
 				</tbody>
@@ -109,25 +109,25 @@
 		<tbody>
 			{% var qty = 0; %}
 			{% var amt = 0; %}
-			{% for(var i=0, l=data.length; i < l; i++) { %}
+			{% for(var i=0, l=fmcr_stock_data.length; i < l; i++) { %}
 				<tr>
-					<td style="text-align: center">{%= data[i].farmerid %}</td>
-					<td style="text-align: center">{%= data[i].name %}</td>
-					<td style="text-align: center">{%= data[i].milkquantity %}</td>
-					<td style="text-align: center">{%= data[i].clr %}</td>
-					<td style="text-align: center">{%= data[i].fat %}</td>
-					<td style="text-align: center">{%= data[i].snf %}</td>
-					<td style="text-align: right">{%= data[i].rate %}</td>
-					<td style="text-align: right">{%= data[i].amount %}</td>
-				 	{% qty += data[i].milkquantity; %}
-				 	{% amt += data[i].amount; %}
+					<td style="text-align: center">{%= fmcr_stock_data[i].farmerid %}</td>
+					<td style="text-align: center">{%= fmcr_stock_data[i].name %}</td>
+					<td style="text-align: center">{%= fmcr_stock_data[i].milkquantity %}</td>
+					<td style="text-align: center">{%= fmcr_stock_data[i].clr %}</td>
+					<td style="text-align: center">{%= fmcr_stock_data[i].fat %}</td>
+					<td style="text-align: center">{%= fmcr_stock_data[i].snf %}</td>
+					<td style="text-align: right">{%= fmcr_stock_data[i].rate %}</td>
+					<td style="text-align: right">{%= fmcr_stock_data[i].amount %}</td>
+				 	{% qty += fmcr_stock_data[i].milkquantity; %}
+				 	{% amt += fmcr_stock_data[i].amount; %}
 				</tr>
 			
 			{% } %}
 		</tbody>
 		<tfoot>
 		    <tr>
-		      <td style="text-align: center;font-weight: bold;">{%= count_data[0].count %}</td>
+		      <td style="text-align: center;font-weight: bold;">{%= avg_data.count %}</td>
 		      <td></td>
 	       	  <td style="text-align: center;font-weight: bold;">{%= qty %}</td>
 	       	  <td></td>
@@ -146,15 +146,15 @@
 		<div class="col-xs-12">
 			<div class="col-xs-4">
 				<div class="col-xs-7">Members:</div>
-				<div class="col-xs-2">{%= member_count %}</div>
+				<div class="col-xs-2">{%= member_data.member_count %}</div>
 			</div>
 			<div class="col-xs-4">
 				<div class="col-xs-4">Qty:</div>
-				<div class="col-xs-2">{%= member_qty %}</div>
+				<div class="col-xs-2">{%= member_data.member_qty %}</div>
 			</div>
 			<div class="col-xs-4">
 				<div class="col-xs-5">Amount:</div>
-				<div class="col-xs-2">{%= member_amt %}</div>
+				<div class="col-xs-2">{%= member_data.member_amt %}</div>
 			</div>
 		</div>
 	</div>
@@ -163,15 +163,15 @@
 		<div class="col-xs-12">
 			<div class="col-xs-4">
 				<div class="col-xs-7">Non Members:</div>
-				<div class="col-xs-2">{%= non_member_count %}</div>
+				<div class="col-xs-2">{%= member_data.non_member_count %}</div>
 			</div>
 			<div class="col-xs-4">
 				<div class="col-xs-4">Qty:</div>
-				<div class="col-xs-1">{%= non_member_qty %}</div>
+				<div class="col-xs-1">{%= member_data.non_member_qty %}</div>
 			</div>
 			<div class="col-xs-4">
 				<div class="col-xs-5">Amount:</div>
-				<div class="col-xs-2">{%= non_member_amt %}</div>
+				<div class="col-xs-2">{%= member_data.non_member_amt %}</div>
 			</div>
 		</div>
 	</div>
@@ -180,19 +180,19 @@
 		<div class="col-xs-12">
 			<div class="col-xs-3">
 				<div class="col-xs-7">Avg fat:</div>
-				<div class="col-xs-2">{%= count_data[0].avg_fat  %}</div>
+				<div class="col-xs-2">{%= avg_data.avg_fat  %}</div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Avg CLR:</div>
-				<div class="col-xs-2">{%= count_data[0].avg_clr  %}</div>
+				<div class="col-xs-2">{%= avg_data.avg_clr  %}</div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Avg SNF:</div>
-				<div class="col-xs-2">{%= count_data[0].avg_snf  %}</div>
+				<div class="col-xs-2">{%= avg_data.avg_snf  %}</div>
 			</div>
 			<div class="col-xs-3">
 				<div class="col-xs-5">Avg Rate:</div>
-				<div class="col-xs-2">{%= count_data[0].avg_rate  %}</div>
+				<div class="col-xs-2">{%= avg_data.avg_rate  %}</div>
 			</div>
 		</div>
 	</div>	

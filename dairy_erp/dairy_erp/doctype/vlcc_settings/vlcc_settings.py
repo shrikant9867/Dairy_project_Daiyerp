@@ -48,3 +48,10 @@ def vlcc_setting_permission(user):
 	else:
 		if user != 'Administrator':
 			return """`tabVLCC Settings`.name = 'Guest' """
+
+#send Email and SMS when item in VLCC warehouse reach at item_stock_threshold_level
+
+@frappe.whitelist()
+def sms_and_email_for_item_stock_threshold_level(allow_guest=True):
+	pass
+	#Now on Hold, added on filed on vlcc setting.	

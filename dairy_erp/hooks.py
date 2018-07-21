@@ -123,7 +123,8 @@ doc_events = {
         "on_submit": "dairy_erp.customization.purchase_order.purchase_order.update_material_indent"
     },
     "Purchase Receipt":{
-        "on_submit": "dairy_erp.customization.customization.on_submit_pr",
+        "on_submit": ["dairy_erp.customization.customization.on_submit_pr",
+                        "dairy_erp.customization.purchase_receipt.purchase_receipt.make_pi_against_vlcc"],
         "validate": ["dairy_erp.customization.customization.set_co_warehouse_pr","dairy_erp.customization.customization.validate_qty",
                         "dairy_erp.customization.purchase_receipt.purchase_receipt.validate_price_list"]
     },

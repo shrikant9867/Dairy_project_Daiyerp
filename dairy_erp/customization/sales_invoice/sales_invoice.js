@@ -1,6 +1,6 @@
 frappe.ui.form.on("Sales Invoice", {
 
-	onload: function(frm) {	
+	onload: function(frm) {
 		if (get_session_user_type().operator_type == "Vet AI Technician")
 		{
 			// frm.set_value("service_note",1)
@@ -20,7 +20,6 @@ frappe.ui.form.on("Sales Invoice", {
 		if(user_.operator_type != "VLCC"){
 			cur_frm.set_df_property('local_sale', 'hidden', 1);
 			// cur_frm.set_df_property('due_date', 'hidden', 1);
-
 		}
 		if(user_.operator_type != "Vet AI Technician"){
 			cur_frm.set_df_property('service_note', 'hidden', 1);
@@ -161,6 +160,27 @@ frappe.ui.form.on("Sales Invoice", {
 	}
 })
 
+
+
+cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
+	if(cur_frm.doc.customer_or_farmer == "Farmer" && cur_frm.doc.local_sale){
+		return {
+			filters: [
+				['Item', 'name', 'not in', ["COW Milk","BUFFALO Milk"]]
+			]
+		}
+	}	
+	if(cur_frm.doc.customer_or_farmer == "Vlcc Local Customer" && cur_frm.doc.local_sale){
+		return {
+			filters: [
+				['Item', 'name', 'in', ["COW Milk","BUFFALO Milk"]]
+			]
+		}
+	}
+}
+
+
+
 local_sale_operations = function(frm){
 	if(frm.doc.customer_or_farmer == "Vlcc Local Customer"){
 		frappe.call({
@@ -255,3 +275,16 @@ get_session_user_type = function() {
 }
 
 $.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));
+
+
+frappe.ui.form.on("Sales Invoice Item", {
+
+	qty: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if (["COW Milk","BUFFALO Milk"].indexOf(child.item_code) <= -1){
+			child.qty = Math.floor(child.qty)
+			frappe.model.set_value(cdt, cdn, "new_dn_qty",parseFloat(child.qty));			
+			cur_frm.refresh_fields('items');
+		}
+	}
+});

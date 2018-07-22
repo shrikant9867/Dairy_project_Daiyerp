@@ -93,7 +93,7 @@ def get_data(filters):
 		where 
 			voucher_type = 'Journal Entry' and company = '{0}' {1}
 		having debit > 0
-		""".format(vlcc,get_conditions_jv(filters)),filters,as_list=1,debug=1)
+		""".format(vlcc,get_conditions_jv(filters)),filters,as_list=1,debug=0)
 
 	return supplier_data + customer_data + jv_data 
 
@@ -131,17 +131,13 @@ def get_payment_amt(row_data,filters):
 
 	report_data = get_data(json.loads(filters))
 	row_data = json.loads(row_data)
-
-	payble = 0.0
-	receivable = 0.0
-	set_amt = 0.0
+	payble, receivable, set_amt = 0.0, 0.0, 0.0
 
 	for data in report_data:
 		if data[12] in row_data:
-			if data[9] == "Purchase Invoice":
-				payble += data[6]
-			if data[9] == "Sales Invoice":
-				receivable += data[5]
+			if data[9] == "Purchase Invoice": payble += data[6]
+			if data[9] == "Sales Invoice": receivable += data[5]
+			if data[7] == "Journal Entry": receivable += data[5]
 
 	return {"payble":payble,"receivable":receivable,"set_amt": min(payble,receivable)}
 
@@ -161,9 +157,10 @@ def make_payment(data,row_data,filters):
 		gl_doc = frappe.get_doc('GL Entry',d)
 		if gl_doc.voucher_type == 'Purchase Invoice':
 			payble_list.append(gl_doc.voucher_no)
-		elif gl_doc.voucher_type == 'Sales Invoice':
+		elif gl_doc.voucher_type in ['Sales Invoice','Journal Entry']:
 			recv_list.append(gl_doc.voucher_no)
 	
+	print "################",recv_list
 	try:
 		payable = make_payble_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
 		receivable = make_receivable_payment(data=data,row_data=row_data,filters=filters,company=vlcc,recv_list=recv_list)

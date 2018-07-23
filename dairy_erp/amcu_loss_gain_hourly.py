@@ -11,143 +11,200 @@ def get_fmcr_hourly():
 
 	check_hourly_dairy_log()
 	message = ""
-	try:
-		fmcr = frappe.db.sql("""select name,sum(milkquantity) as qty,rate,societyid,
-								rcvdtime,shift,milktype,farmerid,GROUP_CONCAT(name) as fmcr
-				 	from 
-					 	`tabFarmer Milk Collection Record`
-					where 
-						is_fmrc_updated = 0 and docstatus = 1
-					group by societyid,date(rcvdtime),shift,milktype
-					order by rcvdtime""",as_dict=True,debug=0)
+	fmcr_stock_qty = 0
 
-		if len(fmcr):
-			for data in fmcr:
-				min_time = frappe.db.sql("""select min(rcvdtime) as rcvdtime
-						 	from 
-							 	`tabFarmer Milk Collection Record`
+	try:
+		fmcr_records = frappe.db.sql("""select name,sum(milkquantity) as qty,societyid, 
+									min(rcvdtime) as min_time,shift,milktype  
+									from   
+										`tabFarmer Milk Collection Record` 
+									where  
+										is_fmrc_updated = 0 and docstatus = 1 
+									group by societyid,date(rcvdtime),
+									shift,milktype order by rcvdtime""",as_dict=True)
+		print fmcr_records,"fmcr_records______________________________\n\n"
+
+		fmcr_data = fmcr_records[0].get('qty') if fmcr_records and fmcr_records[0].get('qty') else []
+		if fmcr_data:
+			for fmcr in fmcr_records:
+				stock_record = frappe.db.sql("""select ifnull(sum(se.qty),0) as qty,
+								s.shift,s.societyid,s.milktype,s.posting_date
+							from 
+								`tabStock Entry` s, `tabStock Entry Detail` se 
 							where 
-								docstatus = 1 and date(rcvdtime) = '{0}' and 
-								shift = '{1}' and milktype = '{2}' and societyid = '{3}'
-								""".
-								format(getdate(data.get('rcvdtime')),
-									data.get('shift'),data.get('milktype'),
-									data.get('societyid')),as_dict=True,debug=0)
+								s.name = se.parent
+								and s.docstatus = 1 and s.is_scheduler = 0
+								and s.is_reserved_farmer = 1 
+								and s.shift = '{0}' and s.milktype = '{1}' and 
+								s.posting_date = '{2}' and s.societyid = '{3}' 
+							""".format(fmcr.get('shift'),fmcr.get('milktype'),
+								getdate(fmcr.get('min_time')),
+								fmcr.get('societyid')),as_dict=1,debug=0)
 
-				data.update({"min_time":min_time[0].get('rcvdtime')})
-
-				vmcr = frappe.db.sql("""select name,sum(milkquantity) as qty,
-										rcvdtime,shift,farmerid,GROUP_CONCAT(name) as vmcr
-			 					from 
-			 						`tabVlcc Milk Collection Record` 
-			 					where 
-			 						shift = '{0}' and milktype = '{1}' and 
-			 						date(rcvdtime) = '{2}' and farmerid = '{3}' and
-			 						docstatus = 1 and is_scheduler = 0
-			 					group by societyid 
-			 					order by rcvdtime
-			 	""".format(data.get('shift'),data.get('milktype'),
-			 		getdate(data.get('rcvdtime')),
-			 		data.get('societyid')),as_dict=1,debug=0)
-			 	
-			 	vlcc = frappe.db.get_value("Village Level Collection Centre",
-			 				{"amcu_id":data.get('societyid')},"name")
-				vlcc_wh = frappe.db.get_value("Village Level Collection Centre",vlcc,
-						["warehouse","edited_gain","edited_loss"],as_dict=1) or {}
-			 	config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'hours') or 0
-			 	min_time = get_datetime(data.get('min_time')) + timedelta(hours=int(config_hrs))
-			 	fmcr = data.get('fmcr').split(',') if data else []
-			 	if now_datetime() < min_time: 
-			 		pass
-			 	elif now_datetime() > min_time: 
-				 	if len(vmcr):
-		 				se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr[0].get('name')},['name','wh_type'],as_dict=1) or {}
-	 					se_qty = frappe.db.get_value('Stock Entry Detail',{'parent':se.get('name')},'qty') or 0
-
-	 					if se.get('wh_type') == 'Loss':
-	 						loss_gain_qty = data.get('qty') - se_qty
-	 						if loss_gain_qty > vmcr[0].get('qty'):
-	 							qty = loss_gain_qty - vmcr[0].get('qty')
-	 							gain = make_stock_adjust(
-				 				purpose='Material Transfer',
-				 				message="Stock Transfer to Edited Gain",
-				 				vlcc=vlcc,data=data,qty=qty,vmcr=vmcr[0].get('name'),
-				 				t_warehouse=vlcc_wh.get('edited_gain'),
-				 				s_warehouse=vlcc_wh.get('warehouse'))
-				 				set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-								set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
-
-	 						elif loss_gain_qty < vmcr[0].get('qty'):
-	 							qty = vmcr[0].get('qty') - loss_gain_qty
-				 				loss = make_stock_adjust(
-				 				purpose='Material Receipt',
-				 				message="Stock In to Edited Loss",
-				 				vlcc=vlcc,data=data,qty=qty,vmcr=vmcr[0].get('name'),
-				 				t_warehouse=vlcc_wh.get('edited_loss'),
-				 				s_warehouse=None)
-				 				set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-								set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
-
-							elif loss_gain_qty == vmcr[0].get('qty'):
-					 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-								set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
-								utils.make_dairy_log(title="Quantity Balanced",method="make_stock_adjust", status="Success",
-									data="Qty" ,message= "Quantity is Balanced so stock entry is not created" , traceback="Scheduler")
-
-	 					elif se.get('wh_type') == 'Gain':
-	 						loss_gain_qty = data.get('qty') + se_qty
-	 						if loss_gain_qty > vmcr[0].get('qty'):
-	 							qty = loss_gain_qty - vmcr[0].get('qty')
-	 							gain = make_stock_adjust(
-				 				purpose='Material Transfer',
-				 				message="Stock Transfer to Edited Gain",
-				 				vlcc=vlcc,data=data,qty=qty,vmcr=vmcr[0].get('name'),
-				 				t_warehouse=vlcc_wh.get('edited_gain'),
-				 				s_warehouse=vlcc_wh.get('warehouse'))
-				 				set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-								set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
-
-	 						elif loss_gain_qty < vmcr[0].get('qty'):
-	 							qty = vmcr[0].get('qty') - loss_gain_qty
-	 							loss = make_stock_adjust(
-				 				purpose='Material Receipt',
-				 				message="Stock In to Edited Loss",
-				 				vlcc=vlcc,data=data,qty=qty,vmcr=vmcr[0].get('name'),
-				 				t_warehouse=vlcc_wh.get('edited_loss'),
-				 				s_warehouse=None)
-				 				set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-								set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
-
-					 		elif loss_gain_qty == vmcr[0].get('qty'):
-					 			set_flag_fmcr(fmcr_list=fmcr,is_fmcr_updated=1)
-								set_flag_vmcr(vmcr=vmcr[0].get('name'),is_scheduler=1)
-								utils.make_dairy_log(title="Quantity Balanced",method="make_stock_adjust", status="Success",
-									data="Qty" ,message= "Quantity is Balanced so stock entry is not created" , traceback="Scheduler")
+				fmcr_stock_qty = flt(fmcr.get('qty')) + flt(stock_record[0].get('qty'))
+				print fmcr_stock_qty,"fmcr_stock_qty_______________________\n\n"
+				if fmcr_stock_qty:
+					loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,fmcr=fmcr,stock=stock_record)
+				
 	except Exception,e:
-		utils.make_dairy_log(title="Scheduler Error",method="get_fmcr_hourly", status="Error",
-		data=message ,message=e, traceback=frappe.get_traceback())
+		utils.make_dairy_log(title="Scheduler Error",method="get_fmcr_hourly", 
+		status="Error",data=message ,message=e, traceback=frappe.get_traceback())
+	
 
-def make_stock_adjust(purpose,message,vlcc,data,qty,vmcr,t_warehouse,s_warehouse):
+def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
+	print stock,"inside loss_gain_computation_____________________\n"
+	
+	vlcc = frappe.db.get_value("Village Level Collection Centre",
+		{"amcu_id":fmcr.get('societyid')},["name","chilling_centre",
+		"warehouse","edited_gain","edited_loss"],as_dict=True) or {}
+	cc = frappe.db.get_value("Address",vlcc.get('chilling_centre'),"centre_id")
+	config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc.get('name')},'hours') or 0
+	min_time = get_datetime(fmcr.get('min_time')) + timedelta(hours=int(config_hrs))
+	
+	if now_datetime() > min_time:
+		vmcr_records = frappe.db.sql("""select name,sum(milkquantity) as qty,
+								rcvdtime as recv_date,shift,farmerid,milktype
+							from 
+								`tabVlcc Milk Collection Record` 
+							where 
+								docstatus = 1 and is_scheduler = 0 and 
+								shift = '{0}' and milktype = '{1}' and 
+								date(rcvdtime) = '{2}' and farmerid = '{3}' and
+								societyid = '{4}'
+			""".format(fmcr.get('shift'),fmcr.get('milktype'),
+				getdate(fmcr.get('min_time')),
+				fmcr.get('societyid'),cc),as_dict=1,debug=0)
+
+		vmcr_data = vmcr_records[0].get('qty') if vmcr_records and vmcr_records[0].get('qty') else []
+		# print vmcr_data,"vmcr_data_________________________\n\n"
+		if vmcr_data:
+			for vmcr in vmcr_records:
+				se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr.get('name')},
+					['name','wh_type'],as_dict=1) or {}
+				se_qty = frappe.db.get_value('Stock Entry Detail',
+					{'parent':se.get('name')},'qty') or 0
+				print vmcr,"vmcr__________\n\n",se_qty,"se_qty_________________________\n\n"
+				if se and se.get('wh_type') == 'Loss':
+					print fmcr_stock_qty,"inside Loss_______________\n\n"
+
+					loss_gain_qty = flt(fmcr_stock_qty) - flt(se_qty)
+
+					if loss_gain_qty > vmcr.get('qty'):
+						qty = loss_gain_qty - vmcr.get('qty')
+						gain = make_stock_adjust(
+			 				purpose='Material Transfer',
+			 				message="Stock Transfer to Edited Gain",
+			 				vlcc=vlcc,fmcr=fmcr,qty=qty,
+			 				vmcr_qty=vmcr.get('qty'),
+			 				t_warehouse=vlcc.get('edited_gain'),se_qty=se_qty,
+			 				s_warehouse=vlcc.get('warehouse'),stock=stock)
+
+					elif loss_gain_qty < vmcr.get('qty'):
+						qty = vmcr.get('qty') - loss_gain_qty
+						loss = make_stock_adjust(
+			 				purpose='Material Receipt',
+			 				message="Stock In to Edited Loss",
+			 				vlcc=vlcc,fmcr=fmcr,qty=qty,
+			 				vmcr_qty=vmcr.get('qty'),
+			 				t_warehouse=vlcc.get('edited_loss'),
+			 				se_qty=se_qty,stock=stock)
+
+					elif loss_gain_qty == vmcr.get('qty'):
+						reserved_qty = stock[0].get('qty') if stock[0].get('qty') else 0
+			 			set_flag(fmcr,vlcc)
+			 			make_farmer_edition_log(fmcr=fmcr,
+			 									edited_stock_entry = "Quantity Balanced",
+			 									loss_gain_qty=se_qty,vmcr_qty=vmcr.get('qty'),
+			 									edited_qty=0,reserved_qty=reserved_qty)
+
+				elif se and se.get('wh_type') == 'Gain':
+					print fmcr_stock_qty,"inside Gain_______________\n\n"
+
+					loss_gain_qty = flt(fmcr_stock_qty) + flt(se_qty)
+
+					if loss_gain_qty > vmcr.get('qty'):
+						qty = loss_gain_qty - vmcr.get('qty')
+						gain = make_stock_adjust(
+			 				purpose='Material Transfer',
+			 				message="Stock Transfer to Edited Gain",
+			 				vlcc=vlcc,fmcr=fmcr,qty=qty,
+			 				vmcr_qty=vmcr.get('qty'),
+			 				t_warehouse=vlcc.get('edited_gain'),se_qty=se_qty,
+			 				s_warehouse=vlcc.get('warehouse'),stock=stock)
+
+					elif loss_gain_qty < vmcr.get('qty'):
+						qty = vmcr.get('qty') - loss_gain_qty
+						loss = make_stock_adjust(
+			 				purpose='Material Receipt',
+			 				message="Stock In to Edited Loss",
+			 				vlcc=vlcc,fmcr=fmcr,qty=qty,
+			 				vmcr_qty=vmcr.get('qty'),
+			 				t_warehouse=vlcc.get('edited_loss'),
+			 				se_qty=se_qty,stock=stock)
+
+			 		elif loss_gain_qty == vmcr.get('qty'):
+			 			reserved_qty = stock[0].get('qty') if stock[0].get('qty') else 0
+			 			set_flag(fmcr,vlcc)
+			 			make_farmer_edition_log(fmcr=fmcr,
+			 						edited_stock_entry = "Quantity Balanced",
+			 						loss_gain_qty=se_qty,vmcr_qty=vmcr.get('qty'),
+									edited_qty=0,reserved_qty=reserved_qty)
+			 	else:
+			 		print fmcr_stock_qty,
+			 		if flt(fmcr_stock_qty) > flt(vmcr.get('qty')):
+			 			print "else greater______________\n\n",fmcr_stock_qty,vmcr.get('qty')
+			 			qty = flt(fmcr_stock_qty) - flt(vmcr.get('qty'))
+						gain = make_stock_adjust(
+			 				purpose='Material Transfer',
+			 				message="Stock Transfer to Edited Gain",
+			 				vlcc=vlcc,fmcr=fmcr,qty=qty,
+			 				vmcr_qty=vmcr.get('qty'),
+			 				t_warehouse=vlcc.get('edited_gain'),se_qty=0,
+			 				s_warehouse=vlcc.get('warehouse'),stock=stock)
+
+					elif flt(fmcr_stock_qty) < flt(vmcr.get('qty')):
+						print "else smaller______________\n\n",fmcr_stock_qty,vmcr.get('qty')
+						qty = flt(vmcr.get('qty')) - flt(fmcr_stock_qty)
+						loss = make_stock_adjust(
+			 				purpose='Material Receipt',
+			 				message="Stock In to Edited Loss",
+			 				vlcc=vlcc,fmcr=fmcr,qty=qty,
+			 				vmcr_qty=vmcr.get('qty'),
+			 				t_warehouse=vlcc.get('edited_loss'),
+			 				se_qty=0,stock=stock)
+
+					elif flt(fmcr_stock_qty) == flt(vmcr.get('qty')):
+						print "equal___________________",fmcr_stock_qty,vmcr.get('qty')
+			 			reserved_qty = stock[0].get('qty') if stock[0].get('qty') else 0
+			 			set_flag(fmcr,vlcc)
+			 			make_farmer_edition_log(fmcr=fmcr,
+			 						edited_stock_entry = "Quantity Balanced",
+			 						loss_gain_qty=0,vmcr_qty=vmcr.get('qty'),
+									edited_qty=0,reserved_qty=reserved_qty)
+
+def make_stock_adjust(purpose,message,vlcc,fmcr,qty,vmcr_qty,t_warehouse,se_qty,s_warehouse=None,stock=None):
+	print stock,"inside make_stock_adjust________________\n\n"
 	try:
-		company_details = frappe.db.get_value("Company",{"name":vlcc},['default_payable_account','abbr','cost_center'],as_dict=1)
+		company_details = frappe.db.get_value("Company",{"name":vlcc.get('name')},
+			['default_payable_account','abbr','cost_center'],as_dict=1)
 		remarks,response_dict = {} ,{}
 		item_code = ""
 
-		amcu_api.create_item(data)
+		amcu_api.create_item(fmcr)
 		amcu_api.make_uom_config("Nos")
 	
-		if data.get('milktype') == "COW":
+		if fmcr.get('milktype') == "COW":
 			item_code = "COW Milk"
-		elif data.get('milktype') == "BUFFALO":
+		elif fmcr.get('milktype') == "BUFFALO":
 			item_code = "BUFFALO Milk"
 
 		item_ = frappe.get_doc("Item",item_code)
 
 		stock_doc = frappe.new_doc("Stock Entry")
 		stock_doc.purpose =  purpose
-		stock_doc.company = vlcc
-		remarks.update({"Farmer ID":data.get('farmerid'),
-			"Rcvd Time":data.get('rcvdtime'),"Message": message,"shift":data.get('shift')})
+		stock_doc.company = vlcc.get('name')
+		remarks.update({"Farmer ID":fmcr.get('farmerid'),
+			"Rcvd Time":fmcr.get('min_time'),"Message": message,"shift":fmcr.get('shift')})
 		stock_doc.remarks = "\n".join("{}: {}".format(k, v) for k, v in remarks.items())
 		stock_doc.append("items",
 			{
@@ -159,15 +216,19 @@ def make_stock_adjust(purpose,message,vlcc,data,qty,vmcr,t_warehouse,s_warehouse
 				"s_warehouse": s_warehouse,
 				"t_warehouse": t_warehouse,
 				"cost_center":company_details.get('cost_center'),
-				"basic_rate": data.get('rate')
+				"basic_rate": fmcr.get('rate')
 			}
 		)
 		stock_doc.flags.ignore_permissions = True
 		stock_doc.flags.is_api = True
 		stock_doc.submit()	
 
-		utils.make_dairy_log(title="Stock Entry Created",method="make_stock_adjust", status="Success",
-		data=stock_doc.name ,message= "Stock Adjustment" , traceback="Scheduler")
+		set_flag(fmcr,vlcc)
+		reserved_qty = stock[0].get('qty') if stock[0].get('qty') else 0
+		make_farmer_edition_log(fmcr=fmcr,
+								edited_stock_entry=stock_doc.name,
+								loss_gain_qty=se_qty,vmcr_qty=vmcr_qty,
+								edited_qty=qty,reserved_qty=reserved_qty)
 
 		return qty
 
@@ -176,18 +237,54 @@ def make_stock_adjust(purpose,message,vlcc,data,qty,vmcr,t_warehouse,s_warehouse
 		data=message ,message=e, traceback=frappe.get_traceback())
 
 
-def set_flag_fmcr(fmcr_list,is_fmcr_updated):
+def make_farmer_edition_log(fmcr,edited_stock_entry,loss_gain_qty,vmcr_qty,edited_qty,reserved_qty):
+	
+	print reserved_qty,"inside make_farmer_edition_log________________\n\n"
+	edition_log = frappe.new_doc("Farmer Edition Log")
+	edition_log.fmcr_qty = fmcr.get('qty')
+	edition_log.reserved_qty = reserved_qty
+	edition_log.loss_gain_qty = loss_gain_qty
+	edition_log.vmcr_qty = vmcr_qty
+	edition_log.stock_entry = edited_stock_entry
+	edition_log.edited_qty = edited_qty
+	edition_log.vlcc = fmcr.get('societyid')
+	edition_log.flags.ignore_permissions = True
+	edition_log.save()
 
-	if fmcr_list:
-		for data in fmcr_list:
-			fmcr_doc = frappe.get_doc('Farmer Milk Collection Record',data)
-			fmcr_doc.is_fmrc_updated = is_fmcr_updated
-			fmcr_doc.flags.ignore_permissions = True
-			fmcr_doc.save()
-
-def set_flag_vmcr(vmcr,is_scheduler):
-	if vmcr:
-		frappe.db.set_value("Vlcc Milk Collection Record",vmcr,"is_scheduler",is_scheduler)
+def set_flag(fmcr,vlcc):
+	cc = frappe.db.get_value("Address",vlcc.get('chilling_centre'),"centre_id")
+	frappe.db.sql("""update 
+						`tabFarmer Milk Collection Record`
+					set 
+						is_fmrc_updated = 1,is_stock_settled=1
+					where  
+						docstatus = 1 and 
+						shift = '{0}' and milktype = '{1}' and 
+						date(rcvdtime) = '{2}' and societyid = '{3}' """.
+						format(fmcr.get('shift'),fmcr.get('milktype'),
+						getdate(fmcr.get('min_time')),fmcr.get('societyid')))
+	frappe.db.sql("""update 
+						`tabStock Entry`
+					set 
+						is_scheduler = 1,is_stock_settled=1
+					where  
+						docstatus = 1 and is_reserved_farmer = 1 and
+						shift = '{0}' and milktype = '{1}' and 
+						posting_date = '{2}' and societyid = '{3}' """.
+						format(fmcr.get('shift'),fmcr.get('milktype'),
+						getdate(fmcr.get('min_time')),fmcr.get('societyid')))
+	frappe.db.sql("""update 
+						`tabVlcc Milk Collection Record`
+					set 
+						is_scheduler = 1 
+					where  
+						docstatus = 1  and
+						shift = '{0}' and milktype = '{1}' and 
+						date(rcvdtime) = '{2}' and farmerid = '{3}' and 
+						societyid = '{4}'""".
+						format(fmcr.get('shift'),fmcr.get('milktype'),
+						getdate(fmcr.get('min_time')),fmcr.get('societyid'),
+						cc))
 
 def check_hourly_dairy_log():
 	utils.make_dairy_log(title="Scheduler Checking for 1Hour",method="make_stock_adjust", status="Success",

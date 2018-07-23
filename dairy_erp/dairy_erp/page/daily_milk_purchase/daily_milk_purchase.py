@@ -74,7 +74,7 @@ def get_avg_data(fmcr_stock_data):
 			avg_rate = flt(rate/count)
 
 		avg_data.update({
-			"count":count,"milkqty":milkqty,
+			"count":count,"milkqty":round(milkqty,2),
 			"avg_fat":round(avg_fat,2),"avg_snf":round(avg_snf,2),
 			"avg_clr":round(avg_clr,2),"avg_rate":round(avg_rate,2)})
 	return avg_data
@@ -137,8 +137,8 @@ def guess_member(fmcr_data,curr_date_):
 
 	 	member_dict.update({"non_member_count":non_member_count,
 					"member_count":member_count,
-					"non_member_qty":non_member_qty,
-					"member_qty":member_qty,
+					"non_member_qty":round(non_member_qty,2),
+					"member_qty":round(member_qty,2),
 					"member_amt":round(member_amt,2),
 					"non_member_amt":round(non_member_amt,2)})
 

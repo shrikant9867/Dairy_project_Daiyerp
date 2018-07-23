@@ -24,7 +24,8 @@ def get_items():
 	
 	response_dict = frappe.db.sql("""select name as item_code,item_name,description,standard_rate,stock_uom, item_group from `tabItem` where 
 		item_group in ('Cattle feed', 'Mineral Mixtures', 'Medicines', 
-		'Artificial Insemination Services','Milk & Products') and is_stock_item=1 and disabled =0 and now() <= end_of_life""",as_dict = 1)
+		'Artificial Insemination Services','Milk & Products') and is_stock_item=1 and disabled =0 and now() <= end_of_life
+		and item_code not in ('Advance Emi','Loan Emi','Milk Incentives')""",as_dict = 1)
 	for row in response_dict:
 		try:
 			row.update({"qty": get_item_qty(row.get('item_code')),"uom":frappe.db.sql("select um.uom,um.conversion_factor * i.standard_rate as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = %s",(row.get('item_code')),as_dict=1)})
@@ -123,11 +124,12 @@ def guess_price_list(party_type, supplier_type=None):
 
 def get_item_list():
 	# return item details along with uom
-	return frappe.db.sql("""select i.name, i.description, i.item_name,
+	return frappe.db.sql("""select i.name as item_code, i.description, i.item_name,
 		i.item_group,uom.uom, uom.conversion_factor from `tabItem` i
 		left join `tabUOM Conversion Detail` uom
 		on uom.parent = i.name where i.is_stock_item = 1
-		and i.disabled = 0 and now() <= i.end_of_life group by i.name, uom.uom""",
+		and i.disabled = 0 and now() <= i.end_of_life 
+		and i.name not in ('Advance Emi','Loan Emi','Milk Incentives') group by i.name, uom.uom""",
 	as_dict=True)
 
 def get_item_prices(price_list):
@@ -140,13 +142,13 @@ def get_item_prices(price_list):
 			"price_list": price_list,
 			"item_code": i.get('name')
 		}, "price_list_rate") or 0
-		if i.get('name') not in items_:
+		if i.get('item_code') not in items_:
 			uom = [{ 'uom': i.pop('uom'),  'rate': i.pop('conversion_factor') * item_price }]
-			i.update({'uom': uom, 'standard_rate': item_price, "qty": get_item_qty(i.get('name'))})
-			items_[i.get('name')] = i
+			i.update({'uom': uom, 'standard_rate': item_price, "qty": get_item_qty(i.get('item_code'))})
+			items_[i.get('item_code')] = i
 		else:
-			items_[i.get('name')]['uom'].append({ 'uom':i.get('uom'), 'rate': i.pop('conversion_factor') * item_price })
-	sorted_items = sorted(items_.values(), key=itemgetter('name'), reverse=False)
+			items_[i.get('item_code')]['uom'].append({ 'uom':i.get('uom'), 'rate': i.pop('conversion_factor') * item_price })
+	sorted_items = sorted(items_.values(), key=itemgetter('item_code'), reverse=False)
 	return sorted_items
 
 

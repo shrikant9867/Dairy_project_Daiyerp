@@ -18,7 +18,7 @@ def get_columns(filters):
 				("Date") + ":Datetime:150",
 				("Shift") + ":Data:150",
 				("Milk Type") + ":Data:150",
-				("Quantity") + ":Int:150",
+				("Quantity") + ":Float:150",
 				("Amount") + ":Currency:150"			
 			]
 	return columns
@@ -35,7 +35,7 @@ def get_conditions(filters):
 
 def get_data(filters):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
-	data = frappe.db.sql("""select farmerid,farmer,rcvdtime,shift,milktype,milkquantity,amount
+	data = frappe.db.sql("""select farmerid,farmer,rcvdtime,shift,milktype,round(milkquantity,2),amount
 				from `tabFarmer Milk Collection Record` where docstatus = 1 and
 				associated_vlcc = '{0}' {1}""".format(
 					user_doc.get('company'),

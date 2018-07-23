@@ -13,6 +13,8 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
+# setup wizard
+# setup_wizard_requires = "assets/dairy_erp/js/setup_wizard.js"
 setup_wizard_complete = "dairy_erp.customization.customization.create_item_group"
 # include js, css files in header of desk.html
 app_include_css = "/assets/js/dairy.desk.min.css"
@@ -123,7 +125,8 @@ doc_events = {
         "on_submit": "dairy_erp.customization.purchase_order.purchase_order.update_material_indent"
     },
     "Purchase Receipt":{
-        "on_submit": "dairy_erp.customization.customization.on_submit_pr",
+        "on_submit": ["dairy_erp.customization.customization.on_submit_pr",
+                        "dairy_erp.customization.purchase_receipt.purchase_receipt.make_pi_against_vlcc"],
         "validate": ["dairy_erp.customization.customization.set_co_warehouse_pr","dairy_erp.customization.customization.validate_qty",
                         "dairy_erp.customization.purchase_receipt.purchase_receipt.validate_price_list"]
     },

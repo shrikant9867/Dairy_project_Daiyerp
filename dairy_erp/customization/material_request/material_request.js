@@ -173,8 +173,10 @@ frappe.ui.form.on("Material Request Item", {
 
 	qty: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		child.qty = Math.floor(child.qty)
-		frappe.model.set_value(cdt, cdn, "new_dn_qty",parseFloat(child.qty));			
-		cur_frm.refresh_fields('items');
-	},
+		if (["COW Milk","BUFFALO Milk"].indexOf(child.item_code) <= -1){
+			child.qty = Math.floor(child.qty)
+			frappe.model.set_value(cdt, cdn, "new_dn_qty",parseFloat(child.qty));			
+			cur_frm.refresh_fields('items');
+		}
+	}
 });

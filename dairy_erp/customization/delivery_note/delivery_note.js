@@ -21,3 +21,15 @@ frappe.ui.form.on("Delivery Note", {
 		dairy.price_list.trigger_price_list();
 	}
 })
+
+frappe.ui.form.on("Delivery Note Item", {
+
+	qty: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if (["COW Milk","BUFFALO Milk"].indexOf(child.item_code) <= -1){
+			child.qty = Math.floor(child.qty)
+			frappe.model.set_value(cdt, cdn, "new_dn_qty",parseFloat(child.qty));			
+			cur_frm.refresh_fields('items');
+		}
+	}
+});

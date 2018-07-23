@@ -1,3 +1,5 @@
+cur_frm.add_fetch("supplier", "supplier_type", "supplier_type")
+
 frappe.ui.form.on("Purchase Receipt Item", {
 	qty: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
@@ -28,6 +30,7 @@ frappe.ui.form.on("Purchase Receipt Item", {
 frappe.ui.form.on("Purchase Receipt", {
 	refresh: function(frm) {
 		dairy.price_list.trigger_price_list();
+		cur_frm.cscript.toggle_supplier_invoice_no();
 	},
 	supplier: function(frm) {
 		if(get_session_user_type().operator_type == 'Camp Office' && 
@@ -35,9 +38,41 @@ frappe.ui.form.on("Purchase Receipt", {
 			frm.set_value("supplier","")
 			frappe.throw(__("Supplier Type Cannot be <b>Vlcc Type</b>"))
 		}
+	},
+	after_save: function(frm) {
+		console.log("abcd")
+		if(cur_frm.doc.name){
+			cur_frm.cscript.toggle_supplier_invoice_no(frm);
+		}
+	},
+	onload:function(){
+		cur_frm.cscript.toggle_supplier_invoice_no();
 	}
 })
+
+cur_frm.cscript.toggle_supplier_invoice_no = function(frm){
+	if(cur_frm.doc.purchase_order_reference){
+		cur_frm.set_df_property("supplier_invoice_no", "hidden", 0);
+	}
+	else{
+		frappe.call({
+			method: "dairy_erp.customization.purchase_receipt.purchase_receipt.toggle_supplier_invoice_no",
+			args: {
+				doc_name:cur_frm.doc.name
+			},
+			callback: function(r){
+				if(r.message){
+					cur_frm.set_df_property("supplier_invoice_no", "hidden", 0);
+					cur_frm.reload_doc();
+				}
+			}
+		});
+	}
+}
+
 $.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));
+
+
 
 get_session_user_type = function() {
 	var user;
@@ -81,3 +116,15 @@ get_supplier_type = function(supplier) {
 	});
 	return type
 }
+
+frappe.ui.form.on("Purchase Receipt Item", {
+
+	qty: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		if (["COW Milk","BUFFALO Milk"].indexOf(child.item_code) <= -1){
+			child.qty = Math.floor(child.qty)
+			frappe.model.set_value(cdt, cdn, "new_dn_qty",parseFloat(child.qty));			
+			cur_frm.refresh_fields('items');
+		}
+	}
+});

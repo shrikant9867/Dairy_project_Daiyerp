@@ -6,6 +6,10 @@ frappe.ui.form.on('Purchase Order', {
 			frm.set_value("supplier_address","")
 			frm.set_value("shipping_address","")
 		}
+		if (has_common(frappe.user_roles, ["Camp Operator", "Camp Manager"])){
+			frm.set_value("is_dropship",1)
+			frm.set_df_property("is_dropship", "read_only", 1);
+		} 
 	},
 
 	refresh: function(frm) {

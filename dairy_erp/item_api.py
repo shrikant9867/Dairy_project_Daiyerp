@@ -140,7 +140,7 @@ def get_item_prices(price_list):
 	for i in items:
 		item_price = frappe.db.get_value("Item Price", {
 			"price_list": price_list,
-			"item_code": i.get('name')
+			"item_code": i.get('item_code')
 		}, "price_list_rate") or 0
 		if i.get('item_code') not in items_:
 			uom = [{ 'uom': i.pop('uom'),  'rate': i.pop('conversion_factor') * item_price }]

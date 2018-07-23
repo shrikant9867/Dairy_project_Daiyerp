@@ -192,13 +192,31 @@ def after_install():
 	create_supplier_type()
 	create_translation()
 
-def create_translation():
 
-	if not frappe.db.sql("select name from `tabTranslation` where source_name='Material Request'"):
+
+def create_translation():
+	"""
+	Made Translation for Material Request and Village Level Collections
+	"""
+	if not frappe.db.get_value("Translation", {"source_name":"Material Request"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
 		mr_translation.language = "en"
 		mr_translation.source_name = "Material Request"
 		mr_translation.target_name = "Material Indent"
+		mr_translation.save()
+
+	if not frappe.db.get_value("Translation", {"source_name":"Village Level Collection Centre"}, "name"):
+		mr_translation = frappe.new_doc("Translation")
+		mr_translation.language = "en"
+		mr_translation.source_name = "Village Level Collection Centre"
+		mr_translation.target_name = "Dairy Cooperative Society"
+		mr_translation.save()
+
+	if not frappe.db.get_value("Translation", {"source_name":"Camp Office"}, "name"):
+		mr_translation = frappe.new_doc("Translation")
+		mr_translation.language = "en"
+		mr_translation.source_name = "Camp Office"
+		mr_translation.target_name = "P&I"
 		mr_translation.save()
 
 def create_supplier_type():

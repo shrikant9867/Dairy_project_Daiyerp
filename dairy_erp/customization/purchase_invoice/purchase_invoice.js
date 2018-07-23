@@ -1,3 +1,5 @@
+cur_frm.add_fetch("supplier", "supplier_type", "supplier_type")
+
 $.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));
 
 frappe.ui.form.on("Purchase Invoice", {

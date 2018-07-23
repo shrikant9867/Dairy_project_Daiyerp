@@ -1,0 +1,33 @@
+<div class = "row">
+	<div class="col-md-3">
+		Dear Mr.,
+	</div>
+	<div class="col-md-3">
+		{{ vlcc_name }}
+	</div>
+	<div class="col-md-6"></div>
+</div>
+
+<div class = "row">
+	<p>After reviewing the stock balance, we have found that the following items are in short supply. 
+Please raise a Material Indent to re-stock the items.</p>
+</div>
+
+<div class="row">
+	<table class="table table-bordered table-hover">
+		<thead>
+			<tr>
+				<th class="text-left">Item</th>
+				<th class="text-left">Acutal Qty</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for item, qty in item_and_qty.items() %}
+				<tr>
+					<td>{{ item }}</td>
+					<td>{{ qty }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>

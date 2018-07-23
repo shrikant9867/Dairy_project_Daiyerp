@@ -9,6 +9,7 @@
 		"public/dashboard/total_summery.html",
 		"public/dashboard/dashboard_panel.html",
 		"public/price_list/price_list_customization.js",
+		"public/js/setup_wizard.js",
 		"public/html/pdf.html"
 	]
 }

@@ -86,7 +86,7 @@ frappe.daily_milk_purchase = Class.extend({
         var me = this;
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
-        var html = frappe.render_template("pdf",{
+        var html = frappe.render_template("dmpr_pdf",{
             content: frappe.render_template("daily_milk_purchase_print",{
                             "fmcr_stock_data":me.table_data.fmcr_stock_data,
                             "avg_data":me.table_data.avg_data,

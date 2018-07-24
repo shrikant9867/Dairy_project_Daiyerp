@@ -19,7 +19,6 @@
 						<td></td>
 					</tr>
 					<tr>  
-					<!-- {% if (avg_data) { %}  -->
 						<td style="text-align: center;">{%= avg_data.milkqty %}</td>
 						<td style="text-align: center;">{%= local_sale_data.qty %}</td>
 						<td style="text-align: right;">{%= local_sale_data.amt %}</td>
@@ -27,7 +26,6 @@
 						<td style="text-align: center;">{%= avg_data.avg_fat  %}</td>
 						<td style="text-align: center;">{%= avg_data.avg_snf %}</td>
 						<td></td>
-					<!-- {% } %} -->
 					</tr>
 				</tbody>
 			</table>
@@ -87,8 +85,6 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% var qty = 0; %}
-			{% var amt = 0; %}
 			{% for(var i=0, l=fmcr_stock_data.length; i < l; i++) { %}
 				<tr>
 					<td style="text-align: center;word-wrap: break-word;">{%= fmcr_stock_data[i].farmerid %}</td>
@@ -99,8 +95,6 @@
 					<td style="text-align: center">{%= fmcr_stock_data[i].snf %}</td>
 					<td style="text-align: right">{%= fmcr_stock_data[i].rate %}</td>
 					<td style="text-align: right">{%= fmcr_stock_data[i].amount %}</td>
-				 	{% qty += fmcr_stock_data[i].milkquantity; %}
-				 	{% amt += fmcr_stock_data[i].amount; %}
 				</tr>
 			
 			{% } %}
@@ -109,12 +103,12 @@
 		    <tr>
 		      <td style="text-align: center;font-weight: bold;">{%= avg_data.count %}</td>
 		      <td></td>
-	       	  <td style="text-align: center;font-weight: bold;">{%= qty %}</td>
+	       	  <td style="text-align: center;font-weight: bold;">{%= avg_data.milkqty %}</td>
 	       	  <td></td>
 	       	  <td></td>
 	       	  <td></td>
 	       	  <td></td>
-	       	  <td style="text-align: right;font-weight: bold;">{%= format_currency(amt,"INR") %}</td>
+	       	  <td style="text-align: right;font-weight: bold;">{%= format_currency(avg_data.amount,"INR") %}</td>
 		    </tr>
 	   </tfoot>
 	</table>

@@ -12,6 +12,7 @@ import calendar
 import datetime
 from frappe import _
 import time
+import json
 
 class VLCCPaymentCycle(Document):
 
@@ -222,3 +223,18 @@ class VLCCPaymentCycle(Document):
 			date_computation.doc_name = fy[2]+fy[3]+"-"+key + "-" +data.cycle
 			date_computation.flags.ignore_permissions = True
 			date_computation.save()
+
+
+@frappe.whitelist()
+def set_cycle_values(doc):
+	doc = json.loads(doc)
+	eom = 0
+	if doc.get('no_of_cycles') == 3:
+		if doc.get('month') == 'All':
+			eom = 31
+		else:
+			month_num = "%02d" % time.strptime(doc.get('month'), "%b").tm_mon
+			end_date = get_month_details(doc.get('fiscal_year'),month_num).month_end_date
+			eom = end_date.day
+	return eom
+

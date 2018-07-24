@@ -10,7 +10,7 @@ def get_data(curr_date=None):
 	curr_date_ = getdate(curr_date) if curr_date else ""
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
 	vlcc_addr = frappe.db.get_value("Village Level Collection Centre",
-				vlcc,"address_display")
+				vlcc,"address_display") or ""
 
 	fmcr_stock_data = []
 	
@@ -64,7 +64,7 @@ def get_data(curr_date=None):
 def get_avg_data(fmcr_stock_data):
 	avg_data = {}
 	count = flt(len(fmcr_stock_data))
-	milkqty,fat,snf,clr,rate,avg_fat,avg_snf,avg_clr,avg_rate = 0,0,0,0,0,0,0,0,0
+	milkqty,fat,snf,clr,rate,avg_fat,avg_snf,avg_clr,avg_rate,amount = 0,0,0,0,0,0,0,0,0,0
 	if fmcr_stock_data:
 		for fmcr_stock in fmcr_stock_data:
 			milkqty += fmcr_stock.get('milkquantity')
@@ -72,13 +72,14 @@ def get_avg_data(fmcr_stock_data):
 			snf += flt(fmcr_stock.get('snf'))
 			clr += flt(fmcr_stock.get('clr'))
 			rate += flt(fmcr_stock.get('rate'))
+			amount += flt(fmcr_stock.get('amount'))
 			avg_fat = flt(fat/count)
 			avg_snf = flt(snf/count)
 			avg_clr = flt(clr/count)
 			avg_rate = flt(rate/count)
 
 		avg_data.update({
-			"count":count,"milkqty":round(milkqty,2),
+			"count":count,"milkqty":round(milkqty,2),"amount":round(amount,2),
 			"avg_fat":round(avg_fat,2),"avg_snf":round(avg_snf,2),
 			"avg_clr":round(avg_clr,2),"avg_rate":round(avg_rate,2)})
 	return avg_data

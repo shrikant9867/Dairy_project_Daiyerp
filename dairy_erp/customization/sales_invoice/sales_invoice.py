@@ -238,3 +238,27 @@ def validate_price_list(doc):
 	
 	if doc.customer_or_farmer == "Vlcc Local Customer" and doc.selling_price_list not in ["GTCS","LCS"+"-"+user_doc]:
 		frappe.throw(_("Please Create Material price List First for <b>Customer</b>"))
+
+
+@frappe.whitelist()
+def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filters):
+	vlcc_settings = frappe.get_doc("VLCC Settings",filters.get('vlcc'))
+	items_dict = {}
+	for item in vlcc_settings.vlcc_item:
+		if items_dict and item.customer_type in items_dict:
+			items_dict[item.customer_type].append(item.item)
+		else:
+			items_dict[item.customer_type] = [item.item]
+	if items_dict:
+		final_item_list = "(" + ",".join("'{0}'".format(item) for item in items_dict[filters.get('customer_type').encode('utf-8')]) + ")"
+		item_list = frappe.db.sql("""select name,item_group from tabItem 
+			where name in {final_item_list} and name like '{txt}' """.format(final_item_list=final_item_list,txt= "%%%s%%" % txt),as_list=1)
+	else:
+		item_list = frappe.db.sql("""select name,item_group 
+							from tabItem where name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1)
+	
+	p_item = [item.get('item_name') for item in filters.get("items_dict")]
+	item_list_update = item_list
+	if p_item[0]:
+		item_list_update = [item for item in item_list if item[0] not in p_item]
+	return item_list_update

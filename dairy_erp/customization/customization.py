@@ -648,35 +648,34 @@ def set_mr_warehouse(doc,method=None):
 			for item in doc.items:
 				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 
-	
+
 def add_config_settings(args=None):
-	print args,"argssssss"
-	dfsdsfdfsdf
-	# add_settings()
-	# add_dairy_language()
-	# create_item_group()
+	add_values(args)
+	add_dairy_language(args)
+	create_item_group()
 
-
-def add_settings(args=None):
+def add_values(args=None):
 	dairy_configuration = frappe.get_doc("Dairy Configuration")
-	dairy_configuration.company = ''
-	dairy_configuration.first_name = ''
-	dairy_configuration.last_name = ''
-	dairy_configuration.email_id = ''
-	dairy_configuration.is_dropship = ''
+	dairy_configuration.company = args.get('company_name')
+	dairy_configuration.full_name = args.get('full_name')
+	dairy_configuration.email_id = args.get('email')
+	dairy_configuration.is_dropship = args.get('is_dropship')
 	dairy_configuration.save(ignore_permissions=True)
 
-def add_dairy_language():
+def add_dairy_language(args):
 	language = frappe.new_doc("Language")
 	language.language_code = "dcl"
 	language.language_name = "Dairy"
 	language.based_on = "en"
 	language.save(ignore_permissions=True)
-	set_dairy_language(language.name)
+	set_dairy_language(language.name,args.get('email'))
 
-def set_dairy_language(language):
+def set_dairy_language(language,email_id):
 	frappe.db.sql("""update `tabUser` SET language= '{0}' WHERE email = '{1}' """.format(language,email_id))
-	frappe.db.sql("""update `tabSystem Settings` SET language= '{0}' """.format(language))
+	# system_setting = frappe.get_doc("System Settings","System Settings")
+	# system_setting.language = language
+	# system_setting.save(ignore_permissions=True)
+	# frappe.db.sql("""update `tabSystem Settings` SET language= '{0}' """.format(language))
 
 def create_item_group():
 

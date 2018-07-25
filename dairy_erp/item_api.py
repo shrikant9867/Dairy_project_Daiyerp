@@ -22,7 +22,8 @@ def get_items():
 	"""Mobile API's common to sell and purchase 
 	"""
 	
-	response_dict = frappe.db.sql("""select name as item_code,item_name,description,standard_rate,stock_uom, item_group from `tabItem` where 
+	response_dict = frappe.db.sql("""select name as item_code,item_name,description,CAST(is_whole_no AS int) as is_whole_no,
+		standard_rate,stock_uom, item_group from `tabItem` where 
 		item_group in ('Cattle feed', 'Mineral Mixtures', 'Medicines', 
 		'Artificial Insemination Services','Milk & Products') and is_stock_item=1 and disabled =0 and now() <= end_of_life
 		and item_code not in ('Advance Emi','Loan Emi','Milk Incentives')""",as_dict = 1)
@@ -124,7 +125,7 @@ def guess_price_list(party_type, supplier_type=None):
 
 def get_item_list():
 	# return item details along with uom
-	return frappe.db.sql("""select i.name as item_code, i.description, i.item_name,
+	return frappe.db.sql("""select i.name as item_code, i.description, i.item_name,i.item_name,CAST(i.is_whole_no as int) as is_whole_no,
 		i.item_group,uom.uom, uom.conversion_factor from `tabItem` i
 		left join `tabUOM Conversion Detail` uom
 		on uom.parent = i.name where i.is_stock_item = 1

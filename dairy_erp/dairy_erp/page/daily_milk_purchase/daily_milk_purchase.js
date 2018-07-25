@@ -31,7 +31,8 @@ frappe.daily_milk_purchase = Class.extend({
                             "fmcr_stock_data":me.table_data.fmcr_stock_data,
                             "avg_data":me.table_data.avg_data,
                             "local_sale_data":me.table_data.local_sale_data,
-                            "member_data":me.table_data.member_data
+                            "member_data":me.table_data.member_data,
+                            "dairy_sale_qty":me.table_data.dairy_sale_qty
                             })
                     $(me.page).find(".render-table").append(me.print)
                 }
@@ -85,7 +86,7 @@ frappe.daily_milk_purchase = Class.extend({
         var me = this;
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
-        var html = frappe.render_template("pdf",{
+        var html = frappe.render_template("dmpr_pdf",{
             content: frappe.render_template("daily_milk_purchase_print",{
                             "fmcr_stock_data":me.table_data.fmcr_stock_data,
                             "avg_data":me.table_data.avg_data,
@@ -93,7 +94,8 @@ frappe.daily_milk_purchase = Class.extend({
                             "member_data":me.table_data.member_data,
                             "vlcc":me.table_data.vlcc,
                             "vlcc_addr":me.table_data.vlcc_addr,
-                            "date_":frappe.datetime.str_to_user(date_)
+                            "date_":frappe.datetime.str_to_user(date_),
+                            "dairy_sale_qty":me.table_data.dairy_sale_qty
                             }),
             title:__("daily_milk_purchase_report_"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,

@@ -82,3 +82,14 @@ frappe.ui.form.on('VLCC Settings', {
 		}
 	}
 });
+
+
+cur_frm.fields_dict['vlcc_item'].grid.get_field("item").get_query = function(doc, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		return {
+			query:"dairy_erp.dairy_erp.doctype.vlcc_settings.vlcc_settings.get_item_by_customer_type",
+			filters: {'customer_type': child.customer_type,
+						'items_dict':cur_frm.doc.vlcc_item
+					}
+		}
+}

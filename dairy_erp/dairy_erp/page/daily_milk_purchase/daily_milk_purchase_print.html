@@ -44,7 +44,7 @@
 						<td style="text-align: center;">{%= avg_data.milkqty %}</td>
 						<td style="text-align: center;">{%= local_sale_data.qty %}</td>
 						<td style="text-align: right;">{%= local_sale_data.amt %}</td>
-						<td style="text-align: center;">{%= (avg_data.milkqty - local_sale_data.qty) || 0 %}</td>
+						<td style="text-align: center;">{%= dairy_sale_qty %}</td>
 						<td style="text-align: center;">{%= avg_data.avg_fat  %}</td>
 						<td style="text-align: center;">{%= avg_data.avg_snf %}</td>
 						<td></td>
@@ -129,12 +129,12 @@
 		    <tr>
 		      <td style="text-align: center;font-weight: bold;">{%= avg_data.count %}</td>
 		      <td></td>
-	       	  <td style="text-align: center;font-weight: bold;">{%= qty %}</td>
+	       	  <td style="text-align: center;font-weight: bold;">{%= avg_data.milkqty %}</td>
 	       	  <td></td>
 	       	  <td></td>
 	       	  <td></td>
 	       	  <td></td>
-	       	  <td style="text-align: right;font-weight: bold;">{%= format_currency(amt,"INR") %}</td>
+	       	  <td style="text-align: right;font-weight: bold;">{%= format_currency(avg_data.amount,"INR") %}</td>
 		    </tr>
 	   </tfoot>
 	</table>

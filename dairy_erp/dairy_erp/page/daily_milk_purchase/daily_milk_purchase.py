@@ -10,12 +10,12 @@ def get_data(curr_date=None):
 	curr_date_ = getdate(curr_date) if curr_date else ""
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
 	vlcc_addr = frappe.db.get_value("Village Level Collection Centre",
-				vlcc,"address_display")
+				vlcc,"address_display") or ""
 
 	fmcr_stock_data = []
 	
-	fmcr_data = frappe.db.sql("""select farmerid,name,milkquantity,
-										clr,fat,snf,rate,amount,societyid
+	fmcr_data = frappe.db.sql("""select farmerid,name,round(milkquantity,2) as milkquantity,
+										clr,fat,snf,rate,round(amount,2) as amount,societyid
 								from
 									`tabFarmer Milk Collection Record`
 								where 
@@ -23,8 +23,8 @@ def get_data(curr_date=None):
 								""".format(get_conditions(curr_date_)),as_dict=True,debug=0)
 
 	resv_farmer_data =  frappe.db.sql("""select s.farmer_id as farmerid,
-					s.name as name,ifnull(se.qty,0) as milkquantity,
-					s.fat,s.snf,s.clr,se.basic_rate as rate,se.amount as amount
+					s.name as name,ifnull(round(se.qty,2),0) as milkquantity,
+					s.fat,s.snf,s.clr,se.basic_rate as rate,round(se.amount,2) as amount
 					from 
 						`tabStock Entry` s, `tabStock Entry Detail` se 
 					where 
@@ -48,19 +48,23 @@ def get_data(curr_date=None):
 		for resv_farmer in resv_farmer_data:
 			fmcr_stock_data.append(resv_farmer)
 
+	avg_data = get_avg_data(fmcr_stock_data)
+	local_sale_data = get_local_sale_data(curr_date_)
+	dairy_sale_qty = flt(avg_data.get('milkqty')) - flt(local_sale_data.get('qty'))
 	return {
 			"fmcr_stock_data":fmcr_stock_data,
-			"avg_data":get_avg_data(fmcr_stock_data),
-			"local_sale_data":get_local_sale_data(curr_date_),
+			"avg_data":avg_data,
+			"local_sale_data":local_sale_data,
 			"member_data":guess_member(fmcr_stock_data,curr_date_),
 			"vlcc":vlcc,
-			"vlcc_addr":vlcc_addr
+			"vlcc_addr":vlcc_addr,
+			"dairy_sale_qty":round(dairy_sale_qty,2)
 		}
 		
 def get_avg_data(fmcr_stock_data):
 	avg_data = {}
 	count = flt(len(fmcr_stock_data))
-	milkqty,fat,snf,clr,rate,avg_fat,avg_snf,avg_clr,avg_rate = 0,0,0,0,0,0,0,0,0
+	milkqty,fat,snf,clr,rate,avg_fat,avg_snf,avg_clr,avg_rate,amount = 0,0,0,0,0,0,0,0,0,0
 	if fmcr_stock_data:
 		for fmcr_stock in fmcr_stock_data:
 			milkqty += fmcr_stock.get('milkquantity')
@@ -68,13 +72,14 @@ def get_avg_data(fmcr_stock_data):
 			snf += flt(fmcr_stock.get('snf'))
 			clr += flt(fmcr_stock.get('clr'))
 			rate += flt(fmcr_stock.get('rate'))
+			amount += flt(fmcr_stock.get('amount'))
 			avg_fat = flt(fat/count)
 			avg_snf = flt(snf/count)
 			avg_clr = flt(clr/count)
 			avg_rate = flt(rate/count)
 
 		avg_data.update({
-			"count":count,"milkqty":round(milkqty,2),
+			"count":count,"milkqty":round(milkqty,2),"amount":round(amount,2),
 			"avg_fat":round(avg_fat,2),"avg_snf":round(avg_snf,2),
 			"avg_clr":round(avg_clr,2),"avg_rate":round(avg_rate,2)})
 	return avg_data
@@ -82,8 +87,8 @@ def get_avg_data(fmcr_stock_data):
 def get_local_sale_data(curr_date_):
 
 	local_sale_data = {}
-	local_sale =  frappe.db.sql("""select ifnull(sum(si.qty),0) as qty, 
-						ifnull(sum(si.amount),0) as amt 
+	local_sale =  frappe.db.sql("""select ifnull(sum(si.qty),0) as qty,  
+									ifnull(sum(si.amount),0) as amt
 			from 
 				`tabSales Invoice Item` si,
 				`tabSales Invoice` s 
@@ -94,8 +99,8 @@ def get_local_sale_data(curr_date_):
 				s.local_sale = 1 {0}""".format(local_sale_condn(curr_date_)),as_dict=True)
 
 	if local_sale and local_sale[0].get('qty'):
-		local_sale_data.update({"qty":round(local_sale[0].get('qty')),
-								"amt":round(local_sale[0].get('amt'))})
+		local_sale_data.update({"qty":round(local_sale[0].get('qty'),2),
+								"amt":round(local_sale[0].get('amt'),2)})
 	return local_sale_data
 
 	

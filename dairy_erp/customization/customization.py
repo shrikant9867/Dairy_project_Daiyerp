@@ -649,8 +649,36 @@ def set_mr_warehouse(doc,method=None):
 				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 
 	
+def add_config_settings(args=None):
+	print args,"argssssss"
+	dfsdsfdfsdf
+	# add_settings()
+	# add_dairy_language()
+	# create_item_group()
 
-def create_item_group(args=None):
+
+def add_settings(args=None):
+	dairy_configuration = frappe.get_doc("Dairy Configuration")
+	dairy_configuration.company = ''
+	dairy_configuration.first_name = ''
+	dairy_configuration.last_name = ''
+	dairy_configuration.email_id = ''
+	dairy_configuration.is_dropship = ''
+	dairy_configuration.save(ignore_permissions=True)
+
+def add_dairy_language():
+	language = frappe.new_doc("Language")
+	language.language_code = "dcl"
+	language.language_name = "Dairy"
+	language.based_on = "en"
+	language.save(ignore_permissions=True)
+	set_dairy_language(language.name)
+
+def set_dairy_language(language):
+	frappe.db.sql("""update `tabUser` SET language= '{0}' WHERE email = '{1}' """.format(language,email_id))
+	frappe.db.sql("""update `tabSystem Settings` SET language= '{0}' """.format(language))
+
+def create_item_group():
 
 	item_groups = ['Cattle feed', 'Mineral Mixtures', 'Medicines', 'Artificial Insemination Services',
 		'Veterinary Services', 'Others/Miscellaneous','Milk & Products', 'Stationary']

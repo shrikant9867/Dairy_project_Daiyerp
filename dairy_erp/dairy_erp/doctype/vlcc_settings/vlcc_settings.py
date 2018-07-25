@@ -57,17 +57,18 @@ def sms_and_email_for_item_stock_threshold_level(allow_guest=True):
 	for vlcc in vlcc_list:
 		vlcc_doc = frappe.get_doc("Village Level Collection Centre",vlcc.name)
 		vlcc_setting_doc = frappe.get_doc("VLCC Settings",vlcc.name)
-		vlcc_emails = [vlcc_doc.email_id]
-		if vlcc_doc.operator_same_as_agent and vlcc_doc.operator_email_id:
-			vlcc_emails.append(vlcc_doc.operator_email_id)
-		if vlcc_doc.warehouse and vlcc_setting_doc and vlcc_setting_doc.item_stock_threshold_level:
-			bin_list = frappe.db.get_all("Bin", {"warehouse": vlcc_doc.warehouse},"name")
-			item_and_actual_qty = {}
-			for bin_name in bin_list:
-				bin_doc = frappe.get_doc("Bin",bin_name.name)
-				if bin_doc.actual_qty < vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty >= 0:
-					item_and_actual_qty[bin_doc.item_code] = bin_doc.actual_qty
-			send_email_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_emails)
+		if vlcc_setting_doc:
+			vlcc_emails = [vlcc_doc.email_id]
+			if vlcc_doc.operator_same_as_agent and vlcc_doc.operator_email_id:
+				vlcc_emails.append(vlcc_doc.operator_email_id)
+			if vlcc_doc.warehouse and vlcc_setting_doc and vlcc_setting_doc.item_stock_threshold_level:
+				bin_list = frappe.db.get_all("Bin", {"warehouse": vlcc_doc.warehouse},"name")
+				item_and_actual_qty = {}
+				for bin_name in bin_list:
+					bin_doc = frappe.get_doc("Bin",bin_name.name)
+					if vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty < vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty >= 0:
+						item_and_actual_qty[bin_doc.item_code] = bin_doc.actual_qty
+				send_email_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_emails)
 
 
 def send_email_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_emails):

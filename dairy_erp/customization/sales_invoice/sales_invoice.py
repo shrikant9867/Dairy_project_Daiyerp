@@ -249,7 +249,7 @@ def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filter
 			items_dict[item.customer_type].append(item.item)
 		else:
 			items_dict[item.customer_type] = [item.item]
-	if items_dict:
+	if items_dict and filters.get('customer_type') in items_dict:
 		final_item_list = "(" + ",".join("'{0}'".format(item) for item in items_dict[filters.get('customer_type').encode('utf-8')]) + ")"
 		item_list = frappe.db.sql("""select name,item_group from tabItem 
 			where name in {final_item_list} and name like '{txt}' """.format(final_item_list=final_item_list,txt= "%%%s%%" % txt),as_list=1)

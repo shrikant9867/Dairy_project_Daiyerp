@@ -125,7 +125,7 @@ def guess_price_list(party_type, supplier_type=None):
 
 def get_item_list():
 	# return item details along with uom
-	return frappe.db.sql("""select i.name as item_code, i.description, i.item_name,
+	return frappe.db.sql("""select i.name as item_code, i.description, i.item_name,i.item_name,CAST(i.is_whole_no as int) as is_whole_no,
 		i.item_group,uom.uom, uom.conversion_factor from `tabItem` i
 		left join `tabUOM Conversion Detail` uom
 		on uom.parent = i.name where i.is_stock_item = 1

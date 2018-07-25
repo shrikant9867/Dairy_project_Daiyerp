@@ -657,7 +657,7 @@ def add_config_settings(args=None):
 def add_values(args=None):
 	dairy_configuration = frappe.get_doc("Dairy Configuration")
 	dairy_configuration.company = args.get('company_name')
-	dairy_configuration.full_name = args.get('full_name')
+	dairy_configuration.first_name = args.get('full_name')
 	dairy_configuration.email_id = args.get('email')
 	dairy_configuration.is_dropship = args.get('is_dropship')
 	dairy_configuration.save(ignore_permissions=True)
@@ -668,7 +668,7 @@ def add_dairy_language(args):
 	language.language_name = "Dairy"
 	language.based_on = "en"
 	language.save(ignore_permissions=True)
-	set_dairy_language(language.name,args.get('email'))
+	set_dairy_language(language.language_code,args.get('email'))
 
 def set_dairy_language(language,email_id):
 	frappe.db.sql("""update `tabUser` SET language= '{0}' WHERE email = '{1}' """.format(language,email_id))

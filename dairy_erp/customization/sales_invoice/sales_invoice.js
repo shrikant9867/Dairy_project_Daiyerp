@@ -288,3 +288,16 @@ frappe.ui.form.on("Sales Invoice Item", {
 		}
 	}
 });
+
+
+cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
+	if(cur_frm.doc.customer_or_farmer && cur_frm.doc.local_sale){
+		return {
+			query:"dairy_erp.customization.sales_invoice.sales_invoice.get_item_by_customer_type",
+			filters: {'customer_type': cur_frm.doc.customer_or_farmer,
+						'vlcc':cur_frm.doc.company,
+						'items_dict':cur_frm.doc.items
+					}
+		}
+	}
+}

@@ -302,6 +302,12 @@ def get_data():
 					"name": "General Ledger",
 					"doctype": "GL Entry",
 					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Purchase Order Dairy",
+					"doctype": "Purchase Order",
+					"is_query_report": True
 				}
 			]
 		}				

@@ -88,3 +88,16 @@ def send_email_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_emails):
 		)
 
 		frappe.db.commit()
+
+
+@frappe.whitelist()
+def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filters):
+	item_list = [item.get('item') for item in filters.get('items_dict') if item.get('customer_type') == filters.get('customer_type')]
+	if item_list[0]:
+		final_item_list = "(" + ",".join("'{0}'".format(item) for item in item_list[0:-1]) + ")"
+		item = frappe.db.sql("""select name,item_group from tabItem 
+			where name not in {final_item_list} and name like '{txt}' """.format(final_item_list=final_item_list,txt= "%%%s%%" % txt),as_list=1)
+	else:
+		item = frappe.db.sql("""select name,item_group 
+							from tabItem where name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1)
+	return item

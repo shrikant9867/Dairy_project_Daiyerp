@@ -229,7 +229,7 @@ class VLCCPaymentCycle(Document):
 def set_cycle_values(doc):
 	doc = json.loads(doc)
 	eom = 0
-	if doc.get('no_of_cycles') == 3:
+	if doc.get('no_of_cycles') == 3 and doc.get('month'):
 		if doc.get('month') == 'All':
 			eom = 31
 		else:

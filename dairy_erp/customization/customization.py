@@ -650,13 +650,13 @@ def set_mr_warehouse(doc,method=None):
 				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 
 def add_config_settings(args=None):
-	# add_values(args)
-	# add_dairy_language(args)
-	create_item_group()
-	# try:
-	# except Exception,e:
-	# 	make_dairy_log(title="Config settings Failed",method="add_config_settings", status="Error",
-	# 	data = args, message=e, traceback=frappe.get_traceback())	
+	try:
+		add_values(args)
+		add_dairy_language(args)
+		create_item_group()
+	except Exception,e:
+		make_dairy_log(title="Config settings Failed",method="add_config_settings", status="Error",
+		data = args, message=e, traceback=frappe.get_traceback())	
 
 def add_values(args=None):
 	dairy_configuration = frappe.get_doc("Dairy Configuration")
@@ -676,9 +676,9 @@ def add_dairy_language(args):
 
 def set_dairy_language(language,email_id):
 	frappe.db.sql("""update `tabUser` SET language= '{0}' WHERE email = '{1}' """.format(language,email_id))
-	system_setting = frappe.get_doc("System Settings","System Settings")
-	system_setting.language = language
-	system_setting.save(ignore_permissions=True)
+	# system_setting = frappe.get_doc("System Settings","System Settings")
+	# system_setting.language = language
+	# system_setting.save(ignore_permissions=True)
 
 def create_item_group():
 

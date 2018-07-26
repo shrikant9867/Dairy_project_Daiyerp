@@ -33,3 +33,8 @@ def create_user_permission(user,doctype,docname):
 	except Exception as e:
 		print frappe.get_traceback()
 		frappe.msgprint("User Permission creation failed for user {0}".format(user))
+
+
+def add_dairy_language(doc, method=None):
+	if frappe.db.exists("Language","Der"):
+		doc.language = "Der"

@@ -12,12 +12,12 @@ def execute(filters=None):
 
 def get_data(filters):
 	result = []
-	result = frappe.db.sql("""select po.name,
+	result = frappe.db.sql("""select Distinct po.name,
 										po.camp_office,
 										po.supplier,
 										po.grand_total,
 										po.status,
-										po_item.material_request,
+										mi.name,
 										mi.company,
 										po.transaction_date
 			from `tabPurchase Order` po, 

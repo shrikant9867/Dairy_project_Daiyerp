@@ -35,7 +35,7 @@ frappe.vlcc_dashboard = Class.extend({
 			"add_type": "Head Office"
 		},
 		{
-			"label": "Camp Office",
+			"label": __("Camp Office"),
 			"doctype": "Address",
 			"add_type": "Camp Office"
 		},

@@ -96,9 +96,24 @@ def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filter
 	item_list = [item.get('item') for item in filters.get('items_dict') if item.get('customer_type') == filters.get('customer_type')]
 	if item_list[0]:
 		final_item_list = "(" + ",".join("'{0}'".format(item) for item in item_list[0:-1]) + ")"
-		item = frappe.db.sql("""select name,item_group from tabItem 
-			where name not in {final_item_list} and name like '{txt}' """.format(final_item_list=final_item_list,txt= "%%%s%%" % txt),as_list=1)
+		if final_item_list  != '()':
+			final_item_list = " and name not in"+ final_item_list
+		else:
+			final_item_list = ""
+		item = frappe.db.sql("""
+			select name,item_group 
+		from 
+			tabItem 
+		where 
+			item_group != 'Stationary' and name not 
+			in ('Advance Emi', 'Loan Emi', 'Milk Incentives')
+			{final_item_list} and name like '{txt}' """.format(final_item_list=final_item_list,txt= "%%%s%%" % txt),as_list=1,debug=1)
 	else:
-		item = frappe.db.sql("""select name,item_group 
-							from tabItem where name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1)
+		item = frappe.db.sql("""
+			select name,item_group 
+		from 
+			tabItem 
+		where 
+			item_group != 'Stationary' and name not 
+				in ('Advance Emi', 'Loan Emi', 'Milk Incentives') and name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1)
 	return item

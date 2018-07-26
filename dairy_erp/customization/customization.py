@@ -201,21 +201,21 @@ def create_translation():
 	"""
 	if not frappe.db.get_value("Translation", {"source_name":"Material Request"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
-		mr_translation.language = "en"
+		mr_translation.language = "dcl"
 		mr_translation.source_name = "Material Request"
 		mr_translation.target_name = "Material Indent"
 		mr_translation.save()
 
 	if not frappe.db.get_value("Translation", {"source_name":"Village Level Collection Centre"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
-		mr_translation.language = "en"
+		mr_translation.language = "dcl"
 		mr_translation.source_name = "Village Level Collection Centre"
 		mr_translation.target_name = "Dairy Cooperative Society"
 		mr_translation.save()
 
 	if not frappe.db.get_value("Translation", {"source_name":"Camp Office"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
-		mr_translation.language = "en"
+		mr_translation.language = "dcl"
 		mr_translation.source_name = "Camp Office"
 		mr_translation.target_name = "P&I"
 		mr_translation.save()

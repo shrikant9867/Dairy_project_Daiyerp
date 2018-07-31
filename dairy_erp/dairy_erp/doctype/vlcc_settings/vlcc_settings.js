@@ -7,6 +7,25 @@ frappe.ui.form.on('VLCC Settings', {
 		// frm.set_df_property("farmer_id1", "read_only", frm.doc.__islocal ? 0:1);
 		// frm.set_df_property("farmer_id2", "read_only", frm.doc.__islocal ? 0:1);
 	},
+	onload_post_render: function(frm){
+		frm.get_field("delete_fmcr_transactions").$input.addClass("btn-danger");
+	},
+	delete_fmcr_transactions: function(frm) {
+		if(frm.doc.upload_file){
+		return new Promise(function(resolve, reject) {
+			frappe.confirm("Are you sure, you want to delete FMCR Records?" ,function() {
+				var negative = 'frappe.validated = false';
+				frm.events.get_csv(frm)
+				resolve(negative);
+			},
+				function() {
+					reject();
+				})
+			})
+		}else{
+			frappe.throw("Please upload file first")
+		}
+	},
 	hours: function(frm) {
 		if (frm.doc.hours > 48) {
 			frappe.msgprint("Hours can not be more than 48")
@@ -33,6 +52,17 @@ frappe.ui.form.on('VLCC Settings', {
 	},
 	validate: function(frm) {
 		frm.events.validate_cycle_hours(frm)
+	},
+	get_csv: function(frm) {
+		frappe.call({
+				method:"dairy_erp.dairy_erp.doctype.vlcc_settings.vlcc_settings.get_csv",
+				args: {"doc":frm.doc},
+				callback: function(r){
+					if(r.message) {
+
+					}
+				}
+			})
 	},
 	set_vlcc: function(frm){
 		frappe.call({

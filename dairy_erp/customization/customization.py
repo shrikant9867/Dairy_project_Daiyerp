@@ -664,6 +664,7 @@ def add_values(args=None):
 	dairy_configuration.first_name = args.get('full_name')
 	dairy_configuration.email_id = args.get('email')
 	dairy_configuration.is_dropship = args.get('is_dropship')
+	dairy_configuration.is_material_request_item_editable = args.get('is_material_request_item_editable')
 	dairy_configuration.save(ignore_permissions=True)
 
 def add_dairy_language(args):

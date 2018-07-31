@@ -85,3 +85,10 @@ def check_pr_flag(doc):
 		if row.delivery_note:
 			flag = True
 	return flag
+
+@frappe.whitelist()
+def make_mi_qty_editable():
+	if frappe.db.get_singles_dict('Dairy Configuration').get('is_material_request_item_editable'):
+		return "True"
+	else:
+		return "False"

@@ -24,6 +24,12 @@ dairy_erp.setup.slides_settings = [
 					fieldname: 'is_dropship',
 					label: __('Dropship Only'),
 					default: 0
+			},
+			{
+					fieldtype: 'Check',
+					fieldname: 'is_material_request_item_editable',
+					label: __('Is Material Request Item Editable'),
+					default: 0
 			}
 		]
 	}

@@ -5,6 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.csvutils import read_csv_content_from_attached_file
+from frappe.utils import flt, now_datetime, cstr, random_string
+import json
+from frappe import _
+from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 class VLCCSettings(Document):
 	def validate(self):
@@ -118,3 +123,72 @@ def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filter
 			item_group != 'Stationary' and name not 
 				in ('Advance Emi', 'Loan Emi', 'Milk Incentives') and name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1)
 	return item
+
+@frappe.whitelist()
+def get_csv(doc):
+	doc = json.loads(doc)
+	max_rows = 500
+	msg,fmcr_msg = "",""
+	rows = read_csv_content_from_attached_file(frappe.get_doc("VLCC Settings",doc.get('name')))
+
+	if not rows:
+		frappe.throw(_("Please select a valid csv file with data"))
+
+	if len(rows) > max_rows:
+		frappe.throw(_("Maximum {0} rows allowed").format(max_rows))
+
+	for row in rows:
+		try:
+			if row[0] and frappe.db.exists("Farmer Milk Collection Record",row[0]):
+				fmcr = frappe.get_doc("Farmer Milk Collection Record",row[0])
+				if fmcr and fmcr.docstatus == 1 and fmcr.associated_vlcc == doc.get('name'):
+					delete_linked_doc(fmcr)
+					msg = _("Records Deleted Successfully,for more info please check 'Dairy log' on server")
+					make_dairy_log(title="FMCR Deleted Successfully" ,method="delete_fmcr", status="Success",
+					data = fmcr.as_dict(),doc_name=fmcr.name)
+				elif fmcr and fmcr.docstatus == 2 and fmcr.associated_vlcc == doc.get('name'):
+					make_dairy_log(title="Cancelled FMCR Deleted Successfully" ,method="delete_fmcr", status="Success",
+					data = fmcr.as_dict(),doc_name=fmcr.name)
+					frappe.db.sql("""delete from `tabFarmer Milk Collection Record` where name = %s""",(fmcr.name))
+				elif fmcr.associated_vlcc != doc.get('name'):
+					fmcr_msg += fmcr.name + " ,"
+		except Exception as e:
+			frappe.db.rollback()
+			msg = _("** Records Deletion Failed, for more info please check 'Dairy log' on server")
+			make_dairy_log(title="FMCR Deletion Failed",method="delete_fmcr", status="Error",
+			data = fmcr.as_dict(), message=e, traceback=frappe.get_traceback())
+	if fmcr_msg:
+		make_dairy_log(title="FMCR Not Mapped With VLCC",method="delete_fmcr", status="Success",
+		data = fmcr_msg)
+		frappe.msgprint("Please enter FMCR associated with vlcc,for more info please check 'Dairy log' on server")
+	if msg:
+		frappe.msgprint(msg)
+
+def delete_linked_doc(fmcr_doc):
+
+	pi = frappe.db.get_value("Purchase Invoice",{"farmer_milk_collection_record":fmcr_doc.name},"name")
+	pr = frappe.db.get_value("Purchase Receipt",{"farmer_milk_collection_record":fmcr_doc.name},"name")
+
+	unlink_ref_doc_from_payment_entries(frappe.get_doc("Purchase Invoice",pi))
+	frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(pi))
+	frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(pr))
+	frappe.db.sql("""delete from `tabStock Ledger Entry` where voucher_no = %s""",(pr))
+	frappe.db.sql("""delete from `tabPurchase Invoice` where name = %s""",(pi))
+	frappe.db.sql("""delete from `tabPurchase Receipt` where name = %s""",(pr))
+	frappe.db.sql("""delete from `tabFarmer Milk Collection Record` where name = %s""",(fmcr_doc.name))
+
+def make_dairy_log(**kwargs):
+	dlog = frappe.get_doc({"doctype":"Dairy Log"})
+	dlog.update({
+			"title":kwargs.get("title"),
+			"method":kwargs.get("method"),
+			"sync_time": now_datetime(),
+			"status":kwargs.get("status"),
+			"data":kwargs.get("data", ""),
+			"error_message":kwargs.get("message", ""),
+			"traceback":kwargs.get("traceback", ""),
+			"doc_name": kwargs.get("doc_name", "")
+		})
+	dlog.insert(ignore_permissions=True)
+	frappe.db.commit()
+	return dlog.name

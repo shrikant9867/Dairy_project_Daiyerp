@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2018-08-01 17:10:44.955862", 
+ "modified": "2018-08-01 19:09:42.426723", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "Material Indent Detail Report", 
@@ -17,7 +17,7 @@
  "report_type": "Script Report", 
  "roles": [
   {
-   "role": "Administrator"
+   "role": "Dairy Supplier"
   }
  ]
 }

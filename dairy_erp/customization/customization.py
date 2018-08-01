@@ -201,21 +201,21 @@ def create_translation():
 	"""
 	if not frappe.db.get_value("Translation", {"source_name":"Material Request"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
-		mr_translation.language = "en"
+		mr_translation.language = "dcl"
 		mr_translation.source_name = "Material Request"
 		mr_translation.target_name = "Material Indent"
 		mr_translation.save()
 
 	if not frappe.db.get_value("Translation", {"source_name":"Village Level Collection Centre"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
-		mr_translation.language = "en"
+		mr_translation.language = "dcl"
 		mr_translation.source_name = "Village Level Collection Centre"
 		mr_translation.target_name = "Dairy Cooperative Society"
 		mr_translation.save()
 
 	if not frappe.db.get_value("Translation", {"source_name":"Camp Office"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
-		mr_translation.language = "en"
+		mr_translation.language = "dcl"
 		mr_translation.source_name = "Camp Office"
 		mr_translation.target_name = "P&I"
 		mr_translation.save()
@@ -650,13 +650,13 @@ def set_mr_warehouse(doc,method=None):
 				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 
 def add_config_settings(args=None):
-	# add_values(args)
-	# add_dairy_language(args)
-	create_item_group()
-	# try:
-	# except Exception,e:
-	# 	make_dairy_log(title="Config settings Failed",method="add_config_settings", status="Error",
-	# 	data = args, message=e, traceback=frappe.get_traceback())	
+	try:
+		add_values(args)
+		add_dairy_language(args)
+		create_item_group()
+	except Exception,e:
+		make_dairy_log(title="Config settings Failed",method="add_config_settings", status="Error",
+		data = args, message=e, traceback=frappe.get_traceback())	
 
 def add_values(args=None):
 	dairy_configuration = frappe.get_doc("Dairy Configuration")
@@ -664,11 +664,12 @@ def add_values(args=None):
 	dairy_configuration.first_name = args.get('full_name')
 	dairy_configuration.email_id = args.get('email')
 	dairy_configuration.is_dropship = args.get('is_dropship')
+	dairy_configuration.is_material_request_item_editable = args.get('is_material_request_item_editable')
 	dairy_configuration.save(ignore_permissions=True)
 
 def add_dairy_language(args):
 	language = frappe.new_doc("Language")
-	language.language_code = "dcl"
+	language.language_code = "Der"
 	language.language_name = "Dairy"
 	language.based_on = "en"
 	language.save(ignore_permissions=True)
@@ -676,9 +677,9 @@ def add_dairy_language(args):
 
 def set_dairy_language(language,email_id):
 	frappe.db.sql("""update `tabUser` SET language= '{0}' WHERE email = '{1}' """.format(language,email_id))
-	system_setting = frappe.get_doc("System Settings","System Settings")
-	system_setting.language = language
-	system_setting.save(ignore_permissions=True)
+	# system_setting = frappe.get_doc("System Settings","System Settings")
+	# system_setting.language = language
+	# system_setting.save(ignore_permissions=True)
 
 def create_item_group():
 

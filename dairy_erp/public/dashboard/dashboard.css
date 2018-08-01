@@ -12,6 +12,10 @@ a:hover {
     text-decoration: none;
 }
 
+.non_editable_field{
+    pointer-events: none;
+}
+
 .logo a {
     font-size: 1.3em;
     color: #fff;

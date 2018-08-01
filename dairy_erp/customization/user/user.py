@@ -38,3 +38,5 @@ def create_user_permission(user,doctype,docname):
 def add_dairy_language(doc, method=None):
 	if frappe.db.exists("Language","Der"):
 		doc.language = "Der"
+	# if frappe.db.exists("Language","dcl"):
+	# 	doc.language = "dcl"

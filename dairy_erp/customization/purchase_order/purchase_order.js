@@ -7,8 +7,7 @@ frappe.ui.form.on('Purchase Order', {
 			frm.set_value("shipping_address","")
 		}
 		if (has_common(frappe.user_roles, ["Camp Operator", "Camp Manager"])){
-			frm.set_value("is_dropship",1)
-			frm.set_df_property("is_dropship", "read_only", 1);
+			cur_frm.cscript.make_is_dropship(frm);
 		} 
 	},
 
@@ -87,9 +86,22 @@ frappe.ui.form.on("Purchase Order Item", {
 	qty: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		if (["COW Milk","BUFFALO Milk"].indexOf(child.item_code) <= -1){
-			child.qty = Math.floor(child.qty)
+			child.qty = Math.round(child.qty)
 			frappe.model.set_value(cdt, cdn, "new_dn_qty",parseFloat(child.qty));			
 			cur_frm.refresh_fields('items');
 		}
 	}
 });
+
+
+cur_frm.cscript.make_is_dropship = function(frm){
+	frappe.call({
+		method: "dairy_erp.customization.purchase_order.purchase_order.make_is_dropship",
+		callback: function(r){
+			if(r.message && r.message == "True"){
+				frm.set_value("is_dropship",1)
+				frm.set_df_property("is_dropship", "read_only", 1);
+			}
+		}
+	});
+}

@@ -25,4 +25,10 @@ def validate_price_list(doc, method = None):
 	if user_doc.get('operator_type') == "Camp Office":
 		if doc.buying_price_list not in ["GTCOB", "LCOB-"+ user_doc.get('branch_office')]:
 			frappe.throw(_("Please Create Material Price List First"))
-	
+
+@frappe.whitelist()	
+def make_is_dropship():
+	if frappe.db.get_singles_dict('Dairy Configuration').get('is_dropship'):
+		return "True"
+	else:
+		return "False"	

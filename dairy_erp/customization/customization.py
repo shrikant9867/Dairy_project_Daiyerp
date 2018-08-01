@@ -669,7 +669,7 @@ def add_values(args=None):
 
 def add_dairy_language(args):
 	language = frappe.new_doc("Language")
-	language.language_code = "dcl"
+	language.language_code = "Der"
 	language.language_name = "Dairy"
 	language.based_on = "en"
 	language.save(ignore_permissions=True)

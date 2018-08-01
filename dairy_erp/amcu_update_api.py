@@ -41,7 +41,11 @@ def update_fmcr(data, row,response_dict):
 			else:
 				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Allowed updation time has been elapsed for {0}".format(fmcr_doc.name)})
 		else:
-			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
+			is_fmcr_created = 1
+			make_fmcr(data,row,response_dict,is_fmcr_created)
+			fmcr = frappe.db.get_value('Farmer Milk Collection Record',
+				{"transactionid":row.get('transactionid'),"farmerid":row.get('farmerid')},"name")
+			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),fmcr)})
 	except Exception,e:
 		frappe.db.rollback()
 		utils.make_dairy_log(title="Sync failed for Data push",method="update_fmcr", status="Error",
@@ -67,7 +71,7 @@ def update_fmcr_amt(fmcr_doc,data,row,response_dict):
 
 	make_fmcr(data,row,response_dict)
 
-def make_fmcr(data,row,response_dict):
+def make_fmcr(data,row,response_dict,is_fmcr_created=0):
 	
 	traceback = ""
 	try:
@@ -95,6 +99,7 @@ def make_fmcr(data,row,response_dict):
 								fmrc_doc.associated_vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
 								fmrc_doc.imeinumber = data.get('imeinumber')
 								fmrc_doc.rcvdtime = data.get('rcvdtime')
+								fmrc_doc.fmcr_created = is_fmcr_created
 								fmrc_doc.processedstatus = data.get('processedstatus')
 								fmrc_doc.societyid = data.get('societyid')
 								fmrc_doc.collectiondate =  time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))

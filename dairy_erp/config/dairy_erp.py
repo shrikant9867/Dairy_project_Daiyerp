@@ -308,6 +308,12 @@ def get_data():
 					"name": "Purchase Order Detail Report",
 					"doctype": "Purchase Order",
 					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Material Indent Detail Report",
+					"doctype": "Material Request",
+					"is_query_report": True
 				}
 			]
 		}				

@@ -5,7 +5,8 @@ from frappe.model.document import Document
 from frappe.utils import flt, cstr, cint
 import time
 from frappe import _
-import dairy_utils as utils
+# import dairy_utils as utils
+import api_utils as utils
 from item_api import get_seesion_company_datails
 import requests
 import json
@@ -25,6 +26,8 @@ def create_po(data):
 			else:
 				response_dict.update({"status":"error", "response":"client id, camp office , item are required "})
 	except Exception,e:
+		utils.make_mobile_log(title="Sync failed Po creation",method="create_po", status="Error",
+			data = data, message=e, traceback=frappe.get_traceback())
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict
 
@@ -35,7 +38,8 @@ def make_po(data):
 	po_obj.flags.ignore_permissions = True
 	po_obj.save()
 	po_obj.submit()
-
+	utils.make_mobile_log(title = "Sync Passed For PO creation", method="make_po", status = "Success",
+		data = po_obj.name, message= "No message", traceback= "No traceback")
 	return po_obj.name
 
 @frappe.whitelist()

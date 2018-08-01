@@ -677,9 +677,6 @@ def add_dairy_language(args):
 
 def set_dairy_language(language,email_id):
 	frappe.db.sql("""update `tabUser` SET language= '{0}' WHERE email = '{1}' """.format(language,email_id))
-	# system_setting = frappe.get_doc("System Settings","System Settings")
-	# system_setting.language = language
-	# system_setting.save(ignore_permissions=True)
 
 def create_item_group():
 

@@ -33,7 +33,7 @@ def get_items():
 			# row.get('uom').append({"uom": frappe.db.get_value('Item',row.get('item_code'),'stock_uom'),"rate": frappe.db.get_value('Item',row.get('item_code'), "standard_rate")})
 		
 		except Exception,e:
-			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
+			utils.make_mobile_log(title="Sync failed for Master API",method="get_items", status="Error",
 			data = row.get('name'), message=e, traceback=frappe.get_traceback())
 			response_dict.append({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
 	return response_dict
@@ -76,7 +76,7 @@ def get_masters():
 		else:
 			frappe.throw(_("User cannot be administrator"))
 	except Exception,e:
-			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
+			utils.make_mobile_log(title="Sync failed Master API",method="get_items", status="Error",
 			data = "", message=e, traceback=frappe.get_traceback())
 			response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
 	return response_dict

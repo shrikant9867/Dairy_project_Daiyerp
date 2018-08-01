@@ -51,6 +51,8 @@ def create_sn(data):
 	sn_obj.flags.ignore_mandatory = True
 	sn_obj.save()
 	sn_obj.submit()
+	utils.make_mobile_log(title="Sync failed for SN creation",method="create_service_note", status="failed",
+			data = data, message= e, traceback=frappe.get_traceback())
 	return sn_obj.name
 
 

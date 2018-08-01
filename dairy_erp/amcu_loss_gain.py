@@ -64,14 +64,14 @@ def handling_loss_gain(data,row,vmcr_doc,response_dict):
 				getdate(fmcr.get('recv_date')),
 				fmcr.get('societyid')),as_dict=1,debug=0)
 
-			fmcr_stock_qty = flt(fmcr.get('qty')) + flt(stock_record[0].get('qty'))
+			fmcr_stock_qty = flt(fmcr.get('qty'),2) + flt(stock_record[0].get('qty'),2)
 			loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,
 						data=data,vmcr_doc=vmcr_doc,response_dict=response_dict)
 		set_flag(fmcr)
 
 	elif stock_data:
 		for stock in stock_record:
-			fmcr_stock_qty = flt(stock.get('qty'))
+			fmcr_stock_qty = flt(stock.get('qty'),2)
 			loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,data=data,
 				vmcr_doc=vmcr_doc,response_dict=response_dict,stock=stock)
 		set_se_flag(stock)
@@ -83,22 +83,22 @@ def loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock=N
 		{"amcu_id":row.get('farmerid')},
 		["name","warehouse","handling_loss","calibration_gain"],as_dict=True)
 	if fmcr_stock_qty:
-		if fmcr_stock_qty > flt(row.get('milkquantity')):
-			qty = fmcr_stock_qty - flt(row.get('milkquantity'))
+		if flt(fmcr_stock_qty,2) > flt(row.get('milkquantity'),2):
+			qty = flt(fmcr_stock_qty,2) - flt(row.get('milkquantity'))
 			make_stock_receipt(
 				message="Material Receipt for Handling Loss",method="handling_loss",
 				data=data,row=row,response_dict=response_dict,
 				qty=qty,warehouse=vlcc.get('handling_loss'),
 				societyid=row.get('farmerid'),vmcr_doc=vmcr_doc)
-		elif fmcr_stock_qty < flt(row.get('milkquantity')):
-			qty = flt(row.get('milkquantity')) - fmcr_stock_qty
+		elif flt(fmcr_stock_qty,2) < flt(row.get('milkquantity'),2):
+			qty = flt(row.get('milkquantity')) - flt(fmcr_stock_qty,2)
 			make_stock_receipt(
 				message="Material Receipt for Calibration Gain",
 				method="handling_gain",data=data,row=row,
 				response_dict=response_dict,
 				qty=qty,warehouse=vlcc.get('calibration_gain'),
 				societyid=row.get('farmerid'),vmcr_doc=vmcr_doc)
-		elif fmcr_stock_qty == flt(row.get('milkquantity')):
+		elif flt(fmcr_stock_qty,2) == flt(row.get('milkquantity'),2):
 			utils.make_dairy_log(title="Quantity Balanced after VMCR Creation",
 				method="handling_loss_gain", status="Success",data="Qty" ,
 				message= "Quantity is Balanced so stock entry is not created",

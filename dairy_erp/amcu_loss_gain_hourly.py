@@ -22,7 +22,6 @@ def get_fmcr_hourly():
 										is_fmrc_updated = 0 and docstatus = 1 
 									group by societyid,date(rcvdtime),
 									shift,milktype order by rcvdtime""",as_dict=True)
-		print fmcr_records,"fmcr_records______________________________\n\n"
 
 		fmcr_data = fmcr_records[0].get('qty') if fmcr_records and fmcr_records[0].get('qty') else []
 		if fmcr_data:
@@ -41,8 +40,7 @@ def get_fmcr_hourly():
 								getdate(fmcr.get('min_time')),
 								fmcr.get('societyid')),as_dict=1,debug=0)
 
-				fmcr_stock_qty = flt(fmcr.get('qty')) + flt(stock_record[0].get('qty'))
-				print fmcr_stock_qty,"fmcr_stock_qty_______________________\n\n"
+				fmcr_stock_qty = flt(fmcr.get('qty'),2) + flt(stock_record[0].get('qty'),2)
 				if fmcr_stock_qty:
 					loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,fmcr=fmcr,stock=stock_record)
 				
@@ -52,7 +50,6 @@ def get_fmcr_hourly():
 	
 
 def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
-	print stock,"inside loss_gain_computation_____________________\n"
 	
 	vlcc = frappe.db.get_value("Village Level Collection Centre",
 		{"amcu_id":fmcr.get('societyid')},["name","chilling_centre",
@@ -76,21 +73,18 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 				fmcr.get('societyid'),cc),as_dict=1,debug=0)
 
 		vmcr_data = vmcr_records[0].get('qty') if vmcr_records and vmcr_records[0].get('qty') else []
-		# print vmcr_data,"vmcr_data_________________________\n\n"
 		if vmcr_data:
 			for vmcr in vmcr_records:
 				se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr.get('name')},
 					['name','wh_type'],as_dict=1) or {}
 				se_qty = frappe.db.get_value('Stock Entry Detail',
 					{'parent':se.get('name')},'qty') or 0
-				print vmcr,"vmcr__________\n\n",se_qty,"se_qty_________________________\n\n"
 				if se and se.get('wh_type') == 'Loss':
-					print fmcr_stock_qty,"inside Loss_______________\n\n"
 
-					loss_gain_qty = flt(fmcr_stock_qty) - flt(se_qty)
+					loss_gain_qty = flt(fmcr_stock_qty,2) - flt(se_qty,2)
 
-					if loss_gain_qty > vmcr.get('qty'):
-						qty = loss_gain_qty - vmcr.get('qty')
+					if flt(loss_gain_qty,2) > flt(vmcr.get('qty'),2):
+						qty = flt(loss_gain_qty,2) - flt(vmcr.get('qty'),2)
 						gain = make_stock_adjust(
 			 				purpose='Material Transfer',
 			 				message="Stock Transfer to Edited Gain",
@@ -99,8 +93,8 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 			 				t_warehouse=vlcc.get('edited_gain'),se_qty=se_qty,
 			 				s_warehouse=vlcc.get('warehouse'),stock=stock)
 
-					elif loss_gain_qty < vmcr.get('qty'):
-						qty = vmcr.get('qty') - loss_gain_qty
+					elif flt(loss_gain_qty,2) < flt(vmcr.get('qty'),2):
+						qty = flt(vmcr.get('qty'),2) - flt(loss_gain_qty,2)
 						loss = make_stock_adjust(
 			 				purpose='Material Receipt',
 			 				message="Stock In to Edited Loss",
@@ -109,7 +103,7 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 			 				t_warehouse=vlcc.get('edited_loss'),
 			 				se_qty=se_qty,stock=stock)
 
-					elif loss_gain_qty == vmcr.get('qty'):
+					elif flt(loss_gain_qty,2) == flt(vmcr.get('qty'),2):
 						reserved_qty = stock[0].get('qty') if stock[0].get('qty') else 0
 			 			set_flag(fmcr,vlcc)
 			 			make_farmer_edition_log(fmcr=fmcr,
@@ -118,12 +112,11 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 			 									edited_qty=0,reserved_qty=reserved_qty)
 
 				elif se and se.get('wh_type') == 'Gain':
-					print fmcr_stock_qty,"inside Gain_______________\n\n"
 
-					loss_gain_qty = flt(fmcr_stock_qty) + flt(se_qty)
+					loss_gain_qty = flt(fmcr_stock_qty,2) + flt(se_qty,2)
 
-					if loss_gain_qty > vmcr.get('qty'):
-						qty = loss_gain_qty - vmcr.get('qty')
+					if flt(loss_gain_qty,2) > flt(vmcr.get('qty'),2):
+						qty = flt(loss_gain_qty,2) - flt(vmcr.get('qty'),2)
 						gain = make_stock_adjust(
 			 				purpose='Material Transfer',
 			 				message="Stock Transfer to Edited Gain",
@@ -132,8 +125,8 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 			 				t_warehouse=vlcc.get('edited_gain'),se_qty=se_qty,
 			 				s_warehouse=vlcc.get('warehouse'),stock=stock)
 
-					elif loss_gain_qty < vmcr.get('qty'):
-						qty = vmcr.get('qty') - loss_gain_qty
+					elif flt(loss_gain_qty,2) < flt(vmcr.get('qty'),2):
+						qty = flt(vmcr.get('qty'),2) - flt(loss_gain_qty,2)
 						loss = make_stock_adjust(
 			 				purpose='Material Receipt',
 			 				message="Stock In to Edited Loss",
@@ -142,7 +135,7 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 			 				t_warehouse=vlcc.get('edited_loss'),
 			 				se_qty=se_qty,stock=stock)
 
-			 		elif loss_gain_qty == vmcr.get('qty'):
+			 		elif flt(loss_gain_qty,2) == flt(vmcr.get('qty'),2):
 			 			reserved_qty = stock[0].get('qty') if stock[0].get('qty') else 0
 			 			set_flag(fmcr,vlcc)
 			 			make_farmer_edition_log(fmcr=fmcr,
@@ -150,10 +143,8 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 			 						loss_gain_qty=se_qty,vmcr_qty=vmcr.get('qty'),
 									edited_qty=0,reserved_qty=reserved_qty)
 			 	else:
-			 		print fmcr_stock_qty,
-			 		if flt(fmcr_stock_qty) > flt(vmcr.get('qty')):
-			 			print "else greater______________\n\n",fmcr_stock_qty,vmcr.get('qty')
-			 			qty = flt(fmcr_stock_qty) - flt(vmcr.get('qty'))
+			 		if flt(fmcr_stock_qty,2) > flt(vmcr.get('qty'),2):
+			 			qty = flt(fmcr_stock_qty,2) - flt(vmcr.get('qty'),2)
 						gain = make_stock_adjust(
 			 				purpose='Material Transfer',
 			 				message="Stock Transfer to Edited Gain",
@@ -162,9 +153,8 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 			 				t_warehouse=vlcc.get('edited_gain'),se_qty=0,
 			 				s_warehouse=vlcc.get('warehouse'),stock=stock)
 
-					elif flt(fmcr_stock_qty) < flt(vmcr.get('qty')):
-						print "else smaller______________\n\n",fmcr_stock_qty,vmcr.get('qty')
-						qty = flt(vmcr.get('qty')) - flt(fmcr_stock_qty)
+					elif flt(fmcr_stock_qty,2) < flt(vmcr.get('qty'),2):
+						qty = flt(vmcr.get('qty'),2) - flt(fmcr_stock_qty,2)
 						loss = make_stock_adjust(
 			 				purpose='Material Receipt',
 			 				message="Stock In to Edited Loss",
@@ -173,8 +163,7 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 			 				t_warehouse=vlcc.get('edited_loss'),
 			 				se_qty=0,stock=stock)
 
-					elif flt(fmcr_stock_qty) == flt(vmcr.get('qty')):
-						print "equal___________________",fmcr_stock_qty,vmcr.get('qty')
+					elif flt(fmcr_stock_qty,2) == flt(vmcr.get('qty'),2):
 			 			reserved_qty = stock[0].get('qty') if stock[0].get('qty') else 0
 			 			set_flag(fmcr,vlcc)
 			 			make_farmer_edition_log(fmcr=fmcr,
@@ -183,7 +172,6 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 									edited_qty=0,reserved_qty=reserved_qty)
 
 def make_stock_adjust(purpose,message,vlcc,fmcr,qty,vmcr_qty,t_warehouse,se_qty,s_warehouse=None,stock=None):
-	print stock,"inside make_stock_adjust________________\n\n"
 	try:
 		company_details = frappe.db.get_value("Company",{"name":vlcc.get('name')},
 			['default_payable_account','abbr','cost_center'],as_dict=1)
@@ -239,7 +227,6 @@ def make_stock_adjust(purpose,message,vlcc,fmcr,qty,vmcr_qty,t_warehouse,se_qty,
 
 def make_farmer_edition_log(fmcr,edited_stock_entry,loss_gain_qty,vmcr_qty,edited_qty,reserved_qty):
 	
-	print reserved_qty,"inside make_farmer_edition_log________________\n\n"
 	edition_log = frappe.new_doc("Farmer Edition Log")
 	edition_log.fmcr_qty = fmcr.get('qty')
 	edition_log.reserved_qty = reserved_qty

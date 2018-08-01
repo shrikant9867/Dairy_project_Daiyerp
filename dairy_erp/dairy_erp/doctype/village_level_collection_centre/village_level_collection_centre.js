@@ -104,9 +104,9 @@ frappe.ui.form.on('Village Level Collection Centre', {
 	},
 	global_percent_effective_credit: function(frm) {
 		if(frm.doc.global_percent_effective_credit < 0 || frm.doc.global_percent_effective_credit > 99) {
-			frm.set_value("global_percent_effective_credit", 0)
-			refresh_field("global_percent_effective_credit")
-			frappe.msgprint(__("Global Percent Effective Credit must be between 0 to 99"))
+			// frm.set_value("global_percent_effective_credit", 0)
+			// refresh_field("global_percent_effective_credit")
+			// frappe.msgprint(__("Global Percent Effective Credit must be between 0 to 99"))
 		}
 	},
 	set_dynamic_cc: function(frm) {

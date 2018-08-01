@@ -24,7 +24,7 @@ def get_mr_list(data):
 			row.update({"items": frappe.db.sql("select item_code,item_name,uom, qty from `tabMaterial Request Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
 		response_dict.update({"status":"success","data":mr_list})
 	except Exception,e:
-			utils.make_mobile_log(title="Sync failed for Data push",method="get_items", status="Error",
+			utils.make_mobile_log(title="Sync failed for MI List",method="get_items", status="Error",
 			data = row.get('name'), message=e, traceback=frappe.get_traceback())
 			response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
 	return response_dict
@@ -45,6 +45,9 @@ def create_mr(data):
 			else:
 				response_dict.update({"status":"error", "response":"client id, camp office , item are required "})
 	except Exception,e:
+		frappe.db.rollback()
+		utils.make_mobile_log(title="Sync failed For MI Creation ",method="create_mr", status="Error",
+			data = data, message= e, traceback= frappe.get_traceback())
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict
 
@@ -58,5 +61,6 @@ def make_mr(row):
 	mr_doc.flags.ignore_permissions = True
 	mr_doc.save()
 	mr_doc.submit()
-
+	utils.make_mobile_log(title="Sync Passed For MI Creation ",method="make_mr", status="Success",
+			data = mr_doc.name, message="NO message", traceback= "No traceback")
 	return mr_doc.name

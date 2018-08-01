@@ -4,6 +4,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, cstr, cint
 import time
+import api_utils as utils
 from frappe import _
 import dairy_utils as utils
 import requests
@@ -28,9 +29,10 @@ def create_pr(data):
 			else:
 				response_dict.update({"status":"error", "response":"client id, camp office , item are required "})
 	except Exception,e:
+		frappe.db.rollback()
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
-		utils.make_dairy_log(title="Sync failed for Data push",method="get_items", status="Error",
-			data = "", message=e, traceback=frappe.get_traceback())
+		utils.make_mobile_log(title="Sync failed PR creation",method="create_pr", status="Error",
+			data = data, message=e, traceback=frappe.get_traceback())
 	return response_dict
 
 def make_pr(data):
@@ -43,6 +45,8 @@ def make_pr(data):
 	pr_obj.flags.ignore_permissions = True
 	pr_obj.save()
 	pr_obj.submit()
+	utils.make_mobile_log(title="Sync Passes PR creation",method="make_pr", status="Success",
+			data = pr_obj.name, message="NO message", traceback="No traceback")
 	update_po(pr_obj)
 	return pr_obj.name
 
@@ -60,6 +64,8 @@ def get_po_attr(supplier):
 		else:
 			frappe.throw("Supplier does not exist")
 	except Exception,e:
+		utils.make_mobile_log(title="Sync failed PO attribute for supplier",method="get_po_attr", status="Error",
+			data = supplier, message=e, traceback=frappe.get_traceback())
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 
 	return response_dict
@@ -73,6 +79,8 @@ def get_mi_attr(supplier):
 			row.update({"items": frappe.db.sql("select item_code,qty,uom from `tabMaterial Request Item` where parent = '{0}'".format(row.get('name')),as_dict=1)})
 		response_dict.update({"status":"success","data": mr_list})
 	except Exception,e:
+		utils.make_mobile_log(title="Sync failed MI attribute for supplier",method="get_mi_attr", status="Error",
+			data = supplier, message=e, traceback=frappe.get_traceback())
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
 	return response_dict
 
@@ -114,11 +122,16 @@ def draft_pr(data):
 			pr_doc.save()
 			pr_doc.submit()
 			response_dict.update({"status": "success","name":pr_doc.name})
+			utils.make_mobile_log(title="Sync passed Draft PR",method="draft_pr", status="Success",
+			data = pr_doc.name, message= "No message", traceback= "No traceback")
 		else:
 			frappe.throw(_("Name Parameter Missing"))
 
 	except Exception,e:
+		frappe.db.rollback()
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})
+		utils.make_mobile_log(title="Sync failed Draft PR",method="draft_pr", status="Error",
+			data = data, message=e, traceback=frappe.get_traceback())
 	return response_dict
 
 

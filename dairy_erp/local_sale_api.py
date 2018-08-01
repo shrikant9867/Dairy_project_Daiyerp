@@ -27,7 +27,7 @@ def create_local_sale(data):
 				response_dict.update({"status": "success", "name": local_exist})
 		
 	except Exception,e:
-		utils.make_mobile_log(title="Sync failed for Data push",method="create_local_sale", status="Error",
+		utils.make_mobile_log(title="Sync failed for LS creation",method="create_local_sale", status="Error",
 			data = data, message=e, traceback=frappe.get_traceback())
 
 		response_dict.update({"status": "Error", "message":e, "traceback": frappe.get_traceback()})
@@ -47,6 +47,8 @@ def create_ls(data):
 	ls_obj.flags.ignore_mandatory = True
 	ls_obj.save()
 	ls_obj.submit()
+	utils.make_mobile_log(title="Sync passed for LS creation",method="create_ls", status="success",
+			data = ls_obj.name, message="No mesage", traceback="No traceback")
 	return ls_obj.name
 
 

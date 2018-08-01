@@ -43,3 +43,18 @@ def get_data(filters):
 
 	return data
 
+@frappe.whitelist()
+def get_farmer(doctype,txt,searchfields,start,pagelen,filters):
+	user = frappe.get_doc("User",frappe.session.user)
+	farmer_list = frappe.db.sql("""
+				select
+						RIGHT(full_name,4),
+						TRIM(RIGHT(full_name,9) FROM full_name),
+						contact_number
+				from
+						`tabFarmer`
+				where
+						vlcc_name = '{user}'
+				and
+						name like '{txt}' """.format(user=user.username,txt= "%%%s%%" % txt),as_list=1)
+	return farmer_list

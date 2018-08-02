@@ -8,12 +8,12 @@ frappe.query_reports["Milk Passbook"] = {
 			"fieldname":"farmer_id",
 			"label": __("Farmer ID"),
 			"fieldtype": "Link",
-			"options": "Farmer",
-			"get_query": function (query_report) {
+			"options": "Farmer"
+			/*"get_query": function (query_report) {
 				return {
-					query:"dairy_erp.dairy_erp.report.milk_passbook.milk_passbook.get_farmer"
+					query:"dairy_erp.dairy_erp.report.milk_passbook.milk_passbook.trim_farmer_id_and_name"
 				}
-			}
+			}*/
 		},
 		{
 			"fieldname":"shift",

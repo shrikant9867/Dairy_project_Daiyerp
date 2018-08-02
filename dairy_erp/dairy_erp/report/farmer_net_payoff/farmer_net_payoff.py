@@ -77,11 +77,20 @@ def get_farmers():
 	return [ [f.get('name'), f.get('full_name')] for f in frappe.get_all("Farmer", fields=["name", "full_name"]) ]
 
 @frappe.whitelist()
-def get_filtered_farmers(doctype,text,searchfields,start,pagelen,filters):
-	user_name = frappe.session.user
-	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
-	farmers = frappe.db.sql(""" select name,full_name from `tabFarmer` where vlcc_name ='{0}'""".format(company_name[0][0]),as_list=1)
-	return farmers
+def trim_farmer_id_and_name(doctype=None,txt=None,searchfields=None,start=None,pagelen=None,filters=None):
+	user = frappe.get_doc("User",frappe.session.user)
+	farmer_list = frappe.db.sql("""
+				select
+						RIGHT(full_name,4),
+						TRIM(RIGHT(full_name,9) FROM full_name),
+						contact_number
+				from
+						`tabFarmer`
+				where
+						vlcc_name = '{user}'
+				and
+						name like '{txt}' """.format(user=user.company,txt= "%%%s%%" % txt),as_list=1,debug=1)
+	return farmer_list
 
 
 @frappe.whitelist()

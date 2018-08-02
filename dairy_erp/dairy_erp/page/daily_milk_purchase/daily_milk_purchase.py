@@ -156,7 +156,7 @@ def get_conditions(curr_date=None):
 	if frappe.session.user != 'Administrator':
 		conditions += " and associated_vlcc = '{0}'".format(vlcc)
 	if curr_date:
-		conditions += " and date(rcvdtime) = '{0}'".format(curr_date)
+		conditions += " and date(collectiondate) = '{0}'".format(curr_date)
 
 	return conditions
 

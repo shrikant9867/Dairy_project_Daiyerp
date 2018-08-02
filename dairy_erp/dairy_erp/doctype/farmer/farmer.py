@@ -67,8 +67,8 @@ class Farmer(Document):
 	def validate_eff_credit_percent(self):
 		# eff-credit % must be between 0-99
 		eff_credit_percent = flt(self.percent_effective_credit)
-		if not self.ignore_effective_credit_percent and (eff_credit_percent < 0 or eff_credit_percent > 99):
-			frappe.throw(_("Percent Of Effective Credit must be between 0 to 99"))
+		# if not self.ignore_effective_credit_percent and (eff_credit_percent < 0 or eff_credit_percent > 99):
+		# 	frappe.throw(_("Percent Of Effective Credit must be between 0 to 99"))
 
 	def check_reserved_farmer(self):
 		user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company'], as_dict =1)

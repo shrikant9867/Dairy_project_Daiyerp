@@ -6,7 +6,7 @@ from frappe.utils import flt, cstr, cint
 import time
 import api_utils as utils
 from frappe import _
-import dairy_utils as utils
+# import dairy_utils as utils
 import requests
 from item_api import get_seesion_company_datails
 import json

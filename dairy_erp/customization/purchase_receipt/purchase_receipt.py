@@ -60,8 +60,24 @@ def make_pi_against_vlcc(doc,method=None):
 		pi.flags.for_cc = True
 		pi.submit()
 
+
+def add_supplier_invoice_no(doc,method=None):
+	purchase_order_reference = ""
+	material_request = frappe.db.get_value("Purchase Receipt Item",{"parent":doc.name},'material_request')
+	if material_request:
+		purchase_order_reference = frappe.db.sql("""select DISTINCT(po.name),pi.material_request 
+												from `tabPurchase Order` po,
+												`tabPurchase Order Item` pi 
+												where pi.parent = po.name 
+												and pi.material_request = "{0}" 
+												and is_dropship = 1""".format(material_request),as_list=1)[0][0]
+	if purchase_order_reference:
+		if not doc.purchase_order_reference:
+			doc.purchase_order_reference = purchase_order_reference if purchase_order_reference else ""
+			doc.save(ignore_permissions=True)
+
 @frappe.whitelist()
-def toggle_supplier_invoice_no(doc_name):
+def toggle_supplier_invoice_no(doc_name, method=None):
 	purchase_order_reference = ""
 	material_request = frappe.db.get_value("Purchase Receipt Item",{"parent":doc_name},'material_request')
 	if material_request:
@@ -73,8 +89,9 @@ def toggle_supplier_invoice_no(doc_name):
 												and is_dropship = 1""".format(material_request),as_list=1)[0][0]
 	if purchase_order_reference:
 		purchase_receipt = frappe.get_doc("Purchase Receipt",doc_name)
-		purchase_receipt.purchase_order_reference = purchase_order_reference if purchase_order_reference else ""
-		purchase_receipt.save()
+		if not purchase_receipt.purchase_order_reference:
+			purchase_receipt.purchase_order_reference = purchase_order_reference if purchase_order_reference else ""
+			purchase_receipt.save(ignore_permissions=True)
 	return purchase_order_reference
 
 

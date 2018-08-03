@@ -128,7 +128,8 @@ doc_events = {
         "on_submit": ["dairy_erp.customization.customization.on_submit_pr",
                         "dairy_erp.customization.purchase_receipt.purchase_receipt.make_pi_against_vlcc"],
         "validate": ["dairy_erp.customization.customization.set_co_warehouse_pr","dairy_erp.customization.customization.validate_qty",
-                        "dairy_erp.customization.purchase_receipt.purchase_receipt.validate_price_list"]
+                        "dairy_erp.customization.purchase_receipt.purchase_receipt.validate_price_list"],
+        "after_insert": "dairy_erp.customization.purchase_receipt.purchase_receipt.add_supplier_invoice_no"
     },
     "Sales Order":{
         "on_submit":"dairy_erp.customization.customization.make_so_against_vlcc",

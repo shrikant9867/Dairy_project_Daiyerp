@@ -84,7 +84,7 @@ def make_fmrc(data, response_dict):
 														farmer_supplier = frappe.db.get_value("Farmer",row.get('farmerid'),'full_name')
 														row.update(
 															{
-																"collectiontime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000)),
+																# "collectiontime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000)),
 																"qualitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
 																"quantitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000))
 															}
@@ -97,7 +97,7 @@ def make_fmrc(data, response_dict):
 														fmrc_doc.rcvdtime = data.get('rcvdtime')
 														fmrc_doc.processedstatus = data.get('processedstatus')
 														fmrc_doc.societyid = data.get('societyid')
-														fmrc_doc.collectiondate =  time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
+														fmrc_doc.collectiondate =  data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 														fmrc_doc.shift = data.get('shift')
 														fmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
 														fmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
@@ -360,8 +360,8 @@ def make_vmrc(data, response_dict):
 						if frappe.db.get_singles_dict('Dairy Setting').get('configurable_days'):
 							if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
 								if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') and row.get('milkquantity') and row.get('rate') and row.get('status'):
-									collectiontime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000))
-									collectiondate = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
+									collectiontime = row.get('collectiontime') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000))
+									collectiondate = data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 									vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
 									vmrc = validate_vmrc_entry(data,row, collectiontime, collectiondate)
 									if not vmrc:

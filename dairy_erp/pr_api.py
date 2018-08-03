@@ -89,7 +89,7 @@ def get_mi_attr(supplier):
 def get_pr_list():
 	response_dict = {}
 	try:
-		pr_list = frappe.db.sql("""select status,company,name,posting_date,additional_discount_percentage,supplier,taxes_and_charges,discount_amount,grand_total,apply_discount_on from `tabPurchase Receipt` where company = '{0}' and status in ('To Bill','Draft') order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
+		pr_list = frappe.db.sql("""select status,company,name,posting_date,additional_discount_percentage,supplier,taxes_and_charges,discount_amount,grand_total,apply_discount_on,supplier_invoice_no from `tabPurchase Receipt` where company = '{0}' and status in ('To Bill','Draft') order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
 		for row in pr_list:
 			row.update({"items": frappe.db.sql("select item_code,item_name,qty,rate,uom,original_qty, received_qty, rejected_qty from `tabPurchase Receipt Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1)})
 			if row.get('taxes_and_charges'):

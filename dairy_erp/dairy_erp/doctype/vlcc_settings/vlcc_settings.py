@@ -10,6 +10,9 @@ from frappe.utils import flt, now_datetime, cstr, random_string
 import json
 from frappe import _
 from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+from frappe.core.doctype.sms_settings.sms_settings import send_sms
+from dairy_erp import dairy_utils as utils
+from frappe.utils import cstr
 
 class VLCCSettings(Document):
 	def validate(self):
@@ -76,7 +79,7 @@ def sms_and_email_for_item_stock_threshold_level(allow_guest=True):
 					if vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty < vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty >= 0:
 						item_and_actual_qty[bin_doc.item_code] = bin_doc.actual_qty
 				send_email_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_emails)
-
+				# send_sms_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_emails)
 
 def send_email_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_emails):
 	if vlcc_emails and item_and_actual_qty:
@@ -95,6 +98,18 @@ def send_email_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_emails):
 		)
 
 		frappe.db.commit()
+
+
+
+@frappe.whitelist(allow_guest=True)
+def sms_threshold_level(allow_guest=True):
+	try:
+		msg = "Date: 31-07-2018 ; Shift: MORNING\r\nQTY: 10.0L ; Amt: Rs.227.6\r\nPaid: Rs.45.0 ; Pending: Rs.182.6\r\nTotal Pending: Rs.378.4 ; Due Date: 31-07-2018\r\n\n"
+		send_sms(["917976680164"],msg)
+	except Exception,e:
+		frappe.db.rollback()
+		utils.make_dairy_log(title="SMS Not Send",method="sms_threshold_level", status="Error",
+		data = "data", message=e, traceback=frappe.get_traceback())
 
 
 @frappe.whitelist()

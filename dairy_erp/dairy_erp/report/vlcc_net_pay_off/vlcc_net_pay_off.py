@@ -113,13 +113,14 @@ def get_filtered_vlccs(doctype,text,searchfields,start,pagelen,filters):
 
 def get_pi(f):
 	if len(f):
+		print "###############",f
 		incentive = frappe.db.sql("""
 				select ifnull(sum(outstanding_amount),0) as total
 			from 
 				`tabPurchase Invoice`
 			where 
 				pi_type = 'Incentive' and supplier = '{0}' and docstatus = 1
-			""".format(f[1]),as_dict=1,debug=0)
+			""".format(f),as_dict=1,debug=1)
 		return {'incentive':incentive[0].get('total')}
 	return {'incentive': 0}
 
@@ -131,14 +132,14 @@ def get_si(f):
 					`tabSales Invoice`
 				where 
 					type = 'Vlcc Loan' and customer = '{0}'  and docstatus =1
-				""".format(f),as_dict=1,debug=1)
+				""".format(f),as_dict=1,debug=0)
 		advance = frappe.db.sql("""
 				select ifnull(sum(outstanding_amount),0) as total
 			from 
 				`tabSales Invoice`
 			where 
 				type = 'Vlcc Advance' and customer = '{0}'  and docstatus =1
-			""".format(f),as_dict=1,debug=1)
+			""".format(f),as_dict=1,debug=0)
 		return {
 				 	'loan': loan[0].get('total'),
 				 	'advance': advance[0].get('total')

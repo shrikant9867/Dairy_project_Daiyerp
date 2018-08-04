@@ -272,8 +272,8 @@ class VLCCPaymentCycleReport(Document):
 	def create_incentive(self):
 		company = frappe.db.get_value("Company",{'is_dairy':1},'name')
 		pi = frappe.new_doc("Purchase Invoice")
-		pi.supplier = company
-		pi.company = self.vlcc_name
+		pi.supplier = self.vlcc_name
+		pi.company = company
 		pi.pi_type = "Incentive"
 		pi.cycle = self.cycle
 		pi.append("items",
@@ -290,8 +290,8 @@ class VLCCPaymentCycleReport(Document):
 		
 		#updating date for current cycle
 		frappe.db.set_value("Purchase Invoice", pi.name, 'posting_date', self.collection_to)
-		gl_stock = frappe.db.get_value("Company", self.vlcc_name, 'stock_received_but_not_billed')
-		gl_credit = frappe.db.get_value("Company", self.vlcc_name, 'default_payable_account')
+		gl_stock = frappe.db.get_value("Company", company, 'stock_received_but_not_billed')
+		gl_credit = frappe.db.get_value("Company", company, 'default_payable_account')
 		frappe.db.set_value("GL Entry",{'account': gl_stock,'voucher_no':pi.name}, 'posting_date', self.collection_to)
 		frappe.db.set_value("GL Entry",{'account': gl_credit,'voucher_no':pi.name}, 'posting_date', self.collection_to)
 
@@ -502,7 +502,7 @@ def get_mi_raised(start_date, end_date, vlcc):
 					where
 						si.customer = '{0}'
 						and si.posting_date between '{1}' and '{2}'
-						and si.type not in ('Advance','Loan')
+						and si.type not in ('Vlcc Advance','Vlcc Loan')
 						""".format(vlcc,start_date,end_date),as_list=1,debug=0)
 	if sales_invoice:
 		grand_total = sales_invoice[0][0]

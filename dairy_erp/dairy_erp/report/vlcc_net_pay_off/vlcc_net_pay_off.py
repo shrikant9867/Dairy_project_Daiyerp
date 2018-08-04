@@ -14,9 +14,12 @@ def execute(filters=None):
 def get_column():
 	columns =[
 		("Village Level Collection Centre") + ":Link/Village Level Collection Centre:200",
+		("Milk Incentives") + ":Currency:200",
 		("Net Payable to Vlcc") + ":Currency:200",
+		("Advance Emi") + ":Currency:200",
+		("Loan Emi") + ":Currency:200",
 		("Net Receivable from Vlcc") + ":Currency:200",
-		("Net Pay Off to Vlcc")+ ":Currency:200",
+		("Net Pay Off to Vlcc")+ ":Currency:200"
 	]
 	return columns
 
@@ -72,14 +75,16 @@ def filter_vlcc_data(data, party_type):
 	return filtered_data
 
 def merge_data(payable, receivable):
-	# [ farmer_id, full_name, payable, receivable, payable-receivable ]
+	# [ farmer_id, full_name, incentives, payable, advance, loan, receivable, payable-receivable ]
 	data = []
 	for f in get_vlccs():
 		if payable.get(f) or receivable.get(f):
+			pi_data = get_pi(f)
+			si_data = get_si(f)
 			pay = payable.get(f, 0)
 			rec = receivable.get(f, 0)
 			net = pay - rec
-			data.append([f, pay, rec, net])
+			data.append([f, pi_data.get('incentive'), pay, si_data.get('advance'), si_data.get('loan'), rec, net])
 	return data		  
 
 
@@ -100,3 +105,45 @@ def get_filtered_company(doctype,text,searchfields,start,pagelen,filters):
 	user_name = frappe.session.user
 	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
 	return company_name
+
+@frappe.whitelist()
+def get_filtered_vlccs(doctype,text,searchfields,start,pagelen,filters):
+	return frappe.db.sql("""select name,vlcc_type from 
+		`tabVillage Level Collection Centre`""")
+
+def get_pi(f):
+	if len(f):
+		incentive = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabPurchase Invoice`
+			where 
+				pi_type = 'Incentive' and supplier = '{0}' and docstatus = 1
+			""".format(f[1]),as_dict=1,debug=0)
+		return {'incentive':incentive[0].get('total')}
+	return {'incentive': 0}
+
+def get_si(f):
+	if len(f):
+		loan = frappe.db.sql("""
+					select ifnull(sum(outstanding_amount),0) as total
+				from 
+					`tabSales Invoice`
+				where 
+					type = 'Vlcc Loan' and customer = '{0}'  and docstatus =1
+				""".format(f),as_dict=1,debug=1)
+		advance = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabSales Invoice`
+			where 
+				type = 'Vlcc Advance' and customer = '{0}'  and docstatus =1
+			""".format(f),as_dict=1,debug=1)
+		return {
+				 	'loan': loan[0].get('total'),
+				 	'advance': advance[0].get('total')
+				}
+	return {
+			 	'loan': 0,
+			 	'advance': 0
+			 }

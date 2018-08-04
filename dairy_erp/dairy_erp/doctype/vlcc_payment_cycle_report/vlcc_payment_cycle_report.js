@@ -11,7 +11,7 @@ frappe.ui.form.on('VLCC Payment Cycle Report', {
 				method:"dairy_erp.dairy_erp.doctype.vlcc_payment_cycle_report.vlcc_payment_cycle_report.get_vpcr_flag",
 				callback:function(r){
 					if(!r.message){
-						frappe.msgprint("Please enable <b>IS VPCR</b> flag in Dair settings to generate VPCR")
+						frappe.msgprint("Please enable <b>IS VPCR</b> flag in Dairy settings to generate VPCR")
 						frappe.set_route("List","VLCC Payment Cycle Report")
 					}
 				}

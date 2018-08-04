@@ -86,7 +86,7 @@ def make_pi(data, cur_cycl=None, company=None):
 			"item_code":"Loan Emi",
 			"qty": 1,
 			"rate": data.get('emi_amount'),
-			"cost_center": frappe.db.get_value("Company", company, "cost_center")
+			"cost_center": frappe.db.get_value("Company", pi.company, "cost_center")
 		})
 	pi.flags.ignore_permissions = True
 	pi.save()

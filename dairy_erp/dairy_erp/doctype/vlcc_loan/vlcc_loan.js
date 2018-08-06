@@ -14,6 +14,10 @@ frappe.ui.form.on('Vlcc Loan', {
 			frm.set_value("emi_deduction_start_cycle",0)
 			frappe.throw("Emi deduction start cycle must be less than or equal to <b>6</b>")
 		}
+		else if (cint(frm.doc.emi_deduction_start_cycle) < -1){
+			frm.set_value("emi_deduction_start_cycle",0)
+			frappe.throw("Emi deduction start cycle not be <b>-2</b>")
+		}
 	},
 	principle: function(frm) {
 		frm.events.no_of_instalments(frm)

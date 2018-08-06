@@ -191,8 +191,15 @@ def update_warehouse(doc, method):
 def after_install():
 
 	create_supplier_type()
-	create_translation()
+	create_language()
 
+def create_language():
+	language = frappe.new_doc("Language")
+	language.language_code = "Der"
+	language.language_name = "Dairy"
+	language.based_on = "en"
+	language.save(ignore_permissions=True)
+	create_translation()
 
 
 def create_translation():
@@ -201,21 +208,21 @@ def create_translation():
 	"""
 	if not frappe.db.get_value("Translation", {"source_name":"Material Request"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
-		mr_translation.language = "dcl"
+		mr_translation.language = "Der"
 		mr_translation.source_name = "Material Request"
 		mr_translation.target_name = "Material Indent"
 		mr_translation.save()
 
 	if not frappe.db.get_value("Translation", {"source_name":"Village Level Collection Centre"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
-		mr_translation.language = "dcl"
+		mr_translation.language = "Der"
 		mr_translation.source_name = "Village Level Collection Centre"
 		mr_translation.target_name = "Dairy Cooperative Society"
 		mr_translation.save()
 
 	if not frappe.db.get_value("Translation", {"source_name":"Camp Office"}, "name"):
 		mr_translation = frappe.new_doc("Translation")
-		mr_translation.language = "dcl"
+		mr_translation.language = "Der"
 		mr_translation.source_name = "Camp Office"
 		mr_translation.target_name = "P&I"
 		mr_translation.save()
@@ -668,12 +675,7 @@ def add_values(args=None):
 	dairy_configuration.save(ignore_permissions=True)
 
 def add_dairy_language(args):
-	language = frappe.new_doc("Language")
-	language.language_code = "Der"
-	language.language_name = "Dairy"
-	language.based_on = "en"
-	language.save(ignore_permissions=True)
-	set_dairy_language(language.language_code,args.get('email'))
+	set_dairy_language('Der',args.get('email'))
 
 def set_dairy_language(language,email_id):
 	frappe.db.sql("""update `tabUser` SET language= '{0}' WHERE email = '{1}' """.format(language,email_id))

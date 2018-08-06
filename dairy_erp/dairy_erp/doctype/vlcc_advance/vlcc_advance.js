@@ -13,6 +13,10 @@ frappe.ui.form.on('Vlcc Advance', {
 			frm.set_value("emi_deduction_start_cycle",0)
 			frappe.throw("Emi deduction start cycle must be less than 6")
 		}
+		else if (cint(frm.doc.emi_deduction_start_cycle) < -1){
+			frm.set_value("emi_deduction_start_cycle",0)
+			frappe.throw("Emi deduction start cycle not be <b>-2</b>")
+		}
 	},
 	no_of_instalment: function(frm) {
 		emi_amount = frm.doc.advance_amount / frm.doc.no_of_instalment

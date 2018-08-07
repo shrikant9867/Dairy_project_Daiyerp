@@ -70,9 +70,9 @@ def sms_and_email_for_item_stock_threshold_level(allow_guest=True):
 		if frappe.db.exists("VLCC Settings",vlcc.name):
 			vlcc_setting_doc = frappe.get_doc("VLCC Settings",vlcc.name)
 		if vlcc_setting_doc:
-			vlcc_emails = [vlcc_doc.email_id]
+			vlcc_details = {'vlcc_manager':[vlcc_doc.name1,vlcc_doc.email_id,vlcc_doc.contact_no]}
 			if vlcc_doc.operator_same_as_agent and vlcc_doc.operator_email_id:
-				vlcc_emails.append(vlcc_doc.operator_email_id)
+				vlcc_details['vlcc_operator'] = [vlcc_doc.operator_name,vlcc_doc.operator_email_id,vlcc_doc.operator_number]
 			if vlcc_doc.warehouse and vlcc_setting_doc and vlcc_setting_doc.item_stock_threshold_level:
 				bin_list = frappe.db.get_all("Bin", {"warehouse": vlcc_doc.warehouse},"name")
 				item_and_actual_qty = {}
@@ -80,41 +80,43 @@ def sms_and_email_for_item_stock_threshold_level(allow_guest=True):
 					bin_doc = frappe.get_doc("Bin",bin_name.name)
 					if vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty < vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty >= 0:
 						item_and_actual_qty[bin_doc.item_code] = bin_doc.actual_qty
-				send_email_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_emails)
-				send_sms_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_doc.contact_no,vlcc_doc.operator_number)
+				send_email_to_vlcc(item_and_actual_qty,vlcc_details)
+				send_sms_to_vlcc(item_and_actual_qty,vlcc_details)
 
-def send_email_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_emails):
-	if vlcc_emails and item_and_actual_qty:
-		email_template = frappe.render_template(
-			"templates/includes/item_stock_threshold_level.html", {
-										"item_and_qty":item_and_actual_qty,
-										"vlcc_name":vlcc_name
-										}
-						)
+def send_email_to_vlcc(item_and_actual_qty,vlcc_details):
+	if vlcc_details and item_and_actual_qty:
+		for vlcc_type, vlcc_detail in vlcc_details.items():
+			email_template = frappe.render_template(
+				"templates/includes/item_stock_threshold_level.html", {
+											"item_and_qty":item_and_actual_qty,
+											"vlcc_name":vlcc_detail[0]
+											}
+							)
 
-		frappe.sendmail(
-			subject='Creation of Material Indent',
-			recipients=vlcc_emails,
-			message=email_template,
-			now=True
-		)
+			frappe.sendmail(
+				subject='Creation of Material Indent',
+				recipients=vlcc_detail[1],
+				message=email_template,
+				now=True
+			)
 
-		frappe.db.commit()
+			frappe.db.commit()
 
 
-def send_sms_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_contact_no,vlcc_operator_number=None):
-	contact_nos	= [vlcc_contact_no]
-	contact_nos.append(vlcc_operator_number) if vlcc_operator_number else ""
-	message = "Dear "+ vlcc_name +",\r\nPlease Raise MI for below items, as these items are having low stock.\r\n"
-	for item, qty in item_and_actual_qty.items():
-		message = message + str(item)+': '+str(qty)+'\r\n'
-	message += '\nSmartERP'
-	try:
-		send_sms(contact_nos,str(message))
-	except Exception,e:
-		frappe.db.rollback()
-		utils.make_dairy_log(title="SMS Not Send",method="sms_threshold_level", status="Error",
-			data = "data", message=e, traceback=frappe.get_traceback())
+def send_sms_to_vlcc(item_and_actual_qty,vlcc_details):
+	if vlcc_details and item_and_actual_qty:
+		for vlcc_type, vlcc_detail in vlcc_details.items():
+			message = "Dear VLCC Manager/Operator, "+ vlcc_detail[0] +",\r\nPlease Raise MI for below items, as these items are having low stock.\r\n"
+			if vlcc_detail[2]:
+				for item, qty in item_and_actual_qty.items():
+					message = message + str(item)+': '+str(qty)+'\r\n'
+				message += '\nSmartERP'
+				try:
+					send_sms([vlcc_detail[2]],str(message))
+				except Exception,e:
+					frappe.db.rollback()
+					utils.make_dairy_log(title="SMS Not Send"+str(vlcc_detail[2]),method="sms_threshold_level", status="Error",
+						data = "data", message=e, traceback=frappe.get_traceback())
 
 # @frappe.whitelist(allow_guest=True)
 # def sms_threshold_level(allow_guest=True):
@@ -125,7 +127,7 @@ def send_sms_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_contact_no,vlcc_operator
 # 		message = message + str(item)+': '+str(qty)+'\r\n'
 # 	message += '\nSmartERP'
 # 	try:
-# 		send_sms(["7976680164"],str(message))
+# 		send_sms(["+917976680164"],str(message))
 # 	except Exception,e:
 # 		frappe.db.rollback()
 # 		utils.make_dairy_log(title="SMS Not Send",method="sms_threshold_level", status="Error",

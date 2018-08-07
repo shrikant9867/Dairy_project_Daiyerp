@@ -11,6 +11,16 @@ frappe.ui.form.on('Farmer Advance', {
 			frm.set_df_property("extension", "hidden", 0);
 		}
 	},
+	emi_deduction_start_cycle: function(frm) {
+		if(cint(frm.doc.emi_deduction_start_cycle) > 6) {
+			frm.set_value("emi_deduction_start_cycle",0)
+			frappe.throw("Emi deduction start cycle must be less than or equal to <b>6</b>")
+		}
+		else if (cint(frm.doc.emi_deduction_start_cycle) < -1){
+			frm.set_value("emi_deduction_start_cycle",0)
+			frappe.throw("Emi deduction start cycle not be <b>-2</b>")
+		}
+	},
 	onload: function(frm) {
 		if(!frm.doc.vlcc){
 			get_vlcc(frm)

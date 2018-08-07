@@ -50,7 +50,8 @@ doctype_js = {
     "Stock Entry":["customization/stock_entry/stock_entry.js"],
     "Purchase Invoice": "customization/purchase_invoice/purchase_invoice.js",
     "Delivery Note": "customization/delivery_note/delivery_note.js",
-    "Company": "customization/company/company.js"
+    "Company": "customization/company/company.js",
+    "Item": "customization/item/item.js"
 }
 doctype_list_js = {
     "Purchase Receipt" :["customization/purchase_receipt/purchase_receipt_list.js"],

@@ -97,28 +97,42 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 	},
 	report_operation: function(report){
 		var me = frappe.container.page.query_report;
-		
+		var flag = true;
 		frappe.selected_rows = []
 
 		report.page.add_inner_button(__("Payment Settlement"), function() {
-
-			frappe.selected_rows = []
-
-			$.each(me.data,function(i,d){
-				if (d.selected == true){
-					frappe.selected_rows.push(d.Name)
+			frappe.call({
+				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.is_fpcr_generated",
+				args : {
+						"filters":report.get_values()
+						},
+				async: false,
+				callback : function(r){
+					if(!r.message){
+						flag = false
+						frappe.throw(__("Please Generate <b>FPCR</b> for the cycle <b>{0}</b> against farmer <b>{1}</b>",
+							[frappe.query_report_filters_by_name.cycle.get_value(),frappe.query_report_filters_by_name.farmer.get_value()]))
+					}
 				}
 			})
+			if(flag){
+				frappe.selected_rows = []
 
-			if (frappe.selected_rows.length === 0){
-				frappe.throw("Please select records")
+				$.each(me.data,function(i,d){
+					if (d.selected == true){
+						frappe.selected_rows.push(d.Name)
+					}
+				})
+
+				if (frappe.selected_rows.length === 0){
+					frappe.throw("Please select records")
+				}
+				// var end_date = frappe.query_report_filters_by_name.end_date.get_value()
+				/*if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
+					frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
+				}*/
+				frappe.query_reports['Farmer Payment Settlement'].check_cycle(report)
 			}
-			// var end_date = frappe.query_report_filters_by_name.end_date.get_value()
-			/*if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
-				frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
-			}*/
-			frappe.query_reports['Farmer Payment Settlement'].check_cycle(report)
-			
 		});
 
 		report.page.add_inner_button(__("Skip Cycle"), function() {

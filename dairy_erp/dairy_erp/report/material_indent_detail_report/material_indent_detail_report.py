@@ -80,12 +80,12 @@ def get_conditions(filters):
 def get_colums():
 	columns = [("Name") + ":Link/Material Request:100",
 				("Type") + ":Data:100",
-				("Camp Office") + ":Link/Address:200",
-				("VLCC Company") + ":Link/Company:150",
+				("Camp Office") + ":Data/Address:200",
+				("VLCC Company") + ":Data/Company:150",
 				("Transation Date") + ":Date:100",
 				("Status") + ":Data:100",
 				("Required Date") + ":Date:100",
-				("Item Code") + ":Link/Item:100",
+				("Item Code") + ":Data/Item:100",
 				("Qty") + ":Data:100",	
 				]	
 	return columns

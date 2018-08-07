@@ -81,7 +81,7 @@ def sms_and_email_for_item_stock_threshold_level(allow_guest=True):
 					if vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty < vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty >= 0:
 						item_and_actual_qty[bin_doc.item_code] = bin_doc.actual_qty
 				send_email_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_emails)
-				send_sms_to_vlcc(item_and_actual_qty,vlcc.name,vlcc.contact_no,vlcc.operator_number)
+				send_sms_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_doc.contact_no,vlcc_doc.operator_number)
 
 def send_email_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_emails):
 	if vlcc_emails and item_and_actual_qty:
@@ -105,7 +105,7 @@ def send_email_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_emails):
 def send_sms_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_contact_no,vlcc_operator_number=None):
 	contact_nos	= [vlcc_contact_no]
 	contact_nos.append(vlcc_operator_number) if vlcc_operator_number else ""
-	message = "Dear VLCC Manager,\r\nPlease Raise MI for below items, as these items are having low stock.\r\n"
+	message = "Dear "+ vlcc_name +",\r\nPlease Raise MI for below items, as these items are having low stock.\r\n"
 	for item, qty in item_and_actual_qty.items():
 		message = message + str(item)+': '+str(qty)+'\r\n'
 	message += '\nSmartERP'
@@ -125,7 +125,7 @@ def send_sms_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_contact_no,vlcc_operator
 # 		message = message + str(item)+': '+str(qty)+'\r\n'
 # 	message += '\nSmartERP'
 # 	try:
-# 		send_sms(["917976680164"],str(message))
+# 		send_sms(["7976680164"],str(message))
 # 	except Exception,e:
 # 		frappe.db.rollback()
 # 		utils.make_dairy_log(title="SMS Not Send",method="sms_threshold_level", status="Error",

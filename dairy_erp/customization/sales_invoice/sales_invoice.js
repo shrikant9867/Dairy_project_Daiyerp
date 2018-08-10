@@ -102,8 +102,16 @@ frappe.ui.form.on("Sales Invoice", {
 			frm.set_value("multimode_payment", 0);
 			frm.trigger("multimode_payment")
 			refresh_many(["multimode_payment", "effective_credit"])
+			if (frm.doc.items){
+				frm.set_value("items","")
+				refresh_field("items")
+			}
 		}else if (frm.doc.customer_or_farmer == "Farmer"){
 			set_farmer_config(frm)
+			if (frm.doc.items){
+				frm.set_value("items","")
+				refresh_field("items")
+			}
 		}
 	},
 

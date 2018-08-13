@@ -31,6 +31,12 @@ frappe.ui.form.on('Purchase Order', {
 			frm.set_value("supplier","")
 			frappe.throw(__("Supplier Type Cannot be <b>Vlcc Type</b>"))
 		}
+		else if(get_session_user_type().operator_type == 'VLCC' &&
+		get_supplier_type(frm.doc.supplier) == "Dairy Type") {
+			frm.set_value("supplier","")
+			frm.set_value("supplier_type","")
+			frappe.throw(__("Supplier Type Cannot be <b>Dairy Type</b>"))
+		}
 
 		erpnext.utils.get_party_details(frm);
 	}

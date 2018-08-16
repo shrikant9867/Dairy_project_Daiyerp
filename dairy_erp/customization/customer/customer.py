@@ -20,4 +20,4 @@ def check_vlcc_local_customer(doc, method=None):
 	cust_name = frappe.db.get_value("Customer",{'company':vlcc_name,'customer_group':'Vlcc Local Customer'},"name")
 	cust_company = cust_name.split('-Local')[0]
 	if doc.customer_group == "Vlcc Local Customer" and cust_name and cust_company and cust_company == vlcc_name: 
-		frappe.throw(_("You can not create multiple 'vlcc local customer', because on creation of new 'Vlcc' by default one local customer has created."))
+		frappe.throw(_("You can not create multiple 'vlcc local customer',because by default one 'Vlcc local customer' has created on creation of vlcc."))

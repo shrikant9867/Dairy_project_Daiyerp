@@ -617,3 +617,11 @@ def get_incentives(amount, qty, vlcc=None):
 
 def get_vlcc():
 	return frappe.db.get_value("User",frappe.session.user,'company')
+
+@frappe.whitelist()
+def is_fpcr_generated(filters):
+	filters = json.loads(filters)
+	if filters.get('cycle') and filters.get('farmer'):
+		fpcr_records = frappe.get_all("Farmer Payment Cycle Report",fields=['count(name) as count']\
+				,filters={'cycle': filters.get('cycle'), 'farmer_id': filters.get('farmer')})
+		return fpcr_records[0].get('count')

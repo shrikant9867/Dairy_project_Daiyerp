@@ -67,7 +67,19 @@ frappe.ui.form.on('Village Level Collection Centre', {
 			}
 		});
 	},
+	contact_no:function(frm){
+		if(frm.doc.contact_no.length < 10 && frm.doc.contact_no){
+			frm.set_value("contact_no","")
+			frappe.throw("Contact No contain aleast 10 digit")
+		}
+	},
 	
+	operator_number:function(frm){
+		if(frm.doc.operator_same_as_agent && frm.doc.operator_number.length < 10 && frm.doc.operator_number){
+			frm.set_value("operator_number","")
+			frappe.throw("Operator Contact No contain aleast 10 digit")
+		}
+	},
 	address: function(frm) {
 		erpnext.utils.get_address_display(frm, "address", "address_display");
 	},

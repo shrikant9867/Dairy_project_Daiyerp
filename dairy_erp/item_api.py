@@ -21,7 +21,6 @@ from customization.price_list.price_list_customization import validate_price_lis
 def get_items():
 	"""Mobile API's common to sell and purchase 
 	"""
-	
 	response_dict = frappe.db.sql("""select name as item_code,item_name,description,CAST(is_whole_no AS int) as is_whole_no,
 		standard_rate,stock_uom, item_group from `tabItem` where 
 		item_group in ('Cattle feed', 'Mineral Mixtures', 'Medicines', 
@@ -84,7 +83,7 @@ def get_masters():
 def get_party_item_prices(party):
 	price_list = guess_price_list(party)
 	if price_list:
-		return get_item_prices(price_list)
+		return get_item_prices(price_list,party)
 	return []
 
 def get_supplier_item_prices(supplier_type):
@@ -124,7 +123,6 @@ def guess_price_list(party_type, supplier_type=None):
 
 
 def get_item_list():
-	# return item details along with uom
 	return frappe.db.sql("""select i.name as item_code, i.description, i.item_name,i.item_name,CAST(i.is_whole_no as int) as is_whole_no,
 		i.item_group,uom.uom, uom.conversion_factor from `tabItem` i
 		left join `tabUOM Conversion Detail` uom
@@ -133,23 +131,45 @@ def get_item_list():
 		and i.name not in ('Advance Emi','Loan Emi','Milk Incentives') group by i.name, uom.uom""",
 	as_dict=True)
 
-def get_item_prices(price_list):
+def get_item_prices(price_list,party=None):
 	""" item prices with per uom rate """
 	from operator import itemgetter
 	items = get_item_list()
 	items_ = {}
-	for i in items:
-		item_price = frappe.db.get_value("Item Price", {
-			"price_list": price_list,
-			"item_code": i.get('item_code')
-		}, "price_list_rate") or 0
-		if i.get('item_code') not in items_:
-			uom = [{ 'uom': i.pop('uom'),  'rate': i.pop('conversion_factor') * item_price }]
-			i.update({'uom': uom, 'standard_rate': item_price, "qty": get_item_qty(i.get('item_code'))})
-			items_[i.get('item_code')] = i
-		else:
-			items_[i.get('item_code')]['uom'].append({ 'uom':i.get('uom'), 'rate': i.pop('conversion_factor') * item_price })
-	sorted_items = sorted(items_.values(), key=itemgetter('item_code'), reverse=False)
+	# Fetch item details from VLCC settings
+	if party:
+		user_doc = frappe.get_doc("User",frappe.session.user)
+		vlcc_setting = frappe.get_doc("VLCC Settings",user_doc.company)
+		for i in vlcc_setting.vlcc_item:
+			if i.get('customer_type') == "Vlcc Local Customer" and party == "Customer":
+				items_[i.get('item')] = ""
+
+			if i.get('customer_type') == "Farmer" and party == "Farmer":
+				items_[i.get('item')] = ""	
+
+		for i in items:
+			item_price = frappe.db.get_value("Item Price", {
+				"price_list": price_list,
+				"item_code": i.get('item_code')
+			}, "price_list_rate") or 0
+			if i.get('item_code') in items_:
+				uom = [{ 'uom': i.pop('uom'),  'rate': i.pop('conversion_factor') * item_price }]
+				i.update({'uom': uom, 'standard_rate': item_price, "qty": get_item_qty(i.get('item_code'))})
+				items_[i.get('item_code')] = i
+		sorted_items = sorted(items_.values(), key=itemgetter('item_code'), reverse=False)
+	else:
+		for i in items:
+			item_price = frappe.db.get_value("Item Price", {
+				"price_list": price_list,
+				"item_code": i.get('item_code')
+			}, "price_list_rate") or 0
+			if i.get('item_code') not in items_:
+				uom = [{ 'uom': i.pop('uom'),  'rate': i.pop('conversion_factor') * item_price }]
+				i.update({'uom': uom, 'standard_rate': item_price, "qty": get_item_qty(i.get('item_code'))})
+				items_[i.get('item_code')] = i
+			else:
+				items_[i.get('item_code')]['uom'].append({ 'uom':i.get('uom'), 'rate': i.pop('conversion_factor') * item_price })
+		sorted_items = sorted(items_.values(), key=itemgetter('item_code'), reverse=False)
 	return sorted_items
 
 
@@ -186,7 +206,7 @@ def get_net_off(row):
 	"farmer": row.get('id')
 	}
 	if len(get_data(fliters)):
-		print "$$$$$$$$$$$$$$$$$$$$$$$$",get_data(fliters),fliters
+		# print "$$$$$$$$$$$$$$$$$$$$$$$$",get_data(fliters),fliters
 		row.update({"farmer_net_off": round(get_data(fliters)[0][4],2)})
 	else: row.update({"farmer_net_off": 0.00})
 

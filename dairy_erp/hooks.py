@@ -179,7 +179,8 @@ doc_events = {
         "after_insert": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.auto_create_vlcc_tax"
     },
     "Customer":{
-        "validate":"dairy_erp.customization.customer.customer.set_party_account"
+        "validate":["dairy_erp.customization.customer.customer.set_party_account",
+        "dairy_erp.customization.customer.customer.check_vlcc_local_customer"]
     }
 }
 

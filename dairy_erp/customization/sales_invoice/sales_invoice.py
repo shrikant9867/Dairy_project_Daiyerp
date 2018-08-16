@@ -15,6 +15,12 @@ def get_local_customer(company):
 	data.update({'customer':frappe.db.get_value("Customer",company+"-"+"Local",'name')})
 	return data
 
+@frappe.whitelist()
+def get_local_institution(company):
+	data = fetch_balance_qty()
+	return data
+
+
 
 @frappe.whitelist()
 def get_farmer_config(farmer, invoice=None):
@@ -252,7 +258,7 @@ def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filter
 	if items_dict and filters.get('customer_type') in items_dict:
 		final_item_list = "(" + ",".join("'{0}'".format(item) for item in items_dict[filters.get('customer_type').encode('utf-8')]) + ")"
 		item_list = frappe.db.sql("""select name,item_group from tabItem 
-			where name in {final_item_list} and name like '{txt}' """.format(final_item_list=final_item_list,txt= "%%%s%%" % txt),as_list=1,debug=1)
+			where name in {final_item_list} and name like '{txt}' """.format(final_item_list=final_item_list,txt= "%%%s%%" % txt),as_list=1,debug=0)
 	else:
 		item_list = frappe.db.sql("""
 			select 
@@ -261,7 +267,7 @@ def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filter
 				tabItem 
 			where 
 				item_group != 'Stationary' and name not in ('Advance Emi', 'Loan Emi', 'Milk Incentives')
-				and name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1,debug=1)
+				and name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1,debug=0)
 	
 	p_item = [item.get('item_name') for item in filters.get("items_dict")]
 	item_list_update = item_list

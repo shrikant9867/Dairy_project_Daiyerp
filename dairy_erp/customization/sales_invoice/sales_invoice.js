@@ -101,7 +101,7 @@ frappe.ui.form.on("Sales Invoice", {
 			&& frm.doc.customer_or_farmer == "Vlcc Local Institution"
 			&& frm.doc.customer) {
 			frm.set_value("customer","")
-			frappe.throw(__("Customer Group Cannot be Farmer/Vlcc Local Customer"))
+			frappe.throw(__("Only 'Vlcc Local Institution' customer should be allowed"))
 		}
 	},
 		

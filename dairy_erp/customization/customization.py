@@ -706,7 +706,7 @@ def create_item():
 
 def create_customer_group():
 
-	customer_groups = ['Farmer', 'Vlcc', 'Dairy','Vlcc Local Customer']
+	customer_groups = ['Farmer', 'Vlcc', 'Dairy','Vlcc Local Customer','Vlcc Local Institution']
 	for i in customer_groups:
 		if not frappe.db.exists('Customer Group',i):
 			cust_grp = frappe.new_doc("Customer Group")
@@ -1018,7 +1018,7 @@ def customer_permission(user):
 
 	if user_doc.get('operator_type') == "VLCC":
 		customer_list = frappe.db.sql("""select c.name as cust from `tabCustomer` c, `tabParty Account` p where p.parent = c.name and 
-					p.company = '{0}' and c.customer_group in ('Farmer','Dairy','Vlcc Local Customer') group by c.name""".format(user_doc.get('company')),as_dict=1)
+					p.company = '{0}' and c.customer_group in ('Farmer','Dairy','Vlcc Local Customer','Vlcc Local Institution') group by c.name""".format(user_doc.get('company')),as_dict=1)
 
 		customer = [ '"%s"'%cust.get("cust") for cust in customer_list ]
 

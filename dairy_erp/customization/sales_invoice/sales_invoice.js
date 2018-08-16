@@ -95,8 +95,18 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 	},
 
+	customer: function(frm) {
+		if(get_session_user_type().operator_type == 'VLCC' &&
+			(get_customer_type(frm.doc.customer) != "Vlcc Local Institution")
+			&& frm.doc.customer_or_farmer == "Vlcc Local Institution"
+			&& frm.doc.customer) {
+			frm.set_value("customer","")
+			frappe.throw(__("Customer Group Cannot be Farmer/Vlcc Local Customer"))
+		}
+	},
+		
 	customer_or_farmer: function(frm) {
-		if(frm.doc.customer_or_farmer == "Vlcc Local Customer"){
+		if(frm.doc.customer_or_farmer == "Vlcc Local Customer" || frm.doc.customer_or_farmer == "Vlcc Local Institution"){
 			frm.set_value("effective_credit","")
 			local_sale_operations(frm)
 			frm.set_value("multimode_payment", 0);
@@ -108,6 +118,8 @@ frappe.ui.form.on("Sales Invoice", {
 			}
 		}else if (frm.doc.customer_or_farmer == "Farmer"){
 			set_farmer_config(frm)
+			frm.set_value("customer","")
+			frm.set_df_property("customer","read_only",1)
 			if (frm.doc.items){
 				frm.set_value("items","")
 				refresh_field("items")
@@ -169,8 +181,27 @@ frappe.ui.form.on("Sales Invoice", {
 })
 
 
+get_customer_type = function(customer) {
+	var customer_group = ''
+	frappe.call({
+		method: "frappe.client.get_value",
+		args: {
+			doctype: "Customer",
+			filters: {"name": customer},
+			fieldname: "customer_group"
+		},
+		async:false,
+		callback: function(r){
+			if(r.message){	
+				customer_group = r.message.customer_group
+			}
+		}
+	});
+	return customer_group
+}
 
-cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
+
+/*cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	if(cur_frm.doc.customer_or_farmer == "Farmer" && cur_frm.doc.local_sale){
 		return {
 			filters: [
@@ -185,7 +216,7 @@ cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(do
 			]
 		}
 	}
-}
+}*/
 
 
 
@@ -196,7 +227,22 @@ local_sale_operations = function(frm){
 			method: "dairy_erp.customization.sales_invoice.sales_invoice.get_local_customer",
 			callback: function(r) {
 				if(r.message) {
+					frm.set_df_property("customer","read_only",1)
 					frm.set_value("customer",r.message.customer)
+					frm.set_value("total_cow_milk_qty",r.message.cow_milk)
+					frm.set_value("total_buffalo_milk_qty",r.message.buff_milk)
+				}
+			}
+		})
+	}
+	if(frm.doc.customer_or_farmer == "Vlcc Local Institution"){
+		frappe.call({
+			args: { "company": frm.doc.company },
+			method: "dairy_erp.customization.sales_invoice.sales_invoice.get_local_institution",
+			callback: function(r) {
+				if(r.message) {
+					frm.set_value("customer","")
+					frm.set_df_property("customer","read_only",0)
 					frm.set_value("total_cow_milk_qty",r.message.cow_milk)
 					frm.set_value("total_buffalo_milk_qty",r.message.buff_milk)
 				}
@@ -300,9 +346,13 @@ frappe.ui.form.on("Sales Invoice Item", {
 
 cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	if(cur_frm.doc.customer_or_farmer && cur_frm.doc.local_sale){
+		customer_type = cur_frm.doc.customer_or_farmer
+		if (customer_type == "Vlcc Local Institution"){
+			customer_type = 'Vlcc Local Customer'
+		}
 		return {
 			query:"dairy_erp.customization.sales_invoice.sales_invoice.get_item_by_customer_type",
-			filters: {'customer_type': cur_frm.doc.customer_or_farmer,
+			filters: {'customer_type': customer_type,
 						'vlcc':cur_frm.doc.company,
 						'items_dict':cur_frm.doc.items
 					}

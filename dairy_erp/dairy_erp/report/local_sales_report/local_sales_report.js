@@ -5,15 +5,25 @@
 frappe.query_reports["Local Sales Report"] = {
 	"filters": [
 		{
+			"fieldname":"customer_type",
+			"label": __("VLCC Local Customer/Farmer"),
+			"fieldtype": "Select",
+			"options": 'Vlcc Local Customer\nFarmer\nVlcc Local Institution',
+			"default": "Vlcc Local Customer"
+		},
+		{
 			"fieldname":"customer",
 			"label": __("Customer"),
 			"fieldtype": "Link",
 			"options":"Customer",
 			"get_query": function (query_report) {
 				return{
-					query:"dairy_erp.dairy_erp.report.local_sales_report.local_sales_report.get_customer"
+					query:"dairy_erp.dairy_erp.report.local_sales_report.local_sales_report.get_customer",
+					"filters": {
+						"customer_type": frappe.query_report_filters_by_name.customer_type.get_value()
+						}
+					}
 				}
-			}
 		},
 		{
 			"fieldname":"from_date",

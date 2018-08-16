@@ -15,7 +15,13 @@ def get_column():
 	columns =[ 	
 		("Farmer ID") + ":Link/Farmer:200",
 		("Farmer") + ":Data:200",
+		("Payable for Milk purchased from farmer") + ":Currency",
+		("Incentive") + ":Currency",
 		("Net Payable to Farmer") + ":Currency:200",
+		("Local Purchase by Farmer") + ":Currency:200",
+		("Any Vet Service Availed") + ":Currency:200",
+		("Advance EMI") + ":Currency:200",
+		("Loan EMI") + ":Currency:200",
 		("Net Receivable from Farmer") + ":Currency:200",
 		("Net Pay Off to Farmer")+ ":Currency:200",
 	]
@@ -64,33 +70,28 @@ def filter_farmer_data(data, party_type):
 
 def merge_data(payable, receivable):
 	# [ farmer_id, full_name, payable, receivable, payable-receivable ]
+	#updated report section refer farmer advance and loan document 25 jun
 	data = []
 	for f in get_farmers():
 		if payable.get(f[1]) or receivable.get(f[1]):
+			pi_data = get_pi_data(f)
+			si_data = get_si_data(f)
 			pay = payable.get(f[1], 0)
 			rec = receivable.get(f[1], 0)
 			net = pay - rec
-			data.append([f[0], f[1], pay, rec, pay-rec])
+			data.append([f[0], f[1], pi_data.get('fmcr'), pi_data.get('incentive'), \
+				pay, si_data.get('local_sale'), si_data.get('vet_service'), si_data.get('advance'), si_data.get('loan'), rec, pay-rec])
 	return data		  
 
 def get_farmers():
 	return [ [f.get('name'), f.get('full_name')] for f in frappe.get_all("Farmer", fields=["name", "full_name"]) ]
 
 @frappe.whitelist()
-def trim_farmer_id_and_name(doctype=None,txt=None,searchfields=None,start=None,pagelen=None,filters=None):
-	user = frappe.get_doc("User",frappe.session.user)
-	farmer_list = frappe.db.sql("""
-				select
-						RIGHT(full_name,4),
-						TRIM(RIGHT(full_name,9) FROM full_name),
-						contact_number
-				from
-						`tabFarmer`
-				where
-						vlcc_name = '{user}'
-				and
-						name like '{txt}' """.format(user=user.company,txt= "%%%s%%" % txt),as_list=1,debug=1)
-	return farmer_list
+def get_filtered_farmers(doctype,text,searchfields,start,pagelen,filters):
+	user_name = frappe.session.user
+	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
+	farmers = frappe.db.sql(""" select name,full_name from `tabFarmer` where vlcc_name ='{0}'""".format(company_name[0][0]),as_list=1)
+	return farmers
 
 
 @frappe.whitelist()
@@ -101,5 +102,67 @@ def get_filtered_company(doctype,text,searchfields,start,pagelen,filters):
 
 @frappe.whitelist()
 def get_filtered_company_(doctype,text,searchfields,start,pagelen,filters):
-	print "#################################"
 	pass
+
+def get_pi_data(f):
+	if len(f):
+		fmcr = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabPurchase Invoice`
+			where 
+				 supplier = '{0}' and docstatus = 1
+			""".format(f[1]),as_dict=1,debug=0)
+		incentive = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabPurchase Invoice`
+			where 
+				pi_type = 'Incentive' and supplier = '{0}' and docstatus = 1
+			""".format(f[1]),as_dict=1,debug=0)
+		return {'fmcr':fmcr[0].get('total') - incentive[0].get('total') , 'incentive':incentive[0].get('total')}
+	return {'fmcr':0, 'incentive':0}
+
+def get_si_data(f):
+	if len(f):
+		local_sale = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabSales Invoice`
+			where 
+				local_sale = 1 and customer = '{0}' and docstatus =1
+			""".format(f[1]),as_dict=1,debug=0)
+		vet_service = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabSales Invoice`
+			where 
+				service_note = 1 and customer = '{0}' and docstatus =1
+			""".format(f[1]),as_dict=1,debug=0)
+		loan = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabSales Invoice`
+			where 
+				type = 'Loan' and customer = '{0}'  and docstatus =1
+			""".format(f[1]),as_dict=1,debug=0)
+		advance = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabSales Invoice`
+			where 
+				type = 'Advance' and customer = '{0}'  and docstatus =1
+			""".format(f[1]),as_dict=1,debug=0)
+		return {
+				'local_sale':local_sale[0].get('total'),
+			 	'vet_service': vet_service[0].get('total'),
+			 	'loan': loan[0].get('total'),
+			 	'advance': advance[0].get('total')
+			 	}
+	return {
+				'local_sale': 0 ,
+			 	'vet_service': 0,
+			 	'loan': 0,
+			 	'advance': 0
+			 	}
+

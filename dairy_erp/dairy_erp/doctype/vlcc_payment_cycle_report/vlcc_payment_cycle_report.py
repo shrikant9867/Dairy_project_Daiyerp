@@ -337,8 +337,10 @@ def get_vlcc_loans_child(start_date, end_date, vlcc, cycle=None):
 			from 
 				`tabVlcc Loan`
 			where
-				outstanding_amount != 0 and date_of_disbursement < now() and docstatus =1
-				""",as_dict=1,debug=0)
+				outstanding_amount != 0
+				and vlcc_id = '{0}'
+				and date_of_disbursement < now() and docstatus =1
+				""".format(vlcc),as_dict=1,debug=0)
 	loans = []
 	for row in loans_:
 		req_cycle = req_cycle_computation(row)
@@ -355,8 +357,10 @@ def get_vlcc_advance_child(start_date, end_date, vlcc, cycle=None):
 			from 
 				`tabVlcc Advance`
 			where
-				outstanding_amount != 0 and date_of_disbursement < now() and docstatus =1	
-			""",as_dict=1)
+				outstanding_amount != 0
+				and vlcc = '{0}'
+				and date_of_disbursement < now() and docstatus =1
+			""".format(vlcc),as_dict=1,debug=0)
 	advance = []
 	for row in advance_:
 		if cycle in req_cycle_computation_advance(row):

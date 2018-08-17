@@ -144,13 +144,13 @@ def get_data():
 				{
 					"type": "page",
 					"name": "vlcc-dashboard",
-					"label": "Vlcc Dashboard",
+					"label": _("Vlcc Dashboard"),
 					"description": _(" "),
 				},
 				{
 					"type": "page",
 					"name": "daily-milk-purchase",
-					"label": "Daily Milk Purchase Report",
+					"label": _("Daily Milk Purchase Report"),
 					"description": _(" "),
 				},
 				{
@@ -177,7 +177,7 @@ def get_data():
 				{
 					"type": "page",
 					"name": "dairy-dashboard",
-					"label": "Dairy Dashboard",
+					"label": _("Dairy Dashboard"),
 					"description": _(" "),
 				},
 				{
@@ -235,6 +235,7 @@ def get_data():
 					"type": "report",
 					"name": "Vlcc Net Pay Off",
 					"doctype": "Village Level Collection Centre",
+					"label": _("Vlcc Net Pay Off"),
 					"is_query_report": True
 				},
 				{

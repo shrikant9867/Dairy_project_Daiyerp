@@ -58,6 +58,7 @@ def get_masters():
 				"camp_office": vlcc_details.get('camp_office'),
 				"vlcc": vlcc_details.get('name'),
 				"farmer": get_farmer(),
+				"customer":get_customer(),
 				"suppliers": get_supplier(),
 				"terms_and_condition": terms_condition(),
 				"sales_taxes": taxes_templates(),
@@ -196,6 +197,18 @@ def get_farmer():
 		row.update({"effective_credit": calculate_effective_credit(row.get('id'))})
 	return farmer
 
+
+def get_customer():
+	company = get_seesion_company_datails()
+	customer = frappe.db.sql("""select
+									name
+								from
+									`tabCustomer`
+								where
+									company = '{0}'
+									and customer_group = 'Vlcc Local Institution'
+									""".format(company.get('company')),as_dict=1,debug=0)
+	return customer
 
 def get_net_off(row):
 	#filters are must as it is net off report data retrival

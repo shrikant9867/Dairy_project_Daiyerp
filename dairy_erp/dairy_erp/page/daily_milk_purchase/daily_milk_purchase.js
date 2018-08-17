@@ -16,12 +16,13 @@ frappe.daily_milk_purchase = Class.extend({
         this.wrapper = $(wrapper).find('.page-content');
         this.set_fields()
     },
-    render_layout: function(date_) {
+    render_layout: function(date_,shift_) {
         var me = this;
         frappe.call({
             method: "dairy_erp.dairy_erp.page.daily_milk_purchase.daily_milk_purchase.get_data",
             args: {
-                "curr_date":date_
+                "curr_date":date_,
+                "shift":shift_
             },
             callback: function(r){
                 if(r.message){
@@ -48,6 +49,7 @@ frappe.daily_milk_purchase = Class.extend({
         var me = this;
         html = `<div class='row'>
                     <div class='col-xs-3 date-field' style='padding-left: 48px;'></div>\
+                    <div class='col-xs-3 shift-field' style='padding-left: 48px;'></div>\
                 </div>
                 <div class='row'>
                     <div class='col-xs-12 render-table'></div>
@@ -70,8 +72,25 @@ frappe.daily_milk_purchase = Class.extend({
             render_input: true
         });
         me.curr_date.set_value(frappe.datetime.str_to_obj(frappe.datetime.get_today()))
+        me.shift = frappe.ui.form.make_control({
+            parent: me.page.find(".shift-field"),
+            df: {
+            fieldtype: "Select",
+            label:__("Shift"),
+            fieldname: "shift",
+            options:["MORNING", "EVENING", "Both"],
+            placeholder: __("Shift"),
+                onchange: function(){
+                    $(me.page).find(".render-table").empty();
+                    if(me.shift.get_value()) {
+                        me.shift_change(me.shift.get_value())
+                    }
+                }
+            },
+            render_input: true
+        });
         me.wrapper_page.set_primary_action(__("Print"), function () {
-            me.create_pdf(me.curr_date.get_value())
+            me.create_pdf(me.curr_date.get_value(),me.shift.get_value())
         })
         me.wrapper_page.set_secondary_action(__("Refresh"),function() { 
             window.location.reload();
@@ -79,10 +98,20 @@ frappe.daily_milk_purchase = Class.extend({
     },
     curr_date_change: function(date_){
         var me =this;
-            $(me.page).find(".render-table").empty();
-            me.render_layout(date_);
+        $(me.page).find(".render-table").empty();
+        var shift_ = me.shift.get_value() ? me.shift.get_value() : ""
+        me.render_layout(date_,shift_);
     },
-    create_pdf: function(date_){
+    shift_change:function(shift_){
+        var me =this;
+        $(me.page).find(".render-table").empty();
+        var date_ = me.curr_date.get_value() ? me.curr_date.get_value() : ""
+        me.render_layout(date_,shift_);
+    },
+    create_pdf: function(date_,shift_){
+        if(shift_ == "Both"){
+            shift_ = "MORNING and EVENING"
+        }
         var me = this;
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
@@ -95,6 +124,7 @@ frappe.daily_milk_purchase = Class.extend({
                             "vlcc":me.table_data.vlcc,
                             "vlcc_addr":me.table_data.vlcc_addr,
                             "date_":frappe.datetime.str_to_user(date_),
+                            "shift_":shift_,
                             "dairy_sale_qty":me.table_data.dairy_sale_qty
                             }),
             title:__("daily_milk_purchase_report_"+frappe.datetime.str_to_user(frappe.datetime.get_today())),

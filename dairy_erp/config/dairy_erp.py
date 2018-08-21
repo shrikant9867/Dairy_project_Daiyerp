@@ -181,6 +181,42 @@ def get_data():
 				}
 			]
 		},
+			{
+			"label": _("Loan & Advance"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Farmer Loan",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Advance",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Payment Cycle Report",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Advance",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Loan",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "VLCC Payment Cycle Report",
+					"description": _(" "),
+				}
+			]
+		},
 		{
 			"label": _("Dairy"),
 			"icon": "icon-star",
@@ -218,6 +254,11 @@ def get_data():
 			"label": _("Settings"),
 			"icon": "icon-star",
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Farmer Settings",
+					"description": _(" "),
+				},
 				{
 					"type": "doctype",
 					"name": "VLCC Settings",

@@ -201,14 +201,15 @@ def get_farmer():
 
 def get_customer():
 	company = get_seesion_company_datails()
-	customer = frappe.db.sql("""select
-									name
-								from
-									`tabCustomer`
-								where
-									company = '{0}'
-									and customer_group = 'Vlcc Local Institution'
-									""".format(company.get('company')),as_dict=1,debug=0)
+	customer = frappe.db.sql("""
+						select
+							name
+						from
+							`tabCustomer`
+						where
+							company = '{0}'
+							and customer_group = 'Vlcc Local Institution'
+							""".format(company.get('company')),as_dict=1,debug=0)
 	return customer
 
 def get_net_off(row):

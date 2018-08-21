@@ -304,7 +304,7 @@ def get_vmcr(start_date, end_date, vlcc, cycle=None):
 			`tabVlcc Milk Collection Record`
 		where 
 			associated_vlcc = '{0}' and rcvdtime between '{1}' and '{2}'
-			""".format(vlcc, start_date, end_date),as_dict=1,debug=0)
+			""".format(vlcc, start_date, end_date),as_dict=1,debug=1)
 	amount = 0
 	qty = 0
 	for i in vmcr:

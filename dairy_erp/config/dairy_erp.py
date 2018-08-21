@@ -154,6 +154,12 @@ def get_data():
 					"description": _(" "),
 				},
 				{
+					"type": "page",
+					"name": "individual_farmer_milk_report",
+					"label": _("Individual Farmer Milk Report"),
+					"description": _(" "),
+				},
+				{
 					"type": "doctype",
 					"name": "Farmer Milk Collection Record",
 					"description": _(" "),
@@ -161,6 +167,16 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Veterinary AI Technician",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Loan",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Advance",
 					"description": _(" "),
 				}
 			]
@@ -183,6 +199,16 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vlcc Milk Collection Record",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Advance",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Loan",
 					"description": _(" "),
 				}
 
@@ -216,18 +242,21 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Farmer Net Payoff",
+					"label": _("Farmer Net Payoff"),
 					"doctype": "Farmer",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Milk Passbook",
+					"label":_("Milk Passbook"),
 					"doctype": "Farmer Milk Collection Record",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Local Sales Report",
+					"label": _("Local Sales Report"),
 					"doctype": "Sales Invoice",
 					"is_query_report": True
 				},
@@ -241,79 +270,106 @@ def get_data():
 				{
 					"type": "report",
 					"name": "VLCC Payment Settlement",
+					"label": _("VLCC Payment Settlement"),
 					"doctype": "VLCC Payment Cycle",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Farmer Payment Settlement",
+					"label": _("Farmer Payment Settlement"),
 					"doctype": "Farmer Payment Cycle",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Accounts Receivable",
+					"label": _("Accounts Receivable"),
 					"doctype": "Sales Invoice",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Accounts Payable",
+					"label": _("Accounts Payable"),
 					"doctype": "Purchase Invoice",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Stock Ledger",
+					"label": _("Stock Ledger"),
 					"doctype": "Stock Ledger Entry",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Stock Balance",
+					"label": _("Stock Balance"),
 					"doctype": "Stock Ledger Entry",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Profit and Loss Statement",
+					"label":_("Profit and Loss Statement"),
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Trial Balance",
+					"label": _("Trial Balance"),
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Balance Sheet",
+					"label":_("Balance Sheet"),
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Cash Flow",
+					"label":_("Cash Flow"),
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "General Ledger",
+					"label":_("General Ledger"),
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Purchase Order Detail Report",
+					"label":_("Purchase Order Detail Report"),
 					"doctype": "Purchase Order",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
 					"name": "Material Indent Detail Report",
+					"label":_("Material Indent Detail Report"),
 					"doctype": "Material Request",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Cattle Feed Sales Report",
+					"label":_("Cattle Feed Sales Report"),
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Cattle Feed Advance Report",
+					"label":_("Cattle Feed Advance Report"),
+					"doctype": "Sales Invoice",
 					"is_query_report": True
 				}
 			]

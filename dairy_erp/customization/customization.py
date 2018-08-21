@@ -940,6 +940,11 @@ def vmcr_permission(user):
 		else:
 			return """`tabVlcc Milk Collection Record`.associated_vlcc = 'Guest' """
 
+	if user_doc.get('operator_type') == "VLCC":
+		company = user_doc.get('company')
+		if company:
+			return """`tabVlcc Milk Collection Record`.associated_vlcc = '{0}' """.format(company)		
+
 	if user_doc.get('operator_type') == "Chilling Centre":
 		cc_centre_id = frappe.db.get_value("Address", user_doc.get('branch_office'), "centre_id")
 		return """`tabVlcc Milk Collection Record`.societyid = '{0}'""".format(cc_centre_id)

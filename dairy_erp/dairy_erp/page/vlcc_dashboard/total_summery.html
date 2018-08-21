@@ -1,0 +1,59 @@
+<div class="row">
+	<div class="col-xs-4">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<div class="panel_head">{%= __("Total Milk Procured") %}</div>
+		</div>
+		<div class="panel-body">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="body_head">Last Week <small>(In Ltrs.)</small></div>
+					<div class="circle_badge" title="{%= data.last_week %}">
+						{%= data.last_milk_qty %}
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="body_head">This Week<small>(In Ltrs.)</small></div>
+					<div class="circle_badge" title="{%= data.this_week %}">
+						{%= data.this_milk_qty %}
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	<div class="col-xs-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="panel_head">{%= __("Total Indents Pending") %}</div>
+			</div>
+			<div class="panel-body">
+				<div class="body_head">{%= __("Total VLCC Requests")  %}</div>
+				<div class="circle_badge">{%= data.pending_indent %}</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-4">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<div class="panel_head">{%= __("Total Amount of Milk Procured")  %}</div>
+		</div>
+		<div class="panel-body">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="body_head">Last Week <small>(In Rs.)</small></div>
+					<div class="circle_badge" title="{%= data.last_week %}">
+						{%= data.last_milk_amt %}
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="body_head">This Week<small>(In Rs.)</small></div>
+					<div class="circle_badge" title="{%= data.this_week %}">
+						{%= data.this_milk_amt %}
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+</div>

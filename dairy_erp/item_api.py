@@ -21,11 +21,12 @@ from customization.price_list.price_list_customization import validate_price_lis
 def get_items():
 	"""Mobile API's common to sell and purchase 
 	"""
+	item_group = "(" + ",".join([ "'{0}'".format(item.get('name')) for item in frappe.get_all("Item Group") ]) + ")"
+	
 	response_dict = frappe.db.sql("""select name as item_code,item_name,description,CAST(is_whole_no AS int) as is_whole_no,
 		standard_rate,stock_uom, item_group from `tabItem` where 
-		item_group in ('Cattle feed', 'Mineral Mixtures', 'Medicines', 
-		'Artificial Insemination Services','Milk & Products') and is_stock_item=1 and disabled =0 and now() <= end_of_life
-		and item_code not in ('Advance Emi','Loan Emi','Milk Incentives')""",as_dict = 1)
+		item_group in {0} and is_stock_item=1 and disabled =0 and now() <= end_of_life
+		and item_code not in ('Advance Emi','Loan Emi','Milk Incentives')""".format(item_group),as_dict = 1,debug=0)
 	for row in response_dict:
 		try:
 			row.update({"qty": get_item_qty(row.get('item_code')),"uom":frappe.db.sql("select um.uom,um.conversion_factor * i.standard_rate as rate from `tabUOM Conversion Detail` as um join `tabItem` as i on  um.parent = i.name where um.parent = %s",(row.get('item_code')),as_dict=1)})

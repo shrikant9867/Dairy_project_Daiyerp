@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
 
 class FarmerMilkCollectionRecord(Document):
 
@@ -107,6 +108,7 @@ class FarmerMilkCollectionRecord(Document):
 		pr.flags.ignore_permissions = True
 		pr.flags.ignore_material_price = True
 		pr.submit()
+		self.set_posting_datetime(pr)
 		return pr.name
 
 	def purchase_invoice(self, pr):
@@ -134,4 +136,14 @@ class FarmerMilkCollectionRecord(Document):
 		pi.flags.ignore_permissions = True
 		pi.flags.ignore_material_price = True
 		pi.submit()
+		self.set_posting_datetime(pi)
 		return pi.name
+
+	def set_posting_datetime(self,doc):
+		if self.collectiontime:			
+			frappe.db.sql("""update `tab{0}` 
+				set 
+					posting_date = '{1}',posting_time = '{2}'
+				where 
+					name = '{3}'""".format(doc.doctype,getdate(self.collectiontime),
+						get_time(self.collectiontime),doc.name))

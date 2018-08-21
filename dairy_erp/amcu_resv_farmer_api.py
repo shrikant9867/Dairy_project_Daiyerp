@@ -4,7 +4,7 @@ from frappe.model.document import Document
 from frappe.utils import flt, cstr, cint
 from frappe.utils.data import to_timedelta
 import time
-from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime
+from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,get_time
 from frappe import _
 import dairy_utils as utils
 from datetime import timedelta
@@ -39,7 +39,7 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,socie
 
 			stock_doc = frappe.new_doc("Stock Entry")
 			stock_doc.purpose =  "Material Receipt"
-			stock_doc.posting_date = getdate(data.get('rcvdtime'))
+			# stock_doc.posting_date = getdate(data.get('rcvdtime'))
 			stock_doc.company = vlcc.get('name')
 			stock_doc.transaction_id = row.get('transactionid')
 			stock_doc.vmcr = vmcr_doc.name if method == 'handling_loss' or method == 'handling_gain' else ""
@@ -75,6 +75,13 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,socie
 			stock_doc.flags.ignore_permissions = True
 			stock_doc.flags.is_api = True
 			stock_doc.submit()
+			if row.get('collectiontime'):
+				frappe.db.sql("""update `tabStock Entry` 
+					set 
+						posting_date = '{0}',posting_time = '{1}'
+					where 
+						name = '{2}'""".format(getdate(row.get('collectiontime')),
+							get_time(row.get('collectiontime')),stock_doc.name))
 			if method == 'handling_loss' or method == 'handling_gain':
 				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Stock Receipt": stock_doc.name})
 			else:

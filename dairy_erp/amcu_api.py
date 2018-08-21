@@ -205,6 +205,12 @@ def make_purchase_receipt_vlcc(data, row, vlcc, farmer, response_dict, fmrc):
 			purchase_rec.per_billed = 100
 			purchase_rec.flags.ignore_permissions = True
 			purchase_rec.submit()
+			if row.get('collectiontime'):
+				frappe.db.sql("""update `tabPurchase Receipt` 
+					set 
+						posting_date = '{0}' 
+					where 
+						name = '{1}'""".format(getdate(row.get('collectiontime')),purchase_rec.name))
 			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase receipt": purchase_rec.name})
 
 	except Exception,e:
@@ -637,6 +643,12 @@ def purchase_invoice_against_farmer(data, row, vlcc,  farmer, item_, response_di
 		)
 		pi_obj.flags.ignore_permissions = True
 		pi_obj.submit()
+		if row.get('collectiontime'):
+			frappe.db.sql("""update `tabPurchase Invoice` 
+				set 
+					posting_date = '{0}' 
+				where 
+					name = '{1}'""".format(getdate(row.get('collectiontime')),pi_obj.name))
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})
 	
 	except Exception,e:

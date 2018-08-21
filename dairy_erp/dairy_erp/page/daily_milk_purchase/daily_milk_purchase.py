@@ -5,9 +5,10 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,add_m
 
 
 @frappe.whitelist()
-def get_data(curr_date=None):
+def get_data(curr_date=None,shift=None):
 	non_member_count,member_count,non_member_qty,member_qty,member_amt,non_member_amt = 0 , 0 , 0, 0,0,0
 	curr_date_ = getdate(curr_date) if curr_date else ""
+	shift_ = shift if shift else ""
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
 	vlcc_addr = frappe.db.get_value("Village Level Collection Centre",
 				vlcc,"address_display") or ""
@@ -20,7 +21,7 @@ def get_data(curr_date=None):
 									`tabFarmer Milk Collection Record`
 								where 
 									docstatus = 1 {0}
-								""".format(get_conditions(curr_date_)),as_dict=True,debug=0)
+								""".format(get_conditions(curr_date_,shift_)),as_dict=True,debug=0)
 
 	resv_farmer_data =  frappe.db.sql("""select s.farmer_id as farmerid,
 					s.name as name,ifnull(round(se.qty,2),0) as milkquantity,
@@ -49,7 +50,7 @@ def get_data(curr_date=None):
 			fmcr_stock_data.append(resv_farmer)
 
 	avg_data = get_avg_data(fmcr_stock_data)
-	local_sale_data = get_local_sale_data(curr_date_)
+	local_sale_data = get_local_sale_data(curr_date_,shift_)
 	dairy_sale_qty = flt(avg_data.get('milkqty')) - flt(local_sale_data.get('qty'))
 	return {
 			"fmcr_stock_data":fmcr_stock_data,
@@ -84,7 +85,7 @@ def get_avg_data(fmcr_stock_data):
 			"avg_clr":round(avg_clr,2),"avg_rate":round(avg_rate,2)})
 	return avg_data
 
-def get_local_sale_data(curr_date_):
+def get_local_sale_data(curr_date_,shift_):
 
 	local_sale_data = {}
 	local_sale =  frappe.db.sql("""select ifnull(sum(si.qty),0) as qty,  
@@ -96,7 +97,7 @@ def get_local_sale_data(curr_date_):
 				s.name= si.parent and 
 				s.docstatus = 1 and
 				si.item_code in ('COW Milk','BUFFALO Milk') and
-				s.local_sale = 1 {0}""".format(local_sale_condn(curr_date_)),as_dict=True)
+				s.local_sale = 1 {0} {1} """.format(local_sale_condn(curr_date_),local_sale_shift_cond(shift_)),as_dict=True,debug=0)
 
 	if local_sale and local_sale[0].get('qty'):
 		local_sale_data.update({"qty":round(local_sale[0].get('qty'),2),
@@ -149,7 +150,7 @@ def guess_member(fmcr_data,curr_date_):
 
 	return member_dict
 
-def get_conditions(curr_date=None):
+def get_conditions(curr_date=None,shift=None):
 	conditions = " and 1=1"
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
 
@@ -157,7 +158,10 @@ def get_conditions(curr_date=None):
 		conditions += " and associated_vlcc = '{0}'".format(vlcc)
 	if curr_date:
 		conditions += " and date(collectiondate) = '{0}'".format(curr_date)
-
+	if shift and shift != "Both":
+		conditions += " and shift = '{0}'".format(shift)
+	if shift and shift == "Both":
+		conditions += " and shift in ('MORNING','EVENING')"
 	return conditions
 
 def local_sale_condn(curr_date=None):
@@ -169,4 +173,12 @@ def local_sale_condn(curr_date=None):
 	if curr_date:
 		conditions += " and s.posting_date = '{0}'".format(curr_date)
 
+	return conditions
+
+def local_sale_shift_cond(shift=None):
+	conditions = " and 1=1"
+	if shift and shift != "Both":
+		conditions += " and s.shift = '{0}'".format(shift)
+	if shift and shift == "Both":
+		conditions += " and s.shift in ('MORNING','EVENING')"
 	return conditions

@@ -56,10 +56,18 @@ def create_ls(data):
 def local_sale_list():
 	response_dict = {}
 	try:
-		la_list = frappe.db.sql("""select name,customer_or_farmer,posting_date,additional_discount_percentage,farmer_or_local_customer_address,organisation_name,
-			discount_amount,grand_total,status,apply_discount_on, by_cash, by_credit, multimode_payment
-			from `tabSales Invoice` 
-			where local_sale =1 and company = '{0}' and docstatus =1 order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
+		la_list = frappe.db.sql("""select
+										name,customer_or_farmer,
+										posting_date,additional_discount_percentage,
+										farmer_or_local_customer_address,
+										organisation_name,discount_amount,
+										grand_total,status,apply_discount_on, 
+										by_cash, by_credit, multimode_payment,
+										customer,shift
+									from
+										`tabSales Invoice`
+									where
+										local_sale =1 and company = '{0}' and docstatus =1 order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
 		for row in la_list:
 			if row.get('customer_or_farmer') == "Farmer":
 				row.update(
@@ -105,12 +113,18 @@ def get_price_list(party_type):
 	elif party_type == "Farmer" and frappe.db.get_value("Price List",'GTFS','name'):
 		return frappe.db.get_value("Price List",'GTFS','name')
 
-	elif party_type == "Vlcc Local Customer" and \
+	elif party_type in ["Vlcc Local Customer","Vlcc Local Institution"] and \
 	frappe.db.get_value("Price List","LCS-"+user_company,'name'):
 		return frappe.db.get_value("Price List","LCS-"+user_company)
 
-	elif party_type == "Vlcc Local Customer"  and frappe.db.get_value("Price List","GTCS","name"):
+	elif party_type in ["Vlcc Local Customer","Vlcc Local Institution"] and frappe.db.get_value("Price List","GTCS","name"):
 		return frappe.db.get_value("Price List","GTCS","name")
+	# elif party_type == "Vlcc Local Customer" and \
+	# frappe.db.get_value("Price List","LCS-"+user_company,'name'):
+	# 	return frappe.db.get_value("Price List","LCS-"+user_company)
+
+	# elif party_type == "Vlcc Local Customer"  and frappe.db.get_value("Price List","GTCS","name"):
+	# 	return frappe.db.get_value("Price List","GTCS","name")
 
 	else:
 		frappe.throw(_("No Material Price List Defined"))

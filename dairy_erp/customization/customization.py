@@ -1222,13 +1222,14 @@ def validate_dn(doc,method):
 		warehouse_qty = get_balance_qty_from_sle(item.item_code,item.warehouse)
 		if item.material_request:
 			mi=frappe.get_doc("Material Request",item.material_request)
-			if item.qty > warehouse_qty:
-				frappe.throw(_("<b>Warehouse Insufficent Stock </b>"))
-			else:
-				for mi_items in mi.items:
-					if item.item_code == mi_items.item_code:
-						if item.qty > (mi_items.qty - mi_items.completed_dn):
-							frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
+			if item.item_code not in ['COW Milk','BUFFALO Milk']:
+				if item.qty > warehouse_qty:
+					frappe.throw(_("Warehouse Insufficent Stock for item <b>{0}</b>".format(item.item_code)))
+				else:
+					for mi_items in mi.items:
+						if item.item_code == mi_items.item_code:
+							if item.qty > (mi_items.qty - mi_items.completed_dn):
+								frappe.throw(_("<b>Dispatch Quantity</b> should not be greater than <b>Requested Quantity</b>"))
 
 
 def item_permissions(user):

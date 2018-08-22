@@ -100,6 +100,14 @@ def validate_local_sale(doc, method):
 		for row in doc.items:
 			row.warehouse = warehouse
 			row.cost_center = frappe.db.get_value('Company',doc.company,'cost_center')
+		validate_warehouse_qty(doc)
+
+def validate_warehouse_qty(doc):
+	for item in doc.items:
+		warehouse_qty = get_balance_qty_from_sle(item.item_code,item.warehouse)
+		if item.item_code not in ['COW Milk','BUFFALO Milk']:
+			if item.qty > warehouse_qty:
+				frappe.throw(_("Warehouse Insufficent Stock for item <b>{0}</b>".format(item.item_code)))
 
 @frappe.whitelist()
 def payment_entry(doc, method):

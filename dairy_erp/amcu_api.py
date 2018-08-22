@@ -206,6 +206,7 @@ def make_purchase_receipt_vlcc(data, row, vlcc, farmer, response_dict, fmrc):
 			purchase_rec.flags.ignore_permissions = True
 			purchase_rec.submit()
 			set_posting_datetime(purchase_rec,row)
+			set_stock_ledger_date(purchase_rec,row)
 			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase receipt": purchase_rec.name})
 
 	except Exception,e:
@@ -497,6 +498,7 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 		delivry_obj.flags.ignore_permissions = True
 		delivry_obj.submit()
 		set_posting_datetime(delivry_obj,row)
+		set_stock_ledger_date(delivry_obj,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Delivery Note" : delivry_obj.name})
 		sales_invoice_against_dairy(data, row, customer, warehouse, item_, vlcc, cost_center, response_dict, delivry_obj.name, vmrc)
 	
@@ -560,6 +562,7 @@ def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,c
 		purchase_rec.flags.ignore_permissions = True
 		purchase_rec.submit()
 		set_posting_datetime(purchase_rec,row)
+		set_stock_ledger_date(purchase_rec,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase_receipt": purchase_rec.name})
 		delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 
@@ -657,6 +660,19 @@ def set_posting_datetime(doc,row):
 			where 
 				name = '{3}'""".format(doc.doctype,getdate(row.get('collectiontime')),
 					get_time(row.get('collectiontime')),doc.name))
+		frappe.db.sql("""update `tabGL Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(row.get('collectiontime')),doc.name))
+
+def set_stock_ledger_date(doc,row):
+	if row.get('collectiontime'):
+		frappe.db.sql("""update `tabStock Ledger Entry` 
+				set 
+					posting_date = %s
+				where 
+					voucher_no = %s""",(getdate(row.get('collectiontime')),doc.name))
 
 
 @frappe.whitelist()

@@ -82,6 +82,17 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,socie
 					where 
 						name = '{2}'""".format(getdate(row.get('collectiontime')),
 							get_time(row.get('collectiontime')),stock_doc.name))
+				frappe.db.sql("""update `tabGL Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(row.get('collectiontime')),stock_doc.name))
+				frappe.db.sql("""update `tabStock Ledger Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(row.get('collectiontime')),stock_doc.name))
+				
 			if method == 'handling_loss' or method == 'handling_gain':
 				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Stock Receipt": stock_doc.name})
 			else:

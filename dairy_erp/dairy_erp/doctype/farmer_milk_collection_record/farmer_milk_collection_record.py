@@ -109,6 +109,7 @@ class FarmerMilkCollectionRecord(Document):
 		pr.flags.ignore_material_price = True
 		pr.submit()
 		self.set_posting_datetime(pr)
+		self.set_stock_ledger_date(pr)
 		return pr.name
 
 	def purchase_invoice(self, pr):
@@ -147,3 +148,17 @@ class FarmerMilkCollectionRecord(Document):
 				where 
 					name = '{3}'""".format(doc.doctype,getdate(self.collectiontime),
 						get_time(self.collectiontime),doc.name))
+			frappe.db.sql("""update `tabGL Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(self.collectiontime),doc.name))
+
+
+	def set_stock_ledger_date(self,doc):
+		if self.collectiontime:
+			frappe.db.sql("""update `tabStock Ledger Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(self.collectiontime),doc.name))

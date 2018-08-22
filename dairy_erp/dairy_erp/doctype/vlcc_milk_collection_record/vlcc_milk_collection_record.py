@@ -128,6 +128,7 @@ class VlccMilkCollectionRecord(Document):
 			pr.flags.ignore_permissions = True
 			pr.submit()
 			self.set_posting_datetime(pr)
+			self.set_stock_ledger_date(pr)
 			return pr.name
 		except Exception as e:
 			raise e
@@ -161,6 +162,7 @@ class VlccMilkCollectionRecord(Document):
 			dn.flags.ignore_permissions = True
 			dn.submit()
 			self.set_posting_datetime(dn)
+			self.set_stock_ledger_date(dn)
 			return dn.name
 		except Exception as e:
 			raise e
@@ -231,3 +233,16 @@ class VlccMilkCollectionRecord(Document):
 				where 
 					name = '{3}'""".format(doc.doctype,getdate(self.collectiontime),
 						get_time(self.collectiontime),doc.name))
+			frappe.db.sql("""update `tabGL Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(self.collectiontime),doc.name))
+
+	def set_stock_ledger_date(self,doc):
+		if self.collectiontime:
+			frappe.db.sql("""update `tabStock Ledger Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(self.collectiontime),doc.name))

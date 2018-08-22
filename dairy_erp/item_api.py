@@ -21,7 +21,7 @@ from customization.price_list.price_list_customization import validate_price_lis
 def get_items():
 	"""Mobile API's common to sell and purchase 
 	"""
-	item_group = "(" + ",".join([ "'{0}'".format(item.get('name')) for item in frappe.get_all("Item Group") ]) + ")"
+	item_group = "(" + ",".join([ "'{0}'".format(item.get('name')) for item in frappe.get_all("Item Group", filters=[("Item Group", "name", "!=", "Stationary")]) ]) + ")"
 	
 	response_dict = frappe.db.sql("""select name as item_code,item_name,description,CAST(is_whole_no AS int) as is_whole_no,
 		standard_rate,stock_uom, item_group from `tabItem` where 
@@ -129,7 +129,7 @@ def get_item_list():
 		i.item_group,uom.uom, uom.conversion_factor from `tabItem` i
 		left join `tabUOM Conversion Detail` uom
 		on uom.parent = i.name where i.is_stock_item = 1
-		and i.disabled = 0 and now() <= i.end_of_life 
+		and i.disabled = 0 and now() <= i.end_of_life and i.item_group != 'Stationary'
 		and i.name not in ('Advance Emi','Loan Emi','Milk Incentives') group by i.name, uom.uom""",
 	as_dict=True)
 

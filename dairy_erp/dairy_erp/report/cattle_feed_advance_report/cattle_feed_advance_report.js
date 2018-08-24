@@ -26,7 +26,7 @@ frappe.query_reports["Cattle Feed Advance Report"] = {
 						}
 				}
 			},
-			"reqd":1
+			"reqd":0
 		},
 		{
 			"fieldname":"start_date",

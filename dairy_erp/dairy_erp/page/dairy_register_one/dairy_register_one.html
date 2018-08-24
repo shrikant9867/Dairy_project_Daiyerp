@@ -1,0 +1,66 @@
+<div class="container-fluid" style="margin: 0 20px 0 20px">
+	<div class = "row">
+		<div class="col-md-12" style="overflow-y:scroll; height:500px;overflow-x:scroll; height:500px;">
+			<table class="table table-bordered" style="table-layout: fixed; width: 100%">
+				<tbody>
+					<tr>
+						<th>Date</th>
+						<th>Shift</th>
+					    <th colspan="3" style="text-align: center;">Members
+					    </th>
+					    <th colspan="3" style="text-align: center;">
+					    	Non Members
+					    </th>
+					    <th colspan="2" style="text-align: center;">
+					    	Total
+					    </th>
+					    <th colspan="2" style="text-align: center;">
+					    	General Test
+					    </th>
+					    <th colspan="2" >Local Sales</th>
+					    <th colspan="2" >Sample Sales</th>
+					</tr>
+					<tr>
+						<th></th>
+						<th></th>
+						<th>Nos</th>
+						<th>Qty</th>
+						<th>Amt</th>
+						<th>Nos</th>
+						<th>Qty</th>
+						<th>Amt</th>
+						<th>Total Milk Qty</th>
+						<th>Total Milk Amt</th>
+						<th>FAT</th>
+						<th>SNF</th>
+						<th>Qty</th>
+						<th>Amt</th>
+						<th>Qty</th>
+						<th>Amt</th>
+					</tr>
+					
+					{% $.each(fmcr_data, function(i, val){ %}
+						<tr>
+						    <td>{%= val.date %}</td>
+						    <td>{%= val.shift %}</td>
+						    <td>{%= val.member_count %}</td>
+						    <td>{%= val.member_qty %}</td>
+						    <td>{%= val.member_amt %}</td>
+						    <td>{%= val.non_member_count %}</td>
+						    <td>{%= val.non_member_qty %}</td>
+						    <td>{%= val.non_member_amt %}</td>
+						    <td>{%= val.total_milk_qty %}</td>
+						    <td>{%= val.total_milk_amt %}</td>
+						    <td>{%= (" ") %}</td>
+						    <td>{%= (" ") %}</td>
+						    <td>{%= val.si_qty %}</td>
+						    <td>{%= val.si_amount %}</td>
+						    <td>{%= val.stock_qty %}</td>
+						    <td>{%= val.stock_amount %}</td>
+						</tr>
+					{% }); %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

@@ -98,6 +98,7 @@ def make_fmrc(data, response_dict):
 														fmrc_doc.processedstatus = data.get('processedstatus')
 														fmrc_doc.societyid = data.get('societyid')
 														fmrc_doc.collectiondate =  data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
+														fmrc_doc.posting_date = getdate(data.get('collectiontime'))
 														fmrc_doc.shift = data.get('shift')
 														fmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
 														fmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
@@ -385,6 +386,7 @@ def make_vmrc(data, response_dict):
 												vmrc_doc.processedstatus = data.get('processedstatus')
 												vmrc_doc.societyid = data.get('societyid')
 												vmrc_doc.collectiondate =  collectiondate
+												vmrc_doc.posting_date = getdate(data.get('collectiontime'))
 												vmrc_doc.shift = data.get('shift')
 												vmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
 												vmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))

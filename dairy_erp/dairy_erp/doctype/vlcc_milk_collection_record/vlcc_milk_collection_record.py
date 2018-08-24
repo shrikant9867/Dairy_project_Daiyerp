@@ -16,6 +16,7 @@ class VlccMilkCollectionRecord(Document):
 		self.validate_vlcc_chilling_centre()
 		self.check_stock()
 		self.calculate_amount()
+		self.set_posting_date()
 
 	def on_submit(self):
 		try:
@@ -36,6 +37,9 @@ class VlccMilkCollectionRecord(Document):
 			print frappe.get_traceback()
 			frappe.db.rollback()
 			frappe.throw(e)
+
+	def set_posting_date(self):
+		self.posting_date = getdate(self.collectiontime)
 
 	def validate_duplicate_entry(self):
 		filters = {

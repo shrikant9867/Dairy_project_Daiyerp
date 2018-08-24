@@ -26,6 +26,11 @@ def set_target_warehouse(doc,method):
 				chilling_centre = row.chilling_centre
 				row.s_warehouse = frappe.db.get_value("Address",user_.get('branch_office'),'warehouse')
 				row.t_warehouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
+
+				warehouse_qty = get_balance_qty_from_sle(row.item_code,row.s_warehouse)
+				if row.item_code not in ['COW Milk','BUFFALO Milk']:
+					if row.qty > warehouse_qty:
+						frappe.throw(_("Warehouse <b>{0}</b> have insufficient stock for item <b>{1}</b> (Available Qty: <b>{2}</b>)".format(row.s_warehouse,row.item_code,warehouse_qty)))
 			target_warhouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
 		
 		if target_warhouse and user_.get('operator_type') == "Camp Office":

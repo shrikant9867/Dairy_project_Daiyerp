@@ -621,7 +621,13 @@ def get_vlcc():
 @frappe.whitelist()
 def is_fpcr_generated(filters):
 	filters = json.loads(filters)
+	si_records = frappe.get_all("Sales Invoice",fields=['name'],filters={'cycle_': filters.get('cycle'),\
+	 	'type': ('in', ['Loan','Advance']),'customer': frappe.db.get_value("Farmer",filters.get('farmer'),'full_name')})
+
 	if filters.get('cycle') and filters.get('farmer'):
 		fpcr_records = frappe.get_all("Farmer Payment Cycle Report",fields=['count(name) as count']\
 				,filters={'cycle': filters.get('cycle'), 'farmer_id': filters.get('farmer')})
-		return fpcr_records[0].get('count')
+		if len(si_records) and fpcr_records[0].get('count') == 0:
+			return "creat"
+		elif not len(si_records):
+			return "ncreat"

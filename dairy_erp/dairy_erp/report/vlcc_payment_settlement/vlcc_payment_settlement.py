@@ -620,7 +620,12 @@ def check_receivable(recv_list):
 @frappe.whitelist()
 def is_vpcr_generated(filters):
 	filters = json.loads(filters)
+	si_records = frappe.get_all("Sales Invoice",fields=['name'],filters={'cycle_': filters.get('cycle'),\
+	 	'type': ('in', ['Vlcc Loan','Vlcc Advance']), 'customer': filters.get('vlcc')})
 	if filters.get('cycle') and filters.get('vlcc'):
 		vpcr_records = frappe.get_all("VLCC Payment Cycle Report",fields=['count(name) as count']\
 				,filters={'cycle': filters.get('cycle'), 'vlcc_name': filters.get('vlcc')})
-		return vpcr_records[0].get('count')
+		if len(si_records) and vpcr_records[0].get('count') == 0:
+			return "creat"
+		elif not len(si_records):
+			return "ncreat"

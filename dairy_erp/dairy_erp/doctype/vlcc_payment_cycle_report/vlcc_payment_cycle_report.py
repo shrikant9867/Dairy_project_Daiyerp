@@ -58,10 +58,13 @@ class VLCCPaymentCycleReport(Document):
 				self.update_si(row, self.cycle, si_exist)
 				self.update_pi(row, self.cycle, pi_exist)
 				self.update_advance_vpcr(row)
-		frappe.msgprint(_("Purchase invoice against incentive AND Sales invoice against loan,advance has been created successfully"))
+		if flag:	
+			frappe.msgprint(_("Purchase invoice against incentive AND Sales invoice against loan,advance has been created successfully"))
 
 	def loan_operation(self):
+		flag = False
 		for row in self.vlcc_loan_child:
+			flag = True
 			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
 						'vlcc_advance_loan':row.loan_id }, 'name')
 			pi_exist = frappe.db.get_value("Purchase Invoice",{'cycle': self.cycle,\
@@ -75,7 +78,9 @@ class VLCCPaymentCycleReport(Document):
 				self.update_si(row, self.cycle, si_exist)
 				self.update_pi(row, self.cycle, pi_exist)
 				self.update_loan_vpcr(row)
-
+		if flag:	
+			frappe.msgprint(_("Sales Invoice has been created successfully against Loans"))
+	
 	def validate_advance(self, row):
 		adv_doc = frappe.get_doc("Vlcc Advance",row.adv_id)
 		if not row.amount:
@@ -303,8 +308,8 @@ def get_vmcr(start_date, end_date, vlcc, cycle=None):
 		from 
 			`tabVlcc Milk Collection Record`
 		where 
-			associated_vlcc = '{0}' and rcvdtime between '{1}' and '{2}'
-			""".format(vlcc, start_date, end_date),as_dict=1,debug=1)
+			associated_vlcc = '{0}' and date(rcvdtime) between '{1}' and '{2}'
+			""".format(vlcc, start_date, end_date),as_dict=1,debug=0)
 	amount = 0
 	qty = 0
 	for i in vmcr:

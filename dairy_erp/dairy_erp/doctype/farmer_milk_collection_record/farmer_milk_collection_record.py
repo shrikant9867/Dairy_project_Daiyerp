@@ -17,6 +17,7 @@ class FarmerMilkCollectionRecord(Document):
 		self.validate_duplicate_entry()
 		self.validate_society_id()
 		self.check_valid_farmer()
+		self.set_posting_date()
 
 	def on_submit(self):
 		try:
@@ -31,6 +32,9 @@ class FarmerMilkCollectionRecord(Document):
 			print frappe.get_traceback()
 			frappe.db.rollback()
 			frappe.throw(e)
+
+	def set_posting_date(self):
+		self.posting_date = getdate(self.collectiontime)
 
 	def create_milk_item(self):
 		if self.milktype and not frappe.db.exists('Item', self.milktype + " Milk"):

@@ -109,7 +109,7 @@ def validate_warehouse_qty(doc):
 		warehouse_qty = get_balance_qty_from_sle(item.item_code,item.warehouse)
 		if item.item_code not in ['COW Milk','BUFFALO Milk']:
 			if item.qty > warehouse_qty:
-				frappe.throw(_("Warehouse Insufficent Stock for item <b>{0}</b>".format(item.item_code)))
+				frappe.throw(_("Warehouse <b>{0}</b> have insufficient stock for item <b>{1}</b> (Available Qty: <b>{2}</b>)".format(item.warehouse,item.item_code,warehouse_qty)))
 
 @frappe.whitelist()
 def payment_entry(doc, method):

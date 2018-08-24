@@ -1,0 +1,91 @@
+<div class="container-fluid" style="margin: 0 20px 0 20px">
+	<div class = "row">
+		<div class="col-md-5">
+			<table class="table table-bordered" style="table-layout: fixed; width: 100%">
+				<tbody>
+					<tr>
+					    <th colspan="7" style="text-align: center;">
+					    	Morning
+					    </th>
+					</tr>
+					<tr>
+						<th>Date</th>
+						<th>Quantity</th>
+						<th>Milk Type</th>
+						<th>FAT</th>
+						<th>SNF</th>
+						<th>Rate</th>
+						<th>Amount</th>
+					</tr>
+					{% for(var i=0, l=morning.length; i < l; i++) { %}
+						{% for(var j=0, m=morning[i].length; j < m; j++) { %}
+							<tr>
+							    <td>{%= morning[i][j][0] %}</td>
+							    <td>{%= morning[i][j][1] %}</td>
+							    <td>{%= morning[i][j][2] %}</td>
+							    <td>{%= morning[i][j][3] %}</td>
+							    <td>{%= morning[i][j][4] %}</td>
+							    <td>{%= morning[i][j][5] %}</td>
+							    <td>{%= morning[i][j][6] %}</td>
+							</tr>
+						{% } %}
+					{% } %}
+				</tbody>
+			</table>
+		</div>
+		<div class="col-md-5">
+			<table class="table table-bordered" style="table-layout: fixed; width: 100%">
+				<tbody>
+					<tr>
+					    <th colspan="7" style="text-align: center;">Evening
+						</th>
+					</tr>
+					<tr>
+						<th>Date</th>
+						<th>Quantity</th>
+						<th>Milk Type</th>
+						<th>FAT</th>
+						<th>SNF</th>
+						<th>Rate</th>
+						<th>Amount</th>
+					</tr>
+					{% for(var i=0, l=evening.length; i < l; i++) { %}
+						{% for(var j=0, m=evening[i].length; j < m; j++) { %}
+							<tr>
+							    <td>{%= evening[i][j][0] %}</td>
+							    <td>{%= evening[i][j][1] %}</td>
+							    <td>{%= evening[i][j][2] %}</td>
+							    <td>{%= evening[i][j][3] %}</td>
+							    <td>{%= evening[i][j][4] %}</td>
+							    <td>{%= evening[i][j][5] %}</td>
+							    <td>{%= evening[i][j][6] %}</td>
+							</tr>
+						{% } %}
+					{% } %}
+				</tbody>
+			</table>
+		</div>
+		<div class="col-md-2">
+			<table class="table table-bordered" style="table-layout: fixed; width: 100%">
+				<tbody>
+					<tr>
+					    <th colspan="2" style="text-align: center;">Total
+						</th>
+					</tr>
+					<tr>
+						<th>Quantity</th>
+						<th>Amount</th>
+					</tr>
+					{% for(var i=0, l=evening.length; i < l; i++) { %}
+						{% for(var j=0, m=evening[i].length; j < m; j++) { %}
+							<tr>
+							    <td>{%= evening[i][j][0] %}</td>
+							    <td>{%= evening[i][j][1] %}</td>
+							</tr>
+						{% } %}
+					{% } %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

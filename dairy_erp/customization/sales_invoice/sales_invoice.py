@@ -93,13 +93,21 @@ def validate_local_sale(doc, method):
 			doc.customer = frappe.db.get_value('Farmer',doc.farmer,'full_name')
 		# elif doc.customer_or_farmer == "Vlcc Local Customer":
 		# 	doc.customer = frappe.db.get_value("Customer",doc.company+"-"+"Local",'name')
-		elif doc.customer_or_farmer in ["Vlcc Local Customer","Vlcc Local Institution"]:
+		elif doc.customer_or_farmer == "Vlcc Local Customer":
 			doc.customer = frappe.db.get_value("Customer",doc.company+"-"+"Local",'name')
 		warehouse = frappe.db.get_value('Village Level Collection Centre',doc.company,'warehouse')
 		doc.debit_to = frappe.db.get_value("Company",doc.company, 'default_receivable_account')
 		for row in doc.items:
 			row.warehouse = warehouse
 			row.cost_center = frappe.db.get_value('Company',doc.company,'cost_center')
+		validate_warehouse_qty(doc)
+
+def validate_warehouse_qty(doc):
+	for item in doc.items:
+		warehouse_qty = get_balance_qty_from_sle(item.item_code,item.warehouse)
+		if item.item_code not in ['COW Milk','BUFFALO Milk']:
+			if item.qty > warehouse_qty:
+				frappe.throw(_("Warehouse Insufficent Stock for item <b>{0}</b>".format(item.item_code)))
 
 @frappe.whitelist()
 def payment_entry(doc, method):

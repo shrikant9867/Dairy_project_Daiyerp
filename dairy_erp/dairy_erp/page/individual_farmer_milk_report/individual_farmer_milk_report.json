@@ -1,0 +1,26 @@
+{
+ "content": null, 
+ "creation": "2018-08-20 12:06:38.151469", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2018-08-20 12:11:51.363008", 
+ "modified_by": "Administrator", 
+ "module": "Dairy Erp", 
+ "name": "individual_farmer_milk_report", 
+ "owner": "Administrator", 
+ "page_name": "individual_farmer_milk_report", 
+ "roles": [
+  {
+   "role": "Vlcc Operator"
+  }, 
+  {
+   "role": "Vlcc Manager"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "Individual Farmer Milk Report"
+}

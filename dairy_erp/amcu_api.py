@@ -13,7 +13,7 @@ from frappe import _
 from amcu_update_api import update_fmcr
 from amcu_delete_api import delete_fmcr
 from amcu_resv_farmer_api import make_stock_receipt
-from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate
+from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
 from frappe.utils.data import add_to_date
 from amcu_loss_gain import handling_loss_gain
 import dairy_utils as utils
@@ -205,12 +205,8 @@ def make_purchase_receipt_vlcc(data, row, vlcc, farmer, response_dict, fmrc):
 			purchase_rec.per_billed = 100
 			purchase_rec.flags.ignore_permissions = True
 			purchase_rec.submit()
-			if row.get('collectiontime'):
-				frappe.db.sql("""update `tabPurchase Receipt` 
-					set 
-						posting_date = '{0}' 
-					where 
-						name = '{1}'""".format(getdate(row.get('collectiontime')),purchase_rec.name))
+			set_posting_datetime(purchase_rec,row)
+			set_stock_ledger_date(purchase_rec,row)
 			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase receipt": purchase_rec.name})
 
 	except Exception,e:
@@ -501,6 +497,8 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 		delivry_obj.status = "Completed"
 		delivry_obj.flags.ignore_permissions = True
 		delivry_obj.submit()
+		set_posting_datetime(delivry_obj,row)
+		set_stock_ledger_date(delivry_obj,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Delivery Note" : delivry_obj.name})
 		sales_invoice_against_dairy(data, row, customer, warehouse, item_, vlcc, cost_center, response_dict, delivry_obj.name, vmrc)
 	
@@ -530,6 +528,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
  		})
  		si_obj.flags.ignore_permissions = True
 		si_obj.submit()
+		set_posting_datetime(si_obj,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"sales invoice": si_obj.name})
 
 	except Exception,e:
@@ -562,6 +561,8 @@ def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,c
 		purchase_rec.per_billed = 100
 		purchase_rec.flags.ignore_permissions = True
 		purchase_rec.submit()
+		set_posting_datetime(purchase_rec,row)
+		set_stock_ledger_date(purchase_rec,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase_receipt": purchase_rec.name})
 		delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 
@@ -613,6 +614,7 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 		pi_obj.remarks = "[#"+account+"#]"
 		pi_obj.flags.ignore_permissions = True
 		pi_obj.submit()
+		set_posting_datetime(pi_obj,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})
 	
 	except Exception,e:
@@ -643,17 +645,34 @@ def purchase_invoice_against_farmer(data, row, vlcc,  farmer, item_, response_di
 		)
 		pi_obj.flags.ignore_permissions = True
 		pi_obj.submit()
-		if row.get('collectiontime'):
-			frappe.db.sql("""update `tabPurchase Invoice` 
-				set 
-					posting_date = '{0}' 
-				where 
-					name = '{1}'""".format(getdate(row.get('collectiontime')),pi_obj.name))
+		set_posting_datetime(pi_obj,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})
 	
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
+
+def set_posting_datetime(doc,row):
+	if row.get('collectiontime'):
+		frappe.db.sql("""update `tab{0}` 
+			set 
+				posting_date = '{1}',posting_time = '{2}'
+			where 
+				name = '{3}'""".format(doc.doctype,getdate(row.get('collectiontime')),
+					get_time(row.get('collectiontime')),doc.name))
+		frappe.db.sql("""update `tabGL Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(row.get('collectiontime')),doc.name))
+
+def set_stock_ledger_date(doc,row):
+	if row.get('collectiontime'):
+		frappe.db.sql("""update `tabStock Ledger Entry` 
+				set 
+					posting_date = %s
+				where 
+					voucher_no = %s""",(getdate(row.get('collectiontime')),doc.name))
 
 
 @frappe.whitelist()

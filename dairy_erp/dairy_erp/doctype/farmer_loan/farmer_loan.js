@@ -19,8 +19,9 @@ frappe.ui.form.on('Farmer Loan', {
 			frappe.throw("Emi deduction start cycle must be less than or equal to <b>6</b>")
 		}
 		else if (cint(frm.doc.emi_deduction_start_cycle) < -1){
+			var emi_deduction_start_cycle = frm.doc.emi_deduction_start_cycle
 			frm.set_value("emi_deduction_start_cycle",0)
-			frappe.throw("Emi deduction start cycle can not be <b>-2</b>")
+			frappe.throw("Emi deduction start cycle can not be <b>"+emi_deduction_start_cycle+"</b>")
 		}
 	},
 	onload: function(frm) {

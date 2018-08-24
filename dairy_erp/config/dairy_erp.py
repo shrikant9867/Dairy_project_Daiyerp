@@ -154,12 +154,6 @@ def get_data():
 					"description": _(" "),
 				},
 				{
-					"type": "page",
-					"name": "individual_farmer_milk_report",
-					"label": _("Individual Farmer Milk Report"),
-					"description": _(" "),
-				},
-				{
 					"type": "doctype",
 					"name": "Farmer Milk Collection Record",
 					"description": _(" "),
@@ -411,6 +405,13 @@ def get_data():
 					"name": "Cattle Feed Advance Report",
 					"label":_("Cattle Feed Advance Report"),
 					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "CC Report",
+					"label":_("CC Report"),
+					"doctype": "Vlcc Milk Collection Record",
 					"is_query_report": True
 				}
 			]

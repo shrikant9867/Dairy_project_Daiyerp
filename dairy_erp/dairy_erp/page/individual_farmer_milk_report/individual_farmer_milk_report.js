@@ -27,14 +27,15 @@ frappe.individual_farmer_milk_report = Class.extend({
             },
             callback: function(r){
                 if(r.message){
-					console.log("inside r message",r.message) 	   
-                	me.table_data = r.message;
+					console.log("inside r message",r.message)
+                    me.table_data = r.message
                     $(me.page).find(".render-table").empty();
-                    console.log(me.table_data.morning,"me.table_data.morning")
                     me.print = frappe.render_template("individual_farmer_milk_report",{
-                                                        'morning':me.table_data.morning,
-                                                        'evening':me.table_data.evening,
-                                                        'total':me.table_data.total
+                                                        'fmcr':r.message.fmcr,
+                                                        'previous_balance':r.message.previous_balance ? r.message.previous_balance:0.00,
+                                                        'total_milk_amount':r.message.total_milk_amount ? r.message.total_milk_amount:0.00,
+                                                        'payment':r.message.payment ? r.message.payment : 0.00,
+                                                        'cattle_feed':r.message.cattle_feed ? r.message.cattle_feed : 0.00
                                                     });
                     $(me.page).find(".render-table").append(me.print);
                 }
@@ -76,7 +77,13 @@ frappe.individual_farmer_milk_report = Class.extend({
 	            label:__("Month"),
 	            fieldname: "month",
 	            options:["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-            	reqd:1
+            	reqd:1,
+                onchange: function(){
+                    $(me.page).find(".render-table").empty();
+                    if(me.vlcc.get_value() && me.cycle.get_value() && me.farmer.get_value()) {
+                        me.month_change(me.vlcc.get_value(),me.cycle.get_value(),me.farmer.get_value())
+                    }
+                }
             },
             render_input: true
         });
@@ -95,7 +102,13 @@ frappe.individual_farmer_milk_report = Class.extend({
 							"month": me.month.get_value()
 							}
 						}
-				}
+				},
+                onchange: function(){
+                    $(me.page).find(".render-table").empty();
+                    if(me.vlcc.get_value() && me.cycle.get_value() && me.farmer.get_value()) {
+                        me.cycle_change(me.vlcc.get_value(),me.cycle.get_value(),me.farmer.get_value())
+                    }
+                }
 			},
 			render_input: true
 		});
@@ -126,6 +139,12 @@ frappe.individual_farmer_milk_report = Class.extend({
 			render_input: true
 		});
 		me.farmer.refresh();
+        me.wrapper_page.set_primary_action(__("Print"), function () {
+            me.create_pdf()
+        })
+        me.wrapper_page.set_secondary_action(__("Refresh"),function() { 
+            window.location.reload();
+        })
     },
     set_vlcc_value:function(){
     	var me = this;
@@ -150,4 +169,61 @@ frappe.individual_farmer_milk_report = Class.extend({
         $(me.page).find(".render-table").empty();
         me.render_table(vlcc_,cycle_,farmer_);
     },
+    cycle_change: function(vlcc_,cycle_,farmer_){
+        var me =this;
+        $(me.page).find(".render-table").empty();
+        me.render_table(vlcc_,cycle_,farmer_);
+    },
+    month_change: function(vlcc_,cycle_,farmer_){
+        var me =this;
+        $(me.page).find(".render-table").empty();
+        me.cycle.set_value("")
+        me.farmer.set_value("")
+    },
+    create_pdf: function(){
+        var me = this;
+        var base_url = frappe.urllib.get_base_url();
+        var print_css = frappe.boot.print_css;
+        var html = frappe.render_template("ifmr_pdf",{
+            content: frappe.render_template("individual_farmer_milk_report",{
+                                                        'fmcr':me.table_data.fmcr,
+                                                        'previous_balance':me.table_data.previous_balance ? me.table_data.previous_balance:0.00,
+                                                        'total_milk_amount':me.table_data.total_milk_amount ? me.table_data.total_milk_amount:0.00,
+                                                        'payment':me.table_data.payment ? me.table_data.payment : 0.00,
+                                                        'cattle_feed':me.table_data.cattle_feed ? me.table_data.cattle_feed : 0.00
+                                                    }),
+            title:__("individual_farmer_milk_report"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
+            base_url: base_url,
+            print_css: print_css
+        });
+        open_pdf(html)
+    }
 }) 
+
+open_pdf = function(html) {
+        //Create a form to place the HTML content
+        var formData = new FormData();
+
+        //Push the HTML content into an element
+        formData.append("html", html);
+        // formData.append("orientation", orientation);
+        var blob = new Blob([], { type: "text/xml"});
+        //formData.append("webmasterfile", blob);
+        formData.append("blob", blob);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", '/api/method/frappe.utils.print_format.report_to_pdf');
+        xhr.setRequestHeader("X-Frappe-CSRF-Token", frappe.csrf_token);
+        xhr.responseType = "arraybuffer";
+
+        xhr.onload = function(success) {
+            if (this.status === 200) {
+                var blob = new Blob([success.currentTarget.response], {type: "application/pdf"});
+                var objectUrl = URL.createObjectURL(blob);
+
+                //Open report in a new window
+                window.open(objectUrl);
+            }
+        };
+        xhr.send(formData);
+    }

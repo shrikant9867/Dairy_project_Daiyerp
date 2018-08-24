@@ -81,6 +81,8 @@ def get_effective_credit(customer, invoice=None):
 
 @frappe.whitelist()
 def validate_local_sale(doc, method):
+	dairy_setting = frappe.db.get_singles_dict('Dairy Setting').get('allow_negative_effective_credit')
+	doc.is_negative = dairy_setting
 	if doc.effective_credit <= 0.000 and doc.service_note and not doc.by_cash:
 		frappe.throw(_("Cannot create Service Note, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
 	elif (doc.grand_total > doc.effective_credit and doc.service_note and not doc.by_cash) \
@@ -100,23 +102,34 @@ def validate_local_sale(doc, method):
 		for row in doc.items:
 			row.warehouse = warehouse
 			row.cost_center = frappe.db.get_value('Company',doc.company,'cost_center')
+		validate_warehouse_qty(doc)
+
+def validate_warehouse_qty(doc):
+	for item in doc.items:
+		warehouse_qty = get_balance_qty_from_sle(item.item_code,item.warehouse)
+		if item.item_code not in ['COW Milk','BUFFALO Milk']:
+			if item.qty > warehouse_qty:
+				frappe.throw(_("Warehouse <b>{0}</b> have insufficient stock for item <b>{1}</b> (Available Qty: <b>{2}</b>)".format(item.warehouse,item.item_code,warehouse_qty)))
 
 @frappe.whitelist()
 def payment_entry(doc, method):
 	if doc.local_sale  or doc.service_note :
+		dairy_setting = frappe.db.get_singles_dict('Dairy Setting').get('allow_negative_effective_credit')
 		input_ = get_farmer_config(doc.farmer,doc.name).get('percent_eff_credit') if doc.farmer else 0
 		if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.by_cash:
-			frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
+			if int(dairy_setting) == 0:
+				frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
 		if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment:
 			frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
 		if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and doc.grand_total > input_:
-			frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
+			if int(dairy_setting) == 0:
+				frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
 		if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.by_credit > input_:
 			frappe.throw(_("By Credit Amount must be less than or equal to Effective Credit."))
 		if doc.local_sale and not doc.update_stock:
 			frappe.throw(_("Please set <b>Update Stock</b> checked"))
 		if (doc.local_sale or doc.service_note) and has_common([doc.customer_or_farmer],["Farmer", "Vlcc Local Customer","Vlcc Local Institution"])\
-		and (doc.by_cash or not doc.multimode_payment) and (not input_ or doc.by_cash):
+		and (doc.by_cash or not doc.multimode_payment) and (not input_ or doc.by_cash) and not doc.is_negative:
 			make_payment_entry(doc)
 		print (doc.local_sale or doc.service_note),has_common([doc.customer_or_farmer],["Farmer", "Vlcc Local Customer"]),(doc.by_cash or not doc.multimode_payment),(not doc.effective_credit or doc.by_cash),\
 		doc.effective_credit,doc.effective_credit,doc.by_cash,"\n\n\n",input_

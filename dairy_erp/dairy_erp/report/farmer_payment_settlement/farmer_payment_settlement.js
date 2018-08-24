@@ -108,7 +108,7 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 						},
 				async: false,
 				callback : function(r){
-					if(!r.message){
+					if(r.message == 'creat'){
 						flag = false
 						frappe.throw(__("Please Generate <b>FPCR</b> for the cycle <b>{0}</b> against farmer <b>{1}</b>",
 							[frappe.query_report_filters_by_name.cycle.get_value(),frappe.query_report_filters_by_name.farmer.get_value()]))

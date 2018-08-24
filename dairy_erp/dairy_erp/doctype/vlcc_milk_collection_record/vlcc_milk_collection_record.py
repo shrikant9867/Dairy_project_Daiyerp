@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
 
 class VlccMilkCollectionRecord(Document):
 
@@ -15,6 +16,7 @@ class VlccMilkCollectionRecord(Document):
 		self.validate_vlcc_chilling_centre()
 		self.check_stock()
 		self.calculate_amount()
+		self.set_posting_date()
 
 	def on_submit(self):
 		try:
@@ -35,6 +37,9 @@ class VlccMilkCollectionRecord(Document):
 			print frappe.get_traceback()
 			frappe.db.rollback()
 			frappe.throw(e)
+
+	def set_posting_date(self):
+		self.posting_date = getdate(self.collectiontime)
 
 	def validate_duplicate_entry(self):
 		filters = {
@@ -126,6 +131,8 @@ class VlccMilkCollectionRecord(Document):
 			pr.per_billed = 100
 			pr.flags.ignore_permissions = True
 			pr.submit()
+			self.set_posting_datetime(pr)
+			self.set_stock_ledger_date(pr)
 			return pr.name
 		except Exception as e:
 			raise e
@@ -158,6 +165,8 @@ class VlccMilkCollectionRecord(Document):
 			dn.status = "Completed"
 			dn.flags.ignore_permissions = True
 			dn.submit()
+			self.set_posting_datetime(dn)
+			self.set_stock_ledger_date(dn)
 			return dn.name
 		except Exception as e:
 			raise e
@@ -186,6 +195,7 @@ class VlccMilkCollectionRecord(Document):
 			pi.flags.ignore_permissions = True
 			pi.flags.for_cc = True
 			pi.submit()
+			self.set_posting_datetime(pi)
 			return pi.name
 		except Exception as e:
 			raise e
@@ -214,6 +224,29 @@ class VlccMilkCollectionRecord(Document):
 			})
 			si.flags.ignore_permissions = True
 			si.submit()
+			self.set_posting_datetime(si)
 			return si.name
 		except Exception as e:
 			raise e
+
+	def set_posting_datetime(self,doc):
+		if self.collectiontime:			
+			frappe.db.sql("""update `tab{0}` 
+				set 
+					posting_date = '{1}',posting_time = '{2}'
+				where 
+					name = '{3}'""".format(doc.doctype,getdate(self.collectiontime),
+						get_time(self.collectiontime),doc.name))
+			frappe.db.sql("""update `tabGL Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(self.collectiontime),doc.name))
+
+	def set_stock_ledger_date(self,doc):
+		if self.collectiontime:
+			frappe.db.sql("""update `tabStock Ledger Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(self.collectiontime),doc.name))

@@ -111,7 +111,7 @@ frappe.query_reports["VLCC Payment Settlement"] = {
 						"filters":filters						},
 				async: false,
 				callback : function(r){
-					if(!r.message){
+					if(r.message == 'creat'){
 						flag = false
 						frappe.throw(__("Please Generate <b>VPCR</b> for the cycle <b>{0}</b> against vlcc <b>{1}</b>",
 							[frappe.query_report_filters_by_name.cycle.get_value(),frappe.query_report_filters_by_name.vlcc.get_value()]))

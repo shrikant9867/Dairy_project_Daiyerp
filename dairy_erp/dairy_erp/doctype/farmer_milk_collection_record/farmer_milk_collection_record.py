@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
 
 class FarmerMilkCollectionRecord(Document):
 
@@ -16,6 +17,7 @@ class FarmerMilkCollectionRecord(Document):
 		self.validate_duplicate_entry()
 		self.validate_society_id()
 		self.check_valid_farmer()
+		self.set_posting_date()
 
 	def on_submit(self):
 		try:
@@ -30,6 +32,9 @@ class FarmerMilkCollectionRecord(Document):
 			print frappe.get_traceback()
 			frappe.db.rollback()
 			frappe.throw(e)
+
+	def set_posting_date(self):
+		self.posting_date = getdate(self.collectiontime)
 
 	def create_milk_item(self):
 		if self.milktype and not frappe.db.exists('Item', self.milktype + " Milk"):
@@ -107,6 +112,8 @@ class FarmerMilkCollectionRecord(Document):
 		pr.flags.ignore_permissions = True
 		pr.flags.ignore_material_price = True
 		pr.submit()
+		self.set_posting_datetime(pr)
+		self.set_stock_ledger_date(pr)
 		return pr.name
 
 	def purchase_invoice(self, pr):
@@ -134,4 +141,28 @@ class FarmerMilkCollectionRecord(Document):
 		pi.flags.ignore_permissions = True
 		pi.flags.ignore_material_price = True
 		pi.submit()
+		self.set_posting_datetime(pi)
 		return pi.name
+
+	def set_posting_datetime(self,doc):
+		if self.collectiontime:			
+			frappe.db.sql("""update `tab{0}` 
+				set 
+					posting_date = '{1}',posting_time = '{2}'
+				where 
+					name = '{3}'""".format(doc.doctype,getdate(self.collectiontime),
+						get_time(self.collectiontime),doc.name))
+			frappe.db.sql("""update `tabGL Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(self.collectiontime),doc.name))
+
+
+	def set_stock_ledger_date(self,doc):
+		if self.collectiontime:
+			frappe.db.sql("""update `tabStock Ledger Entry` 
+					set 
+						posting_date = %s
+					where 
+						voucher_no = %s""",(getdate(self.collectiontime),doc.name))

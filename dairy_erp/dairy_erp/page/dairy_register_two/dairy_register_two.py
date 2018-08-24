@@ -51,7 +51,7 @@ def get_vmcr_data(start_date=None,end_date=None):
 			merged.update(vmcr_dict.get(key,{'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0}))
 			merged.update({'daily_sales':merged.get('total_milk_qty')-merged.get('si_qty')})
 			merged.update({'excess_qty':merged.get('daily_sales')-merged.get('vmcr_qty')})
-			merged.update({'profit':merged.get('total_milk_amt') if merged.get('total_milk_amt') > })
+			# merged.update({'profit':merged.get('total_milk_amt') if merged.get('total_milk_amt') > })
 			final_dict[key] = merged
 		else:
 			pass

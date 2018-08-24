@@ -24,7 +24,9 @@ class FarmerPaymentCycleReport(Document):
 
 	
 	def advance_operation(self):
+		flag = False
 		for row in self.advance_child:
+			flag = True
 			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
 						'farmer_advance':row.adv_id }, 'name')
 			if not si_exist:
@@ -34,8 +36,11 @@ class FarmerPaymentCycleReport(Document):
 			elif si_exist:
 				self.update_si(row, self.cycle, si_exist)
 				self.update_advance_fpcr(row)
+		if flag:
+			frappe.msgprint(_("Sales invoice created successfully against Advances"))
 	
 	def loan_operation(self):
+		flag = False	
 		for row in self.loan_child:
 			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
 						'farmer_advance':row.loan_id }, 'name')
@@ -46,6 +51,8 @@ class FarmerPaymentCycleReport(Document):
 			elif si_exist:
 				self.update_si(row, self.cycle, si_exist)
 				self.update_loan_fpcr(row)
+		if flag:
+			frappe.msgprint(_("Sales invoice created successfully against Loans"))
 
 	
 	def validate_advance(self, row):

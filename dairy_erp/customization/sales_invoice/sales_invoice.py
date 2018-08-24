@@ -110,7 +110,9 @@ def payment_entry(doc, method):
 		if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment:
 			frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
 		if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and doc.grand_total > input_:
-			frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
+			dairy_setting = frappe.db.get_singles_dict('Dairy Setting').get('allow_negative_effective_credit')
+			if not int(dairy_setting):
+				frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
 		if (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.by_credit > input_:
 			frappe.throw(_("By Credit Amount must be less than or equal to Effective Credit."))
 		if doc.local_sale and not doc.update_stock:

@@ -573,7 +573,7 @@ def generate_incentive(filters):
 			associated_vlcc = '{0}' and rcvdtime between '{1}' and '{2}' and farmerid= '{3}'
 			""".format(get_vlcc(), filters.get('start_date'), filters.get('end_date'), filters.get('farmer')),as_dict=1)
 		if fmcr[0].get('total') != 0:
-			incentive = get_incentives(fmcr[0].get('total'), fmcr[0].get('qty'))
+			incentive = get_incentives(fmcr[0].get('total'), fmcr[0].get('qty'), get_vlcc())
 			create_pi(filters, incentive)
 			frappe.msgprint(_("Incentive Generated"))
 	else:
@@ -599,16 +599,18 @@ def create_pi(filters, total):
 	pi.submit()
 
 def get_incentives(amount, qty, vlcc=None):
+	print "#############################",vlcc,amount,qty
 	if vlcc and amount and qty:
+		print "#$$$$$$$$$$$$$$$$$$$$$$$$$$"
 		incentive = 0
 		name = frappe.db.get_value("Farmer Settings", {'vlcc':vlcc}, 'name')
 		farmer_settings = frappe.get_doc("Farmer Settings",name)
-		if farmer_settings.enable_local_setting and not farmer_settings.enable_per_litre:
+		if farmer_settings.enable_local_setting and not farmer_settings.enable_local_per_litre:
 			incentive = (float(farmer_settings.local_farmer_incentive ) * float(amount)) / 100	
-		if farmer_settings.enable_local_setting and farmer_settings.enable_per_litre:
+		if farmer_settings.enable_local_setting and farmer_settings.enable_local_per_litre:
 			incentive = (float(farmer_settings.local_per_litre) * float(qty))
 		if not farmer_settings.enable_local_setting and not farmer_settings.enable_per_litre:
-			incentive = (float(farmer_settings.farmer_incentives) * float(farmer_settings)) / 100
+			incentive = (float(farmer_settings.farmer_incentives) * float(amount)) / 100
 		if not farmer_settings.enable_local_setting and farmer_settings.enable_per_litre:
 			incentive = (float(farmer_settings.per_litre) * float(qty))
 		return incentive

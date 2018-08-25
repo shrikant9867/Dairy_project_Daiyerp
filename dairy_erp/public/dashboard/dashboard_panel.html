@@ -1,6 +1,6 @@
 <div>
 	<label class="_doctype" data-doctype="{%= data.doctype %}" data-add_type="{%= data.add_type %}">
-		<a>{%= data.label %}</a>
+		<a>{%= __(data.label) %}</a>
 	</label>
 	{% if (data.label == "Supplier" || data.label == "Farmer") { %}
 		<a class="fa fa-plus new_master" data-doctype="{%= data.doctype %}" 

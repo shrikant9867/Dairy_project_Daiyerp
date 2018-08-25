@@ -25,9 +25,7 @@ frappe.ui.form.on('VLCC Payment Cycle', {
 		cycle.read_only = 1;
 		frm.refresh_field("cycles");
 
-		if(frm.doc.no_of_cycles == 3 && frm.doc.month){
-			frm.events.set_cycle_values(frm)
-		}	
+		frm.events.set_cycle_values(frm)	
 	},
 	min_set_per: function(frm){
 		if (frm.doc.min_set_per > 100){
@@ -42,25 +40,23 @@ frappe.ui.form.on('VLCC Payment Cycle', {
 		frm.events.set_cycle_values(frm)
 	},
 	set_cycle_values: function(frm){
-		if(frm.doc.no_of_cycles) {
+		if(frm.doc.no_of_cycles == 3) {
 			frappe.call({
 				method:"dairy_erp.dairy_erp.doctype.vlcc_payment_cycle.vlcc_payment_cycle.set_cycle_values",
 				args : {"doc":frm.doc},
 				callback: function(r){
+					var day = 0
 					frm.set_value("cycles","")
-					if(r.message) {
-						var day = 0
-						for(i=1;i<= frm.doc.no_of_cycles;i++){
-							var row = frappe.model.add_child(frm.doc, "VLCC Payment Child", "cycles");
-							var s_day = day + 1
-							var e_day = s_day + 9
-								day = e_day
-							row.cycle = "Cycle " + i
-							row.start_day = s_day 
-							row.end_day = e_day
-							if(i == 3) {
-								row.end_day = r.message 
-							}
+					for(i=1;i<= frm.doc.no_of_cycles;i++){
+						var row = frappe.model.add_child(frm.doc, "VLCC Payment Child", "cycles");
+						var s_day = day + 1
+						var e_day = s_day + 9
+							day = e_day
+						row.cycle = "Cycle " + i
+						row.start_day = s_day 
+						row.end_day = e_day
+						if(i == 3) {
+							row.end_day = r.message 
 						}
 					}
 					refresh_field("cycles");

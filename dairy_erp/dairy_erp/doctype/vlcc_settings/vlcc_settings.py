@@ -56,23 +56,25 @@ def sms_and_email_for_item_stock_threshold_level(allow_guest=True):
 	vlcc_list = frappe.db.get_all("Village Level Collection Centre")
 	for vlcc in vlcc_list:
 		vlcc_doc = frappe.get_doc("Village Level Collection Centre",vlcc.name)
-		vlcc_setting_doc = frappe.get_doc("VLCC Settings",vlcc.name)
-		vlcc_emails = [vlcc_doc.email_id]
-		if vlcc_doc.operator_same_as_agent and vlcc_doc.operator_email_id:
-			vlcc_emails.append(vlcc_doc.operator_email_id)
-		if vlcc_doc.warehouse and vlcc_setting_doc and vlcc_setting_doc.item_stock_threshold_level:
-			bin_list = frappe.db.get_all("Bin", {"warehouse": vlcc_doc.warehouse},"name")
-			item_and_actual_qty = {}
-			for bin_name in bin_list:
-				bin_doc = frappe.get_doc("Bin",bin_name.name)
-				if bin_doc.actual_qty < vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty >= 0:
-					item_and_actual_qty[bin_doc.item_code] = bin_doc.actual_qty
-			send_email_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_emails)
+		vlcc_setting_doc = ""
+		if frappe.db.exists("VLCC Settings",vlcc.name):
+			vlcc_setting_doc = frappe.get_doc("VLCC Settings",vlcc.name)
+		if vlcc_setting_doc:
+			vlcc_emails = [vlcc_doc.email_id]
+			if vlcc_doc.operator_same_as_agent and vlcc_doc.operator_email_id:
+				vlcc_emails.append(vlcc_doc.operator_email_id)
+			if vlcc_doc.warehouse and vlcc_setting_doc and vlcc_setting_doc.item_stock_threshold_level:
+				bin_list = frappe.db.get_all("Bin", {"warehouse": vlcc_doc.warehouse},"name")
+				item_and_actual_qty = {}
+				for bin_name in bin_list:
+					bin_doc = frappe.get_doc("Bin",bin_name.name)
+					if vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty < vlcc_setting_doc.item_stock_threshold_level and bin_doc.actual_qty >= 0:
+						item_and_actual_qty[bin_doc.item_code] = bin_doc.actual_qty
+				send_email_to_vlcc(item_and_actual_qty,vlcc.name,vlcc_emails)
 
 
 def send_email_to_vlcc(item_and_actual_qty,vlcc_name,vlcc_emails):
-	print vlcc_emails,"vlcc_emailssssssssssss"
-	if vlcc_emails:
+	if vlcc_emails and item_and_actual_qty:
 		email_template = frappe.render_template(
 			"templates/includes/item_stock_threshold_level.html", {
 										"item_and_qty":item_and_actual_qty,
@@ -95,9 +97,24 @@ def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filter
 	item_list = [item.get('item') for item in filters.get('items_dict') if item.get('customer_type') == filters.get('customer_type')]
 	if item_list[0]:
 		final_item_list = "(" + ",".join("'{0}'".format(item) for item in item_list[0:-1]) + ")"
-		item = frappe.db.sql("""select name,item_group from tabItem 
-			where name not in {final_item_list} and name like '{txt}' """.format(final_item_list=final_item_list,txt= "%%%s%%" % txt),as_list=1)
+		if final_item_list  != '()':
+			final_item_list = " and name not in"+ final_item_list
+		else:
+			final_item_list = ""
+		item = frappe.db.sql("""
+			select name,item_group 
+		from 
+			tabItem 
+		where 
+			item_group != 'Stationary' and name not 
+			in ('Advance Emi', 'Loan Emi', 'Milk Incentives')
+			{final_item_list} and name like '{txt}' """.format(final_item_list=final_item_list,txt= "%%%s%%" % txt),as_list=1,debug=1)
 	else:
-		item = frappe.db.sql("""select name,item_group 
-							from tabItem where name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1)
+		item = frappe.db.sql("""
+			select name,item_group 
+		from 
+			tabItem 
+		where 
+			item_group != 'Stationary' and name not 
+				in ('Advance Emi', 'Loan Emi', 'Milk Incentives') and name like '{txt}' """.format(txt= "%%%s%%" % txt),as_list=1)
 	return item

@@ -13,6 +13,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words
 from frappe.utils import has_common
+from dairy_erp.dairy_utils import make_dairy_log
 from dairy_erp.customization.price_list.price_list_customization \
 	import get_selling_price_list, get_buying_price_list
 from dairy_erp.customization.sales_invoice.sales_invoice import get_taxes_and_charges_template
@@ -648,9 +649,38 @@ def set_mr_warehouse(doc,method=None):
 			for item in doc.items:
 				item.warehouse = frappe.db.get_value("Village Level Collection Centre",{"name":doc.company},"warehouse")
 
-	
+def add_config_settings(args=None):
+	# add_values(args)
+	# add_dairy_language(args)
+	create_item_group()
+	# try:
+	# except Exception,e:
+	# 	make_dairy_log(title="Config settings Failed",method="add_config_settings", status="Error",
+	# 	data = args, message=e, traceback=frappe.get_traceback())	
 
-def create_item_group(args=None):
+def add_values(args=None):
+	dairy_configuration = frappe.get_doc("Dairy Configuration")
+	dairy_configuration.company = args.get('company_name')
+	dairy_configuration.first_name = args.get('full_name')
+	dairy_configuration.email_id = args.get('email')
+	dairy_configuration.is_dropship = args.get('is_dropship')
+	dairy_configuration.save(ignore_permissions=True)
+
+def add_dairy_language(args):
+	language = frappe.new_doc("Language")
+	language.language_code = "dcl"
+	language.language_name = "Dairy"
+	language.based_on = "en"
+	language.save(ignore_permissions=True)
+	set_dairy_language(language.language_code,args.get('email'))
+
+def set_dairy_language(language,email_id):
+	frappe.db.sql("""update `tabUser` SET language= '{0}' WHERE email = '{1}' """.format(language,email_id))
+	system_setting = frappe.get_doc("System Settings","System Settings")
+	system_setting.language = language
+	system_setting.save(ignore_permissions=True)
+
+def create_item_group():
 
 	item_groups = ['Cattle feed', 'Mineral Mixtures', 'Medicines', 'Artificial Insemination Services',
 		'Veterinary Services', 'Others/Miscellaneous','Milk & Products', 'Stationary']

@@ -15,7 +15,7 @@ app_license = "MIT"
 # ------------------
 # setup wizard
 # setup_wizard_requires = "assets/dairy_erp/js/setup_wizard.js"
-setup_wizard_complete = "dairy_erp.customization.customization.create_item_group"
+setup_wizard_complete = "dairy_erp.customization.customization.add_config_settings"
 # include js, css files in header of desk.html
 app_include_css = "/assets/js/dairy.desk.min.css"
 app_include_js = "/assets/js/dairy.desk.min.js"
@@ -165,7 +165,8 @@ doc_events = {
         "validate": "dairy_erp.customization.payment_entry.payment_entry.validate_by_credit_invoice"
     },
     "User": {
-        "after_insert": "dairy_erp.customization.user.user.add_user_permission"
+        "after_insert": "dairy_erp.customization.user.user.add_user_permission",
+        "validate": "dairy_erp.customization.user.user.add_dairy_language"
     },
     "Sales Taxes and Charges Template": {
         "autoname": "dairy_erp.customization.tax_and_charges.custom_taxes_charges.autoname",

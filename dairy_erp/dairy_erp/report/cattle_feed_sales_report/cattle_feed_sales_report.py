@@ -38,16 +38,16 @@ def get_data(filters):
 							where
 								si.local_sale = 1
 								and si.name = si_item.parent
-								and si.customer_or_farmer = "Farmer" 
-								and si.farmer = '{0}'
+								and si.customer_or_farmer = "Farmer"
 								and si_item.item_code not in ('COW Milk','BUFFALO Milk')
-								and si.docstatus = 1 and si.company = '{1}'
-								{2}""".format(filters.get('farmer'),filters.get('vlcc'),get_conditions(filters)),filters,debug=1)
+								and si.docstatus = 1 and si.company = '{0}'
+								{1}""".format(filters.get('vlcc'),get_conditions(filters)),filters,debug=1)
 	return data
 
 def get_conditions(filters):
 	conditions = " and 1=1"
-	if filters.get('start_date') and filters.get('end_date'):
+	if filters.get('farmer') and filters.get('start_date') and filters.get('end_date'):	
+		conditions += " and si.posting_date between %(start_date)s and %(end_date)s and si.farmer = %(farmer)s"
+	elif filters.get('start_date') and filters.get('end_date'):
 		conditions += " and si.posting_date between %(start_date)s and %(end_date)s"
-
 	return conditions

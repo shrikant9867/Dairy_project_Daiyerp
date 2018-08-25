@@ -1,0 +1,26 @@
+{
+ "content": null, 
+ "creation": "2018-08-24 10:14:26.517391", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2018-08-24 10:14:26.517391", 
+ "modified_by": "Administrator", 
+ "module": "Dairy Erp", 
+ "name": "dairy_register_two", 
+ "owner": "Administrator", 
+ "page_name": "dairy_register_two", 
+ "roles": [
+  {
+   "role": "Vlcc Manager"
+  }, 
+  {
+   "role": "Vlcc Operator"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "Dairy Register - 2"
+}

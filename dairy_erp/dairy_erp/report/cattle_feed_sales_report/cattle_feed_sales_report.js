@@ -26,7 +26,7 @@ frappe.query_reports["Cattle Feed Sales Report"] = {
 						}
 				}
 			},
-			"reqd":1,
+			"reqd":0,
 			"on_change":function(query_report){
 				frappe.call({
 					method: "frappe.client.get_value",
@@ -42,8 +42,8 @@ frappe.query_reports["Cattle Feed Sales Report"] = {
 							query_report.trigger_refresh();		
 						}
 						else{
-							frappe.query_report_filters_by_name.farmer_id.set_input("sas");
-							frappe.query_report_filters_by_name.full_name.set_input("asa");
+							frappe.query_report_filters_by_name.farmer_id.set_input("");
+							frappe.query_report_filters_by_name.full_name.set_input("");
 							query_report.trigger_refresh();
 						}		
 					}
@@ -95,14 +95,5 @@ frappe.query_reports["Cattle Feed Sales Report"] = {
 				}
 			}
 		})
-	},
-	"formatter":function (row, cell, value, columnDef, dataContext, default_formatter) {
-		value = default_formatter(row, cell, value, columnDef, dataContext);
-        //console.log("concad", dataContext)
-	    if(columnDef.id == "Explanation") {
-	    	//console.log(dataContext,"customer customer")
-            value = "<input type='text' name='fname'>";
-	    }
-	    return value;
 	}
 }

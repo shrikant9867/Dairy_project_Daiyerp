@@ -72,7 +72,8 @@ def get_masters():
 				"mi_reference": get_mi_references(),
 				"po_reference": get_po_references(),
 				"global_percent_effective_credit": frappe.db.get_value("Village Level Collection Centre", \
-								vlcc_details.get('name'), 'global_percent_effective_credit')
+								vlcc_details.get('name'), 'global_percent_effective_credit'),
+				"settings": get_config_settings()
 			})
 		else:
 			frappe.throw(_("User cannot be administrator"))
@@ -368,3 +369,8 @@ def get_po_references():
 			where 
 			parent = '{0}'""".format(row.get('name')),as_dict=1)})
 	return po_list
+
+def get_config_settings():
+	return {
+		"allow_negative_eff_credit": cint(frappe.db.get_singles_dict('Dairy Setting').get('allow_negative_effective_credit'))
+	}

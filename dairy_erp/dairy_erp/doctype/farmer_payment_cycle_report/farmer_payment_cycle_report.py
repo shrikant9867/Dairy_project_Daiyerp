@@ -290,6 +290,7 @@ def get_incentives(amount, qty, vlcc=None):
 			incentive = (float(farmer_settings.farmer_incentives) * float(amount)) / 100
 		if not farmer_settings.enable_local_setting and farmer_settings.enable_per_litre:
 			incentive = (float(farmer_settings.per_litre) * float(qty))
+		print "###########"
 		return incentive
 
 

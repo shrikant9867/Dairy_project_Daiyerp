@@ -290,7 +290,6 @@ def get_incentives(amount, qty, vlcc=None):
 			incentive = (float(farmer_settings.farmer_incentives) * float(amount)) / 100
 		if not farmer_settings.enable_local_setting and farmer_settings.enable_per_litre:
 			incentive = (float(farmer_settings.per_litre) * float(qty))
-		print "###########"
 		return incentive
 
 
@@ -369,8 +368,8 @@ def get_cycle(doctype,text,searchfields,start,pagelen,filters):
 		from
 			`tabFarmer Date Computation`
 		where
-			 now() between start_date and end_date and vlcc = '{0}'
-		""".format(filters.get('vlcc')))
+			 end_date < now() and vlcc = '{vlcc}' and name like '{txt}'
+		""".format(vlcc = filters.get('vlcc'),txt= "%%%s%%" % text,as_list=True))
 
 def req_cycle_computation(data):
 	

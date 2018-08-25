@@ -256,3 +256,10 @@ get_address =  function(frm) {
 		}
 	})
 }
+
+cur_frm.fields_dict['cycle'].get_query = function(doc) {
+	return {
+		"query": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_cycle",
+		filters: {'vlcc': doc.vlcc_name}
+	}
+}

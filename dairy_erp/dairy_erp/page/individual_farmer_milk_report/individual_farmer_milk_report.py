@@ -97,7 +97,7 @@ def get_pi_outstanding(filters):
 									and pi.docstatus = 1
 									and pi.supplier = '{0}'
 									and pi.posting_date < '{1}'
-								""".format(filters.get('farmer'),filters.get('start_date')),as_list=1,debug=1)
+								""".format(filters.get('farmer'),filters.get('start_date')),as_list=1,debug=0)
 	return pi_data[0][0]
 
 def get_si_outstanding(filters):
@@ -111,7 +111,7 @@ def get_si_outstanding(filters):
 									and si.docstatus = 1
 									and si.customer = '{0}'
 									and si.posting_date < '{1}'
-								""".format(filters.get('farmer'),filters.get('start_date')),as_list=1,debug=1)
+								""".format(filters.get('farmer'),filters.get('start_date')),as_list=1,debug=0)
 	return si_data[0][0]
 
 def get_fmcr_milk_data(filters):
@@ -128,7 +128,7 @@ def get_fmcr_milk_data(filters):
 											.format(filters.get('start_date'),
 													filters.get('end_date'),
 													filters.get('farmer'),
-													filters.get('vlcc')),as_list=1,debug=1)
+													filters.get('vlcc')),as_list=1,debug=0)
 	return total_milk_amount[0][0]
 
 def cattle_feed_amount(filters):
@@ -142,5 +142,5 @@ def cattle_feed_amount(filters):
 									and si.docstatus = 1
 									and si.customer = '{0}'
 									and si.posting_date between '{1}' and '{2}'
-								""".format(filters.get('farmer'),filters.get('start_date'),filters.get('end_date')),as_list=1,debug=1)
+								""".format(filters.get('farmer'),filters.get('start_date'),filters.get('end_date')),as_list=1,debug=0)
 	return cattle_feed_amount[0][0]

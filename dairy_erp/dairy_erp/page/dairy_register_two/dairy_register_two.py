@@ -39,7 +39,6 @@ def get_vmcr_data(start_date=None,end_date=None):
 		for vmcr in vmcr_data_list:
 			vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
 
-	print "vmcr_dict\n\n\n",vmcr_dict
 	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+vmcr_dict.keys()
 	final_dict = {}
 	
@@ -48,17 +47,21 @@ def get_vmcr_data(start_date=None,end_date=None):
 			merged = {}
 			merged.update(members.get(key, {'total_milk_amt': 0,'total_milk_qty': 0}))
 			merged.update(date_and_shift_wise_local_sale.get(key, {'si_amount': 0, 'si_qty': 0}))
-			merged.update(vmcr_dict.get(key,{'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0}))
-			merged.update({'daily_sales':merged.get('total_milk_qty')-merged.get('si_qty')})
-			merged.update({'excess_qty':merged.get('daily_sales')-merged.get('vmcr_qty')})
-			# merged.update({'profit':merged.get('total_milk_amt') if merged.get('total_milk_amt') > })
+			merged.update(vmcr_dict.get(key,{'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
+			merged.update({'daily_sales':merged.get('total_milk_qty')-merged.get('si_qty')})		
+			merged.update({'excess_qty':merged.get('daily_sales') - merged.get('vmcr_qty')})
+			merged.update({'short_qty':merged.get('vmcr_qty') - merged.get('daily_sales')})
+			if merged.get('vmcr_amount') + merged.get('si_amount') > merged.get('total_milk_amt'):
+				merged.update({'profit': (merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt')})
+				merged.update({'loss': 0})
+			if merged.get('vmcr_amount') + merged.get('si_amount') < merged.get('total_milk_amt'):
+				merged.update({'loss': merged.get('total_milk_amt') - (merged.get('vmcr_amount') + merged.get('si_amount'))})
+				merged.update({'profit': 0})
 			final_dict[key] = merged
 		else:
 			pass
-	pass		
-	# print "vmcr_data_list\n\n\n\n",vmcr_data_list		
-	# print "final_dict\n\n\n",final_dict
-	# return final_dict
+	
+	return final_dict
 
 def get_vmcr_data_list(filters):
 	vmcr_list = frappe.db.sql("""
@@ -75,7 +78,7 @@ def get_vmcr_data_list(filters):
 								where
 									vmcr.docstatus = 1 and
 									vmcr.shift in ('MORNING','EVENING') and
-									{0} """.format(get_conditions(filters)),as_dict=1,debug=1)	
+									{0} """.format(get_conditions(filters)),as_dict=1,debug=0)	
 	return vmcr_list
 
 def get_conditions(filters):

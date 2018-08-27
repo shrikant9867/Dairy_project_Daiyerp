@@ -1,0 +1,275 @@
+<style>
+.nopadding {
+   padding: 0 !important;
+   margin: 0 !important;
+}
+.row {
+    vertical-align: top;
+}
+</style>
+<div class="container-fluid" style="margin: 0 20px 0 20px">
+	<div class = "row content">
+		<div class="col-md-7 nopadding">
+			<table class="table table-bordered">
+				<tbody>
+					<tr>
+						<th colspan="2">milk purchase</th>
+						<th>This Month</th>
+						<th>Up to the Month</th>
+					</tr>
+					<tr>
+						<th colspan="2">{%= ("Total Milk Purchase") %}</th>
+						<td>{%= mis_data.fmcr_data[1][0].total_milk_purchase_society %}</td>
+						<td>{%= mis_data.fmcr_data[0][0].total_milk_purchase_society %}</td>
+					</tr>
+					<tr>
+					    <td colspan="2">{%= ("Local Sale") %}</td>
+					    <td>{%= mis_data.local_sale[1][0].local_sale %}</td>
+					    <td>{%= mis_data.local_sale[0][0].local_sale %}</td>
+					</tr>
+
+					<tr>
+					    <th rowspan="2">{%= ("Sale To") %}</th>
+					    <th>{%= ("Society Account Ltr") %}</th>
+					    <td>{%= (mis_data.fmcr_data[1][0].total_milk_purchase_society) - (mis_data.local_sale[1][0].local_sale) %}</td>
+					    <td>{%= (mis_data.fmcr_data[0][0].total_milk_purchase_society) - (mis_data.local_sale[0][0].local_sale) %}</td>
+					</tr>
+					<tr>
+					    <th>{%= ("Dairy Account Kg") %}</th>
+					    <td>{%= mis_data.vmcr_data[1][0].total_milk_purchase_dairy %}</td>
+					    <td>{%= mis_data.vmcr_data[0][0].total_milk_purchase_dairy %}</td>
+					</tr>
+					<tr>
+					    <th rowspan="2">{%= ("FAT %") %}</th>
+					    <th>{%= ("Society Account") %}</th>
+					    <td>{%= mis_data.fmcr_data[1][0].society_account_fat %}</td>
+					    <td>{%= mis_data.fmcr_data[0][0].society_account_fat %}</td>
+					</tr>
+					<tr>
+					    <th>{%= ("Dairy Account") %}</th>
+					    <td>{%= mis_data.vmcr_data[1][0].dairy_account_fat %}</td>
+					    <td>{%= mis_data.vmcr_data[0][0].dairy_account_fat %}</td>
+					</tr>
+					<tr>
+					    <th rowspan="2">{%= ("SNF %") %}</th>
+					    <th>{%= ("Society Account") %}</th>
+					    <td>{%= mis_data.fmcr_data[1][0].society_account_fat %}</td>
+					    <td>{%= mis_data.fmcr_data[0][0].society_account_fat %}</td>
+					</tr>
+					<tr>
+					    <th>{%= ("Dairy Account") %}</th>
+					    <td>{%= mis_data.vmcr_data[1][0].dairy_account_fat %}</td>
+					    <td>{%= mis_data.vmcr_data[0][0].dairy_account_fat %}</td>
+					</tr>
+
+				</tbody>
+			</table>
+		</div>
+		<div class="col-md-5 nopadding">
+			<table class="table table-bordered">
+				<tbody>
+					<tr>
+						<td rowspan="2">{%= ("1) No of first aids given") %}
+						<td>COW</td>	
+						<td></td>
+					</tr>
+					<tr>
+						<td>BUFFALO</td>
+						<td></td>	
+					</tr>
+					<tr>
+						<td rowspan="2">
+							{%= ("2) No of waxines") %}
+						</td>
+						<td>{%= ("Foot & Mouth Descese") %}</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>Others</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>{%= "Cattle Feed sales (Kg)" %}</td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>{%= "Grass seed sales (Kg)" %}</td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>{%= "No and area of model farm" %}</td>
+						<td></td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="row content">
+		<div class="col-md-5 nopadding">
+			<table class="table table-bordered">
+				<tbody>
+					<tr>
+						<th>Quality Of Milk</th>
+						<th>Total Ltr.</th>	
+					</tr>
+					<tr>
+						<td>Good Milk</td>
+						<td>{%= milk_quality.good %}</td>
+					</tr>
+					<tr>
+						<td>Bad Milk</td>
+						<td>{%= milk_quality.bad %}</td>
+					</tr>
+					<tr>
+						<td>Formated Milk</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>Total Qty</td>
+						<td class="total_milk"></td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="table table-bordered">
+				<tbody>
+					<tr>
+						<th colspan="2">No. Of registered members</th>
+					</tr>
+					<tr>
+						<th>{%= ("a)Total") %}</th>
+						{% if (member_data.non_member_count || member_data.member_count) { %}
+							<td>{%= member_data.non_member_count + member_data.member_count %} </td>
+						{% }	
+						else { %}	
+			            	<td></td>
+			            {% } %}
+					</tr>
+					<tr>
+						<th>{%= ("b)Females") %}</th>
+						<td></td>
+					</tr>
+					<tr>
+						<th>{%= ("c)SC/ST") %}</th>
+						<td></td>
+					</tr>
+					<tr>
+						<th>{%= ("d)OBC") %}</th>
+						<td></td>
+					</tr>
+					<tr>
+						<th>{%= ("e)BC") %}</th>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="table table-bordered">
+				<tbody>
+					<tr>
+						<th colspan="3">Avg. No Of Milk Suppliers</th>
+					</tr>
+					<tr>
+						<td></td>
+						<th>Total</th>
+						<th>SC/ST</th>
+					</tr>
+					<tr>
+						<th>{%= ("a)Member") %}</th>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<th>{%= ("b)Non Member") %}</th>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<th>{%= ("c)Total") %}</th>
+						<td></td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="table table-bordered">
+			  <tbody>
+				  <tr>
+				    <td rowspan="2">No. of Participants in karshaka Panchaya</td>
+				    <td>Male</td>
+				  	<td></td>
+				  </tr>
+				  <tr>
+				    <td>Female</td>			  	
+				  	<td></td>
+				  </tr>
+				  <tr>
+				    <td colspan="2">No. of Cattles Submitted</td>
+				  	<td ></td>
+				  </tr>
+				  <tr>
+				    <td rowspan="2">No. of Society</td>
+				    <td>Male</td>
+				  	<td></td>
+				  </tr>
+				  <tr>
+				    <td>Female</td>			  	
+				  	<td></td>
+				  </tr>
+				  </tbody>
+			</table>
+		</div>
+		<div class="col-md-7 nopadding">
+			<table class="table table-bordered">
+				<tbody>
+					<tr>
+						<th colspan="3">Milk Purchase Details</th>
+						<th colspan="2">Month status</th>
+					</tr>
+					<tr>
+						<th colspan="3">{%= ("Average Daily Purchase") %}</th>
+						<td colspan="2">{%= mis_data.fmcr_data[1][0].daliy_milk_purchase_society %}</td>
+					</tr>
+					<tr>
+						<th colspan="3">{%= ("Members") %}</th>
+						<td colspan="2">{%= member_data.member_qty %}</td>
+					</tr>
+					<tr>
+						<th colspan="3">{%= ("Non Members") %}</th>
+						<td colspan="2">{%= member_data.non_member_qty %}
+					</tr>
+					<tr>
+						<td></td>
+						<td>Prev. balance</td>
+						<td>Purchase Qty.</td>
+						<td>Used Qty.</td>
+						<td>Remaining</td>
+					</tr>
+					<tr>
+						<th>Acid</th>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<th>Alcohol</th>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="table table-bordered">
+				<tbody>
+				<tr>
+					<th>FINANCIAL STATUS</th>
+					<th>This Month</th>
+					<th>Up to the month</th>	
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

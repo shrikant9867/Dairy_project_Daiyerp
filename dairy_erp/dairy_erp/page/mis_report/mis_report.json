@@ -1,0 +1,26 @@
+{
+ "content": null, 
+ "creation": "2018-08-25 07:29:25.908901", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2018-08-25 07:29:40.077689", 
+ "modified_by": "Administrator", 
+ "module": "Dairy Erp", 
+ "name": "mis_report", 
+ "owner": "Administrator", 
+ "page_name": "mis_report", 
+ "roles": [
+  {
+   "role": "Vlcc Operator"
+  }, 
+  {
+   "role": "Vlcc Manager"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "MIS Report"
+}

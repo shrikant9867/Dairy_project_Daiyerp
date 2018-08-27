@@ -92,7 +92,6 @@ def fetch_farmer_data(fmcr_data,filters):
 	return final_
 
 def get_member_non_menber(farmer_list,filters):
-	print filters,"inside get_member_non_menber\n\n"
 	non_member_count,member_count,non_member_qty,member_qty,member_amt,non_member_amt = 0 , 0 , 0, 0,0,0
 	member_dict = {}
 	if farmer_list:
@@ -127,6 +126,13 @@ def get_member_non_menber(farmer_list,filters):
 					"total_milk_qty":round(member_qty+non_member_qty,2),
 					"total_milk_amt":round(member_amt+non_member_amt,2)
 					})
+		if filters.get('from_report') == "MIS Report":
+		 	member_dict.update({
+					"non_member_qty":round(non_member_qty,2),
+					"member_qty":round(member_qty,2),
+					"non_member_count":non_member_count,
+					"member_count":member_count
+					})
 		else:
 			member_dict.update({"non_member_count":non_member_count,
 					"member_count":member_count,
@@ -156,6 +162,12 @@ def get_conditions(filters):
 	conditions = " and 1=1"
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
 
+	if filters.get('from_report') == "MIS Report":
+		filters.update({
+						'start_date':filters.get('month_start_date'),
+						'end_date':filters.get('month_end_date')
+		})
+	
 	if frappe.session.user != 'Administrator':
 		conditions += " and associated_vlcc = '{0}'".format(vlcc)
 	if filters.get('start_date') and filters.get('end_date'):
@@ -165,6 +177,20 @@ def get_conditions(filters):
 	if filters.get('date'):
 		conditions += " and date(collectiondate) = '{0}' ".format(filters.get('date'))
 	return conditions
+
+# def get_conditions(filters):
+# 	conditions = " and 1=1"
+# 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
+
+# 	if frappe.session.user != 'Administrator':
+# 		conditions += " and associated_vlcc = '{0}'".format(vlcc)
+# 	if filters.get('start_date') and filters.get('end_date'):
+# 		conditions += " and date(collectiondate) between '{0}' and '{1}' ".format(filters.get('start_date'),filters.get('end_date'))
+# 	if filters.get('shift') == "Both":
+# 		conditions += " and shift in ('MORNING','EVENING')"
+# 	if filters.get('date'):
+# 		conditions += " and date(collectiondate) = '{0}' ".format(filters.get('date'))
+# 	return conditions
 
 def get_local_sale_data(filters):
 	vlcc_comp = frappe.db.get_value("User",frappe.session.user,"company")

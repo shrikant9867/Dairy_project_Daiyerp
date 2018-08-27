@@ -7,21 +7,42 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from dairy_erp.dairy_utils import make_dairy_log
+from frappe.utils import flt, cstr,nowdate,cint
 
 class FarmerPaymentCycleReport(Document):
 	
 	def validate(self):
 		if frappe.db.get_value("Farmer Payment Cycle Report",{'cycle':self.cycle,\
 			 'vlcc_name':self.vlcc_name, 'farmer_id':self.farmer_id},'name') and self.is_new():
-			frappe.throw(_("FPCR has already been generated for this cycle"))
+			frappe.throw(_("FPCR has already been generated for this cycle against farmer <b>{0}</b>".format(self.farmer_id)))
+		if self.collection_to > nowdate() :
+			frappe.throw(_("You can generate FPCR after <b>'{0}'</b>".format(self.collection_to)))
 		
 	
 	def before_submit(self):
 		self.advance_operation()
 		self.loan_operation()
+		self.update_fpcr()
 		if float(self.incentives) != 0:
 			self.create_incentive()
+			frappe.msgprint(_("Purchase invoice created successfully against Incentives"))
+	
 
+	def update_fpcr(self):
+		loan_total, loan_si, adavnce_si, advance_total = 0, 0, 0, 0 
+		for row in self.loan_child:
+			si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+			,filters={'farmer_advance':row.loan_id})
+			loan_si += si_amt[0].get('amt')
+			loan_total += row.principle
+		for row in self.advance_child:
+			si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+			,filters={'farmer_advance':row.adv_id})
+			adavnce_si += si_amt[0].get('amt')
+			advance_total += row.principle
+		self.advance_outstanding = float(advance_total) - float(adavnce_si)
+		self.loan_outstanding = float(loan_total) - float(loan_si)
+	
 	
 	def advance_operation(self):
 		flag = False
@@ -31,8 +52,8 @@ class FarmerPaymentCycleReport(Document):
 						'farmer_advance':row.adv_id }, 'name')
 			if not si_exist:
 				self.validate_advance(row)
-				self.create_si(row, "Advance", "Advance Emi", row.adv_id)
-				self.update_advance(row)
+				si = self.create_si(row, "Advance", "Advance Emi", row.adv_id)
+				self.update_advance(row, si)
 			elif si_exist:
 				self.update_si(row, self.cycle, si_exist)
 				self.update_advance_fpcr(row)
@@ -40,19 +61,21 @@ class FarmerPaymentCycleReport(Document):
 			frappe.msgprint(_("Sales invoice created successfully against Advances"))
 	
 	def loan_operation(self):
-		flag = False	
+		flag = False
 		for row in self.loan_child:
+			flag = True
 			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
 						'farmer_advance':row.loan_id }, 'name')
 			if not si_exist:
 				self.validate_loan(row)
-				self.create_si(row,"Loan","Loan Emi", row.loan_id)
-				self.update_loan(row)
+				si = self.create_si(row,"Loan","Loan Emi", row.loan_id)
+				self.update_loan(row, si)
 			elif si_exist:
 				self.update_si(row, self.cycle, si_exist)
 				self.update_loan_fpcr(row)
 		if flag:
 			frappe.msgprint(_("Sales invoice created successfully against Loans"))
+
 
 	
 	def validate_advance(self, row):
@@ -80,6 +103,7 @@ class FarmerPaymentCycleReport(Document):
 	def create_si(self, row, type_, item, doc_id):
 		si_doc = frappe.new_doc("Sales Invoice")
 		si_doc.type = type_
+		si_doc.posting_date = self.collection_to
 		si_doc.customer = self.farmer_name
 		si_doc.company = self.vlcc_name
 		si_doc.farmer_advance = doc_id
@@ -93,15 +117,23 @@ class FarmerPaymentCycleReport(Document):
 		si_doc.flags.ignore_permissions = True
 		si_doc.save()
 		si_doc.submit()
+		frappe.db.set_value("Sales Invoice", si_doc.name, 'posting_date', self.collection_to)
+		gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
+		gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
+		frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": si_doc.name},\
+					'posting_date', self.collection_to )
+		frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": si_doc.name},\
+					'posting_date', self.collection_to )	
+		return si_doc.name
 
 	
-	def update_loan(self, row):
+	def update_loan(self, row, si = None):
 		instalment = 0
 		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
 			,filters={'farmer_advance':row.loan_id})
 		
 		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
-		loan_doc.append("cycle", {"cycle": self.cycle})
+		loan_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
 		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
 		for i in loan_doc.cycle:
 			instalment += 1
@@ -114,12 +146,12 @@ class FarmerPaymentCycleReport(Document):
 		loan_doc.flags.ignore_permissions = True
 		loan_doc.save()
 
-	def update_advance(self, row):
+	def update_advance(self, row, si=None):
 		instalment = 0
 		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
 			,filters={'farmer_advance':row.adv_id})
 		adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
-		adv_doc.append("cycle", {"cycle": self.cycle})
+		adv_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
 		adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
 		for i in adv_doc.cycle:
 			instalment +=1
@@ -174,8 +206,24 @@ class FarmerPaymentCycleReport(Document):
 		frappe.db.set_value("Sales Invoice Item", item_row, 'rate', row.amount)
 		frappe.db.set_value("Sales Invoice Item", item_row, 'amount', row.amount)
 		frappe.db.set_value("Sales Invoice", si_no, 'grand_total', row.amount)
+		frappe.db.set_value("Sales Invoice", si_no, 'outstanding_amount', row.amount)
+		frappe.db.set_value("Sales Invoice", si_no, 'rounded_total', row.amount)
+		self.update_gl_entry(si_no, row.amount)
 
+	def update_gl_entry(self, si_no, amount):
+		if si_no and amount:
+			gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
+			gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
+			frappe.db.set_value("GL Entry", {'account': gl_stock, 'voucher_no': si_no},\
+				'credit_in_account_currency', amount)
+			frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": si_no},\
+					'credit', amount )
+			frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": si_no},\
+					'debit', amount )
+			frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": si_no},\
+					'debit_in_account_currency', amount )
 
+	
 	def create_incentive(self):
 		pi = frappe.new_doc("Purchase Invoice")
 		pi.supplier = self.farmer_name
@@ -193,7 +241,13 @@ class FarmerPaymentCycleReport(Document):
 		pi.flags.ignore_permissions = True
 		pi.save()
 		pi.submit()
-
+		
+		#updating date for current cycle
+		frappe.db.set_value("Purchase Invoice", pi.name, 'posting_date', self.collection_to)
+		gl_stock = frappe.db.get_value("Company", get_vlcc(), 'stock_received_but_not_billed')
+		gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_payable_account')
+		frappe.db.set_value("GL Entry",{'account': gl_stock,'voucher_no':pi.name}, 'posting_date', self.collection_to)
+		frappe.db.set_value("GL Entry",{'account': gl_credit,'voucher_no':pi.name}, 'posting_date', self.collection_to)
 
 @frappe.whitelist()
 def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
@@ -228,9 +282,9 @@ def get_incentives(amount, qty, vlcc=None):
 		incentive = 0
 		name = frappe.db.get_value("Farmer Settings", {'vlcc':vlcc}, 'name')
 		farmer_settings = frappe.get_doc("Farmer Settings",name)
-		if farmer_settings.enable_local_setting and not farmer_settings.enable_per_litre:
+		if farmer_settings.enable_local_setting and not farmer_settings.enable_local_per_litre:
 			incentive = (float(farmer_settings.local_farmer_incentive ) * float(amount)) / 100	
-		if farmer_settings.enable_local_setting and farmer_settings.enable_per_litre:
+		if farmer_settings.enable_local_setting and farmer_settings.enable_local_per_litre:
 			incentive = (float(farmer_settings.local_per_litre) * float(qty))
 		if not farmer_settings.enable_local_setting and not farmer_settings.enable_per_litre:
 			incentive = (float(farmer_settings.farmer_incentives) * float(amount)) / 100
@@ -239,6 +293,7 @@ def get_incentives(amount, qty, vlcc=None):
 		return incentive
 
 
+@frappe.whitelist()
 def get_advances(start_date, end_date, vlcc, farmer_id, cycle = None):
 	
 	advance  = frappe.db.sql("""
@@ -246,13 +301,14 @@ def get_advances(start_date, end_date, vlcc, farmer_id, cycle = None):
 		from 
 			`tabFarmer Advance` 
 		where
-			creation < now() and  farmer_id = '{2}' and status = 'Unpaid'
+			creation < now() and  farmer_id = '{2}' and status = 'Unpaid' and docstatus = 1
 		 """.format(start_date, end_date, farmer_id), as_dict=1)
 	if len(advance):
 		return advance[0].get('oustanding') if advance[0].get('oustanding') != None else 0
 	else: return 0
 
 
+@frappe.whitelist()
 def get_loans(start_date, end_date, vlcc, farmer_id, cycle = None):
 
 	loan  = frappe.db.sql("""
@@ -260,7 +316,7 @@ def get_loans(start_date, end_date, vlcc, farmer_id, cycle = None):
 		from 
 			`tabFarmer Loan` 
 		where
-			creation < now() and  farmer_id = '{2}' and status = 'Unpaid'
+			creation < now() and  farmer_id = '{2}' and status = 'Unpaid' and docstatus = 1
 		 """.format(start_date, end_date, farmer_id), as_dict=1)
 	if len(loan):
 		return loan[0].get('oustanding') if loan[0].get('oustanding') != None else 0
@@ -312,30 +368,67 @@ def get_cycle(doctype,text,searchfields,start,pagelen,filters):
 		from
 			`tabFarmer Date Computation`
 		where
-			 now() between start_date and end_date and vlcc = '{0}'
-		""".format(filters.get('vlcc')))
+			 end_date < now() and vlcc = '{vlcc}' and name like '{txt}'
+		""".format(vlcc = filters.get('vlcc'),txt= "%%%s%%" % text,as_list=True))
 
 def req_cycle_computation(data):
 	
-	not_req_cycl = frappe.db.sql("""
-			select name
-		from
-			`tabFarmer Date Computation`
-		where
-			'{0}' < start_date and vlcc = '{1}' order by start_date {2}""".
-		format(data.get('date_of_disbursement'),data.get('vlcc'),get_conditions(data)),as_dict=1,debug=0)
-	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
-	instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
-	if len(not_req_cycl):
-		req_cycle = frappe.db.sql("""
+	if data.get('emi_deduction_start_cycle') > 0:
+
+		not_req_cycl = frappe.db.sql("""
 				select name
 			from
 				`tabFarmer Date Computation`
 			where
-				'{date}' < start_date {cond} and vlcc = '{vlcc}' order by start_date limit {instalment}
-			""".format(date=data.get('date_of_disbursement'), cond = get_cycle_cond(data,not_req_cycl_list),vlcc = data.get('vlcc'),
-				instalment = instalment),as_dict=1,debug=0)
+				'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
+		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
+		instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
+		if len(not_req_cycl):
+			req_cycle = frappe.db.sql("""
+					select name
+				from
+					`tabFarmer Date Computation`
+				where
+					'{date}' < start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
+				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
+					instalment = instalment),as_dict=1,debug=0)
+			
+			req_cycl_list = [i.get('name') for i in req_cycle]
+			return req_cycl_list
+	elif data.get('emi_deduction_start_cycle') == 0:
+		not_req_cycl = frappe.db.sql("""
+				select name
+			from
+				`tabFarmer Date Computation`
+			where
+				'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
+		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		
+		instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
+		req_cycle = frappe.db.sql("""
+					select name
+				from
+					`tabFarmer Date Computation`
+				where
+					'{date}' < start_date  and vlcc = '{vlcc}' order by start_date limit {instalment}
+				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
+					instalment = instalment),as_dict=1,debug=0)
+		req_cycl_list = [i.get('name') for i in req_cycle]
+		return req_cycl_list
+
+	elif data.get('emi_deduction_start_cycle') == -1:
+		instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
+		req_cycle = frappe.db.sql("""
+					select
+						name
+					from
+						`tabFarmer Date Computation`
+					where
+					'{date}' < end_date
+						order by start_date limit {instalment}
+				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=0)
 		req_cycl_list = [i.get('name') for i in req_cycle]
 		return req_cycl_list
 	return []
@@ -365,28 +458,66 @@ def get_current_cycle(data):
 
 def req_cycle_computation_advance(data):
 	
-	not_req_cycl = frappe.db.sql("""
-			select name
-		from
-			`tabFarmer Date Computation`
-		where
-			'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
-		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
-	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
-	
-	instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
-	if len(not_req_cycl):
-		req_cycle = frappe.db.sql("""
+	if data.get('emi_deduction_start_cycle') > 0:
+		not_req_cycl = frappe.db.sql("""
 				select name
 			from
 				`tabFarmer Date Computation`
 			where
-				'{date}' < start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
-			""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
-				instalment = instalment),as_dict=1)
+				'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
+		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		
+		instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
+		if len(not_req_cycl):
+			req_cycle = frappe.db.sql("""
+					select name
+				from
+					`tabFarmer Date Computation`
+				where
+					'{date}' < start_date and name not in ({cycle})  and vlcc = '{vlcc}' order by start_date limit {instalment}
+				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
+					instalment = instalment),as_dict=1)
+			
+			req_cycl_list = [i.get('name') for i in req_cycle]
+			return req_cycl_list
+	elif data.get('emi_deduction_start_cycle') == 0:
+
+		not_req_cycl = frappe.db.sql("""
+				select name
+			from
+				`tabFarmer Date Computation`
+			where
+				'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
+		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
+		
+		instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
+		req_cycle = frappe.db.sql("""
+					select name
+				from
+					`tabFarmer Date Computation`
+				where
+					'{date}' < start_date  and vlcc = '{vlcc}' order by start_date limit {instalment}
+				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
+					instalment = instalment),as_dict=1,debug=0)
 		req_cycl_list = [i.get('name') for i in req_cycle]
 		return req_cycl_list
+
+	elif data.get('emi_deduction_start_cycle') == -1:
+		instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
+		req_cycle = frappe.db.sql("""
+					select
+						name
+					from
+						`tabFarmer Date Computation`
+					where
+					'{date}' < end_date
+						order by start_date limit {instalment}
+				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=0)
+		req_cycl_list = [i.get('name') for i in req_cycle]
+		return req_cycl_list
+	
 	return []
 
 
@@ -442,3 +573,36 @@ def fpcr_permission(user):
 
 	if user != 'Administrator' and "Vlcc Manager" in roles:
 		return """(`tabFarmer Payment Cycle Report`.vlcc_name = '{0}')""".format(user_doc.get('company'))
+
+@frappe.whitelist()
+def get_fpcr_flag():
+	return frappe.db.get_value("Farmer Settings", {'vlcc':get_vlcc()}, 'is_fpcr')
+
+def get_vlcc():
+	return frappe.db.get_value("User",frappe.session.user, 'company')
+
+@frappe.whitelist()
+def get_updated_advance(cycle, adv_id=None, amount=None, total = None):
+	sum_ = frappe.db.sql("""
+			select ifnull(sum(grand_total),0) as total
+		from 
+			`tabSales Invoice` 
+		where 
+		farmer_advance =%s  and cycle_ !=%s""",(adv_id,cycle),as_dict=1,debug=1)
+	if len(sum_):
+		adv_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
+		return adv_amount
+	else: return 0
+
+@frappe.whitelist()
+def get_updated_loan(cycle, loan_id=None, amount=None, total = None):
+	sum_ = frappe.db.sql("""
+				select ifnull(sum(grand_total),0) as total
+			from 
+				`tabSales Invoice` 
+			where 
+			farmer_advance =%s  and cycle_ !=%s""",(loan_id,cycle),as_dict=1,debug=1)
+	if len(sum_):
+		loan_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
+		return loan_amount
+	else: return 0

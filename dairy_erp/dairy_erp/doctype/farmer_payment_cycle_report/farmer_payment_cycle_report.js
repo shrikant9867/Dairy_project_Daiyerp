@@ -6,6 +6,17 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 
 	},
 	onload: function(frm) {
+		if(frm.doc.__islocal){	
+			frappe.call({	
+				method:"dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_fpcr_flag",
+				callback:function(r){
+					if(!r.message){
+						frappe.msgprint("Please enable <b>IS FPCR</b> flag in farmer settings to generate FPCR")
+						frappe.set_route("List","Farmer Payment Cycle Report")
+					}
+				}
+			})
+		}
 		if(!frm.doc.date) {
 			frm.set_value("date",frappe.datetime.get_today())
 		}
@@ -40,11 +51,14 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 		}
 	},
 	farmer_id: function(frm) {
-		frm.events.add_cycle_child(frm)
-		frm.events.calculate_total_ami(frm)
-		frm.events.calculate_total_outstanding(frm)
-		frm.events.calculate_advance_emi(frm)
-		frm.events.calculate_advance_outstanding(frm)	
+		if(frm.doc.farmer_id){
+			frm.events.add_cycle_child(frm)
+			frm.events.calculate_total_ami(frm)
+			frm.events.calculate_total_outstanding(frm)
+			frm.events.calculate_advance_emi(frm)
+			frm.events.calculate_advance_outstanding(frm)
+			frm.events.calculate_net_pay(frm)
+		}
 	},
 	add_cycle_child: function(frm) {
 		if(frm.doc.collection_from && frm.doc.collection_to && frm.doc.vlcc_name && frm.doc.farmer_id) {
@@ -62,7 +76,6 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 						frm.set_value("fmcr_details", "")
 						frm.set_value("loan_child", "")
 						frm.set_value("advance_child","")
-						console.log(r.message)
 						total = 0
 						$.each(r.message.fmcr, function(i, d) {
 							var row = frappe.model.add_child(cur_frm.doc, "FMCR Table", "fmcr_details");
@@ -84,11 +97,11 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 							row.extension = d.extension
 							row.paid_instalment = d.paid_instalment
 							row.no_of_instalment = d.no_of_instalments
+							row.amount = d.emi_amount
 
 						});
 						$.each(r.message.child_advance, function(i, d) {
 							var row = frappe.model.add_child(cur_frm.doc, "Advance Child", "advance_child");
-							console.log(d)
 							row.adv_id = d.name
 							row.principle = d.advance_amount
 							row.emi_amount = d.emi_amount
@@ -96,6 +109,7 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 							row.extension = d.extension
 							row.paid_instalment = d.paid_instalment
 							row.no_of_instalment = d.no_of_instalment
+							row.amount = d.emi_amount
 						})
 						frm.set_value("total_amount", total)
 						frm.set_value("incentives", r.message.incentive)
@@ -107,6 +121,7 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 						frm.events.calculate_total_outstanding(frm)
 						frm.events.calculate_advance_emi(frm)
 						frm.events.calculate_advance_outstanding(frm)
+						frm.events.calculate_net_pay(frm)	
 
 					}
 					else{
@@ -130,44 +145,34 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 	calculate_total_ami: function(frm) {
 		emi = 0
 		$.each(frm.doc.loan_child, function(i, d) {
-			emi += flt(d.emi_amount)				
+			emi += flt(d.amount)				
 		});
 		frm.set_value("loan_emi", emi.toFixed(2))
 	},
 	calculate_total_outstanding: function(frm) {
-		outstanding = 0
-		$.each(frm.doc.loan_child, function(i, d) {
-			outstanding += flt(d.outstanding)
-		});
-		frm.set_value("loan_outstanding", outstanding.toFixed(2))
+		
 	},
 	calculate_advance_emi: function(frm) {
 		emi = 0
 		$.each(frm.doc.advance_child, function(i, d) {
-			console.log()
-			emi += flt(d.emi_amount)				
+			emi += flt(d.amount)				
 		});
 		frm.set_value("advance_emi", emi.toFixed(2))
 	},
 	calculate_advance_outstanding: function(frm) {
-		outstanding = 0
-		$.each(frm.doc.advance_child, function(i, d) {
-			outstanding += flt(d.outstanding)				
-		});
-		frm.set_value("advance_outstanding", outstanding.toFixed(2))
+	
 	},
 	address: function(frm) {
 		erpnext.utils.get_address_display(frm, "address", "address_display");
 		frm.refresh_field("address_display")
+	},
+	calculate_net_pay: function(frm){
+		net_pay = flt(frm.doc.total_bill) - (flt(frm.doc.loan_emi) + 
+		flt(frm.doc.advance_emi) + flt(frm.doc.feed_and_fodder) +
+		flt(frm.doc.veterinary_services))
+		frm.set_value("net_pay",net_pay)
 	}
 });
-
-cur_frm.fields_dict['cycle'].get_query = function(doc) {
-			return {
-				"query": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_cycle",
-				filters: {'vlcc': doc.vlcc_name}
-			}
-		}
 
 get_vlcc =  function(frm) {
 		frappe.call({
@@ -185,21 +190,56 @@ get_vlcc =  function(frm) {
 		})
 }
 
-frappe.ui.form.on('Loan Child', 'pay_full_loan', function(frm, cdt, cdn) {
-	var row = locals[cdt][cdn]
-	frappe.call({
-		method: "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.update_full_loan",
-		args: {
-			"loan": row.loan_id
-		},
-		callback: function(r){
-			if(r.message){	
-			
+frappe.ui.form.on('Loan Child',  {
+	pay_full_loan: function(frm) {
+		var row = locals[cdt][cdn]
+		frappe.call({
+			method: "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.update_full_loan",
+			args: {
+				"loan": row.loan_id
+			},
+			callback: function(r){
+				if(r.message){	
+				
+				}
 			}
+		});
+	},
+	amount: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn]
+		if(frm.doc.cycle && row.loan_id && row.amount) {
+			frappe.call({
+				method: "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_updated_loan",
+				args: {"cycle": frm.doc.cycle, "loan_id": row.loan_id, "amount": row.amount, "total": row.principle},
+				callback: function(r) {
+					if (r.message){
+						frm.set_value("loan_outstanding",r.message)
+					}
+				}
+			});
 		}
-	});
+		frm.events.calculate_total_ami(frm)
+		frm.events.calculate_net_pay(frm)	
+	}
 
 });
+
+frappe.ui.form.on('Advance Child', 'amount', function(frm, cdt, cdn){
+	var row = locals[cdt][cdn]
+	if(frm.doc.cycle && row.adv_id && row.amount) {
+		frappe.call({
+			method: "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_updated_advance",
+			args: {"cycle": frm.doc.cycle, "adv_id": row.adv_id, "amount": row.amount, "total": row.principle},
+			callback: function(r) {
+				if (r.message){
+					frm.set_value("advance_outstanding",r.message)
+				}
+			}
+		});
+	}
+	frm.events.calculate_advance_emi(frm)
+	frm.events.calculate_net_pay(frm)
+})
 
 get_address =  function(frm) {
 	frappe.call({
@@ -215,4 +255,11 @@ get_address =  function(frm) {
 			}
 		}
 	})
+}
+
+cur_frm.fields_dict['cycle'].get_query = function(doc) {
+	return {
+		"query": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_cycle",
+		filters: {'vlcc': doc.vlcc_name}
+	}
 }

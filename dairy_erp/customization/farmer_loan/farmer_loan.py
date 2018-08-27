@@ -30,7 +30,7 @@ def create_si():
 		child_cycl = frappe.db.sql("""select cycle from `tabFarmer Cycle` where parent =%s""",(row.get('name')),as_dict=1)
 		cc = [i.get('cycle') for i in child_cycl]	
 		if len(cur_cycl):
-			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc and  not frappe.db.get_value("Farmer Settings",{'vlcc': row.get('vlcc')}, 'is_fpcr'):
+			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
 				make_si(row,cur_cycl[0].get('name'))
 
 
@@ -45,7 +45,7 @@ def make_si(data,cur_cycl=None):
 			si_doc.farmer_advance = data.get('name')
 			si_doc.cycle_ = cur_cycl
 			si_doc.append("items",{
-				"item_code":"Milk Incentives",
+				"item_code":"Loan Emi",
 				"qty": 1,
 				"rate": data.get('emi_amount'),
 				"cost_center": frappe.db.get_value("Company", data.get('vlcc'), "cost_center")
@@ -62,7 +62,8 @@ def make_si(data,cur_cycl=None):
 				loan_doc.outstanding_amount = 0
 				loan_doc.status = "Paid"
 			loan_doc.append("cycle",{
-				"cycle":cur_cycl
+				"cycle":cur_cycl,
+				"sales_invoice": si_doc.name
 				})
 			for i in loan_doc.cycle:
 				paid_instlmnt += 1
@@ -86,27 +87,64 @@ def get_current_cycle(data):
 
 def req_cycle_computation(data):
 	
-	not_req_cycl = frappe.db.sql("""
-			select name
-		from
-			`tabFarmer Date Computation`
-		where
-			'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
-		format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1)
-	not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
-	instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
-	if len(not_req_cycl):
-		req_cycle = frappe.db.sql("""
+	if data.get('emi_deduction_start_cycle') > 0:
+		not_req_cycl = frappe.db.sql("""
 				select name
 			from
 				`tabFarmer Date Computation`
 			where
-				'{date}' < start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
-			""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
-				instalment = instalment),as_dict=1)
+				'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1)
+		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
+		instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
+		if len(not_req_cycl):
+			req_cycle = frappe.db.sql("""
+					select name
+				from
+					`tabFarmer Date Computation`
+				where
+					'{date}' < start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
+				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
+					instalment = instalment),as_dict=1)
+			
+			req_cycl_list = [i.get('name') for i in req_cycle]
+			return req_cycl_list
+	elif data.get('emi_deduction_start_cycle') == 0:
+		not_req_cycl = frappe.db.sql("""
+				select name
+			from
+				`tabFarmer Date Computation`
+			where
+				'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
+		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		
+		instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
+		req_cycle = frappe.db.sql("""
+					select name
+				from
+					`tabFarmer Date Computation`
+				where
+					'{date}' < start_date  and vlcc = '{vlcc}' order by start_date limit {instalment}
+				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
+					instalment = instalment),as_dict=1,debug=0)
 		req_cycl_list = [i.get('name') for i in req_cycle]
 		return req_cycl_list
+
+	elif data.get('emi_deduction_start_cycle') == -1:
+		instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
+		req_cycle = frappe.db.sql("""
+					select
+						name
+					from
+						`tabFarmer Date Computation`
+					where
+					'{date}' < end_date
+						order by start_date limit {instalment}
+				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=0)
+		req_cycl_list = [i.get('name') for i in req_cycle]
+		return req_cycl_list
+
 	return []
 
 def get_si_amount(data):

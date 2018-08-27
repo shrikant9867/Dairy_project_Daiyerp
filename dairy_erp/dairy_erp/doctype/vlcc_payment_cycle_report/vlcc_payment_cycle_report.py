@@ -547,3 +547,13 @@ def get_updated_advance(cycle, adv_id=None, amount=None, total = None):
 @frappe.whitelist()
 def get_vpcr_flag():
 	return frappe.get_doc("Dairy Setting").as_dict().get('is_vpcr')
+
+@frappe.whitelist()
+def get_cycle(doctype,text,searchfields,start,pagelen,filters):
+	return frappe.db.sql("""
+			select name 
+		from
+			`tabCyclewise Date Computation`
+		where
+			 end_date < now() and name like '{txt}'
+		""".format(txt= "%%%s%%" % text,as_list=True))

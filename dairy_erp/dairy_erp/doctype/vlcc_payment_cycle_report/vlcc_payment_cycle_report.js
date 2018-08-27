@@ -237,3 +237,9 @@ frappe.ui.form.on('VLCC Advance Child', 'amount', function(frm, cdt, cdn){
 	frm.events.calculate_advance_emi(frm)
 	frm.events.calculate_net_pay(frm)
 })
+
+cur_frm.fields_dict['cycle'].get_query = function(doc) {
+	return {
+		"query": "dairy_erp.dairy_erp.doctype.vlcc_payment_cycle_report.vlcc_payment_cycle_report.get_cycle",
+	}
+}

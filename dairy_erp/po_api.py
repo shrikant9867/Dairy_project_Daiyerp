@@ -26,6 +26,7 @@ def create_po(data):
 			else:
 				response_dict.update({"status":"error", "response":"client id, camp office , item are required "})
 	except Exception,e:
+		frappe.db.rollback()
 		utils.make_mobile_log(title="Sync failed Po creation",method="create_po", status="Error",
 			data = data, message=e, traceback=frappe.get_traceback())
 		response_dict.update({"status":"error","message":e,"traceback":frappe.get_traceback()})

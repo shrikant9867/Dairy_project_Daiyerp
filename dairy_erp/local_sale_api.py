@@ -27,6 +27,7 @@ def create_local_sale(data):
 				response_dict.update({"status": "success", "name": local_exist})
 		
 	except Exception,e:
+		frappe.db.rollback()
 		utils.make_mobile_log(title="Sync failed for LS creation",method="create_local_sale", status="Error",
 			data = data, message=e, traceback=frappe.get_traceback())
 
@@ -38,6 +39,8 @@ def create_ls(data):
 	ls_obj.local_sale = 1
 	ls_obj.update_stock = 1
 	ls_obj.debit_to = frappe.db.get_value("Company",ls_obj.company, 'default_receivable_account')
+	if data.get('customer_or_farmer') == "Vlcc Local Institution":
+		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
 	ls_obj.update(data)
 	ls_obj.customer_or_farmer = data.get('customer_or_farmer')
 	ls_obj.selling_price_list = get_price_list(ls_obj.customer_or_farmer)
@@ -56,18 +59,15 @@ def create_ls(data):
 def local_sale_list():
 	response_dict = {}
 	try:
-		la_list = frappe.db.sql("""select
-										name,customer_or_farmer,
-										posting_date,additional_discount_percentage,
-										farmer_or_local_customer_address,
-										organisation_name,discount_amount,
-										grand_total,status,apply_discount_on, 
-										by_cash, by_credit, multimode_payment,
-										customer,shift
-									from
-										`tabSales Invoice`
-									where
-										local_sale =1 and company = '{0}' and docstatus =1 order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
+		la_list = frappe.db.sql("""
+			select
+				name,customer_or_farmer,posting_date,additional_discount_percentage,farmer_or_local_customer_address,
+				organisation_name,discount_amount,grand_total,status,apply_discount_on, by_cash, 
+				by_credit, multimode_payment,customer,shift
+			from
+				`tabSales Invoice`
+			where
+				local_sale =1 and company = '{0}' and docstatus =1 order by creation desc limit 10 """.format(get_seesion_company_datails().get('company')),as_dict=1)
 		for row in la_list:
 			if row.get('customer_or_farmer') == "Farmer":
 				row.update(
@@ -90,7 +90,7 @@ def local_sale_list():
 					{
 						"total_milk_cow": frappe.db.get_value("Sales Invoice",row.get('name'),'total_cow_milk_qty'),
 						"total_milk_buffalo": frappe.db.get_value("Sales Invoice",row.get('name'),'total_buffalo_milk_qty'),
-						"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabSales Invoice Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1)
+						"items": frappe.db.sql("select item_code,item_name,qty,rate,uom from `tabSales Invoice Item` where parent = '{0}' order by idx".format(row.get('name')),as_dict=1,debug=1)
 					}
 				)
 

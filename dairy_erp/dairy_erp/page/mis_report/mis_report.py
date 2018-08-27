@@ -79,7 +79,7 @@ def get_fmcr_data_list(filters,date_range):
 									`tabFarmer Milk Collection Record` fmcr
 								where
 									docstatus = 1 {1}
-								""".format(filters.get('fmcr_cond'),get_fmcr_conditions(filters)),as_dict=True,debug=1)
+								""".format(filters.get('fmcr_cond'),get_fmcr_conditions(filters)),as_dict=True,debug=0)
 	return fmcr_data
 
 

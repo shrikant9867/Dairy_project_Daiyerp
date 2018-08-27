@@ -39,7 +39,6 @@ def get_vmcr_data(start_date=None,end_date=None):
 		for vmcr in vmcr_data_list:
 			vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
 
-	print "vmcr_dict\n\n\n",vmcr_dict
 	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+vmcr_dict.keys()
 	final_dict = {}
 	
@@ -62,8 +61,6 @@ def get_vmcr_data(start_date=None,end_date=None):
 		else:
 			pass
 	
-	# print "vmcr_data_list\n\n\n\n",vmcr_data_list		
-	print "final_dict\n\n\n",final_dict
 	return final_dict
 
 def get_vmcr_data_list(filters):
@@ -81,7 +78,7 @@ def get_vmcr_data_list(filters):
 								where
 									vmcr.docstatus = 1 and
 									vmcr.shift in ('MORNING','EVENING') and
-									{0} """.format(get_conditions(filters)),as_dict=1,debug=1)	
+									{0} """.format(get_conditions(filters)),as_dict=1,debug=0)	
 	return vmcr_list
 
 def get_conditions(filters):

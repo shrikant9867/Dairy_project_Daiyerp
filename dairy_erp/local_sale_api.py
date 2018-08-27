@@ -85,7 +85,7 @@ def local_sale_list():
 					row.update({'taxes_and_charges':frappe.db.get_value("Sales Invoice",row.get('name'),'taxes_and_charges')})
 					row.update({row.get('taxes_and_charges'): frappe.db.sql("""select charge_type,description,rate from `tabSales Taxes and Charges` where parent = '{0}'""".format(row.get('name')),as_dict=1)})
 
-			if row.get('customer_or_farmer') == "Vlcc Local Customer":
+			if row.get('customer_or_farmer') in ["Vlcc Local Customer","Vlcc Local Institution"]:
 				row.update(
 					{
 						"total_milk_cow": frappe.db.get_value("Sales Invoice",row.get('name'),'total_cow_milk_qty'),

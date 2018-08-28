@@ -52,10 +52,10 @@ frappe.mis_report = Class.extend({
         $(me.page).find('[data-fieldname="update_total_milk"]').click(function(){
             if($(me.page).find('[data-fieldname="formated_milk"]').val()){
                 console.log($(me.page).find('[data-fieldname="formated_milk"]').val())
-                var milk_data =  {"formated_milk":$(me.page).find('[data-fieldname="formated_milk"]').val(),
-                             "good_milk":$(me.page).find(".good_milk").html(),
-                             "bad_milk":$(me.page).find(".bad_milk").html(),
-                             "total_milk":$(me.page).find(".total_milk").html()
+                var milk_data =  {"formated_milk":flt($(me.page).find('[data-fieldname="formated_milk"]').val()),
+                             "good_milk":flt($(me.page).find(".good_milk").html()),
+                             "bad_milk":flt($(me.page).find(".bad_milk").html()),
+                             "total_milk":flt($(me.page).find(".total_milk").html())
                             }
                 me.add_formated_milk(milk_data);
             }

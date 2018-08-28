@@ -166,16 +166,16 @@ def get_vmcr_milk_quality_data(filters,status):
 
 @frappe.whitelist()
 def add_formated_milk(filters=None):
-	pass
-	# filters = json.loads(filters)
-	# milk_data = filters.get('milk_data')
+	filters = json.loads(filters)
+	milk_data = filters.get('milk_data')
+	return milk_data
 	# doc = frappe.db.get_value("MIS Report Log",{"vlcc_name":filters.get("vlcc"),
 	# 										"fiscal_year":filters.get("fiscal_year"),
 	# 										"month":filters.get("fiscal_year")
 	# 										},['name','formated_milk_new'],as_dict=True)
 	# if doc:
 	# 	mis_report_log = frappe.get_doc("MIS Report Log",doc.get('name'))
-	# 	if mis_report_log.formated_milk_new != filters.get('milk_data').get('formated_milk'):
+	# 	if mis_report_log.formated_milk_new != milk_data.get('formated_milk'):
 	# 		mis_report_log = frappe.new_doc("MIS Report Log")
 	# 		mis_report_log.formated_milk_old = mis_report_log.formated_milk_new
 	# 		mis_report_log.formated_milk_new = milk_data.get('formated_milk')

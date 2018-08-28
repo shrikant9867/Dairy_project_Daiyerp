@@ -287,6 +287,18 @@ class VillageLevelCollectionCentre(Document):
 				})
 			custmer_doc_vlcc.flags.ignore_permissions = True		
 			custmer_doc_vlcc.save()
+		# local institution
+		if not frappe.db.exists('Customer', self.vlcc_name+"-"+"Local Institution"):
+			custmer_doc_vlcc = frappe.new_doc("Customer")
+			custmer_doc_vlcc.customer_name = self.vlcc_name+"-"+"Local Institution"
+			custmer_doc_vlcc.customer_group = "Vlcc Local Institution"
+			custmer_doc_vlcc.company = self.vlcc_name
+			custmer_doc_vlcc.append("accounts",{
+					"company": self.vlcc_name,
+					"account": frappe.db.get_value("Company", self.vlcc_name, "default_receivable_account")
+				})
+			custmer_doc_vlcc.flags.ignore_permissions = True		
+			custmer_doc_vlcc.save()
 
 	def create_missing_accounts(self, company):
 		try:

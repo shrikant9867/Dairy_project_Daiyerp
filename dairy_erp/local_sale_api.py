@@ -116,9 +116,11 @@ def get_price_list(party_type):
 
 	elif party_type in ["Vlcc Local Customer","Vlcc Local Institution"] and \
 	frappe.db.get_value("Price List","LCS-"+user_company,'name'):
+		print "inside get_price_list\n\n\n\n1",party_type
 		return frappe.db.get_value("Price List","LCS-"+user_company)
 
 	elif party_type in ["Vlcc Local Customer","Vlcc Local Institution"] and frappe.db.get_value("Price List","GTCS","name"):
+		print "inside get_price_list\n\n\n\n2",party_type
 		return frappe.db.get_value("Price List","GTCS","name")
 	# elif party_type == "Vlcc Local Customer" and \
 	# frappe.db.get_value("Price List","LCS-"+user_company,'name'):

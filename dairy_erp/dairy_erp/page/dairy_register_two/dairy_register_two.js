@@ -1,3 +1,6 @@
+{% include "dairy_erp/public/js/openpdf.js" %}
+
+
 frappe.pages['dairy_register_two'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -27,12 +30,12 @@ frappe.dairy_register_two = Class.extend({
             callback: function(r){
                 if(r.message){
                 	console.log("inside callback",r.message)
-                    /*me.table_data = r.message
+                    me.table_data = r.message
                     $(me.page).find(".render-table").empty();
                     me.print = frappe.render_template("dairy_register_two",{
-                            "fmcr_data":me.table_data
+                            "vmcr_data":me.table_data
                             })
-                    $(me.page).find(".render-table").append(me.print)*/
+                    $(me.page).find(".render-table").append(me.print)
                 }
             }
         })
@@ -80,7 +83,13 @@ frappe.dairy_register_two = Class.extend({
             },
             render_input: true
         });
-        me.end_date.set_value(frappe.datetime.str_to_obj(frappe.datetime.get_today()))
+        me.end_date.set_value(frappe.datetime.str_to_obj(frappe.datetime.get_today()));
+        me.wrapper_page.set_primary_action(__("Print"), function () {
+            me.create_pdf()
+        })
+        me.wrapper_page.set_secondary_action(__("Refresh"),function() { 
+            window.location.reload();
+        })
     },
     start_date_change: function(date_){
         var me =this;
@@ -95,6 +104,20 @@ frappe.dairy_register_two = Class.extend({
         var _start_date = me.start_date.get_value() ? me.start_date.get_value() : ""
         var _end_date = me.end_date.get_value() ? me.end_date.get_value() : ""
         me.render_layout(_start_date,_end_date);
+    },
+    create_pdf: function(){
+        var me = this;
+        var base_url = frappe.urllib.get_base_url();
+        var print_css = frappe.boot.print_css;
+        var html = frappe.render_template("dr2",{
+            content: frappe.render_template("dairy_register_two",{
+                                                        "vmcr_data":me.table_data
+                                                    }),
+            title:__("dairy_register_two"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
+            base_url: base_url,
+            print_css: print_css
+        });
+        open_pdf(html)
     }
 })        
 

@@ -154,6 +154,30 @@ def get_data():
 					"description": _(" "),
 				},
 				{
+					"type": "page",
+					"name": "individual_farmer_milk_report",
+					"label": _("Individual Farmer Milk Report"),
+					"description": _(" "),
+				},
+				{
+					"type": "page",
+					"name": "dairy_register_one",
+					"label": _("Dairy Register - 1"),
+					"description": _(" "),
+				},
+				{
+					"type": "page",
+					"name": "dairy_register_two",
+					"label": _("Dairy Register - 2"),
+					"description": _(" "),
+				},
+				{
+					"type": "page",
+					"name": "mis_report",
+					"label": _("MIS Report"),
+					"description": _(" "),
+				},
+				{
 					"type": "doctype",
 					"name": "Farmer Milk Collection Record",
 					"description": _(" "),

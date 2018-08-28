@@ -18,6 +18,7 @@ import json
 
 def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,societyid,vmcr_doc=None):
 
+	print method,"method___________________\n\n"
 	try:
 		vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":societyid},["name","warehouse"],as_dict=True)
 		company_details = frappe.db.get_value("Company",{"name":vlcc.get('name')},['default_payable_account','abbr','cost_center'],as_dict=1)
@@ -43,12 +44,16 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,socie
 			stock_doc.company = vlcc.get('name')
 			stock_doc.transaction_id = row.get('transactionid')
 			stock_doc.vmcr = vmcr_doc.name if method == 'handling_loss' or method == 'handling_gain' else ""
-			stock_doc.wh_type = 'Loss' if method == 'handling_loss' else 'Gain'
+			if method == 'handling_loss':
+				stock_doc.wh_type = 'Loss'
+			elif method == 'handling_gain':
+				stock_doc.wh_type = 'Loss'
+
 			if row.get('transactionid'):
 				stock_doc.shift = data.get('shift')
 				stock_doc.milktype = row.get('milktype')
 				stock_doc.societyid = data.get('societyid')
-				stock_doc.is_reserved_farmer = 1
+				stock_doc.is_reserved_farmer = 1 if method == "create_fmrc" else 0
 				stock_doc.farmer_id = row.get('farmerid')
 				stock_doc.fat = row.get('fat')
 				stock_doc.snf = row.get('snf')

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.data import add_to_date
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
 
 class VlccMilkCollectionRecord(Document):
@@ -173,11 +174,13 @@ class VlccMilkCollectionRecord(Document):
 
 	def make_purchase_invoice(self,pr):
 		try:
+			days = frappe.db.get_singles_dict('Dairy Setting').get('configurable_days') or 0
 			item_mapper = {"COW": "COW Milk", "BUFFALO": "BUFFALO Milk"}
 			item = frappe.get_doc("Item", item_mapper[self.milktype])
 			pi = frappe.new_doc("Purchase Invoice")
 			pi.supplier = frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "name")
 			pi.vlcc_milk_collection_record = self.name
+			# pi.due_date = add_to_date(getdate(self.collectiontime),0,0,cint(days))
 			pi.company = frappe.db.get_value("Company",{"is_dairy":1},'name')
 			pi.append("items",
 				{
@@ -202,6 +205,7 @@ class VlccMilkCollectionRecord(Document):
 
 	def make_sales_invoice(self, dn):
 		try:
+			days = frappe.db.get_value("VLCC Settings", self.associated_vlcc, 'configurable_days') or 0
 			item_mapper = {"COW": "COW Milk", "BUFFALO": "BUFFALO Milk"}
 			item = frappe.get_doc("Item", item_mapper[self.milktype])
 			customer = frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "plant_office")
@@ -211,6 +215,7 @@ class VlccMilkCollectionRecord(Document):
 			si = frappe.new_doc("Sales Invoice")
 			si.customer = customer
 			si.company = vlcc
+			# si.due_date = add_to_date(getdate(self.collectiontime),0,0,cint(days))
 			si.vlcc_milk_collection_record = self.name
 			si.append("items",
 			{

@@ -170,12 +170,19 @@ frappe.ui.form.on("Sales Invoice", {
 
 	validate: function(frm) {
 		frm.events.validate_multimode_payment(frm);
+		frm.events.validate_organization(frm);
 	},
 
 	validate_multimode_payment: function(frm) {
 		multimode_amt = frm.doc.by_cash + frm.doc.by_credit
 		if(frm.doc.multimode_payment && (frm.doc.grand_total != multimode_amt)) {
 			frappe.throw("Sum of By Cash and By credit must be equal to Outstanding Amount")
+		}
+	},
+
+	validate_organization : function(frm) {
+		if(frm.doc.customer_or_farmer == "Vlcc Local Institution" &&  frm.doc.customer == frm.doc.company+"-Local Institution" && !frm.doc.organisation_name ){
+			frappe.throw("Please Enter Organisation Name against vlcc local Institution")
 		}
 	}
 })

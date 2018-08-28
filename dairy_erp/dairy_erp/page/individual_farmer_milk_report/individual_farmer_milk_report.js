@@ -95,7 +95,7 @@ frappe.individual_farmer_milk_report = Class.extend({
 				label:"Farmer Cycle",
 				placeholder: __("Farmer Cycle"),
 				fieldname: "cycle",
-				options:"Cyclewise Date Computation",
+				options:"Farmer Date Computation",
 				reqd:1,
 				get_query: function () {
 					return {

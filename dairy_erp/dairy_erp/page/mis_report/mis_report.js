@@ -40,9 +40,49 @@ frappe.mis_report = Class.extend({
                             "milk_quality":me.milk_quality
                             })
                     $(me.page).find(".render-table").append(me.print)
+                    me.update_total_milk()
                 }
             }
         })
+    },
+    update_total_milk:function() {
+        var me = this;
+        console.log($(me.page).find(".good_milk").html(),"total milk___________")
+        console.log("insdie update_total_milk",$(me.page).find('[data-fieldname="update_total_milk"]'))
+        $(me.page).find('[data-fieldname="update_total_milk"]').click(function(){
+            if($(me.page).find('[data-fieldname="formated_milk"]').val()){
+                console.log($(me.page).find('[data-fieldname="formated_milk"]').val())
+                var milk_data =  {"formated_milk":flt($(me.page).find('[data-fieldname="formated_milk"]').val()),
+                             "good_milk":flt($(me.page).find(".good_milk").html()),
+                             "bad_milk":flt($(me.page).find(".bad_milk").html()),
+                             "total_milk":flt($(me.page).find(".total_milk").html())
+                            }
+                me.add_formated_milk(milk_data);
+            }
+            else{
+                frappe.throw(__("Please Add Formated Milk Qty"))
+            }
+        })
+    },
+    add_formated_milk:function(milk_data){
+        var me = this;
+        console.log("inside add_formated_milk",milk_data)
+        frappe.call({
+            method: "dairy_erp.dairy_erp.page.mis_report.mis_report.add_formated_milk",
+            args: {
+                "filters": {
+                    "milk_data":milk_data,
+                    "vlcc":frappe.sys_defaults.company,
+                    "month":me.month.get_value(),
+                    "fiscal_year":me.fiscal_year.get_value()   
+                }
+            },
+            callback: function(r){
+                if(r.message){  
+                    console.log(r.message)       
+                }
+            }
+        });
     },
     set_filters:function(){
         var me = this;

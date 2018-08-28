@@ -198,7 +198,7 @@ class VlccMilkCollectionRecord(Document):
 			pi.flags.ignore_permissions = True
 			pi.flags.for_cc = True
 			pi.submit()
-			self.set_posting_datetime(pi)
+			self.set_posting_datetime(pi,days)
 			return pi.name
 		except Exception as e:
 			raise e
@@ -229,12 +229,12 @@ class VlccMilkCollectionRecord(Document):
 			})
 			si.flags.ignore_permissions = True
 			si.submit()
-			self.set_posting_datetime(si)
+			self.set_posting_datetime(si,days)
 			return si.name
 		except Exception as e:
 			raise e
 
-	def set_posting_datetime(self,doc):
+	def set_posting_datetime(self,doc,days=None):
 		if self.collectiontime:			
 			frappe.db.sql("""update `tab{0}` 
 				set 
@@ -242,6 +242,13 @@ class VlccMilkCollectionRecord(Document):
 				where 
 					name = '{3}'""".format(doc.doctype,getdate(self.collectiontime),
 						get_time(self.collectiontime),doc.name))
+			if doc.doctype in ['Sales Invoice','Purchase Invoice']:
+				frappe.db.sql("""update `tab{0}` 
+					set 
+						due_date = '{1}'
+					where 
+						name = '{2}'""".format(doc.doctype,add_to_date(getdate(self.collectiontime),0,0,cint(days)),doc.name))
+			
 			frappe.db.sql("""update `tabGL Entry` 
 					set 
 						posting_date = %s

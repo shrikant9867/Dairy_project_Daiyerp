@@ -117,15 +117,24 @@
 					</tr>
 					<tr>
 						<td>Good Milk</td>
-						<td>{%= milk_quality.good %}</td>
+						<td class="good_milk">{%= milk_quality.good %}</td>
 					</tr>
 					<tr>
 						<td>Bad Milk</td>
-						<td>{%= milk_quality.bad %}</td>
+						<td class="bad_milk">{%= milk_quality.bad %}</td>
 					</tr>
 					<tr>
 						<td>Formated Milk</td>
-						<td></td>
+						<td>
+							<div class="row">
+								<div class="col-md-8">
+									<input type="number" autocomplete="off" class="input-with-feedback form-control" data-fieldtype="Float" data-fieldname="formated_milk" placeholder="" data-doctype="MIS Report Log">
+								</div>
+								<div class="col-md-4">
+									<button class="input-with-feedback form-control" btn btn-primary btn-sm primary-actiondata-fieldtype="Button" data-fieldname="update_total_milk" data-doctype="MIS Report Log" style="color: blue">Update</button>
+								</div>
+							</div>
+						</td>
 					</tr>
 					<tr>
 						<td>Total Qty</td>

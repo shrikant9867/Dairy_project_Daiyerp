@@ -5,7 +5,7 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,add_m
 
 @frappe.whitelist()
 def get_fmcr_data(vlcc=None,cycle=None,farmer=None):
-	cyclewise_computation = frappe.db.get_values("Cyclewise Date Computation",{"name":cycle},["start_date","end_date"],as_dict=1)
+	cyclewise_computation = frappe.db.get_values("Farmer Date Computation",{"name":cycle},["start_date","end_date"],as_dict=1)
 	start_date = cyclewise_computation[0]['start_date']
 	end_date = cyclewise_computation[0]['end_date']	
 	filters = {

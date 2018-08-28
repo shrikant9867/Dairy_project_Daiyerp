@@ -41,6 +41,7 @@ def create_ls(data):
 	ls_obj.debit_to = frappe.db.get_value("Company",ls_obj.company, 'default_receivable_account')
 	if data.get('customer_or_farmer') == "Vlcc Local Institution":
 		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
+		print "#################",ls_obj.customer
 	ls_obj.update(data)
 	ls_obj.customer_or_farmer = data.get('customer_or_farmer')
 	ls_obj.selling_price_list = get_price_list(ls_obj.customer_or_farmer)

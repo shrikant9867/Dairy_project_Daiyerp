@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.data import add_to_date
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
 
 class FarmerMilkCollectionRecord(Document):
@@ -119,10 +120,12 @@ class FarmerMilkCollectionRecord(Document):
 	def purchase_invoice(self, pr):
 		# purchase invoice against farmer
 		item_mapper = {"COW": "COW Milk", "BUFFALO": "BUFFALO Milk"}
+		days = frappe.db.get_value('VLCC Settings',{'vlcc':self.associated_vlcc},'configurable_days') or 0
 		item = frappe.get_doc("Item", item_mapper[self.milktype])
 		pi = frappe.new_doc("Purchase Invoice")
 		pi.supplier =  frappe.db.get_value("Supplier", {"farmer": self.farmerid}, "name")
 		pi.farmer_milk_collection_record = self.name
+		# pi.due_date = add_to_date(getdate(self.collectiontime),0,0,cint(days))
 		pi.company = self.associated_vlcc
 		pi.buying_price_list = "Standard Buying"
 		pi.append("items",
@@ -141,10 +144,10 @@ class FarmerMilkCollectionRecord(Document):
 		pi.flags.ignore_permissions = True
 		pi.flags.ignore_material_price = True
 		pi.submit()
-		self.set_posting_datetime(pi)
+		self.set_posting_datetime(pi,days)
 		return pi.name
 
-	def set_posting_datetime(self,doc):
+	def set_posting_datetime(self,doc,days=None):
 		if self.collectiontime:			
 			frappe.db.sql("""update `tab{0}` 
 				set 
@@ -152,6 +155,13 @@ class FarmerMilkCollectionRecord(Document):
 				where 
 					name = '{3}'""".format(doc.doctype,getdate(self.collectiontime),
 						get_time(self.collectiontime),doc.name))
+
+			if doc.doctype == 'Purchase Invoice':
+				frappe.db.sql("""update `tab{0}` 
+					set 
+						due_date = '{1}'
+					where 
+						name = '{2}'""".format(doc.doctype,add_to_date(getdate(self.collectiontime),0,0,cint(days)),doc.name))
 			frappe.db.sql("""update `tabGL Entry` 
 					set 
 						posting_date = %s

@@ -3563,7 +3563,7 @@
   "doctype": "Property Setter", 
   "doctype_or_field": "DocType", 
   "field_name": null, 
-  "modified": "2018-08-28 15:47:19.777839", 
+  "modified": "2018-08-28 20:10:46.402842", 
   "name": "Sales Invoice-read_only_onload", 
   "property": "read_only_onload", 
   "property_type": "Check", 

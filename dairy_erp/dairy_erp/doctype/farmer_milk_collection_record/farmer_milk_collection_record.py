@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.data import add_to_date
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
 
 class FarmerMilkCollectionRecord(Document):
@@ -119,10 +120,12 @@ class FarmerMilkCollectionRecord(Document):
 	def purchase_invoice(self, pr):
 		# purchase invoice against farmer
 		item_mapper = {"COW": "COW Milk", "BUFFALO": "BUFFALO Milk"}
+		days = frappe.db.get_value('VLCC Settings',{'vlcc':self.associated_vlcc},'configurable_days') or 0
 		item = frappe.get_doc("Item", item_mapper[self.milktype])
 		pi = frappe.new_doc("Purchase Invoice")
 		pi.supplier =  frappe.db.get_value("Supplier", {"farmer": self.farmerid}, "name")
 		pi.farmer_milk_collection_record = self.name
+		# pi.due_date = add_to_date(getdate(self.collectiontime),0,0,cint(days))
 		pi.company = self.associated_vlcc
 		pi.buying_price_list = "Standard Buying"
 		pi.append("items",

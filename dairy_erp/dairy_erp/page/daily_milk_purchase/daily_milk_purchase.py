@@ -32,7 +32,7 @@ def get_data(curr_date=None,shift=None):
 						s.name = se.parent
 						and s.docstatus = 1 and 
 						s.is_reserved_farmer = 1 
-						{0}""".format(local_sale_condn(curr_date_)),as_dict=True,debug=0)
+						{0} {1}""".format(local_sale_condn(curr_date_),local_sale_shift_cond(shift_)),as_dict=True,debug=0)
 
 	fmcr = fmcr_data[0].get('name') if fmcr_data and fmcr_data[0].get('name') else []
 	resv_farmer = resv_farmer_data[0].get('name') if resv_farmer_data and resv_farmer_data[0].get('name') else []

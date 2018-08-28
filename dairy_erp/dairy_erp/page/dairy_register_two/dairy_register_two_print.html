@@ -1,0 +1,74 @@
+<div class="container-fluid" style="margin: 0 20px 0 20px">
+	<div class="row">
+		<div class="col-xs-12" style="font-size: 16px;">
+			<center>
+				Dairy Register - 1: <b>Start date</b> - {%= start_date %}, <b>End date - {%= end_date %}</b>
+			</center>
+		</div>
+	</div>
+	<div style="border-top: double #d1d8dd; margin: 4px 0 4px 0"></div>	
+
+	<div class = "row">
+		<div class="col-md-12">
+			<table class="table table-bordered">
+				<tbody>
+					<tr>
+						<th>Date</th>
+						<th>Shift</th>
+						<th>Dairy Sales</th>
+					    <th colspan="5" style="text-align: center;">Dairy Received
+					    </th>
+					    <th colspan="5" style="text-align: center;">
+					    	Spoilage
+					    </th>
+					    <th>Excess Qty</th>
+					    <th>Profit</th>
+					    <th>Short Qty</th>
+					    <th>Loss</th>
+					</tr>
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th>Qty</th>
+						<th>FAT</th>
+						<th>SNF</th>
+						<th>Rate</th>
+						<th>Amt</th>
+						<th>Qty</th>
+						<th>FAT</th>
+						<th>SNF</th>
+						<th>Rate</th>
+						<th>Amt</th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<th></th>
+					</tr>
+					
+					{% $.each(vmcr_data, function(i, val){ %}
+						<tr>
+						    <td>{%= val.vmcr_date %}</td>
+						    <td>{%= val.shift %}</td>
+						    <td>{%= val.daily_sales %}</td>
+						    <td>{%= val.vmcr_qty %}</td>
+						    <td>{%= val.fat %}</td>
+						    <td>{%= val.snf %}</td>
+						    <td>{%= val.rate %}</td>
+						    <td>{%= val.vmcr_amount %}</td>
+						    <td></td>
+						    <td></td>
+						    <td></td>
+						    <td></td>
+						    <td></td>
+						    <td>{%= val.excess_qty %}</td>
+						    <td>{%= val.profit %}</td>
+						    <td>{%= val.short_qty %}</td>
+						    <td>{%= val.loss %}</td>
+						</tr>
+					{% }); %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

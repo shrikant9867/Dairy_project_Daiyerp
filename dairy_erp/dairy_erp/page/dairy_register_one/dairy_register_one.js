@@ -108,11 +108,13 @@ frappe.dairy_register_one = Class.extend({
         var me = this;
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
-        var html = frappe.render_template("ifmr_pdf",{
-            content: frappe.render_template("dairy_register_one",{
-                                                        'fmcr_data':me.table_data.fmcr
+        var html = frappe.render_template("dr_one",{
+            content: frappe.render_template("dairy_register_one_print",{
+                                                        'fmcr_data':me.table_data,
+                                                        'start_date':me.start_date.get_value(),
+                                                        'end_date':me.end_date.get_value()
                                                     }),
-            title:__("individual_farmer_milk_report"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
+            title:__("dairy_register_one_"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,
             print_css: print_css
         });

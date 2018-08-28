@@ -9,15 +9,26 @@ from dairy_erp.dairy_erp.page.dairy_register_one.dairy_register_one import get_f
 @frappe.whitelist()
 def get_mis_data(month=None,fiscal_year=None):
 	fiscal_year_date = frappe.db.get_values("Fiscal Year",{"name":fiscal_year},["year_start_date","year_end_date"],as_dict=1)
-	
 	month_mapper = {"Jan":1,"Feb":2,"Mar":3,"Apr":4,"May":5,"Jun":6,
 					"Jul":7,"Aug":8,"Sep":9,"Oct":10,"Nov":11,"Dec":12}
 	
 	member_non_member = {}
 	milk_purchase_dict = {}
 	milk_quality_data = {}
+	formated_and_total_milk = {}
 
 	if fiscal_year:
+		mis_report_log = frappe.db.get_value("MIS Report Log",{"vlcc_name":frappe.db.get_value("User",frappe.session.user,"company"),
+											"fiscal_year":fiscal_year,
+											"month":month
+											},['name'],as_dict=True)
+		if mis_report_log:
+			mis_report_doc = frappe.get_doc("MIS Report Log",mis_report_log.get('name'))
+			formated_and_total_milk.update({
+				'total_milk':mis_report_doc.total_milk,
+				'formated_milk':mis_report_doc.formated_milk_new
+				})
+
 		start_date = get_month_details(fiscal_year,month_mapper[month]).month_start_date
 		end_date = get_month_details(fiscal_year,month_mapper[month]).month_end_date
 	
@@ -65,7 +76,11 @@ def get_mis_data(month=None,fiscal_year=None):
 				member_non_member['non_member_count'] = member_data[row]['non_member_count']
 				member_non_member['member_count'] = member_data[row]['member_count']
 
-	return {"milk_purchase_dict":milk_purchase_dict,"member_data":member_non_member,'milk_quality':milk_quality_data}
+	return {"milk_purchase_dict":milk_purchase_dict,
+	"member_data":member_non_member,
+	'milk_quality':milk_quality_data,
+	'formated_and_total_milk':formated_and_total_milk
+	}
 
 def get_fmcr_data_list(filters,date_range):
 	filters.update({
@@ -168,29 +183,28 @@ def get_vmcr_milk_quality_data(filters,status):
 def add_formated_milk(filters=None):
 	filters = json.loads(filters)
 	milk_data = filters.get('milk_data')
-	return milk_data
-	# doc = frappe.db.get_value("MIS Report Log",{"vlcc_name":filters.get("vlcc"),
-	# 										"fiscal_year":filters.get("fiscal_year"),
-	# 										"month":filters.get("fiscal_year")
-	# 										},['name','formated_milk_new'],as_dict=True)
-	# if doc:
-	# 	mis_report_log = frappe.get_doc("MIS Report Log",doc.get('name'))
-	# 	if mis_report_log.formated_milk_new != milk_data.get('formated_milk'):
-	# 		mis_report_log = frappe.new_doc("MIS Report Log")
-	# 		mis_report_log.formated_milk_old = mis_report_log.formated_milk_new
-	# 		mis_report_log.formated_milk_new = milk_data.get('formated_milk')
-	# 		mis_report_log.good_milk = milk_data.get('good_milk')
-	# 		mis_report_log.bad_milk = milk_data.get('bad_milk')
-	# 		mis_report_log.total_milk = milk_data.get('total_milk')
-	# 		mis_report_log.save()
-	# else:
-	# 	mis_report_log = frappe.new_doc("MIS Report Log")
-	# 	mis_report_log.vlcc_name = filters.get('vlcc')
-	# 	mis_report_log.fiscal_year = filters.get('fiscal_year')
-	# 	mis_report_log.month = filters.get('month')
-	# 	mis_report_log.formated_milk_new = milk_data.get('formated_milk')
-	# 	mis_report_log.formated_milk_old = milk_data.get('formated_milk')
-	# 	mis_report_log.good_milk = milk_data.get('good_milk')
-	# 	mis_report_log.bad_milk = milk_data.get('bad_milk')
-	# 	mis_report_log.total_milk = milk_data.get('total_milk')
-	# 	mis_report_log.save()
+	doc = frappe.db.get_value("MIS Report Log",{"vlcc_name":filters.get("vlcc"),
+											"fiscal_year":filters.get("fiscal_year"),
+											"month":filters.get("month")
+											},['name','formated_milk_new'],as_dict=True)
+	if doc:
+		mis_report_log = frappe.get_doc("MIS Report Log",doc.get('name'))
+		if mis_report_log.formated_milk_new != milk_data.get('formated_milk'):
+			mis_report_log.formated_milk_old = mis_report_log.formated_milk_new
+			mis_report_log.formated_milk_new = milk_data.get('formated_milk')
+			mis_report_log.good_milk = milk_data.get('good_milk')
+			mis_report_log.bad_milk = milk_data.get('bad_milk')
+			mis_report_log.total_milk = milk_data.get('bad_milk') + milk_data.get('good_milk') + milk_data.get('formated_milk')
+			mis_report_log.save()
+	else:
+		mis_report_log = frappe.new_doc("MIS Report Log")
+		mis_report_log.vlcc_name = filters.get('vlcc')
+		mis_report_log.fiscal_year = filters.get('fiscal_year')
+		mis_report_log.month = filters.get('month')
+		mis_report_log.formated_milk_new = milk_data.get('formated_milk')
+		mis_report_log.formated_milk_old = milk_data.get('formated_milk')
+		mis_report_log.good_milk = milk_data.get('good_milk')
+		mis_report_log.bad_milk = milk_data.get('bad_milk')
+		mis_report_log.total_milk = milk_data.get('bad_milk') + milk_data.get('good_milk') + milk_data.get('formated_milk')
+		mis_report_log.save()
+	return mis_report_log.name	

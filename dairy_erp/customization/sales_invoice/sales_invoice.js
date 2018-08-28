@@ -162,7 +162,7 @@ frappe.ui.form.on("Sales Invoice", {
 			refresh_field(field)
 			frappe.msgprint(__("<b>{0}</b> must be less than or equal to Outstanding Amount", [frappe.model.unscrub(field)]))
 		}
-		else {
+		else if(frm.doc[field] > 0){
 			frm.set_value(trigger_map[field], frm.doc.grand_total - frm.doc[field])
 			refresh_field(trigger_map[field])
 		}

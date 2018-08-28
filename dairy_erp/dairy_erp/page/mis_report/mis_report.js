@@ -33,6 +33,7 @@ frappe.mis_report = Class.extend({
                     me.mis_data = r.message.milk_purchase_dict
                     me.member_data = r.message.member_data
                     me.milk_quality = r.message.milk_quality
+                    me.formated_and_total_milk = r.message.formated_and_total_milk
                     $(me.page).find(".render-table").empty();
                     me.print = frappe.render_template("mis_report",{
                             "mis_data":me.mis_data,
@@ -47,11 +48,10 @@ frappe.mis_report = Class.extend({
     },
     update_total_milk:function() {
         var me = this;
-        console.log($(me.page).find(".good_milk").html(),"total milk___________")
-        console.log("insdie update_total_milk",$(me.page).find('[data-fieldname="update_total_milk"]'))
+        $(me.page).find('[data-fieldname="formated_milk"]').val(me.formated_and_total_milk.formated_milk)
+        $(me.page).find(".total_milk").html(me.formated_and_total_milk.total_milk);
         $(me.page).find('[data-fieldname="update_total_milk"]').click(function(){
             if($(me.page).find('[data-fieldname="formated_milk"]').val()){
-                console.log($(me.page).find('[data-fieldname="formated_milk"]').val())
                 var milk_data =  {"formated_milk":flt($(me.page).find('[data-fieldname="formated_milk"]').val()),
                              "good_milk":flt($(me.page).find(".good_milk").html()),
                              "bad_milk":flt($(me.page).find(".bad_milk").html()),
@@ -66,20 +66,21 @@ frappe.mis_report = Class.extend({
     },
     add_formated_milk:function(milk_data){
         var me = this;
-        console.log("inside add_formated_milk",milk_data)
+        $(me.page).find('[data-fieldname="formated_milk"]').val(milk_data.formated_milk)
+        $(me.page).find(".total_milk").html(milk_data.good_milk+milk_data.bad_milk+milk_data.formated_milk);
         frappe.call({
             method: "dairy_erp.dairy_erp.page.mis_report.mis_report.add_formated_milk",
             args: {
                 "filters": {
                     "milk_data":milk_data,
-                    "vlcc":frappe.sys_defaults.company,
+                    "vlcc":frappe.boot.user.first_name,
                     "month":me.month.get_value(),
                     "fiscal_year":me.fiscal_year.get_value()   
                 }
             },
             callback: function(r){
                 if(r.message){  
-                    console.log(r.message)       
+                    console.log(r.message)
                 }
             }
         });
@@ -156,12 +157,14 @@ frappe.mis_report = Class.extend({
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
         var html = frappe.render_template("mis_pdf",{
-            content: frappe.render_template("mis_report",{
+            content: frappe.render_template("mis_print",{
                                                         "mis_data":me.mis_data,
                                                         "member_data":me.member_data,
-                                                        "milk_quality":me.milk_quality
+                                                        "milk_quality":me.milk_quality,
+                                                        "month":me.month.get_value(),
+                                                        "fiscal_year":me.fiscal_year.get_value()
                                                     }),
-            title:__("dairy_register_two"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
+            title:__("mis_report"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,
             print_css: print_css
         });

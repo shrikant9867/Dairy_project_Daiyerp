@@ -110,8 +110,10 @@ frappe.dairy_register_two = Class.extend({
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
         var html = frappe.render_template("dr2",{
-            content: frappe.render_template("dairy_register_two",{
-                                                        "vmcr_data":me.table_data
+            content: frappe.render_template("dairy_register_two_print",{
+                                                        "vmcr_data":me.table_data,
+                                                        'start_date':me.start_date.get_value(),
+                                                        'end_date':me.end_date.get_value()
                                                     }),
             title:__("dairy_register_two"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,

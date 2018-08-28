@@ -186,12 +186,16 @@ frappe.individual_farmer_milk_report = Class.extend({
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
         var html = frappe.render_template("ifmr_pdf",{
-            content: frappe.render_template("individual_farmer_milk_report",{
+            content: frappe.render_template("ifmr_print",{
                                                         'fmcr':me.table_data.fmcr,
                                                         'previous_balance':me.table_data.previous_balance ? me.table_data.previous_balance:0.00,
                                                         'total_milk_amount':me.table_data.total_milk_amount ? me.table_data.total_milk_amount:0.00,
                                                         'payment':me.table_data.payment ? me.table_data.payment : 0.00,
-                                                        'cattle_feed':me.table_data.cattle_feed ? me.table_data.cattle_feed : 0.00
+                                                        'cattle_feed':me.table_data.cattle_feed ? me.table_data.cattle_feed : 0.00,
+                                                        'vlcc':me.vlcc.get_value(),
+                                                        'month':me.month.get_value(),
+                                                        'cycle':me.cycle.get_value(),
+                                                        'farmer':me.cycle.get_value()
                                                     }),
             title:__("individual_farmer_milk_report"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,

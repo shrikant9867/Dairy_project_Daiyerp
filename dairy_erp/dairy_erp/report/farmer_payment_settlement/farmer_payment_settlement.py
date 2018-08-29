@@ -599,9 +599,7 @@ def create_pi(filters, total):
 	pi.submit()
 
 def get_incentives(amount, qty, vlcc=None):
-	print "#############################",vlcc,amount,qty
 	if vlcc and amount and qty:
-		print "#$$$$$$$$$$$$$$$$$$$$$$$$$$"
 		incentive = 0
 		name = frappe.db.get_value("Farmer Settings", {'vlcc':vlcc}, 'name')
 		farmer_settings = frappe.get_doc("Farmer Settings",name)

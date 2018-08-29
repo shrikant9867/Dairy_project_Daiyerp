@@ -24,9 +24,11 @@ class FarmerPaymentCycleReport(Document):
 		self.loan_operation()
 		self.update_fpcr()
 		if float(self.incentives) != 0:
-			self.create_incentive()
-			frappe.msgprint(_("Purchase invoice created successfully against Incentives"))
-	
+			if not frappe.db.get_value("Purchase Invoice", {'cycle':self.cycle,\
+		 'supplier': self.farmer_name},'name'):
+				self.create_incentive()
+				frappe.msgprint(_("Purchase invoice created successfully against Incentives"))
+			else: frappe.msgprint(_("Purchase invoice Already created successfully against Incentives"))
 
 	def update_fpcr(self):
 		loan_total, loan_si, adavnce_si, advance_total = 0, 0, 0, 0 

@@ -15,7 +15,7 @@ from amcu_delete_api import delete_fmcr
 from amcu_resv_farmer_api import make_stock_receipt
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
 from frappe.utils.data import add_to_date
-from amcu_loss_gain import handling_loss_gain
+from amcu_loss_gain import handling_loss_gain,loss_gain_computation
 import dairy_utils as utils
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 import requests
@@ -366,48 +366,18 @@ def make_vmrc(data, response_dict):
 									collectiontime = row.get('collectiontime') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000))
 									collectiondate = data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 									vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
-									vmrc = validate_vmrc_entry(data,row, collectiontime, collectiondate)
-									if not vmrc:
-										if  validate_society_exist_dairy(data):
-											if validate_vlcc(row):
-												row.update(
-													{
-														"collectiontime": collectiontime,
-														"qualitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
-														"quantitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000)),		
-														"tippingendtime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingendtime'))/1000)),		
-														"tippingstarttime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingstarttime'))/1000)),
-														"associated_vlcc": frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
-													})
-												vmrc_doc = frappe.new_doc("Vlcc Milk Collection Record")
-												vmrc_doc.id = data.get('id')
-												vmrc_doc.imeinumber = data.get('imeinumber')
-												vmrc_doc.rcvdtime = data.get('rcvdtime')
-												vmrc_doc.processedstatus = data.get('processedstatus')
-												vmrc_doc.societyid = data.get('societyid')
-												vmrc_doc.collectiondate =  collectiondate
-												vmrc_doc.posting_date = getdate(data.get('collectiontime'))
-												vmrc_doc.shift = data.get('shift')
-												vmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
-												vmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
-												vmrc_doc.endshift = 1 if data.get('endshift') == True else 0
-							 					vmrc_doc.update(row)
-												vmrc_doc.flags.ignore_permissions = True
-												vmrc_doc.flags.is_api = True
-												vmrc_doc.submit()
-												response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"vmrc":vmrc_doc.name})
-												vlcc = validate_vlcc(row)
-												if row.get('status') == "Accept":
-													make_purchase_receipt_dairy(data, row, vlcc_name, response_dict, vmrc_doc.name)
-													handling_loss_gain(data,row,vmrc_doc,response_dict)
-											else:
-												traceback = "vlcc does not exist"
-												frappe.throw(_("Vlcc Does not exist"))
-										else :
-											traceback = "Society Does Not Exist"
-											frappe.throw(_("Society does not exist"))
-									else:
-										response_dict.update({row.get('farmerid')+"-"+row.get('milktype'):["created already check erpnext.Exception if any check dairy log"]})
+									vmrc = validate_vmrc_entry(row)
+									if row.get('operation') == 'CREATE':
+										if not vmrc:
+											vmrc_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)	
+											handling_loss_gain(data,row,vmrc_doc,response_dict)
+										else:
+											response_dict.update({row.get('farmerid')+"-"+row.get('milktype'):["Record already created please check on server,if any exception check 'Dairy log'."]})
+									elif row.get('operation') == 'UPDATE':
+										if vmrc:
+											delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)
+										else:
+											response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
 								else:
 									response_dict.update({"status":["Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate are manadatory"]})
 							else:
@@ -420,15 +390,108 @@ def make_vmrc(data, response_dict):
 						data = data, message=e, traceback=frappe.get_traceback())
 						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})
 
+def delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict):
 
-def validate_vmrc_entry(data, row, collectiontime, collectiondate):
+	vmcr = frappe.db.get_value('Vlcc Milk Collection Record',
+				{"transactionid":row.get('transactionid'),"farmerid":row.get('farmerid'),"docstatus":['=',1]},"name")
+	if vmcr:
+		pr = frappe.db.get_value("Purchase Receipt",{"vlcc_milk_collection_record":vmcr,"docstatus":['=',1]},"name")
+		dn = frappe.db.get_value("Delivery Note",{"vlcc_milk_collection_record":vmcr,"docstatus":['=',1]},"name")
+		pi = frappe.db.get_value("Purchase Invoice",{"vlcc_milk_collection_record":vmcr,"docstatus":['=',1]},"name")
+		si = frappe.db.get_value("Sales Invoice",{"vlcc_milk_collection_record":vmcr,"docstatus":['=',1]},"name")
+		vmcr_doc = frappe.get_doc("Vlcc Milk Collection Record",vmcr)
+		se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr},
+					['name','wh_type'],as_dict=1) or {}		
+		vmcr_stock_qty = vmcr_stock_qty_computation(vmcr,se)
 
-	return frappe.db.sql(""" select name from `tabVlcc Milk Collection Record` where societyid='{0}' and 
-						collectiontime = '{1}' and collectiondate = '{2}'
-						and  rcvdtime = '{3}' and shift = '{4}' and farmerid = '{5}' and
-						milktype = '{6}'""".format(data.get('societyid'),collectiontime,
-						collectiondate,data.get('rcvdtime'),data.get('shift'),
-						row.get('farmerid'),row.get('milktype')),as_dict=1)
+		if si:
+			si_doc = frappe.get_doc("Sales Invoice",si)
+			si_doc.cancel()
+			frappe.delete_doc("Sales Invoice", si_doc.name)
+		if dn:
+			dn_doc = frappe.get_doc("Delivery Note",dn)
+			dn_doc.cancel()
+			frappe.delete_doc("Delivery Note", dn_doc.name)
+		if pi:
+			pi_doc = frappe.get_doc("Purchase Invoice",pi)
+			pi_doc.cancel()
+			frappe.delete_doc("Purchase Invoice", pi_doc.name)
+		if pr:
+			pr_doc = frappe.get_doc("Purchase Receipt",pr)
+			pr_doc.cancel()
+			frappe.delete_doc("Purchase Receipt", pr_doc.name)
+
+		if se.get('name'):
+			se_doc = frappe.get_doc("Stock Entry",se.get('name'))
+			se_doc.cancel()
+			frappe.delete_doc("Stock Entry", se_doc.name)
+
+		vmcr_doc.cancel()
+		update_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,vmcr_stock_qty,response_dict)
+	return ""
+
+def vmcr_stock_qty_computation(vmcr,se):
+	vmcr_stock_qty = 0
+	vmcr_doc = frappe.get_doc("Vlcc Milk Collection Record",vmcr)
+	se_qty = frappe.db.get_value('Stock Entry Detail',
+		{'parent':se.get('name')},'qty') or 0
+
+	if se and se.get('wh_type') == 'Loss':
+		vmcr_stock_qty = flt(se_qty,2) + flt(vmcr_doc.milkquantity,2)
+	elif se and se.get('wh_type') == 'Gain':
+		vmcr_stock_qty = flt(vmcr_doc.milkquantity,2) - flt(se_qty,2)
+	else:
+		vmcr_stock_qty = flt(vmcr_doc.milkquantity,2)
+	return vmcr_stock_qty
+
+def update_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,vmcr_stock_qty,response_dict):
+	edited_vmcr_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)
+	loss_gain_computation(vmcr_stock_qty,row,data,edited_vmcr_doc,response_dict)
+
+def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict):
+	if validate_society_exist_dairy(data):
+		if validate_vlcc(row):
+			row.update(
+				{
+					"collectiontime": collectiontime,
+					"qualitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
+					"quantitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000)),		
+					"tippingendtime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingendtime'))/1000)),		
+					"tippingstarttime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingstarttime'))/1000)),
+					"associated_vlcc": frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
+				})
+			vmrc_doc = frappe.new_doc("Vlcc Milk Collection Record")
+			vmrc_doc.id = data.get('id')
+			vmrc_doc.imeinumber = data.get('imeinumber')
+			vmrc_doc.rcvdtime = data.get('rcvdtime')
+			vmrc_doc.processedstatus = data.get('processedstatus')
+			vmrc_doc.societyid = data.get('societyid')
+			vmrc_doc.collectiondate =  collectiondate
+			vmrc_doc.posting_date = getdate(data.get('collectiontime'))
+			vmrc_doc.shift = data.get('shift')
+			vmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
+			vmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
+			vmrc_doc.endshift = 1 if data.get('endshift') == True else 0
+			vmrc_doc.update(row)
+			vmrc_doc.flags.ignore_permissions = True
+			vmrc_doc.flags.is_api = True
+			vmrc_doc.submit()
+			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"vmrc":vmrc_doc.name})
+			vlcc = validate_vlcc(row)
+			if row.get('status') == "Accept":
+				make_purchase_receipt_dairy(data, row, vlcc_name, response_dict, vmrc_doc.name)
+			return vmrc_doc
+		else:
+			traceback = "vlcc does not exist"
+			frappe.throw(_("Vlcc Does not exist"))
+	else :
+		traceback = "Society Does Not Exist"
+		frappe.throw(_("Society does not exist"))
+
+def validate_vmrc_entry(row):
+
+	return frappe.db.get_value('Vlcc Milk Collection Record',
+			{"transactionid":row.get('transactionid'),"docstatus":['=',1] },"name")
 
 
 def validate_society_exist_dairy(data):

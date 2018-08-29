@@ -49,15 +49,29 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	local_sale: function(frm) {
-		
 		if (frm.doc.local_sale){
-			frm.set_df_property("customer", "read_only", 1);
-			frm.set_df_property("due_date", "read_only", 1);
-			frm.set_df_property("update_stock", "read_only", 1);
-			frm.set_value("update_stock",1)
-			local_sale_operations(frm)
-			frm.set_value("due_date",frappe.datetime.nowdate())
-
+			frappe.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "VLCC Settings",
+					filters: {"name": frm.doc.company},
+					fieldname: ["name"]
+				},
+				callback: function(r){
+					if(!r.message){
+						frappe.msgprint("Please Create <b>VLCC Settings</b>")
+						frappe.set_route("List","Sales Invoice")
+					}
+					else{
+						frm.set_df_property("customer", "read_only", 1);
+						frm.set_df_property("due_date", "read_only", 1);
+						frm.set_df_property("update_stock", "read_only", 1);
+						frm.set_value("update_stock",1)
+						local_sale_operations(frm)
+						frm.set_value("due_date",frappe.datetime.nowdate())
+					}
+				}
+			})
 		}
 		else{
 			frm.set_value("customer_or_farmer","Vlcc Local Customer")
@@ -353,9 +367,9 @@ frappe.ui.form.on("Sales Invoice Item", {
 
 cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	if(cur_frm.doc.customer_or_farmer && cur_frm.doc.local_sale){
-		customer_type = cur_frm.doc.customer_or_farmer
+		var customer_type = cur_frm.doc.customer_or_farmer
 		if (customer_type == "Vlcc Local Institution"){
-			customer_type = 'Vlcc Local Customer'
+			var customer_type = 'Vlcc Local Customer'
 		}
 		return {
 			query:"dairy_erp.customization.sales_invoice.sales_invoice.get_item_by_customer_type",

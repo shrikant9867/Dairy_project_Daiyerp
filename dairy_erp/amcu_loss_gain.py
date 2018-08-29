@@ -76,7 +76,6 @@ def handling_loss_gain(data,row,vmcr_doc,response_dict):
 				vmcr_doc=vmcr_doc,response_dict=response_dict,stock=stock)
 		set_se_flag(stock)
 
-
 def loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock=None):
 
 	vlcc = frappe.db.get_value("Village Level Collection Centre",

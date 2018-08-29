@@ -515,7 +515,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
 		days = frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') if frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') else 0
  		si_obj = frappe.new_doc("Sales Invoice")
  		si_obj.customer = customer
- 		si_obj.due_date = add_to_date(getdate(row.get('collectiontime')),0,0,cint(days))
+ 		# si_obj.due_date = add_to_date(getdate(row.get('collectiontime')),0,0,cint(days))
  		si_obj.company = vlcc
 		si_obj.vlcc_milk_collection_record = vmrc
  		si_obj.append("items",
@@ -530,7 +530,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
  		})
  		si_obj.flags.ignore_permissions = True
 		si_obj.submit()
-		set_posting_datetime(si_obj,row)
+		set_posting_datetime(si_obj,row,days)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"sales invoice": si_obj.name})
 
 	except Exception,e:
@@ -594,7 +594,7 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 		pi_obj = frappe.new_doc("Purchase Invoice")
 		pi_obj.supplier =  vlcc
 		pi_obj.vlcc_milk_collection_record = vmrc
-		pi_obj.due_date = add_to_date(getdate(row.get('collectiontime')),0,0,days)
+		# pi_obj.due_date = add_to_date(getdate(row.get('collectiontime')),0,0,days)
 		pi_obj.chilling_centre = frappe.db.get_value("Address", \
 							{"centre_id" : data.get('societyid')}, 'name')
 		pi_obj.company = company
@@ -616,7 +616,7 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 		pi_obj.remarks = "[#"+account+"#]"
 		pi_obj.flags.ignore_permissions = True
 		pi_obj.submit()
-		set_posting_datetime(pi_obj,row)
+		set_posting_datetime(pi_obj,row,days)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})
 	
 	except Exception,e:
@@ -630,7 +630,7 @@ def purchase_invoice_against_farmer(data, row, vlcc,  farmer, item_, response_di
 		pi_obj = frappe.new_doc("Purchase Invoice")
 		pi_obj.supplier =  farmer
 		pi_obj.farmer_milk_collection_record = fmrc
-		pi_obj.due_date = add_to_date(getdate(row.get('collectiontime')),0,0,cint(days))
+		# pi_obj.due_date = add_to_date(getdate(row.get('collectiontime')),0,0,cint(days))
 		pi_obj.company = vlcc
 		pi_obj.append("items",
 			{
@@ -647,14 +647,14 @@ def purchase_invoice_against_farmer(data, row, vlcc,  farmer, item_, response_di
 		)
 		pi_obj.flags.ignore_permissions = True
 		pi_obj.submit()
-		set_posting_datetime(pi_obj,row)
+		set_posting_datetime(pi_obj,row,days)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})
 	
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
 
-def set_posting_datetime(doc,row):
+def set_posting_datetime(doc,row,days=None):
 	if row.get('collectiontime'):
 		frappe.db.sql("""update `tab{0}` 
 			set 
@@ -662,6 +662,13 @@ def set_posting_datetime(doc,row):
 			where 
 				name = '{3}'""".format(doc.doctype,getdate(row.get('collectiontime')),
 					get_time(row.get('collectiontime')),doc.name))
+		if doc.doctype in ['Sales Invoice','Purchase Invoice']:
+			frappe.db.sql("""update `tab{0}` 
+				set 
+					due_date = '{1}'
+				where 
+					name = '{2}'""".format(doc.doctype,add_to_date(getdate(row.get('collectiontime')),0,0,cint(days)),doc.name))
+
 		frappe.db.sql("""update `tabGL Entry` 
 					set 
 						posting_date = %s
@@ -675,7 +682,6 @@ def set_stock_ledger_date(doc,row):
 					posting_date = %s
 				where 
 					voucher_no = %s""",(getdate(row.get('collectiontime')),doc.name))
-
 
 @frappe.whitelist()
 def log_out():

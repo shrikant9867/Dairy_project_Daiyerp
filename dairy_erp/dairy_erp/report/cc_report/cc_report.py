@@ -41,7 +41,7 @@ def get_data(filters=None):
 								where
 									vmcr.docstatus = 1 and
 									vmcr.shift = '{0}' and
-									{1} and date(vmcr.collectiondate) = '{2}' """.format(filters.get('shift'),get_conditions(filters),filters.get('start_date')),as_list=1,debug=1)	
+									{1} and date(vmcr.collectiontime) = '{2}' """.format(filters.get('shift'),get_conditions(filters),filters.get('start_date')),as_list=1,debug=1)	
 	return vmcr_list
 
 def get_conditions(filters):

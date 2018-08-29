@@ -11,6 +11,7 @@
 			</center>
 		</div>
 	</div>
+	<br>
 	<div class="row">
 		<div class="col-xs-3"><b>Vlcc:</b> {%= vlcc %}</div>
 		<div class="col-xs-3"><b>Month:</b> {%= month %}</div>
@@ -27,8 +28,11 @@
 					    <th colspan="8" style="text-align: center;">
 					    	Morning
 					    </th>
-						<th colspan="8" style="text-align: center;">
+						<th colspan="6" style="text-align: center;">
 					    	Evening
+					    </th>
+					    <th colspan="2" style="text-align: center;">
+					    	Total
 					    </th>
 					</tr>
 					<tr>
@@ -147,12 +151,17 @@
 						<th colspan="2" style="text-align: center;">
 					    	Deduction
 					    </th>
+					    <th style="text-align: center;">
+					    	Balance Amount
+					    </th>
+					</tr>    
 					    <tr>
-					    	<td></td>
+					    	<td>{%= frappe.datetime.get_today()%}</td>
 					    	<td>{%= ("Previous Balance") %}</td>
 					    	<td>{%= previous_balance %}</td>
 					    	<td>{%= ("Payment") %}</td>
 					    	<td>{%= payment %}</td>
+					    	<td>{%= previous_balance + payment%}</td>
 					    </tr>
 					    <tr>
 					    	<td>{{ (" ") }}</td>
@@ -160,6 +169,7 @@
 					    	<td>{%= total_milk_amount %}</td>
 					    	<td>{%= ("Cattle Feed") %}</td>
 					    	<td>{%= cattle_feed %}</td>
+					    	<td>{%= total_milk_amount + cattle_feed%}</td>
 					    </tr>
 					    <tr>
 					    	<td>{{ (" ") }}</td>
@@ -167,8 +177,8 @@
 					    	<td>{%= previous_balance + total_milk_amount %}</td>
 					    	<td>{%= ("Total") %}</td>
 					    	<td>{%= payment + cattle_feed %}</td>
+					    	<td>{%= previous_balance + total_milk_amount + payment + cattle_feed %}</td>
 					    </tr>
-					</tr>
 				</tbody>
 			</table>
 		</div>

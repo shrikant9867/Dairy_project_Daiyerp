@@ -1,0 +1,56 @@
+<br>
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+<h4 class="text-center">
+{% if(filters.operator_type == "Chilling Centre") { %}
+	{%= filters.branch_office%}
+{% } else { %}
+	{%= filters.vlcc%}
+{% } %}
+</h4>
+<div class="row">
+	<div class="col-md-1 col-xs-1">
+		<b>{%= __("Date") %}:</b>
+	</div>
+	<div class="col-md-3 col-xs-3" style="padding-left: 0px;">
+		{%= dateutil.str_to_user(filters.start_date) %}
+	</div>
+	<div class="col-md-1 col-xs-1">
+		<b>{%= __("Shift") %}:</b>	
+	</div>
+	<div class="col-md-3 col-xs-3" style="padding-left: 0px;">
+		{%= filters.shift %}
+	</div>
+	<div class="col-md-1 col-xs-1">
+		<b>{%= __("Route") %}:</b>
+	</div>
+	<div class="col-md-3 col-xs-3" style="padding-left: 0px;">
+		{%= filters.route %}
+	</div>
+</div>
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 14%">{%= __("Type") %}</th>
+			<th style="width: 14%">{%= __("Cans") %}</th>
+			<th style="width: 14%">{%= __("Qty") %}</th>
+			<th style="width: 14%">{%= __("FAT") %}</th>
+			<th style="width: 14%">{%= __("SNF") %}</th>
+			<th style="width: 14%">{%= __("Rate") %}</th>	
+			<th style="width: 14%">{%= __("Milk Value") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+				<td>{%= data[i][__("Type")] %}</td>
+				<td>{%= data[i][__("Cans")] %}</td>
+				<td>{%= data[i][__("Qty")] %}</td>
+				<td>{%= data[i][__("FAT")] %}</td>
+				<td>{%= data[i][__("SNF")] %}</td>
+				<td>{%= data[i][__("Rate")] %}</td>
+				<td>{%= data[i][__("Milk Value")] %}</td>
+			</tr>
+		{% } %}
+	</tbody>
+</table>

@@ -6,16 +6,18 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,add_m
 @frappe.whitelist()
 def get_fmcr_data(vlcc=None,cycle=None,farmer=None):
 	cyclewise_computation = frappe.db.get_values("Farmer Date Computation",{"name":cycle},["start_date","end_date"],as_dict=1)
+	farmer_full_name = frappe.db.get_value("Farmer",{'name':farmer},"full_name")
 	start_date = cyclewise_computation[0]['start_date']
 	end_date = cyclewise_computation[0]['end_date']	
 	filters = {
 				'start_date':start_date,
 				'end_date':end_date,
 				'vlcc':vlcc,
-				'farmer':farmer
+				'farmer':farmer,
+				'farmer_full_name':farmer_full_name
 				}
 	fmcr_list = get_fmcr(filters)
-	previous_balance = get_pi_outstanding(filters)
+	# previous_balance = get_pi_outstanding(filters)
 
 	date_and_shift_wise_fmcr = {}
 	for fmcr in fmcr_list:
@@ -63,7 +65,7 @@ def get_fmcr_data(vlcc=None,cycle=None,farmer=None):
 
 def get_fmcr(filters):	
 	fmcr_list = frappe.db.sql("""select
-									date(fmcr.collectiondate),
+									date(fmcr.collectiontime),
 									fmcr.milkquantity,
 									fmcr.milktype,
 									fmcr.fat,
@@ -75,54 +77,56 @@ def get_fmcr(filters):
 							`tabFarmer Milk Collection Record` fmcr
 						where
 							{0}
-							group by fmcr.collectiondate,fmcr.shift,fmcr.name
+							and fmcr.docstatus = 1
+							group by fmcr.collectiontime,fmcr.shift,fmcr.name
 		""".format(get_conditions(filters)),as_list=1,debug=0)
 	return fmcr_list
 
 def get_conditions(filters):
 	if filters:
-		conditions = "fmcr.collectiondate between '{0}' and '{1}' \
+		conditions = "date(fmcr.collectiontime) between '{0}' and '{1}' \
 					and fmcr.farmerid = '{2}'\
 					and fmcr.associated_vlcc = '{3}'".format(filters.get('start_date'),filters.get('end_date'),filters.get('farmer'),filters.get('vlcc'))
 		return conditions
 
 def get_pi_outstanding(filters):
 	pi_data = frappe.db.sql("""
-								select
-									sum(pi.outstanding_amount)
-								from
-									`tabPurchase Invoice` pi
-								where
-									pi.supplier_type = 'Farmer'
-									and pi.docstatus = 1
-									and pi.supplier = '{0}'
-									and pi.posting_date < '{1}'
-								""".format(filters.get('farmer'),filters.get('start_date')),as_list=1,debug=0)
+		select
+			COALESCE(round(sum(pi.outstanding_amount),2))
+		from
+			`tabPurchase Invoice` pi
+		where
+			pi.supplier_type = 'Farmer'
+			and pi.docstatus = 1
+			and pi.supplier = '{0}'
+			and pi.company = '{1}'
+			and pi.posting_date < '{2}'
+		""".format(filters.get('farmer_full_name'),filters.get('vlcc'),filters.get('start_date')),as_list=1,debug=0)
 	return pi_data[0][0]
 
 def get_si_outstanding(filters):
 	si_data = frappe.db.sql("""
 								select
-									sum(si.outstanding_amount)
+									COALESCE(round(sum(si.outstanding_amount),2))
 								from
 									`tabSales Invoice` si
 								where
-									si.customer_or_farmer = 'Farmer'
-									and si.docstatus = 1
+									si.docstatus = 1
 									and si.customer = '{0}'
 									and si.posting_date < '{1}'
-								""".format(filters.get('farmer'),filters.get('start_date')),as_list=1,debug=0)
+								""".format(filters.get('farmer_full_name'),filters.get('start_date')),as_list=1,debug=1)
 	return si_data[0][0]
 
 def get_fmcr_milk_data(filters):
 	total_milk_amount = frappe.db.sql("""
 										select
-											sum(fmcr.milkquantity)
+											COALESCE(round(sum(fmcr.milkquantity),2))
 										from
 											`tabFarmer Milk Collection Record` fmcr
 										where
 											fmcr.milktype in ('COW','BUFFALO') and
-											fmcr.collectiondate between '{0}' and '{1}'
+											fmcr.docstatus = 1 and
+											date(fmcr.collectiontime) between '{0}' and '{1}'
 											and fmcr.farmerid = '{2}'
 											and fmcr.associated_vlcc = '{3}'"""
 											.format(filters.get('start_date'),
@@ -133,14 +137,15 @@ def get_fmcr_milk_data(filters):
 
 def cattle_feed_amount(filters):
 	cattle_feed_amount = frappe.db.sql("""
-								select
-									sum(si.outstanding_amount)
-								from
-									`tabSales Invoice` si
-								where
-									si.customer_or_farmer = 'Farmer'
-									and si.docstatus = 1
-									and si.customer = '{0}'
-									and si.posting_date between '{1}' and '{2}'
-								""".format(filters.get('farmer'),filters.get('start_date'),filters.get('end_date')),as_list=1,debug=0)
+		select
+			COALESCE(round(sum(si.outstanding_amount),2))
+		from
+			`tabSales Invoice` si
+		where
+			si.local_sale = 1 and
+			si.farmer = '{0}' and
+			si.docstatus = 1
+			and si.customer = '{1}'
+			and si.posting_date between '{2}' and '{3}'
+		""".format(filters.get('farmer'),filters.get('farmer_full_name'),filters.get('start_date'),filters.get('end_date')),as_list=1,debug=1)
 	return cattle_feed_amount[0][0]

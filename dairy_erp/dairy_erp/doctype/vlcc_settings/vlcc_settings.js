@@ -52,6 +52,23 @@ frappe.ui.form.on('VLCC Settings', {
 	},
 	validate: function(frm) {
 		frm.events.validate_cycle_hours(frm)
+		//frm.events.validate_item_table(frm)
+	},
+	validate_item_table:function(frm){
+		var c_type_wise_item = {}
+		if(frm.doc.vlcc_item.length > 0){
+			$.each(frm.doc.vlcc_item,function(i,d){
+				if(d.customer_type){
+					c_type_wise_item[d.customer_type] = d.item
+				}
+			})
+		}
+		if(!in_list(Object.keys(c_type_wise_item),'Farmer')) {
+			frappe.throw(__("Please Add Item For Farmer"))
+		}
+		else if(!in_list(Object.keys(c_type_wise_item),'Vlcc Local Customer')) {
+			frappe.throw(__("Please Add Item For Vlcc Local Customer"))
+		}
 	},
 	get_csv: function(frm) {
 		frappe.call({

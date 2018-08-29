@@ -49,7 +49,7 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	local_sale: function(frm) {
-		/*if (frm.doc.local_sale){
+		if (frm.doc.local_sale){
 			frappe.call({
 				method: "frappe.client.get_value",
 				args: {
@@ -72,14 +72,6 @@ frappe.ui.form.on("Sales Invoice", {
 					}
 				}
 			})
-		}*/
-		if (frm.doc.local_sale){
-			frm.set_df_property("customer", "read_only", 1);
-			frm.set_df_property("due_date", "read_only", 1);
-			frm.set_df_property("update_stock", "read_only", 1);
-			frm.set_value("update_stock",1)
-			local_sale_operations(frm)
-			frm.set_value("due_date",frappe.datetime.nowdate())
 		}
 		else{
 			frm.set_value("customer_or_farmer","Vlcc Local Customer")

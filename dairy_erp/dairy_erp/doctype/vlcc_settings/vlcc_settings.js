@@ -52,7 +52,7 @@ frappe.ui.form.on('VLCC Settings', {
 	},
 	validate: function(frm) {
 		frm.events.validate_cycle_hours(frm)
-		//frm.events.validate_item_table(frm)
+		frm.events.validate_item_table(frm)
 	},
 	validate_item_table:function(frm){
 		var c_type_wise_item = {}

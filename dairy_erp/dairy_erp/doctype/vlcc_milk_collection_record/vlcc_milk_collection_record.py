@@ -43,18 +43,19 @@ class VlccMilkCollectionRecord(Document):
 		self.posting_date = getdate(self.collectiontime)
 
 	def validate_duplicate_entry(self):
-		filters = {
-			"societyid": self.societyid,
-			"collectiontime": self.collectiontime,
-			"collectiondate": self.collectiondate,
-			"rcvdtime": self.rcvdtime,
-			"shift": self.shift,
-			"farmerid": self.farmerid,
-			"milktype": self.milktype
-		}
-		is_duplicate = frappe.db.get_value("Vlcc Milk Collection Record", filters, "name")
-		if is_duplicate and is_duplicate != self.name:
-			frappe.throw(_("Duplicate Entry found - {0}".format(is_duplicate)))
+		if not self.flags.is_api:
+			filters = {
+				"societyid": self.societyid,
+				"collectiontime": self.collectiontime,
+				"collectiondate": self.collectiondate,
+				"rcvdtime": self.rcvdtime,
+				"shift": self.shift,
+				"farmerid": self.farmerid,
+				"milktype": self.milktype
+			}
+			is_duplicate = frappe.db.get_value("Vlcc Milk Collection Record", filters, "name")
+			if is_duplicate and is_duplicate != self.name:
+				frappe.throw(_("Duplicate Entry found - {0}".format(is_duplicate)))
 
 	def validate_vlcc_chilling_centre(self):
 		vlcc_data = frappe.db.get_value("Village Level Collection Centre", {

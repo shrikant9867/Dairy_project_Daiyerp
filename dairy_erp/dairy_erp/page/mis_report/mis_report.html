@@ -13,7 +13,6 @@
 .male_width{
 	width: 12%;
 }	
-
 </style>
 <div class="container-fluid" style="margin: 0 20px 0 20px">
 	<div class = "row content">
@@ -21,7 +20,7 @@
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<th colspan="2">milk purchase</th>
+						<th colspan="2">Milk purchase</th>
 						<th>This Month</th>
 						<th>Up to the Month</th>
 					</tr>
@@ -73,44 +72,26 @@
 				</tbody>
 			</table>
 		</div>
-		<div class="col-md-5 nopadding">
-			<table class="table table-bordered">
+		<div class="col-md-5 no">
+			<table class="table table-bordered" BORDER=10>
 				<tbody>
-					<tr>
-						<td rowspan="2">{%= ("1) No of first aids given") %}
-						<td>COW</td>	
-						<td></td>
-					</tr>
-					<tr>
-						<td>BUFFALO</td>
-						<td></td>	
-					</tr>
-					<tr>
-						<td rowspan="2">
-							{%= ("2) No of waxines") %}
-						</td>
-						<td>{%= ("Foot & Mouth Descese") %}</td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>Others</td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>{%= "Cattle Feed sales (Kg)" %}</td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>{%= "Grass seed sales (Kg)" %}</td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td>{%= "No and area of model farm" %}</td>
-						<td></td>
-						<td></td>
-					</tr>
+				<tr>
+					<th colspan="2">Cattle Feed</th>
+					<th>This Month</th>
+					<th>Up to the month</th>	
+				</tr>
+				<tr>
+					<td>1</td>
+					<td>Procured</td>
+					<td>{%= cattle_feed.month.procured %}</td>
+					<td>{%= cattle_feed.upto_month.procured %}</td>
+				</tr>
+				<tr>
+					<td>2</td>
+					<td>Sold To Farmers</td>
+					<td>{%= cattle_feed.month.sold_to_farmers %}</td>
+					<td>{%= cattle_feed.upto_month.sold_to_farmers %}</td>
+				</tr>
 				</tbody>
 			</table>
 		</div>
@@ -281,9 +262,13 @@
 			<table class="table table-bordered">
 				<tbody>
 				<tr>
-					<th>FINANCIAL STATUS</th>
+					<th colspan="4">FINANCIAL STATUS</th>	
+				</tr>
+				<tr>
+					<th>SI No.</th>
+					<th>Account Head</th>
 					<th>This Month</th>
-					<th>Up to the month</th>	
+					<th>Up to the month</th>
 				</tr>
 				</tbody>
 			</table>

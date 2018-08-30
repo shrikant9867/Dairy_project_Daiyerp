@@ -24,7 +24,11 @@ class VLCCPaymentCycleReport(Document):
 		self.loan_operation()
 		self.update_vpcr()
 		if float(self.incentives) != 0:
-			self.create_incentive()
+			if not frappe.db.get_value("Purchase Invoice", {'cycle': self.cycle,\
+				 'supplier': self.vlcc_name},'name'): 
+				self.create_incentive()
+				frappe.msgprint(_("Purchase invoice created successfully against Incentives"))
+			else: frappe.msgprint(_("Purchase invoice Already created successfully against Incentives"))
 
 	def update_vpcr(self):
 		loan_total, loan_si, adavnce_si, advance_total = 0, 0, 0, 0 
@@ -309,7 +313,7 @@ def get_vmcr(start_date, end_date, vlcc, cycle=None):
 			`tabVlcc Milk Collection Record`
 		where 
 			associated_vlcc = '{0}' and date(rcvdtime) between '{1}' and '{2}'
-			""".format(vlcc, start_date, end_date),as_dict=1,debug=0)
+			""".format(vlcc, start_date, end_date),as_dict=1,debug=1)
 	amount = 0
 	qty = 0
 	for i in vmcr:

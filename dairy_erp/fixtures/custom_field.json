@@ -5192,7 +5192,7 @@
   "modified": "2018-06-02 20:03:09.459825", 
   "name": "Sales Invoice-type", 
   "no_copy": 0, 
-  "options": "\nAdvance\nLoan", 
+  "options": "\nAdvance\nLoan\nVlcc Advance\nVlcc Loan", 
   "permlevel": 0, 
   "precision": "", 
   "print_hide": 0, 

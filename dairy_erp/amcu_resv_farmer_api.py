@@ -18,7 +18,6 @@ import json
 
 def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,societyid,vmcr_doc=None):
 
-	print method,"method___________________\n\n"
 	try:
 		vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":societyid},["name","warehouse"],as_dict=True)
 		company_details = frappe.db.get_value("Company",{"name":vlcc.get('name')},['default_payable_account','abbr','cost_center'],as_dict=1)
@@ -47,7 +46,7 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,socie
 			if method == 'handling_loss':
 				stock_doc.wh_type = 'Loss'
 			elif method == 'handling_gain':
-				stock_doc.wh_type = 'Loss'
+				stock_doc.wh_type = 'Gain'
 
 			if row.get('transactionid'):
 				stock_doc.shift = data.get('shift')

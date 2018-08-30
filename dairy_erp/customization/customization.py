@@ -27,6 +27,7 @@ def validate_dairy_company(doc,method=None):
 				comp_doc = frappe.get_doc("Company",link.link_name)
 				comp_doc.is_dairy = 1
 				comp_doc.save()
+				create_dairy_as_supplier(comp_doc.name)
 
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		doc.append("links",
@@ -45,6 +46,20 @@ def validate_dairy_company(doc,method=None):
 		company = frappe.db.get_value("User", frappe.session.user, "company")
 		if company:
 			frappe.db.set_value("Address", doc.name, "vlcc", company)
+
+def create_dairy_as_supplier(company):
+#loan and advances utility for cross booking of account
+	supl_doc = frappe.new_doc("Supplier")
+	supl_doc.supplier_name = company
+	supl_doc.supplier_type = "Dairy Type"
+	supl_doc.append("accounts",
+		{
+		"company": company,
+		"account": frappe.db.get_value("Company", company, 'default_payable_account')
+		}
+	) 
+	supl_doc.flags.ignore_permissions = True
+	supl_doc.save()
 
 def make_account_and_warehouse(doc, method=None):
 	try:

@@ -88,7 +88,6 @@ def make_fmcr(data,row,response_dict,is_fmcr_created=0):
 								farmer_supplier = frappe.db.get_value("Farmer",row.get('farmerid'),'full_name')
 								row.update(
 									{
-										"collectiontime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000)),
 										"qualitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
 										"quantitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000))
 									}

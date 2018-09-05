@@ -75,8 +75,8 @@ th,td {
 						    </td>
 						    <td row_id={%= i + "@diff_fat" %}>{%= val.diff_fat %}</td>
 						    <td row_id={%= i + "@diff_snf" %}>{%= val.diff_snf %}</td>
-						    <td>{%= val.si_qty %}</td>
-						    <td>{%= val.si_amount %}</td>
+						    <td>{%= flt(val.si_qty,2) %}</td>
+						    <td>{%= flt(val.si_amount,2) %}</td>
 						    <td>{%= val.stock_qty %}</td>
 						    <td>{%= val.stock_amount %}</td>
 							<td>{%= val.dairy_sales %}</td>

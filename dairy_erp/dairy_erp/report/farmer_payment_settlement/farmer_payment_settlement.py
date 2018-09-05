@@ -597,6 +597,15 @@ def create_pi(filters, total):
 	pi.flags.ignore_permissions = True
 	pi.save()
 	pi.submit()
+	#updating date for current cycle
+	gl_stock = frappe.db.get_value("Company", pi.company, 'stock_received_but_not_billed')
+	gl_credit = frappe.db.get_value("Company", pi.company, 'default_payable_account')
+	gl_name = frappe.db.get_value("GL Entry",{'account':gl_credit,'voucher_no':pi.name},'name')
+	frappe.db.set_value("Purchase Invoice", pi.name, 'posting_date', filters.get('end_date'))
+	frappe.db.set_value("GL Entry",{'account': gl_stock,'voucher_no':pi.name}, 'posting_date', filters.get('end_date'))
+	frappe.db.get_value("GL Entry",gl_name, 'posting_date', filters.get('end_date'))
+	frappe.db.sql("""update `tabGL Entry` set posting_date = '{0}' where name = '{1}'
+		""".format(filters.get('end_date'),gl_name))
 
 def get_incentives(amount, qty, vlcc=None):
 	if vlcc and amount and qty:

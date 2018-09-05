@@ -7,12 +7,18 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,add_m
 def get_fmcr_data(start_date=None,end_date=None):
 	start_date,end_date
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
+	vlcc_addr = frappe.db.get_value("Village Level Collection Centre",vlcc,"address_display")
+	vlcc_details = {'vlcc_addr':vlcc_addr,"vlcc":vlcc}
 	filters = {
 		"start_date":start_date,
 		"end_date":end_date,
 		"shift":"Both",
-		'vlcc':vlcc
+		'vlcc':vlcc,
+		'operator_type':'VLCC'
 	}
+
+	vmcr_dict = {}
+	vmcr_data_list = get_vmcr_data_list(filters)
 
 	fmcr_list = get_fmcr_list(filters)
 	local_sale_list = get_local_sale_data(filters)
@@ -20,12 +26,18 @@ def get_fmcr_data(start_date=None,end_date=None):
 	# date_and_shift_wise_fmcr = {}
 	date_and_shift_wise_local_sale = {}
 	date_and_shift_wise_sample_local_sale = {}
+	date_and_shift_wise_dairy_sale = {}
 	# for fmcr in fmcr_list:
 	# 	if date_and_shift_wise_fmcr and str(fmcr['date'])+"#"+fmcr['shift'] in date_and_shift_wise_fmcr:
 	# 		date_and_shift_wise_fmcr[str(fmcr['date'])+"#"+fmcr['shift']].append(fmcr['name']+"@"+fmcr['farmerid'])
 	# 	else:
 	# 		date_and_shift_wise_fmcr[str(fmcr['date'])+"#"+fmcr['shift']] = [fmcr['name']+"@"+fmcr['farmerid']]
-	
+	for vmcr in vmcr_data_list:
+		vmcr['g_fat'] = 0
+		vmcr['g_snf'] = 0
+		vmcr['diff_fat'] = 0 - vmcr.get('vmcr_fat')
+		vmcr['diff_snf'] = 0 - vmcr.get('vmcr_snf')
+		vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
 	
 	for si in local_sale_list:
 		local_sale_dict = {}
@@ -67,9 +79,25 @@ def get_fmcr_data(start_date=None,end_date=None):
 			merged.update(members.get(key, {'member_qty': '-','total_milk_amt': '-', 'non_member_count': '-', 'date': key.split('#')[0], 'member_count': '-', 'member_amt': '-', 'shift': key.split('#')[1], 'non_member_amt': '-', 'non_member_qty': '-', 'total_milk_qty': '-'}))
 			merged.update(date_and_shift_wise_local_sale.get(key, {'si_amount': "-", 'si_qty': "-"}))
 			merged.update(date_and_shift_wise_sample_local_sale.get(key, {'stock_amount': "-", 'stock_qty': "-"}))
+			merged.update({'dairy_sales':calculate_dairy_sales(merged.get('total_milk_qty'),merged.get('si_qty'))})
+			merged.update(vmcr_dict.get(key,{'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
 			final_dict[key] = merged
 		
-	return final_dict
+	return {"final_dict":final_dict,"vlcc_details":vlcc_details}
+
+
+def calculate_dairy_sales(total_milk_qty,local_sale_qty):
+	dairy_sales = 0
+	if total_milk_qty and local_sale_qty:
+		if total_milk_qty == '-' and local_sale_qty != '-':
+			dairy_sales = local_sale_qty
+		elif total_milk_qty != '-' and local_sale_qty == '-':
+			dairy_sales = total_milk_qty
+		elif total_milk_qty == '-' and local_sale_qty == '-':
+			dairy_sales = '-'
+		else:
+			dairy_sales = total_milk_qty - local_sale_qty  	
+	return dairy_sales		
 
 def fetch_farmer_data(fmcr_data,filters):
 	final_ = {}
@@ -241,3 +269,26 @@ def get_sample_sale_data(filters):
 									and se.posting_date between '{1}' and '{2}'
 									and se.shift in ('MORNING','EVENING') """.format(filters.get('vlcc'),filters.get('start_date'),filters.get('end_date')),as_dict=1,debug=0)
 	return stock_entry
+
+def get_vmcr_data_list(filters):
+	vmcr_list = frappe.db.sql("""
+								select
+									vmcr.fat as vmcr_fat,
+									vmcr.snf as vmcr_snf,
+									date(vmcr.collectiontime) as vmcr_date,
+									vmcr.shift
+								from
+									`tabVlcc Milk Collection Record` vmcr
+								where
+									vmcr.docstatus = 1 and
+									vmcr.shift in ('MORNING','EVENING')
+									{0} """.format(get_vmcr_conditions(filters)),as_dict=1,debug=1)
+	return vmcr_list
+
+def get_vmcr_conditions(filters):
+	cond = " and 1=1"	
+	if filters.get('operator_type') == "VLCC":
+		cond = " and vmcr.associated_vlcc = '{0}' """.format(filters.get('vlcc'))
+	if filters.get('start_date') and filters.get('end_date'):
+		cond += " and date(vmcr.collectiontime) between '{0}' and '{1}'".format(filters.get('start_date'),filters.get('end_date'))
+	return cond	

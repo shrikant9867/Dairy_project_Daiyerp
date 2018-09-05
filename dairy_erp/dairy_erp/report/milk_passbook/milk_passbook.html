@@ -33,48 +33,59 @@ th,td {
 </div>
 
 <div class="row">
-	{% if (filters.customer_type == "Farmer") { %}
-	<div class="col-xs-6 text-right">
-		{%= filters.customer %}
-	</div>
-	<div class="col-xs-6 text-left">
+	<div class="col-xs-3">
+		<b>Farmer Id</b>
+		&nbsp;
 		{%= filters.farmer_id %}
 	</div>
-	{% } else { %}
-	<div class="col-xs-12">
-		<center>
-			{%= filters.customer %}		
-		</center>
+	<div class="col-xs-3"></div>
+	<div class="col-xs-3"></div>
+	<div class="col-xs-3">
+		<b>Farmer Name</b>
+		&nbsp;
+		{%= filters.farmer_name %}
 	</div>
-	{% } %}
 </div>
-
-
+<hr>
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th>Sr No</th>
+			<th>Sr. No</th>
 			<th>{%= __("Date") %}</th>
-			<th>{%= __("Customer") %}</th>
 			<th>{%= __("Shift") %}</th>
-			<th>{%= __("Sales Invoice") %}</th>	
-			<th>{%= __("Item Code") %}</th>
+			<th>{%= __("Milk Type") %}</th>
 			<th>{%= __("Quantity") %}</th>
+			<th>{%= __("FAT") %}</th>
+			<th>{%= __("SNF") %}</th>	
 			<th>{%= __("Rate") %}</th>
-			<th>{%= __("Amount") %}</th>	
+			<th>{%= __("Total") %}</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
-			<td>{%= i+1 %}</td>
-			<td>{%= data[i][__("Date")] %}</td>
-			<td>{%= data[i][__("Customer")] %}</td>
-			<td>{%= data[i][__("Shift")] %}</td>
-			<td>{%= data[i][__("Sales Invoice")] %}</td>
-			<td>{%= data[i][__("Item Code")] %}</td>
-			<td>{%= data[i][__("Quantity")] %}</td>
-			<td>{%= data[i][__("Rate")] %}</td>
-			<td>{%= data[i][__("Amount")] %}</td>
+			{% if (i == l-1) { %}
+				<td>{%= i+1 %}</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>Grand Total</td>
+				<td>{%= data[i][__("Total")] %}</td>
+			{% } else { %}
+			<tr>
+				<td>{%= i+1 %}</td>
+				<td>{%= data[i][__("Date")] %}</td>
+				<td>{%= data[i][__("Shift")] %}</td>
+				<td>{%= data[i][__("Milk Type")] %}</td>
+				<td>{%= data[i][__("Quantity")] %}</td>
+				<td>{%= data[i][__("FAT")] %}</td>
+				<td>{%= data[i][__("SNF")] %}</td>
+				<td>{%= data[i][__("Rate")] %}</td>
+				<td>{%= data[i][__("Total")] %}</td>
+			</tr>
+			{% } %}
 		{% } %}
 	</tbody>
 </table>

@@ -1,29 +1,44 @@
+<style type="text/css">
+
+th,td {
+	text-align: center;
+}
+</style>
+
 <br>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-<h4 class="text-center">
-{% if(filters.operator_type == "Chilling Centre") { %}
-	{%= filters.branch_office%}
-{% } else { %}
-	{%= filters.vlcc%}
-{% } %}
-</h4>
+<h4 class="text-center">{%= filters.branch_office %}</h4>
+<h6 class="text-center">{%= filters.address %}</h6>
 <div class="row">
-	<div class="col-md-1 col-xs-1">
-		<b>{%= __("Date") %}:</b>
+	<div class="col-xs-3">
+		<b>Date</b>
+		&nbsp;
+		{%= filters.start_date %}
 	</div>
-	<div class="col-md-3 col-xs-3" style="padding-left: 0px;">
-		{%= dateutil.str_to_user(filters.start_date) %}
-	</div>
-	<div class="col-md-1 col-xs-1">
-		<b>{%= __("Shift") %}:</b>	
-	</div>
-	<div class="col-md-3 col-xs-3" style="padding-left: 0px;">
+	<div class="col-xs-3">
+		<b>Shift</b>
+		&nbsp;
 		{%= filters.shift %}
 	</div>
-	<div class="col-md-1 col-xs-1">
-		<b>{%= __("Route") %}:</b>
+	{% if (filters.operator_type == "VLCC") { %}
+	<div class="col-xs-3">
+		<div class="row">
+			<b>Society Name</b>
+			&nbsp;
+			{%= filters.vlcc %}
+		</div>
+		<div class="row">
+			<b>Society Id</b>
+			&nbsp;
+			{%= filters.vlcc_id %}
+		</div>
 	</div>
-	<div class="col-md-3 col-xs-3" style="padding-left: 0px;">
+	{% } else { %}
+	<div class="col-xs-3"></div>
+	{% } %}
+	<div class="col-xs-3">
+		<b>Route</b>
+		&nbsp;
 		{%= filters.route %}
 	</div>
 </div>

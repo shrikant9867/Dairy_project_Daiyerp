@@ -2,16 +2,20 @@
 .width-increase {
   		width: 9%;
 	}
+
+th,td {
+	text-align: center;
+}	
 </style>
 
 <div class="container-fluid" style="margin: 0 20px 0 20px">
 	<div class = "row">
-		<div class="col-md-12" style="overflow-y:scroll; height:500px;overflow-x:scroll; height:500px;">
+		<div class="col-md-12" style="overflow-y:scroll; height:100px;overflow-x:scroll; height:500px;">
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<th>Date</th>
-						<th>Shift</th>
+						<th rowspan="2" class="width-increase">Date</th>
+						<th rowspan="2">Shift</th>
 					    <th colspan="3" style="text-align: center;">Members
 					    </th>
 					    <th colspan="3" style="text-align: center;">
@@ -23,12 +27,16 @@
 					    <th colspan="2" style="text-align: center;">
 					    	General Test
 					    </th>
+					    <th colspan="2">
+					    	Difference
+					    	&nbsp;
+					    	<button class="btn btn-secondary btn-default btn-sm" id="update_diff">Update</button>
+					    </th>
 					    <th colspan="2" >Local Sales</th>
 					    <th colspan="2" >Sample Sales</th>
+					    <th rowspan="2">Dairy Sales</th>
 					</tr>
 					<tr>
-						<th></th>
-						<th></th>
 						<th>Nos</th>
 						<th>Qty</th>
 						<th>Amt</th>
@@ -37,6 +45,8 @@
 						<th>Amt</th>
 						<th>Total Milk Qty</th>
 						<th>Total Milk Amt</th>
+						<th>FAT</th>
+						<th>SNF</th>
 						<th>FAT</th>
 						<th>SNF</th>
 						<th>Qty</th>
@@ -48,7 +58,7 @@
 					{% $.each(fmcr_data, function(i, val){ %}
 						<tr>
 						    <td>{%= val.date %}</td>
-						    <td>{%= val.shift %}</td>
+						    <td>{%= val.shift[0] %}</td>
 						    <td>{%= val.member_count %}</td>
 						    <td>{%= val.member_qty %}</td>
 						    <td>{%= val.member_amt %}</td>
@@ -57,12 +67,19 @@
 						    <td>{%= val.non_member_amt %}</td>
 						    <td>{%= val.total_milk_qty %}</td>
 						    <td>{%= val.total_milk_amt %}</td>
-						    <td>{%= (" ") %}</td>
-						    <td>{%= (" ") %}</td>
+						    <td class="g_fat" row_id={%= i  + "@d_fat" %}>
+						    <input type="number" class="form-control" data-fieldtype="Float" data-fieldname="g_fat" value={%= val.g_fat %}>	
+						    </td>
+						    <td class="g_snf" row_id={%= i  + "@d_snf" %}>
+						    <input type="number" class="form-control" data-fieldtype="Float" data-fieldname="g_snf" value={%= val.g_snf %}>
+						    </td>
+						    <td row_id={%= i + "@diff_fat" %}>{%= val.diff_fat %}</td>
+						    <td row_id={%= i + "@diff_snf" %}>{%= val.diff_snf %}</td>
 						    <td>{%= val.si_qty %}</td>
 						    <td>{%= val.si_amount %}</td>
 						    <td>{%= val.stock_qty %}</td>
 						    <td>{%= val.stock_amount %}</td>
+							<td>{%= val.dairy_sales %}</td>
 						</tr>
 					{% }); %}
 				</tbody>

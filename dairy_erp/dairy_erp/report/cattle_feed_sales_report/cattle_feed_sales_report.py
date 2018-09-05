@@ -15,7 +15,7 @@ def get_columns():
 	columns = [
 		_("Date") + ":Date:90", 
 		_("Sales Invoice") + ":Link/Sales Invoice:150",
-		_("Item Code") + ":Link/Item:150",
+		_("Item Code") + ":Data:150",
 		_("Quantity") + ":Float:150",
 		_("Rate") + ":Currency:150",
 		_("Total") + ":Currency:100",
@@ -31,7 +31,7 @@ def get_data(filters):
 									si_item.item_name,
 									si_item.qty,
 									si_item.rate,
-									si.grand_total 
+									si_item.qty*si_item.rate 
 							from
 								`tabSales Invoice` si,
 								`tabSales Invoice Item` si_item
@@ -41,7 +41,12 @@ def get_data(filters):
 								and si.customer_or_farmer = "Farmer"
 								and si_item.item_code not in ('COW Milk','BUFFALO Milk')
 								and si.docstatus = 1 and si.company = '{0}'
-								{1}""".format(filters.get('vlcc'),get_conditions(filters)),filters,debug=1)
+								{1}""".format(filters.get('vlcc'),get_conditions(filters)),filters,as_list=1,debug=0)
+	if data:
+		g_total = 0
+		for row in data:
+			g_total += row[5]
+		data.append(["","","Grand Total","","","g_total",""])	
 	return data
 
 def get_conditions(filters):

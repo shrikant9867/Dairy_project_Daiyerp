@@ -35,12 +35,16 @@ frappe.mis_report = Class.extend({
                     me.milk_quality = r.message.milk_quality
                     me.formated_and_total_milk = r.message.formated_and_total_milk
                     me.cattle_feed = r.message.cattle_feed
+                    me.financial_data_dict = r.message.financial_data_dict
+                    me.vlcc_addr = r.message.vlcc_addr
                     $(me.page).find(".render-table").empty();
                     me.print = frappe.render_template("mis_report",{
                             "mis_data":me.mis_data,
                             "member_data":me.member_data,
                             "milk_quality":me.milk_quality,
-                            "cattle_feed":me.cattle_feed
+                            "cattle_feed":me.cattle_feed,
+                            "financial_data_dict":me.financial_data_dict,
+                            "month":month_
                             })
                     $(me.page).find(".render-table").append(me.print)
                     me.update_total_milk()
@@ -83,6 +87,8 @@ frappe.mis_report = Class.extend({
             callback: function(r){
                 if(r.message){  
                     console.log(r.message)
+                    me.formated_and_total_milk.formated_milk = flt(milk_data.formated_milk)
+                    me.formated_and_total_milk.total_milk = flt(milk_data.good_milk) + flt(milk_data.bad_milk) + flt(milk_data.formated_milk)                   
                 }
             }
         });
@@ -156,6 +162,7 @@ frappe.mis_report = Class.extend({
     },
     create_pdf: function(){
         var me = this;
+        console.log(me.formated_and_total_milk,"before print ")
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
         var html = frappe.render_template("mis_pdf",{
@@ -165,9 +172,13 @@ frappe.mis_report = Class.extend({
                                                         "milk_quality":me.milk_quality,
                                                         "month":me.month.get_value(),
                                                         "fiscal_year":me.fiscal_year.get_value(),
-                                                        "formated_and_total_milk":me.formated_and_total_milk
+                                                        "formated_and_total_milk":me.formated_and_total_milk,
+                                                        "vlcc_addr":me.vlcc_addr,
+                                                        'vlcc':frappe.boot.user.first_name,
+                                                        'cattle_feed':me.cattle_feed,
+                                                        'financial_data_dict':me.financial_data_dict
                                                     }),
-            title:__("mis_report"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
+            title:__("MIS Report"),
             base_url: base_url,
             print_css: print_css
         });

@@ -8,6 +8,8 @@ from dairy_erp.dairy_erp.page.dairy_register_one.dairy_register_one import get_f
 def get_vmcr_data(start_date=None,end_date=None):
 	# return start_date,end_date
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
+	vlcc_addr = frappe.db.get_value("Village Level Collection Centre",vlcc,"address_display")
+	vlcc_details = {'vlcc_addr':vlcc_addr,"vlcc":vlcc}
 	filters = {
 		"start_date":start_date,
 		"end_date":end_date,
@@ -67,7 +69,7 @@ def get_vmcr_data(start_date=None,end_date=None):
 		else:
 			pass
 	
-	return final_dict
+	return {"final_dict":final_dict,"vlcc_details":vlcc_details}
 
 def get_vmcr_data_list(filters):
 	vmcr_list = frappe.db.sql("""

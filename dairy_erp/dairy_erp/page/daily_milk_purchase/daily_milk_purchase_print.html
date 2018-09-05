@@ -1,12 +1,15 @@
 
 <div class="container-fluid" style="margin: 0 20px 0 20px">
 	<div class="row">
-		<div class="col-xs-12">
+		<div class="col-xs-6 text-left">
 			{% if (vlcc_addr) { %}
 				<header>
                     {%= vlcc_addr %}
 				</header>
             {% } %}
+		</div>
+		<div class="col-xs-6 text-right">
+			{%= vlcc %}
 		</div>
 	</div>
 	<div class="row">
@@ -45,8 +48,8 @@
 						<td style="text-align: center;">{%= local_sale_data.qty %}</td>
 						<td style="text-align: right;">{%= local_sale_data.amt %}</td>
 						<td style="text-align: center;">{%= dairy_sale_qty %}</td>
-						<td style="text-align: center;">{%= avg_data.avg_fat  %}</td>
-						<td style="text-align: center;">{%= avg_data.avg_snf %}</td>
+						<td style="text-align: center;"></td>
+						<td style="text-align: center;"></td>
 						<td></td>
 					</tr>
 				</tbody>

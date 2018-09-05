@@ -10,12 +10,22 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Territory",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Customer Group",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
 					"name": "Customer",
 					"description": _(" "),
 				},
 				{
 					"type": "doctype",
-					"name": "Item",
+					"name": "Supplier Type",
 					"description": _(" "),
 				},
 				{
@@ -30,7 +40,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Supplier Type",
+					"name": "Item",
 					"description": _(" "),
 				},
 				{
@@ -45,17 +55,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Customer Group",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
 					"name": "Price List",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Territory",
 					"description": _(" "),
 				},
 				{
@@ -81,12 +81,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Delivery Note",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Sales Invoice",
+					"name": "Purchase Receipt",
 					"description": _(" "),
 				},
 				{
@@ -96,12 +91,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Payment Entry",
+					"name": "Sales Invoice",
 					"description": _(" "),
 				},
 				{
 					"type": "doctype",
-					"name": "Purchase Receipt",
+					"name": "Delivery Note",
 					"description": _(" "),
 				},
 				{
@@ -111,25 +106,14 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Payment Entry",
+					"description": _(" "),
+				},				
+				{
+					"type": "doctype",
 					"name": "Journal Entry",
 					"description": _(" "),
 				}	
-			]
-		},
-		{
-			"label": _("Payment Tool"),
-			"icon": "icon-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "VLCC Payment Cycle",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Payment Cycle",
-					"description": _(" "),
-				}
 			]
 		},
 		{
@@ -137,44 +121,19 @@ def get_data():
 			"icon": "icon-star",
 			"items": [
 				{
-					"type": "doctype",
-					"name": "Farmer",
-					"description": _(" "),
-				},
-				{
 					"type": "page",
 					"name": "vlcc-dashboard",
 					"label": _("Vlcc Dashboard"),
 					"description": _(" "),
 				},
 				{
-					"type": "page",
-					"name": "daily-milk-purchase",
-					"label": _("Daily Milk Purchase Report"),
+					"type": "doctype",
+					"name": "Village Level Collection Centre",
 					"description": _(" "),
 				},
 				{
-					"type": "page",
-					"name": "individual_farmer_milk_report",
-					"label": _("Individual Farmer Milk Report"),
-					"description": _(" "),
-				},
-				{
-					"type": "page",
-					"name": "dairy_register_one",
-					"label": _("Dairy Register - 1"),
-					"description": _(" "),
-				},
-				{
-					"type": "page",
-					"name": "dairy_register_two",
-					"label": _("Dairy Register - 2"),
-					"description": _(" "),
-				},
-				{
-					"type": "page",
-					"name": "mis_report",
-					"label": _("MIS Report"),
+					"type": "doctype",
+					"name": "Farmer",
 					"description": _(" "),
 				},
 				{
@@ -188,108 +147,20 @@ def get_data():
 					"description": _(" "),
 				},
 				{
-					"type": "doctype",
-					"name": "Farmer Loan",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Advance",
-					"description": _(" "),
-				}
-			]
-		},
-			{
-			"label": _("Loan & Advance"),
-			"icon": "icon-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Farmer Loan",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Advance",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Payment Cycle Report",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Vlcc Advance",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Vlcc Loan",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "VLCC Payment Cycle Report",
-					"description": _(" "),
-				}
-			]
-		},
-		{
-			"label": _("Dairy"),
-			"icon": "icon-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Village Level Collection Centre",
-					"description": _(" "),
-				},
-				{
 					"type": "page",
-					"name": "dairy-dashboard",
-					"label": _("Dairy Dashboard"),
+					"name": "individual_farmer_milk_report",
+					"label": _("Individual Farmer Milk Report"),
+					"description": _(" "),
+				},
+				
+				{
+					"type": "doctype",
+					"name": "Farmer Loan",
 					"description": _(" "),
 				},
 				{
 					"type": "doctype",
-					"name": "Vlcc Milk Collection Record",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Vlcc Advance",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Vlcc Loan",
-					"description": _(" "),
-				}
-
-			]
-		},
-		{
-			"label": _("Settings"),
-			"icon": "icon-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Farmer Settings",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "VLCC Settings",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Dairy Log",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Mobile App Log",
+					"name": "Farmer Advance",
 					"description": _(" "),
 				}
 			]
@@ -298,13 +169,6 @@ def get_data():
 			"label": _("Reports"),
 			"icon": "icon-star",
 			"items": [
-				{
-					"type": "report",
-					"name": "Farmer Net Payoff",
-					"label": _("Farmer Net Payoff"),
-					"doctype": "Farmer",
-					"is_query_report": True
-				},
 				{
 					"type": "report",
 					"name": "Milk Passbook",
@@ -320,24 +184,55 @@ def get_data():
 					"is_query_report": True
 				},
 				{
+					"type": "page",
+					"name": "individual_farmer_milk_report",
+					"label": _("Individual Farmer Milk Report"),
+					"description": _(" "),
+				},
+				{
+					"type": "page",
+					"name": "daily-milk-purchase",
+					"label": _("Daily Milk Purchase Report"),
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Dairy Register",
+					"label": _("Dairy Register"),
+					"description": _(" "),
+				},
+				{
+					"type": "page",
+					"name": "mis_report",
+					"label": _("MIS Report"),
+					"description": _(" "),
+				},
+				{
 					"type": "report",
-					"name": "Vlcc Net Pay Off",
-					"doctype": "Village Level Collection Centre",
-					"label": _("Vlcc Net Pay Off"),
+					"name": "Cattle Feed Sales Report",
+					"label":_("Cattle Feed Sales Report"),
+					"doctype": "Sales Invoice",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
-					"name": "VLCC Payment Settlement",
-					"label": _("VLCC Payment Settlement"),
-					"doctype": "VLCC Payment Cycle",
+					"name": "Cattle Feed Advance Report",
+					"label":_("Cattle Feed Advance Report"),
+					"doctype": "Sales Invoice",
 					"is_query_report": True
 				},
 				{
 					"type": "report",
-					"name": "Farmer Payment Settlement",
-					"label": _("Farmer Payment Settlement"),
-					"doctype": "Farmer Payment Cycle",
+					"name": "CC Report",
+					"label":_("Chilling Center Report"),
+					"doctype": "Vlcc Milk Collection Record",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Farmer Net Payoff",
+					"label": _("Farmer Net Payoff"),
+					"doctype": "Farmer",
 					"is_query_report": True
 				},
 				{
@@ -352,20 +247,6 @@ def get_data():
 					"name": "Accounts Payable",
 					"label": _("Accounts Payable"),
 					"doctype": "Purchase Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Stock Ledger",
-					"label": _("Stock Ledger"),
-					"doctype": "Stock Ledger Entry",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Stock Balance",
-					"label": _("Stock Balance"),
-					"doctype": "Stock Ledger Entry",
 					"is_query_report": True
 				},
 				{
@@ -405,6 +286,34 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Stock Ledger",
+					"label": _("Stock Ledger"),
+					"doctype": "Stock Ledger Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Stock Balance",
+					"label": _("Stock Balance"),
+					"doctype": "Stock Ledger Entry",
+					"is_query_report": True
+				},				
+				{
+					"type": "report",
+					"name": "Vlcc Net Pay Off",
+					"doctype": "Village Level Collection Centre",
+					"label": _("Vlcc Net Pay Off"),
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "VLCC Payment Settlement",
+					"label": _("VLCC Payment Settlement"),
+					"doctype": "VLCC Payment Cycle",
+					"is_query_report": True
+				},				
+				{
+					"type": "report",
 					"name": "Purchase Order Detail Report",
 					"label":_("Purchase Order Detail Report"),
 					"doctype": "Purchase Order",
@@ -416,28 +325,120 @@ def get_data():
 					"label":_("Material Indent Detail Report"),
 					"doctype": "Material Request",
 					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Cattle Feed Sales Report",
-					"label":_("Cattle Feed Sales Report"),
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Cattle Feed Advance Report",
-					"label":_("Cattle Feed Advance Report"),
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "CC Report",
-					"label":_("CC Report"),
-					"doctype": "Vlcc Milk Collection Record",
-					"is_query_report": True
 				}
+			]
+		},
+		{
+			"label": _("Loan & Advance"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Farmer Loan",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Advance",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Advance",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Loan",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "VLCC Payment Cycle Report",
+					"description": _(" "),
+				}
+			]
+		},
+		{
+			"label": _("Settings"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Farmer Settings",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "VLCC Settings",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Dairy Log",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Mobile App Log",
+					"description": _(" "),
+				}
+			]
+		},
+		{
+			"label": _("Payment Tool"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Farmer Payment Cycle",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Farmer Payment Cycle Report",
+					"description": _(" "),
+				},
+				{
+					"type": "report",
+					"name": "Farmer Payment Settlement",
+					"label": _("Farmer Payment Settlement"),
+					"doctype": "Farmer Payment Cycle",
+					"is_query_report": True
+				},
+				{
+					"type": "doctype",
+					"name": "VLCC Payment Cycle",
+					"description": _(" "),
+				},
+			]
+		},
+		{
+			"label": _("Dairy"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "page",
+					"name": "dairy-dashboard",
+					"label": _("Dairy Dashboard"),
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Milk Collection Record",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Advance",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "Vlcc Loan",
+					"description": _(" "),
+				}
+
 			]
 		}				
 	]			

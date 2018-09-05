@@ -53,7 +53,7 @@ frappe.dairy_register_one = Class.extend({
                 if(in_list(Object.keys(me.table_data),f_id) && g_fat_val){
                     var diff_fat = g_fat_val - me.table_data[f_id].vmcr_fat
                     me.table_data[f_id].diff_fat = diff_fat
-                    me.table_data[f_id].g_fat = g_fat_val    
+                    me.table_data[f_id].g_fat = g_fat_val
                 }
             })
             $.each(g_snf,function(i,d){

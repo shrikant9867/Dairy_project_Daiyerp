@@ -24,12 +24,21 @@ th,td {
 	<div class="row">
 		<div class="col-xs-12" style="font-size: 16px;">
 			<center>
-				Dairy Register - 1: <b>Start date</b> - {%= start_date %}, <b>End date - {%= end_date %}</b>
+				<b>Dairy Register - 1</b>
+			</center>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12" style="font-size: 16px;">
+			<center>
+			<b>{%= __("Start Date") %}</b>
+		{%= start_date %}
+			<b>{%= __("End Date") %}</b>
+		{%= end_date %}
 			</center>
 		</div>
 	</div>
 	<div style="border-top: double #d1d8dd; margin: 4px 0 4px 0"></div>
-
 	<div class = "row">
 		<div class="col-md-12">
 			<table class="table table-bordered">

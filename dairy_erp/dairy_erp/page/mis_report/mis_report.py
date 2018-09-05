@@ -119,28 +119,50 @@ def get_mis_data(month=None,fiscal_year=None):
 		fmcr = milk_purchase_dict.get('fmcr_data')
 		local_sale_data = milk_purchase_dict.get('local_sale')
 
+		total_1_2_3 = [vmcr[1][0].get('revenue_from_dairy_sale')+
+												local_sale_data[1][0].get('local_sale_of_milk')+
+												sample_sale_data.get("month")[0].get('sample_own_milk_sale'),
+												vmcr[0][0].get('revenue_from_dairy_sale')+
+												local_sale_data[0][0].get('local_sale_of_milk')+
+												sample_sale_data.get("upto_month")[0].get('sample_own_milk_sale')
+								]
+		total_5_6 = [fmcr[1][0].get('total_amount_of_milk_purchased')+
+											get_expenses(filters,'month','Trade Expenses').get('Trade Expenses')+
+											get_expenses(filters,'month','Office Expenses').get('Office Expenses'),
+											fmcr[0][0].get('total_amount_of_milk_purchased')+
+											get_expenses(filters,'upto_month','Trade Expenses').get('Trade Expenses')+
+											get_expenses(filters,'upto_month','Office Expenses').get('Office Expenses')
+								]
+		gross_profit_4_7 = 	[total_1_2_3[0]-total_5_6[0],total_1_2_3[1]-total_5_6[1]]				
+		total_income = [other_income.get('month').get('other_income')+gross_profit_4_7[0],other_income.get('upto_month').get('other_income')+gross_profit_4_7[1]]
+		s_total = [get_expenses(filters,'month','Salary').get('Salary')+
+					get_expenses(filters,'month','Other Expenses').get('Other Expenses'),
+					get_expenses(filters,'upto_month','Salary').get('Salary')+
+					get_expenses(filters,'upto_month','Other Expenses').get('Other Expenses')]
+		net_profit = [total_income[0]-s_total[0],total_income[1]-s_total[1]]
+		if total_5_6[0] != 0 and gross_profit_4_7[0] != 0 and total_5_6[1] != 0 and gross_profit_4_7[1] != 0:
+			profit_in = [round((gross_profit_4_7[0]/total_5_6[0])*100,2),round((gross_profit_4_7[1]/total_5_6[1])*100,2)]
+		else:
+			profit_in = [0,0]
 		financial_data_dict = {"revenue_from_dairy_sale":[vmcr[1][0].get('revenue_from_dairy_sale'),vmcr[0][0].get('revenue_from_dairy_sale')],
 								"local_sale_of_milk":[local_sale_data[1][0].get('local_sale_of_milk'),local_sale_data[0][0].get('local_sale_of_milk')],
 								"sample_own_milk_sale":[sample_sale_data.get("month")[0].get('sample_own_milk_sale'),sample_sale_data.get("upto_month")[0].get('sample_own_milk_sale')],
-								"total_1_2_3":"",
-								"Blank_1":"",
+								"total_1_2_3":total_1_2_3,
 								"total_amount_of_milk_purchased":[fmcr[1][0].get('total_amount_of_milk_purchased'),fmcr[0][0].get('total_amount_of_milk_purchased')],
 								"trade_expenses_or_office_expenses":[get_expenses(filters,'month','Trade Expenses').get('Trade Expenses')+get_expenses(filters,'month','Office Expenses').get('Office Expenses'),get_expenses(filters,'upto_month','Trade Expenses').get('Trade Expenses')+get_expenses(filters,'upto_month','Office Expenses').get('Office Expenses')],
-								"total_5_6":"",
-								"Blank_2":"",
-								"gross_profit_4_7":"",
+								"total_5_6":total_5_6,
+								"gross_profit_4_7":gross_profit_4_7,
 								"Blank_3":"",
 								"other_income":other_income,
-								"total_income":"",
+								"total_income":total_income,
 								"Blank_4":"",
 								"salary":[get_expenses(filters,'month','Salary').get('Salary'),get_expenses(filters,'upto_month','Salary').get('Salary')],
 								"other_expenses":[get_expenses(filters,'month','Other Expenses').get('Other Expenses'),get_expenses(filters,'upto_month','Other Expenses').get('Other Expenses')],
-								"total":"",
+								"s_total":s_total,
 								"Blank_5":"",
-								"net_profit":"",
+								"net_profit":net_profit,
 								"Blank_6":"",
-								"profit_in":""}
-		
+								"profit_in":profit_in}
 
 	return {"milk_purchase_dict":milk_purchase_dict,
 	"member_data":member_non_member,
@@ -161,7 +183,7 @@ def get_fmcr_data_list(filters,date_range):
 	fmcr_data = frappe.db.sql("""select
 									COALESCE(round(sum(fmcr.milkquantity),2),0) as total_milk_purchase_society,
 									COALESCE(round(sum(fmcr.fat*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_fat,
-									COALESCE(round(avg(fmcr.snf*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_snf,
+									COALESCE(round(sum(fmcr.snf*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_snf,
 									COALESCE(round(avg(fmcr.milkquantity),2),0) as daliy_milk_purchase_society,
 									COALESCE(round(sum(fmcr.amount),2),0) as total_amount_of_milk_purchased
 								from

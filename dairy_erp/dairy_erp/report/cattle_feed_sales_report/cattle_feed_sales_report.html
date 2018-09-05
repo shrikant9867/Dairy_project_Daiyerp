@@ -4,7 +4,16 @@ th,td {
 	text-align: center;
 }
 </style>
-<br>
+<div class="row">
+	<div class="col-xs-6 text-left">
+		{% if (filters.vlcc_addr) { %}
+            {%= filters.vlcc_addr %}
+        {% } %}
+	</div>
+	<div class="col-xs-6 text-right">
+		{%= filters.vlcc %}
+	</div>
+</div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.vlcc %}</h4>
 <div class="row">
@@ -50,6 +59,7 @@ th,td {
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			{% if (i == l-1) { %}
+			<tr>	
 				<td>{%= i+1 %}</td>
 				<td></td>
 				<td></td>
@@ -58,6 +68,7 @@ th,td {
 				<td>Grand Total</td>
 				<td>{%= data[i][__("Total")] %}</td>
 				<td>{%= data[i][__("Remarks")] %}</td>
+			</tr>
 			{% } else { %}
 			<tr>
 				<td>{%= i+1 %}</td>

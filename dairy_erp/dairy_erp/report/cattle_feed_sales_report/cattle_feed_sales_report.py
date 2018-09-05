@@ -46,7 +46,7 @@ def get_data(filters):
 		g_total = 0
 		for row in data:
 			g_total += row[5]
-		data.append(["","","Grand Total","","","g_total",""])	
+		data.append(["","","Grand Total","","",g_total,""])	
 	return data
 
 def get_conditions(filters):

@@ -55,7 +55,7 @@ def get_data(filters):
 	if data:
 		g_total = 0
 		for row in data:
-			g_total += row[5]
+			g_total += row[7]
 		data.append(["","","Grand Total","","","","",g_total])		
 	return data
 

@@ -75,7 +75,13 @@ frappe.query_reports["Cattle Feed Sales Report"] = {
 			"fieldtype": "Date",
 			"reqd":1,
 			"default": frappe.datetime.get_today()
-		}
+		},
+		{
+			"fieldname":"vlcc_addr",
+			"label": __("VLCC Address"),
+			"fieldtype": "Data",
+			"hidden": 1
+		},
 	],
 	onload: function(query_report) {
 		frappe.call({
@@ -90,6 +96,24 @@ frappe.query_reports["Cattle Feed Sales Report"] = {
 					if(has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
 						// $('body').find("[data-fieldname=vlcc]").val(r.message.company)
 						frappe.query_report_filters_by_name.vlcc.set_input(r.message.company);
+					}
+					query_report.trigger_refresh();
+				}
+			}
+		})
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Village Level Collection Centre",
+				filters: {"name": frappe.boot.user.first_name},
+				fieldname: ["address_display"]
+			},
+			callback: function(r) {
+				console.log("insidr e",r.message)
+				if(!r.exc && r.message && !in_list(["Administrator", "Guest"], frappe.session.user)){
+					if(has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
+						// $('body').find("[data-fieldname=vlcc]").val(r.message.company)
+						frappe.query_report_filters_by_name.vlcc_addr.set_input(r.message.address_display);
 					}
 					query_report.trigger_refresh();
 				}

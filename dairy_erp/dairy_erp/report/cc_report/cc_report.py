@@ -12,7 +12,7 @@ def execute(filters=None):
 
 def get_columns():
 	columns = [
-		_("Type") + ":Data:100",
+		_("Quality Type") + ":Data:100",
 		_("Cans") + ":Float:100",
 		_("Qty") + ":Float:100",
 		_("FAT") + ":Float:100",
@@ -29,7 +29,7 @@ def get_data(filters=None):
 									vmcr.milkquality,
 									CASE
 									    WHEN vmcr.milkquantity <= 40 THEN 1
-									    WHEN vmcr.milkquantity > 40 THEN FLOOR(vmcr.milkquantity/40)
+									    WHEN vmcr.milkquantity > 40 THEN CEIL(vmcr.milkquantity/40)
 									END,
 									vmcr.milkquantity,
 									vmcr.fat,
@@ -53,3 +53,43 @@ def get_conditions(filters):
 	elif filters.get('operator_type') == "VLCC":
 		cond += " and vmcr.associated_vlcc = '{0}' """.format(filters.get('vlcc'))
 	return cond
+
+@frappe.whitelist()
+def get_other_data(role):
+	data = {}
+	user_doc = frappe.get_doc("User",frappe.session.user)
+	if "Vlcc Operator" in role or "Vlcc Manager" in role:
+		data['vlcc'] = user_doc.company
+		data['operator_type'] = user_doc.operator_type
+		data['vlcc_id'] = frappe.db.get_value("Village Level Collection Centre",{'name':user_doc.company},"amcu_id")
+		data['branch_office'] = frappe.db.get_value("Village Level Collection Centre",{'name':user_doc.company},"chilling_centre")
+		data['address'] = get_address(data.get('branch_office'))
+	if "Chilling Center Manager" in role or "Chilling Center Operator" in role:
+		data['vlcc'] = ""
+		data['operator_type'] = user_doc.operator_type
+		data['branch_office'] = user_doc.branch_office
+		data['address'] = get_address(user_doc.branch_office)
+	return data
+		
+def get_address(name):
+	final_addr = ""
+	addr = frappe.get_doc("Address",name)
+	if addr.get('address_line1'):
+		final_addr += addr.get('address_line1') + "<br>"
+	if addr.get('address_line2'):
+	    final_addr += addr.get('address_line2') + "<br>"
+	if addr.get('city'):
+	    final_addr += addr.get('city') + "<br>" 
+	if addr.get('state'):
+	    final_addr += addr.get('state') + "<br>" 
+	if addr.get('pincode'):
+	    final_addr += addr.get('pincode') + "<br>" 
+	if addr.get('country'):
+	    final_addr += addr.get('country') + "<br>" 
+	if addr.get('phone'):
+	    final_addr += addr.get('phone') + "<br>"
+	if addr.get('fax'):
+	    final_addr += addr.get('fax') + "<br>"
+	if addr.get('email_id'):
+	    final_addr += addr.get('email_id') + "<br>"
+	return final_addr

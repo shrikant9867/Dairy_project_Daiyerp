@@ -15,9 +15,11 @@ def get_columns():
 	columns = [
 		_("Date") + ":Date:90", 
 		_("Customer") + ":Link/Customer:150",
+		_("Shift") + ":Data:90",
 		_("Sales Invoice") + ":Link/Sales Invoice:150",
 		_("Item Code") + ":Link/Item:150",
 		_("Quantity") + ":Float:150",
+		_("Rate") + ":Float:150",
 		_("Amount") + ":Currency:100"
 	]
 
@@ -27,7 +29,14 @@ def get_data(filters):
 
 	vlcc_comp = frappe.db.get_value("User",frappe.session.user,"company")
 
-	data = frappe.db.sql("""select si.posting_date, si.customer, si.name,si_item.item_name,si_item.qty,si.grand_total 
+	data = frappe.db.sql("""select si.posting_date,
+								   si.customer,
+								   si.shift,
+								   si.name,
+								   si_item.item_name,
+								   si_item.qty,
+								   si_item.rate,
+								   si.grand_total
 							from 
 								`tabSales Invoice` si,
 								`tabSales Invoice Item` si_item,

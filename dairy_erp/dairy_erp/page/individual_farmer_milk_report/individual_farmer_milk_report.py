@@ -120,7 +120,7 @@ def get_si_outstanding(filters):
 def get_fmcr_milk_data(filters):
 	total_milk_amount = frappe.db.sql("""
 										select
-											COALESCE(round(sum(fmcr.milkquantity),2))
+											COALESCE(round(sum(fmcr.amount),2))
 										from
 											`tabFarmer Milk Collection Record` fmcr
 										where

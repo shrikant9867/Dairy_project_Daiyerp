@@ -8,7 +8,25 @@ frappe.query_reports["Milk Passbook"] = {
 			"fieldname":"farmer_id",
 			"label": __("Farmer ID"),
 			"fieldtype": "Link",
-			"options": "Farmer"
+			"options": "Farmer",
+			"on_change": function(query_report) {
+				var farmer_id = frappe.query_report_filters_by_name.farmer_id.get_value()
+				frappe.call({
+					method: "frappe.client.get_value",
+					args: {
+						doctype: "Farmer",
+						filters: {"name": farmer_id},
+						fieldname: ["full_name"]
+					},
+					callback: function(r) {
+						console.log("insidr e",r.message)
+						if(!r.exc && r.message){
+							frappe.query_report_filters_by_name.farmer_name.set_input(r.message.full_name);
+							query_report.trigger_refresh();
+						}
+					}
+				})
+			}
 			/*"get_query": function (query_report) {
 				return {
 					query:"dairy_erp.dairy_erp.report.milk_passbook.milk_passbook.trim_farmer_id_and_name"
@@ -19,7 +37,7 @@ frappe.query_reports["Milk Passbook"] = {
 			"fieldname":"shift",
 			"label": __("Shift"),
 			"fieldtype": "Select",
-			"options": '\nMORNING\nEVENING',
+			"options": ['MORNING','EVENING'],
 			"default": " "
 		},
 		{
@@ -51,7 +69,46 @@ frappe.query_reports["Milk Passbook"] = {
 				}
 				query_report.trigger_refresh();
 			}
+		},
+		{
+			"fieldname":"vlcc_addr",
+			"label": __("VLCC Address"),
+			"fieldtype": "Data",
+			"hidden": 1
+		},
+		{
+			"fieldname":"farmer_name",
+			"label": __("Farmer Name"),
+			"fieldtype": "Data",
+			"hidden": 1
+		},
+		{
+			"fieldname":"vlcc",
+			"label": __("VLCC"),
+			"fieldtype": "Link",
+			"options":"Company",
+			"hidden": 1,
+			"default":frappe.boot.user.first_name
 		}
-
-	]
+	],
+	onload: function(query_report) {
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Village Level Collection Centre",
+				filters: {"name": frappe.boot.user.first_name},
+				fieldname: ["address_display"]
+			},
+			callback: function(r) {
+				console.log("insidr e",r.message)
+				if(!r.exc && r.message && !in_list(["Administrator", "Guest"], frappe.session.user)){
+					if(has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
+						// $('body').find("[data-fieldname=vlcc]").val(r.message.company)
+						frappe.query_report_filters_by_name.vlcc_addr.set_input(r.message.address_display);
+					}
+					query_report.trigger_refresh();
+				}
+			}
+		})
+	}
 }

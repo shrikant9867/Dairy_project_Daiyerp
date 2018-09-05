@@ -9,7 +9,14 @@ frappe.query_reports["Local Sales Report"] = {
 			"label": __("VLCC Local Customer/Farmer"),
 			"fieldtype": "Select",
 			"options": 'Vlcc Local Customer\nFarmer\nVlcc Local Institution',
-			"default": "Vlcc Local Customer"
+			"default": "Vlcc Local Customer",
+			"on_change": function(query_report) {
+				var customer = frappe.query_report_filters_by_name.customer.get_value()
+				if (customer){
+					frappe.query_report_filters_by_name.customer.set_input("");
+				}
+				query_report.trigger_refresh();
+			}
 		},
 		{
 			"fieldname":"customer",
@@ -23,7 +30,32 @@ frappe.query_reports["Local Sales Report"] = {
 						"customer_type": frappe.query_report_filters_by_name.customer_type.get_value()
 						}
 					}
+				},
+			"on_change": function(query_report) {
+				var customer_type = frappe.query_report_filters_by_name.customer_type.get_value()
+				console.log("insdie on_change")
+				if(customer_type == "Farmer"){
+					console.log("insdie farmer cond")
+					frappe.call({
+						method: "frappe.client.get_value",
+						args: {
+							doctype: "Farmer",
+							filters: {"full_name": frappe.query_report_filters_by_name.customer.get_value()},
+							fieldname: ["name"]
+						},
+						callback: function(r) {
+							console.log("insidr e",r.message)
+							if(!r.exc && r.message && !in_list(["Administrator", "Guest"], frappe.session.user)){
+								if(has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
+									// $('body').find("[data-fieldname=vlcc]").val(r.message.company)
+									frappe.query_report_filters_by_name.farmer_id.set_input(r.message.name);
+								}
+								query_report.trigger_refresh();
+							}
+						}
+					})
 				}
+			}	
 		},
 		{
 			"fieldname":"from_date",
@@ -59,7 +91,20 @@ frappe.query_reports["Local Sales Report"] = {
 			"fieldtype": "Link",
 			"options":"Company",
 			"read_only": 1
+		},
+		{
+			"fieldname":"vlcc_addr",
+			"label": __("VLCC Address"),
+			"fieldtype": "Data",
+			"hidden": 1
+		},
+		{
+			"fieldname":"farmer_id",
+			"label": __("Farmer Id"),
+			"fieldtype": "Data",
+			"hidden": 1
 		}
+
 	],
 	onload: function(query_report) {
 		frappe.call({
@@ -74,6 +119,24 @@ frappe.query_reports["Local Sales Report"] = {
 					if(has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
 						// $('body').find("[data-fieldname=vlcc]").val(r.message.company)
 						frappe.query_report_filters_by_name.vlcc.set_input(r.message.company);
+					}
+					query_report.trigger_refresh();
+				}
+			}
+		})
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Village Level Collection Centre",
+				filters: {"name": frappe.boot.user.first_name},
+				fieldname: ["address_display"]
+			},
+			callback: function(r) {
+				console.log("insidr e",r.message)
+				if(!r.exc && r.message && !in_list(["Administrator", "Guest"], frappe.session.user)){
+					if(has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
+						// $('body').find("[data-fieldname=vlcc]").val(r.message.company)
+						frappe.query_report_filters_by_name.vlcc_addr.set_input(r.message.address_display);
 					}
 					query_report.trigger_refresh();
 				}

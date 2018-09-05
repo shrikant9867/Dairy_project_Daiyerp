@@ -10,75 +10,93 @@
 .participants {
   		width: 34%;
 	}
+
 .male_width{
 	width: 12%;
 }	
+
+.p_break {
+	page-break-before: always
+}
+
+th,td {
+	text-align: center;
+}
+
 </style>
 <div class="container-fluid" style="margin: 0 20px 0 20px">
 	<div class = "row content">
-		<div class="col-md-7 nopadding">
+		<div class="col-md-6">
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<th colspan="2">Milk purchase</th>
-						<th>This Month</th>
-						<th>Up to the Month</th>
+						<th colspan="5">Part – A</th>
 					</tr>
 					<tr>
-						<th colspan="2">{%= ("Total Milk Purchase") %}</th>
+						<th>SI No.</th>
+						<th colspan="2">Milk purchase</th>
+						<th>{%= month %}</th>
+						<th>{%= ("Till ") + month %}</th>
+					</tr>
+					<tr>
+						<td>1</td>
+						<td colspan="2">{%= ("Total Milk Purchased (in Ltrs.)") %}</td>
 						<td>{%= mis_data.fmcr_data[1][0].total_milk_purchase_society %}</td>
 						<td>{%= mis_data.fmcr_data[0][0].total_milk_purchase_society %}</td>
 					</tr>
 					<tr>
-					    <td colspan="2">{%= ("Local Sale") %}</td>
+						<td>2</td>
+					    <td colspan="2">{%= ("Local Sale of Milk (in Ltrs.)") %}</td>
 					    <td>{%= mis_data.local_sale[1][0].local_sale %}</td>
 					    <td>{%= mis_data.local_sale[0][0].local_sale %}</td>
 					</tr>
-
 					<tr>
-					    <th rowspan="2">{%= ("Sale To") %}</th>
-					    <th>{%= ("Society Account Ltr") %}</th>
+						<td>3</td>
+					    <td colspan="2">{%= ("Total Milk Sold to Dairy (Society )") %}</td>
 					    <td>{%= (mis_data.fmcr_data[1][0].total_milk_purchase_society) - (mis_data.local_sale[1][0].local_sale) %}</td>
 					    <td>{%= (mis_data.fmcr_data[0][0].total_milk_purchase_society) - (mis_data.local_sale[0][0].local_sale) %}</td>
 					</tr>
 					<tr>
-					    <th>{%= ("Dairy Account Kg") %}</th>
+						<td>4</td>
+					    <td colspan="2">{%= ("Total Milk Received in Chilling Center (Dairy)") %}</td>
 					    <td>{%= mis_data.vmcr_data[1][0].total_milk_purchase_dairy %}</td>
 					    <td>{%= mis_data.vmcr_data[0][0].total_milk_purchase_dairy %}</td>
 					</tr>
 					<tr>
-					    <th rowspan="2">{%= ("FAT %") %}</th>
-					    <th>{%= ("Society Account") %}</th>
+						<td rowspan="2">5</td>
+					    <td rowspan="2">{%= ("Average Fat (%)") %}</td>
+					    <td>{%= ("Society Account") %}</td>
 					    <td>{%= mis_data.fmcr_data[1][0].society_account_fat %}</td>
 					    <td>{%= mis_data.fmcr_data[0][0].society_account_fat %}</td>
 					</tr>
 					<tr>
-					    <th>{%= ("Dairy Account") %}</th>
+					    <td>{%= ("Dairy Account") %}</td>
 					    <td>{%= mis_data.vmcr_data[1][0].dairy_account_fat %}</td>
 					    <td>{%= mis_data.vmcr_data[0][0].dairy_account_fat %}</td>
 					</tr>
 					<tr>
-					    <th rowspan="2">{%= ("SNF %") %}</th>
-					    <th>{%= ("Society Account") %}</th>
+						<td rowspan="2">6</td>
+					    <td rowspan="2">{%= ("Average SNF (%)") %}</td>
+					    <td>{%= ("Society Account") %}</td>
 					    <td>{%= mis_data.fmcr_data[1][0].society_account_fat %}</td>
 					    <td>{%= mis_data.fmcr_data[0][0].society_account_fat %}</td>
 					</tr>
 					<tr>
-					    <th>{%= ("Dairy Account") %}</th>
+					    <td>{%= ("Dairy Account") %}</td>
 					    <td>{%= mis_data.vmcr_data[1][0].dairy_account_fat %}</td>
 					    <td>{%= mis_data.vmcr_data[0][0].dairy_account_fat %}</td>
 					</tr>
-
 				</tbody>
 			</table>
-		</div>
-		<div class="col-md-5 no">
 			<table class="table table-bordered" BORDER=10>
 				<tbody>
 				<tr>
+					<th colspan="5">Part – C</th>
+				</tr>
+				<tr>
 					<th colspan="2">Cattle Feed</th>
-					<th>This Month</th>
-					<th>Up to the month</th>	
+					<th>{%= month %}</th>
+					<th>{%= ("Till ") + month %}</th>	
 				</tr>
 				<tr>
 					<td>1</td>
@@ -92,27 +110,63 @@
 					<td>{%= cattle_feed.month.sold_to_farmers %}</td>
 					<td>{%= cattle_feed.upto_month.sold_to_farmers %}</td>
 				</tr>
+				<tr>
+					<td></td>
+					<td>Total</td>
+					<td>{%= cattle_feed.month.procured + cattle_feed.month.sold_to_farmers %}</td>
+					<td>{%= cattle_feed.upto_month.procured + cattle_feed.upto_month.sold_to_farmers %}</td>
+				</tr>
 				</tbody>
 			</table>
-		</div>
-	</div>
-	<div class="row content">
-		<div class="col-md-5 nopadding">
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<th>Quality Of Milk</th>
-						<th>Total Ltr.</th>	
+						<th colspan="5">Part – E</th>
 					</tr>
 					<tr>
+						<td>SI No.</td>
+						<td>Avg. No Of Milk Suppliers</td>
+						<td>Total</td>
+						<td>SC/ST</td>
+					</tr>
+					<tr>
+						<td>1</td>
+						<td>{%= ("Member") %}</td>
+						<td>{%= member_data.member_count %}</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td>{%= ("Non Member") %}</td>
+						<td>{%= member_data.non_member_count %}</td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="col-md-6">
+			<table class="table table-bordered">
+				<tbody>
+					<tr>
+						<th colspan="4">Part – B</th>
+					</tr>
+					<tr>
+						<th>SI No.</th>
+						<th>Type Of Milk</th>
+						<th>Quantity (Ltrs.)</th>	
+					</tr>
+					<tr>
+						<td>1</td>
 						<td>Good Milk</td>
 						<td class="good_milk">{%= milk_quality.good %}</td>
 					</tr>
 					<tr>
+						<td>2</td>
 						<td>Bad Milk</td>
 						<td class="bad_milk">{%= milk_quality.bad %}</td>
 					</tr>
 					<tr>
+						<td>3</td>
 						<td>Formated Milk</td>
 						<td>
 							<div class="row">
@@ -126,6 +180,7 @@
 						</td>
 					</tr>
 					<tr>
+						<td></td>
 						<td>Total Qty</td>
 						<td class="total_milk"></td>
 					</tr>
@@ -134,10 +189,16 @@
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<th colspan="2">No. Of registered members</th>
+						<th colspan="4">Part – D</th>
 					</tr>
 					<tr>
-						<th>{%= ("a)Total") %}</th>
+						<th>SI No.</th>
+						<th>Registered Farmers</th>
+						<th>Nos.</th>
+					</tr>
+					<tr>
+						<td>1</td>
+						<td>{%= ("Total Registered Farmers") %}</td>
 						{% if (member_data.non_member_count || member_data.member_count) { %}
 							<td>{%= member_data.non_member_count + member_data.member_count %} </td>
 						{% }	
@@ -146,19 +207,18 @@
 			            {% } %}
 					</tr>
 					<tr>
-						<th>{%= ("b)Females") %}</th>
+						<td>2</td>
+						<td>{%= ("Females") %}</td>
 						<td></td>
 					</tr>
 					<tr>
-						<th>{%= ("c)SC/ST") %}</th>
+						<td>3</td>
+						<td>{%= ("SC/ST") %}</td>
 						<td></td>
 					</tr>
 					<tr>
-						<th>{%= ("d)OBC") %}</th>
-						<td></td>
-					</tr>
-					<tr>
-						<th>{%= ("e)BC") %}</th>
+						<td>4</td>
+						<td>{%= ("OBC") %}</td>
 						<td></td>
 					</tr>
 				</tbody>
@@ -166,112 +226,258 @@
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<th colspan="3">Avg. No Of Milk Suppliers</th>
+						<th colspan="4">Part – F</th>
 					</tr>
 					<tr>
-						<td></td>
-						<th>Total</th>
-						<th>SC/ST</th>
+						<th>SI No.</th>
+						<th>Milk Purchased</th>
+						<th>Month</th>
 					</tr>
 					<tr>
-						<th>{%= ("a)Member") %}</th>
-						<td></td>
-						<td></td>
+						<td>1</td>
+						<td>{%= ("Average Daily Purchase") %}</td>
+						<td>{%= mis_data.fmcr_data[1][0].daliy_milk_purchase_society  + (" ltrs.") %}</td>
 					</tr>
 					<tr>
-						<th>{%= ("b)Non Member") %}</th>
-						<td></td>
-						<td></td>
+						<td>2</td>
+						<td>{%= ("Members") %}</td>
+						<td>{%= member_data.member_qty  + (" ltrs.") %}</td>
 					</tr>
 					<tr>
-						<th>{%= ("c)Total") %}</th>
-						<td></td>
-						<td></td>
+						<td>3</td>
+						<td>{%= ("Non Members") %}</td>
+						<td>{%= member_data.non_member_qty  + (" ltrs.") %}
 					</tr>
 				</tbody>
-			</table>
-			<table class="table table-bordered">
-			  <tbody>
-				  <tr>
-				    <td rowspan="2" class="participants">No. of Participants in karshaka Panchaya</td>
-				    <td class="male_width">Male</td>
-				  	<td>{%= (" ") %}</td>
-				  </tr>
-				  <tr>
-				    <td class="male_width">Female</td>			  	
-				  	<td>{%= (" ") %}</td>
-				  </tr>
-				  <tr>
-				    <td colspan="2">No. of Cattles Submitted</td>
-				  	<td ></td>
-				  </tr>
-				  <tr>
-				    <td rowspan="2">No. of Society</td>
-				    <td>Male</td>
-				  	<td></td>
-				  </tr>
-				  <tr>
-				    <td>Female</td>			  	
-				  	<td></td>
-				  </tr>
-				  </tbody>
 			</table>
 		</div>
-		<div class="col-md-7 nopadding">
+	</div>
+	<div class="row content">
+		<div class="col-md-7">
 			<table class="table table-bordered">
 				<tbody>
-					<tr>
-						<th colspan="3">Milk Purchase Details</th>
-						<th colspan="2">Month status</th>
-					</tr>
-					<tr>
-						<th colspan="3">{%= ("Average Daily Purchase") %}</th>
-						<td colspan="2">{%= mis_data.fmcr_data[1][0].daliy_milk_purchase_society %}</td>
-					</tr>
-					<tr>
-						<th colspan="3">{%= ("Members") %}</th>
-						<td colspan="2">{%= member_data.member_qty %}</td>
-					</tr>
-					<tr>
-						<th colspan="3">{%= ("Non Members") %}</th>
-						<td colspan="2">{%= member_data.non_member_qty %}
-					</tr>
-					<tr>
-						<td></td>
-						<td>Prev. balance</td>
-						<td>Purchase Qty.</td>
-						<td>Used Qty.</td>
-						<td>Remaining</td>
-					</tr>
-					<tr>
-						<th>Acid</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<th>Alcohol</th>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-					</tr>
-				</tbody>
-			</table>
-			<table class="table table-bordered">
-				<tbody>
+				<tr>
+					<th colspan="5">Part – G</th>
+				</tr>
 				<tr>
 					<th colspan="4">FINANCIAL STATUS</th>	
 				</tr>
 				<tr>
 					<th>SI No.</th>
 					<th>Account Head</th>
-					<th>This Month</th>
-					<th>Up to the month</th>
+					<th>{%= month %}</th>
+					<th>{%= ("Till ")+ month %}</th>
+				</tr>
+				<tr>
+					<td>{%= ("1") %}</td>
+					<td>{%= ("Revenue from Dairy Sale") %}</td>
+					<td>{%= financial_data_dict.revenue_from_dairy_sale[0] %}</td>
+					<td>{%= financial_data_dict.revenue_from_dairy_sale[1] %}</td>
+				</tr>
+				<tr>
+					<td>{%= ("2") %}</td>
+					<td>{%= ("Local Sale of Milk") %}</td>
+					<td>{%= financial_data_dict.local_sale_of_milk[0] %}</td>
+					<td>{%= financial_data_dict.local_sale_of_milk[1] %}</td>
+				</tr>
+				<tr>
+					<td>{%= ("3") %}</td>
+					<td>{%= ("Sample/Own milk sale") %}</td>
+					<td>{%= financial_data_dict.sample_own_milk_sale[0] %}</td>
+					<td>{%= financial_data_dict.sample_own_milk_sale[1] %}</td>
+				</tr>
+				<tr>
+					<td>{%= ("4") %}</td>
+					<td>{%= ("Total ") %}</td>
+					<td>{%= financial_data_dict.revenue_from_dairy_sale[0] +
+					financial_data_dict.local_sale_of_milk[0]
+					+
+					financial_data_dict.sample_own_milk_sale[0]	
+					%}</td>
+					<td>{%= financial_data_dict.revenue_from_dairy_sale[1] +
+					financial_data_dict.local_sale_of_milk[1]
+					+
+					financial_data_dict.sample_own_milk_sale[1]%}</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>{%= ("5") %}</td>
+					<td>{%= ("Total Amount of Milk Purchased") %}</td>
+					<td>{%= financial_data_dict.total_amount_of_milk_purchased[0] %}</td>
+					<td>{%= financial_data_dict.total_amount_of_milk_purchased[1] %}</td>
+				</tr>
+				<tr>
+					<td>{%= ("6") %}</td>
+					<td>{%= ("Trade Expenses or Office Expenses") %}</td>
+					<td>{%= financial_data_dict.trade_expenses_or_office_expenses[0] %}</td>
+					<td>{%= financial_data_dict.trade_expenses_or_office_expenses[1] %}</td>
+				</tr>
+				<tr>
+					<td>{%= ("7") %}</td>
+					<td>{%= ("Total") %}</td>
+					<td>{%= financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0] %}</td>
+					<td>{%= financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1] %}</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>8</td>
+					<td>{%= ("Gross Profit  (4-7)") %}</td>
+					<td>{%= (financial_data_dict.revenue_from_dairy_sale[0] +
+					financial_data_dict.local_sale_of_milk[0]
+					+
+					financial_data_dict.sample_own_milk_sale[0]) -	
+					(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0])
+					%}
+					</td>
+					<td>{%= (financial_data_dict.revenue_from_dairy_sale[1] +
+					financial_data_dict.local_sale_of_milk[1]
+					+
+					financial_data_dict.sample_own_milk_sale[1]) -	
+					(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1])
+					%}
+					</td>
+				</tr>
+				<tr>
+					<td>9</td>
+					<td>{%= ("Other Income (including cattle feed commission)") %}</td>
+					<td>{%= financial_data_dict.other_income.month.other_income %}</td>
+					<td>
+						{%= financial_data_dict.other_income.upto_month.other_income %}
+					</td>
+				</tr>
+				<tr>
+					<td>10</td>
+					<td>{%= ("Total Income") %}</td>
+					<td>{%= (financial_data_dict.revenue_from_dairy_sale[0] +
+					financial_data_dict.local_sale_of_milk[0]
+					+
+					financial_data_dict.sample_own_milk_sale[0]) -	
+					(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0])
+					+
+					financial_data_dict.other_income.month.other_income
+					%}</td>
+					<td>
+						{%= (financial_data_dict.revenue_from_dairy_sale[1] +
+					financial_data_dict.local_sale_of_milk[1]
+					+
+					financial_data_dict.sample_own_milk_sale[1]) -	
+					(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1])
+					+
+					financial_data_dict.other_income.upto_month.other_income
+					%}
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>11</td>
+					<td>{%= ("Salary") %}</td>
+					<td>{%= financial_data_dict.salary[0] %}</td>
+					<td>
+						{%= financial_data_dict.salary[1] %}
+					</td>
+				</tr>
+				<tr>
+					<td>12</td>
+					<td>{%= ("Other Expenses") %}</td>
+					<td>{%= financial_data_dict.other_expenses[0] %}</td>
+					<td>
+						{%= financial_data_dict.other_expenses[1] %}
+					</td>
+				</tr>
+				<tr>
+					<td>13</td>
+					<td>{%= ("Total") %}</td>
+					<td>{%= financial_data_dict.salary[0] + financial_data_dict.other_expenses[0] %}</td>
+					<td>{%= financial_data_dict.salary[1] + financial_data_dict.other_expenses[1] %}</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>14</td>
+					<td>{%= ("Net Profit") %}</td>
+					<td>{%= 
+					(financial_data_dict.revenue_from_dairy_sale[0] 
+						+
+						financial_data_dict.local_sale_of_milk[0]
+						+
+						financial_data_dict.sample_own_milk_sale[0])
+						-
+						(
+						financial_data_dict.total_amount_of_milk_purchased[0]
+						+
+						financial_data_dict.trade_expenses_or_office_expenses[0]
+						)+
+						(financial_data_dict.other_income.month.other_income)
+						-
+						(financial_data_dict.salary[0] + financial_data_dict.other_expenses[0])		
+					%}
+					</td>
+					<td>{%= (financial_data_dict.revenue_from_dairy_sale[1] +
+					financial_data_dict.local_sale_of_milk[1]
+					+
+					financial_data_dict.sample_own_milk_sale[1]) -	
+					(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1])
+					+
+					financial_data_dict.other_income.upto_month.other_income
+					-
+					(financial_data_dict.salary[1] + financial_data_dict.other_expenses[1])
+					%}
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>15</td>
+					<td>Profit in %</td>
+					<td>
+					{% if (flt(((financial_data_dict.revenue_from_dairy_sale[0] +
+										financial_data_dict.local_sale_of_milk[0]
+										+
+										financial_data_dict.sample_own_milk_sale[0]) -	
+										(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0]))/(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0])*100,2) === NaN) { %}	
+					{%= ("0") %}
+					{% } else { %}
+					{%= flt(((financial_data_dict.revenue_from_dairy_sale[0] +
+										financial_data_dict.local_sale_of_milk[0]
+										+
+										financial_data_dict.sample_own_milk_sale[0]) -	
+										(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0]))/(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0])*100,2) %}
+					{% } %}
+					</td>
+					<td>{%= flt((((financial_data_dict.revenue_from_dairy_sale[1] +
+										financial_data_dict.local_sale_of_milk[1]
+										+
+										financial_data_dict.sample_own_milk_sale[1]) -	
+										(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1]))/(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1]))*100,2)
+					%}</td>
 				</tr>
 				</tbody>
 			</table>
+		</div>
+		<div class="col-md-5">
 		</div>
 	</div>
 </div>

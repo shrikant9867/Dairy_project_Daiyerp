@@ -55,6 +55,9 @@ frappe.query_reports["Local Sales Report"] = {
 						}
 					})
 				}
+				else{
+					query_report.trigger_refresh();
+				}
 			}	
 		},
 		{

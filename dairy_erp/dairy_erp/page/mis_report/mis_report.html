@@ -289,15 +289,8 @@ th,td {
 				<tr>
 					<td>{%= ("4") %}</td>
 					<td>{%= ("Total ") %}</td>
-					<td>{%= financial_data_dict.revenue_from_dairy_sale[0] +
-					financial_data_dict.local_sale_of_milk[0]
-					+
-					financial_data_dict.sample_own_milk_sale[0]	
-					%}</td>
-					<td>{%= financial_data_dict.revenue_from_dairy_sale[1] +
-					financial_data_dict.local_sale_of_milk[1]
-					+
-					financial_data_dict.sample_own_milk_sale[1]%}</td>
+				<td>{%= flt(financial_data_dict.total_1_2_3[0],2) %}</td>
+				<td>{%= flt(financial_data_dict.total_1_2_3[1],2) %}</td>
 				</tr>
 				<tr>
 					<td></td>
@@ -320,8 +313,8 @@ th,td {
 				<tr>
 					<td>{%= ("7") %}</td>
 					<td>{%= ("Total") %}</td>
-					<td>{%= financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0] %}</td>
-					<td>{%= financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1] %}</td>
+					<td>{%= financial_data_dict.total_5_6[0] %}</td>
+					<td>{%= financial_data_dict.total_5_6[1] %}</td>
 				</tr>
 				<tr>
 					<td></td>
@@ -332,50 +325,27 @@ th,td {
 				<tr>
 					<td>8</td>
 					<td>{%= ("Gross Profit  (4-7)") %}</td>
-					<td>{%= (financial_data_dict.revenue_from_dairy_sale[0] +
-					financial_data_dict.local_sale_of_milk[0]
-					+
-					financial_data_dict.sample_own_milk_sale[0]) -	
-					(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0])
-					%}
+					<td>{%= flt(financial_data_dict.gross_profit_4_7[0],2) %}
 					</td>
-					<td>{%= (financial_data_dict.revenue_from_dairy_sale[1] +
-					financial_data_dict.local_sale_of_milk[1]
-					+
-					financial_data_dict.sample_own_milk_sale[1]) -	
-					(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1])
+					<td>{%= flt(financial_data_dict.gross_profit_4_7[1],2)
 					%}
 					</td>
 				</tr>
 				<tr>
 					<td>9</td>
 					<td>{%= ("Other Income (including cattle feed commission)") %}</td>
-					<td>{%= financial_data_dict.other_income.month.other_income %}</td>
+					<td>{%= flt(financial_data_dict.other_income.month.other_income,2) %}</td>
 					<td>
-						{%= financial_data_dict.other_income.upto_month.other_income %}
+						{%= flt(financial_data_dict.other_income.upto_month.other_income,2) %}
 					</td>
 				</tr>
 				<tr>
 					<td>10</td>
 					<td>{%= ("Total Income") %}</td>
-					<td>{%= (financial_data_dict.revenue_from_dairy_sale[0] +
-					financial_data_dict.local_sale_of_milk[0]
-					+
-					financial_data_dict.sample_own_milk_sale[0]) -	
-					(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0])
-					+
-					financial_data_dict.other_income.month.other_income
+					<td>{%= flt(financial_data_dict.total_income[0],2)
 					%}</td>
-					<td>
-						{%= (financial_data_dict.revenue_from_dairy_sale[1] +
-					financial_data_dict.local_sale_of_milk[1]
-					+
-					financial_data_dict.sample_own_milk_sale[1]) -	
-					(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1])
-					+
-					financial_data_dict.other_income.upto_month.other_income
-					%}
-					</td>
+					<td>{%= flt(financial_data_dict.total_income[0],2)
+					%}</td>
 				</tr>
 				<tr>
 					<td></td>
@@ -402,8 +372,10 @@ th,td {
 				<tr>
 					<td>13</td>
 					<td>{%= ("Total") %}</td>
-					<td>{%= financial_data_dict.salary[0] + financial_data_dict.other_expenses[0] %}</td>
-					<td>{%= financial_data_dict.salary[1] + financial_data_dict.other_expenses[1] %}</td>
+					<td>{%= financial_data_dict.s_total[0]
+					%}</td>
+					<td>{%= financial_data_dict.s_total[1]
+					%}</td>
 				</tr>
 				<tr>
 					<td></td>
@@ -414,32 +386,10 @@ th,td {
 				<tr>
 					<td>14</td>
 					<td>{%= ("Net Profit") %}</td>
-					<td>{%= 
-					(financial_data_dict.revenue_from_dairy_sale[0] 
-						+
-						financial_data_dict.local_sale_of_milk[0]
-						+
-						financial_data_dict.sample_own_milk_sale[0])
-						-
-						(
-						financial_data_dict.total_amount_of_milk_purchased[0]
-						+
-						financial_data_dict.trade_expenses_or_office_expenses[0]
-						)+
-						(financial_data_dict.other_income.month.other_income)
-						-
-						(financial_data_dict.salary[0] + financial_data_dict.other_expenses[0])		
+					<td>{%= flt(financial_data_dict.net_profit[0],2)
 					%}
 					</td>
-					<td>{%= (financial_data_dict.revenue_from_dairy_sale[1] +
-					financial_data_dict.local_sale_of_milk[1]
-					+
-					financial_data_dict.sample_own_milk_sale[1]) -	
-					(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1])
-					+
-					financial_data_dict.other_income.upto_month.other_income
-					-
-					(financial_data_dict.salary[1] + financial_data_dict.other_expenses[1])
+					<td>{%= flt(financial_data_dict.net_profit[1],2)
 					%}
 					</td>
 				</tr>
@@ -452,26 +402,10 @@ th,td {
 				<tr>
 					<td>15</td>
 					<td>Profit in %</td>
-					<td>
-					{% if (flt(((financial_data_dict.revenue_from_dairy_sale[0] +
-										financial_data_dict.local_sale_of_milk[0]
-										+
-										financial_data_dict.sample_own_milk_sale[0]) -	
-										(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0]))/(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0])*100,2) === NaN) { %}	
-					{%= ("0") %}
-					{% } else { %}
-					{%= flt(((financial_data_dict.revenue_from_dairy_sale[0] +
-										financial_data_dict.local_sale_of_milk[0]
-										+
-										financial_data_dict.sample_own_milk_sale[0]) -	
-										(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0]))/(financial_data_dict.total_amount_of_milk_purchased[0] + financial_data_dict.trade_expenses_or_office_expenses[0])*100,2) %}
-					{% } %}
+					<td>{%= flt(financial_data_dict.profit_in[0],2)
+					%}
 					</td>
-					<td>{%= flt((((financial_data_dict.revenue_from_dairy_sale[1] +
-										financial_data_dict.local_sale_of_milk[1]
-										+
-										financial_data_dict.sample_own_milk_sale[1]) -	
-										(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1]))/(financial_data_dict.total_amount_of_milk_purchased[1] + financial_data_dict.trade_expenses_or_office_expenses[1]))*100,2)
+					<td>{%= flt(financial_data_dict.profit_in[1],2)
 					%}</td>
 				</tr>
 				</tbody>

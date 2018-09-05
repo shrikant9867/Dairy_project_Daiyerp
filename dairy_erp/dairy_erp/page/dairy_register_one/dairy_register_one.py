@@ -43,13 +43,13 @@ def get_fmcr_data(start_date=None,end_date=None):
 		local_sale_dict = {}
 		if date_and_shift_wise_local_sale and str(si['posting_date'])+"#"+si['shift'] in date_and_shift_wise_local_sale:
 			p = date_and_shift_wise_local_sale[str(si['posting_date'])+"#"+si['shift']]
-			local_sale_dict['si_qty']  = p.get('si_qty') + si.get('qty')
-			local_sale_dict['si_amount']  = p.get('si_amount') + si.get('amount')
+			local_sale_dict['si_qty']  = round(p.get('si_qty'),2) + round(si.get('qty'),2)
+			local_sale_dict['si_amount']  = round(p.get('si_amount'),2) + round(si.get('amount'),2)
 			date_and_shift_wise_local_sale[str(si['posting_date'])+"#"+si['shift']] = local_sale_dict
 		else:
 			local_sale_dict = {
-				"si_qty":si.get('qty'),
-				"si_amount":si.get('amount')
+				"si_qty":round(si.get('qty'),2),
+				"si_amount":round(si.get('amount'),2)
 			}
 			date_and_shift_wise_local_sale[str(si['posting_date'])+"#"+si['shift']] = local_sale_dict
 

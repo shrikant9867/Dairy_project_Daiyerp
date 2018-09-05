@@ -66,6 +66,7 @@ th,td {
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
 			<td>{%= i+1 %}</td>
 			<td>{%= data[i][__("Date")] %}</td>
 			<td>{%= data[i][__("Customer")] %}</td>
@@ -75,6 +76,7 @@ th,td {
 			<td>{%= data[i][__("Quantity")] %}</td>
 			<td>{%= data[i][__("Rate")] %}</td>
 			<td>{%= data[i][__("Amount")] %}</td>
+			</tr>
 		{% } %}
 	</tbody>
 </table>

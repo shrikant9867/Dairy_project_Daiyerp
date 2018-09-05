@@ -444,6 +444,6 @@ def get_other_income(filters,cond):
 					si.local_sale = 1 and
 					si.customer_or_farmer = 'Farmer' and
 					{1}	
-		""".format(filters.get('vlcc'),conditions_si),as_list=1,debug=1)
+		""".format(filters.get('vlcc'),conditions_si),as_list=1,debug=0)
 
 	return {"other_income":si_data[0][0] - pi_data[0][0]}

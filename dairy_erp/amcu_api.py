@@ -377,7 +377,11 @@ def make_vmrc(data, response_dict):
 										if vmrc:
 											delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)
 										else:
-											response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
+											is_vmcr_created = 1
+											vmrc_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict,is_vmcr_created)	
+											handling_loss_gain(data,row,vmrc_doc,response_dict)
+											response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),vmrc_doc.name)})
+											# response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
 								else:
 									response_dict.update({"status":["Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate are manadatory"]})
 							else:
@@ -448,7 +452,7 @@ def update_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,vmcr_stock_
 	edited_vmcr_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)
 	loss_gain_computation(vmcr_stock_qty,row,data,edited_vmcr_doc,response_dict)
 
-def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict):
+def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict,is_vmcr_created=0):
 	if validate_society_exist_dairy(data):
 		if validate_vlcc(row):
 			row.update(
@@ -466,6 +470,7 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			vmrc_doc.rcvdtime = data.get('rcvdtime')
 			vmrc_doc.processedstatus = data.get('processedstatus')
 			vmrc_doc.societyid = data.get('societyid')
+			vmrc_doc.vmcr_created = is_vmcr_created
 			vmrc_doc.collectiondate =  collectiondate
 			vmrc_doc.posting_date = getdate(data.get('collectiontime'))
 			vmrc_doc.shift = data.get('shift')

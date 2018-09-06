@@ -181,7 +181,11 @@ doc_events = {
     "Customer":{
         "validate":["dairy_erp.customization.customer.customer.set_party_account",
         "dairy_erp.customization.customer.customer.check_vlcc_local_customer"]
+    },
+    "UOM":{
+        "validate":"dairy_erp.customization.item.item.update_uom"
     }
+
 }
 
 # Scheduled Tasks

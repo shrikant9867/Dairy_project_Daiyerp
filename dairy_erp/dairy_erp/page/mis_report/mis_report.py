@@ -29,21 +29,6 @@ def get_mis_data(month=None,fiscal_year=None):
 	vlcc_addr = ""
 
 	if fiscal_year:
-		mis_report_log = frappe.db.get_value("MIS Report Log",{"vlcc_name":frappe.db.get_value("User",frappe.session.user,"company"),
-											"fiscal_year":fiscal_year,
-											"month":month
-											},['name'],as_dict=True)
-		if mis_report_log:
-			mis_report_doc = frappe.get_doc("MIS Report Log",mis_report_log.get('name'))
-			formated_and_total_milk.update({
-				'total_milk':mis_report_doc.total_milk,
-				'formated_milk':mis_report_doc.formated_milk_new
-				})
-		else:
-			formated_and_total_milk.update({
-				'total_milk':0,
-				'formated_milk':0
-				})
 
 		start_date = get_month_details(fiscal_year,month_mapper[month]).month_start_date
 		end_date = get_month_details(fiscal_year,month_mapper[month]).month_end_date
@@ -95,7 +80,22 @@ def get_mis_data(month=None,fiscal_year=None):
 		milk_quality_data = {'good':get_vmcr_milk_quality_data(filters,"Accept").get('milk_quantity'),
 							'bad':get_vmcr_milk_quality_data(filters,"Reject").get('milk_quantity')}
 		
-
+		mis_report_log = frappe.db.get_value("MIS Report Log",{"vlcc_name":frappe.db.get_value("User",frappe.session.user,"company"),
+											"fiscal_year":fiscal_year,
+											"month":month
+											},['name'],as_dict=True)
+		if mis_report_log:
+			mis_report_doc = frappe.get_doc("MIS Report Log",mis_report_log.get('name'))
+			formated_and_total_milk.update({
+				'total_milk':mis_report_doc.total_milk,
+				'formated_milk':mis_report_doc.formated_milk_new
+				})
+		else:
+			formated_and_total_milk.update({
+				'total_milk':milk_quality_data.get('good')+milk_quality_data.get('bad'),
+				'formated_milk':0
+				})					
+							
 		for row in member_data:
 			if member_non_member.get('non_member_qty'):
 				member_non_member['non_member_qty'] += member_data[row]['non_member_qty']

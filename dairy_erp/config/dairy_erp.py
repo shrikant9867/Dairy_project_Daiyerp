@@ -170,6 +170,12 @@ def get_data():
 			"icon": "icon-star",
 			"items": [
 				{
+					"type": "page",
+					"name": "smarterp_comparison_report",
+					"label": _("SmartAMCU - SmartERP Comparison Report"),
+					"description": _(" "),
+				},
+				{
 					"type": "report",
 					"name": "Milk Passbook",
 					"label":_("Milk Passbook"),

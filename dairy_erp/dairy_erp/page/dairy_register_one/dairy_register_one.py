@@ -220,8 +220,14 @@ def get_conditions(filters):
 # 		conditions += " and date(collectiondate) = '{0}' ".format(filters.get('date'))
 # 	return conditions
 
-def get_local_sale_data(filters):
-	vlcc_comp = frappe.db.get_value("User",frappe.session.user,"company")
+def get_local_sale_data(filters,cond=None):
+	vlcc_comp = ""
+	if cond and cond == "smartamcu":
+		if filters.get('cc') and filters.get('vlcc_list'):
+			vlcc_comp = "and si.company in {0} ".format(filters.get('vlcc_list'))
+	else:
+		vlcc_comp = "and si.company = '{0}' ".format(frappe.db.get_value("User",frappe.session.user,"company"))
+		 
 	si_data = frappe.db.sql("""
 							select 
 								si.posting_date,
@@ -238,9 +244,9 @@ def get_local_sale_data(filters):
 								si_item.item_code in ("COW Milk","BUFFALO Milk") and
 								si.customer_or_farmer in ('Vlcc Local Customer','Vlcc Local Institution')
 								and si_item.parent = si.name
-								and si.docstatus = 1 and si.company = '{0}'
+								and si.docstatus = 1 {0}
 								{1}""".format(vlcc_comp,get_si_conditions(filters)),
-								filters,debug=0,as_dict=1)
+								filters,debug=1,as_dict=1)
 	return si_data
 
 def get_si_conditions(filters):

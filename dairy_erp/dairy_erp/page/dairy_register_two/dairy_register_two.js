@@ -30,7 +30,9 @@ frappe.dairy_register_two = Class.extend({
             callback: function(r){
                 if(r.message){
                 	console.log("inside callback",r.message)
-                    me.table_data = r.message
+                    me.table_data = r.message.final_dict
+                    me.vlcc_addr = r.message.vlcc_details.vlcc_addr
+                    me.vlcc = r.message.vlcc_details.vlcc
                     $(me.page).find(".render-table").empty();
                     me.print = frappe.render_template("dairy_register_two",{
                             "vmcr_data":me.table_data
@@ -113,7 +115,9 @@ frappe.dairy_register_two = Class.extend({
             content: frappe.render_template("dairy_register_two_print",{
                                                         "vmcr_data":me.table_data,
                                                         'start_date':me.start_date.get_value(),
-                                                        'end_date':me.end_date.get_value()
+                                                        'end_date':me.end_date.get_value(),
+                                                        'vlcc_addr':me.vlcc_addr,
+                                                        'vlcc':me.vlcc
                                                     }),
             title:__("dairy_register_two"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,

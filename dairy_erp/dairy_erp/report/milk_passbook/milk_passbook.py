@@ -13,13 +13,14 @@ def execute(filters=None):
 
 def get_columns(filters):
 
-	columns =[ ("Farmer ID") + ":Link/Farmer:200",
-				("Farmer") + ":Data:200",
-				("Date") + ":Datetime:150",
-				("Shift") + ":Data:150",
-				("Milk Type") + ":Data:150",
-				("Quantity") + ":Float:150",
-				("Amount") + ":Currency:150"			
+	columns =[ ("Date") + ":Date:100",
+				("Shift") + ":Data:100",
+				("Milk Type") + ":Data:100",
+				("Quantity") + ":Float:100",
+				("FAT") + ":Float:100",
+				("SNF") + ":Float:100",
+				("Rate") + ":Float:100",
+				("Total") + ":Currency:100"			
 			]
 	return columns
 
@@ -35,12 +36,27 @@ def get_conditions(filters):
 
 def get_data(filters):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
-	data = frappe.db.sql("""select farmerid,farmer,rcvdtime,shift,milktype,round(milkquantity,2),amount
-				from `tabFarmer Milk Collection Record` where docstatus = 1 and
-				associated_vlcc = '{0}' {1}""".format(
+	data = frappe.db.sql("""select 
+									date(rcvdtime),
+									shift,
+									milktype,
+									round(milkquantity,2),
+									round(fat,2),
+									round(snf,2),
+									round(rate,2),
+									amount
+							from 
+								`tabFarmer Milk Collection Record` 
+							where 
+								docstatus = 1 and
+								associated_vlcc = '{0}' {1}""".format(
 					user_doc.get('company'),
 					get_conditions(filters)),as_list=True)
-
+	if data:
+		g_total = 0
+		for row in data:
+			g_total += row[7]
+		data.append(["","","Grand Total","","","","",g_total])		
 	return data
 
 @frappe.whitelist()

@@ -72,12 +72,12 @@ def get_avg_data(fmcr_stock_data):
 			fat += flt(fmcr_stock.get('milkquantity')) * flt(fmcr_stock.get('fat'))
 			snf += flt(fmcr_stock.get('milkquantity')) * flt(fmcr_stock.get('snf'))
 			clr += flt(fmcr_stock.get('milkquantity')) * flt(fmcr_stock.get('clr'))
-			rate += flt(fmcr_stock.get('rate'))
+			rate += flt(fmcr_stock.get('rate')) * flt(fmcr_stock.get('milkquantity'))
 			amount += flt(fmcr_stock.get('amount'))
 		avg_fat = flt(fat/milkqty) if fat and milkqty else 0
 		avg_snf = flt(snf/milkqty) if snf and milkqty else 0
 		avg_clr = flt(clr/milkqty) if clr and milkqty else 0
-		avg_rate = flt(rate/count) if rate else 0
+		avg_rate = flt(rate/milkqty) if rate and milkqty else 0
 
 		avg_data.update({
 			"count":count,"milkqty":round(milkqty,2),"amount":round(amount,2),

@@ -1,31 +1,44 @@
-<br>
-<h2 class="text-center">{%= __(report.report_name) %}</h2>
-<h4 class="text-center">{%= filters.vlcc%}</h4>
+<style type="text/css">
+
+th,td {
+	text-align: center;
+}
+</style>
 <div class="row">
-	<div class="col-md-2 col-xs-2">
-		Farmer Id
+	<div class="col-xs-6 text-left">
+		{% if (filters.vlcc_addr) { %}
+            {%= filters.vlcc_addr %}
+        {% } %}
 	</div>
-	<div class="col-md-4 col-xs-4" style="padding-left: 0px;">
+	<div class="col-xs-6 text-right">
+		{%= filters.vlcc %}
+	</div>
+</div>
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+<h4 class="text-center">{%= filters.vlcc %}</h4>
+<div class="row">
+	<div class="col-md-6 col-xs-6">
+		<b>Farmer Id</b>
+		&nbsp;
 		{%= filters.farmer_id%}
 	</div>
-	<div class="col-md-2 col-xs-2">
-		Full Name
-	</div>
-	<div class="col-md-4 col-xs-4" style="padding-left: 0px;">
-		{%= filters.full_name%}
+	<div class="col-xs-2 col-md-2"></div>
+	<div class="col-md-4 col-xs-4 text-right">
+		<b>Farmer Name</b>
+		&nbsp;
+		{%= filters.full_name %}
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-2 col-xs-2">
-		<b>{%= __("Start Date") %}:</b>
-	</div>
-	<div class="col-md-4 col-xs-4" style="padding-left: 0px;">
+	<div class="col-md-6 col-xs-6">
+		<b>Start Date</b>
+		&nbsp;
 		{%= dateutil.str_to_user(filters.start_date) %}
 	</div>
-	<div class="col-md-2 col-xs-2">
-		<b>{%= __("End Date") %}:</b>
-	</div>
-	<div class="col-md-4 col-xs-4" style="padding-left: 0px;">
+	<div class="col-xs-2 col-md-2"></div>
+	<div class="col-md-4 col-xs-4 text-right">
+		<b>End Date</b>
+		&nbsp;
 		{%= dateutil.str_to_user(filters.end_date) %}
 	</div>
 </div>
@@ -33,6 +46,7 @@
 <table class="table table-bordered">
 	<thead>
 		<tr>
+			<th>Sr. No</th>
 			<th style="width: 14%">{%= __("Date") %}</th>
 			<th style="width: 14%">{%= __("Sales Invoice") %}</th>
 			<th style="width: 14%">{%= __("Item Code") %}</th>
@@ -44,7 +58,20 @@
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
+			{% if (i == l-1) { %}
+			<tr>	
+				<td>{%= i+1 %}</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>{%= data[i][__("Quantity")] %}</td>
+				<td><b>Grand Total</b></td>
+				<td><b>{%= data[i][__("Total")] %}</b></td>
+				<td>{%= data[i][__("Remarks")] %}</td>
+			</tr>
+			{% } else { %}
 			<tr>
+				<td>{%= i+1 %}</td>
 				<td>{%= data[i][__("Date")] %}</td>
 				<td>{%= data[i][__("Sales Invoice")] %}</td>
 				<td>{%= data[i][__("Item Code")] %}</td>
@@ -53,6 +80,7 @@
 				<td>{%= data[i][__("Total")] %}</td>
 				<td>{%= data[i][__("Remarks")] %}</td>
 			</tr>
+			{% } %}
 		{% } %}
 	</tbody>
 </table>

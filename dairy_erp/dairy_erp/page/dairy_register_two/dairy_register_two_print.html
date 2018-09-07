@@ -1,35 +1,60 @@
+<style type="text/css">
+	th,td {
+	text-align: center;
+}
+</style>
+
 <div class="container-fluid" style="margin: 0 20px 0 20px">
+	<div class="row">
+		<div class="col-xs-6">
+			{%= vlcc %}
+		</div>
+		<div class="col-xs-6 text-right">
+			{% if (vlcc_addr) { %}
+				<header>
+                    {%= vlcc_addr %}
+				</header>
+            {% } %}
+		</div>
+	</div>
 	<div class="row">
 		<div class="col-xs-12" style="font-size: 16px;">
 			<center>
-				Dairy Register - 1: <b>Start date</b> - {%= start_date %}, <b>End date - {%= end_date %}</b>
+				<b>Dairy Register - 2</b>
 			</center>
 		</div>
 	</div>
-	<div style="border-top: double #d1d8dd; margin: 4px 0 4px 0"></div>	
+	<div class="row">
+		<div class="col-xs-12" style="font-size: 16px;">
+			<center>
+			<b>{%= __("Start Date") %}</b>
+		{%= start_date %}
+			<b>{%= __("End Date") %}</b>
+		{%= end_date %}
+			</center>
+		</div>
+	</div>
+	<div style="border-top: double #d1d8dd; margin: 4px 0 4px 0"></div>
 
 	<div class = "row">
 		<div class="col-md-12">
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<th>Date</th>
-						<th>Shift</th>
-						<th>Dairy Sales</th>
+						<th rowspan="2">Date</th>
+						<th rowspan="2">Shift</th>
+						<th rowspan="2">Dairy Sales</th>
 					    <th colspan="5" style="text-align: center;">Dairy Received
 					    </th>
 					    <th colspan="5" style="text-align: center;">
 					    	Spoilage
 					    </th>
-					    <th>Excess Qty</th>
-					    <th>Profit</th>
-					    <th>Short Qty</th>
-					    <th>Loss</th>
+					    <th rowspan="2">Excess Qty</th>
+					    <th rowspan="2">Profit</th>
+					    <th rowspan="2">Short Qty</th>
+					    <th rowspan="2">Loss</th>
 					</tr>
 					<tr>
-						<th></th>
-						<th></th>
-						<th></th>
 						<th>Qty</th>
 						<th>FAT</th>
 						<th>SNF</th>
@@ -40,16 +65,12 @@
 						<th>SNF</th>
 						<th>Rate</th>
 						<th>Amt</th>
-						<th></th>
-						<th></th>
-						<th></th>
-						<th></th>
 					</tr>
 					
 					{% $.each(vmcr_data, function(i, val){ %}
 						<tr>
 						    <td>{%= val.vmcr_date %}</td>
-						    <td>{%= val.shift %}</td>
+						    <td>{%= val.shift[0] %}</td>
 						    <td>{%= val.daily_sales %}</td>
 						    <td>{%= val.vmcr_qty %}</td>
 						    <td>{%= val.fat %}</td>

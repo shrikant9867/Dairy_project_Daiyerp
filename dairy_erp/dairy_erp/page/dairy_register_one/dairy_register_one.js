@@ -29,14 +29,48 @@ frappe.dairy_register_one = Class.extend({
             callback: function(r){
                 if(r.message){
                 	console.log("inside callback",r.message)
-                    me.table_data = r.message
+                    me.table_data = r.message.final_dict
+                    me.vlcc_addr = r.message.vlcc_details.vlcc_addr
+                    me.vlcc = r.message.vlcc_details.vlcc
                     $(me.page).find(".render-table").empty();
                     me.print = frappe.render_template("dairy_register_one",{
                             "fmcr_data":me.table_data
                             })
                     $(me.page).find(".render-table").append(me.print)
+                    me.update_diff();
                 }
             }
+        })
+    },
+    update_diff:function(){
+        var me = this;
+        $(me.page).find('#update_diff').click(function(){
+            var g_fat = $(me.page).find('.g_fat')
+            var g_snf = $(me.page).find('.g_snf')
+            $.each(g_fat,function(i,d){
+                var f_id = $(d).attr('row_id').split('@')[0]
+                var g_fat_val = $(d).find('[data-fieldname="g_fat"]').val()
+                if(in_list(Object.keys(me.table_data),f_id) && g_fat_val){
+                    var diff_fat = g_fat_val - me.table_data[f_id].vmcr_fat
+                    me.table_data[f_id].diff_fat = diff_fat
+                    me.table_data[f_id].g_fat = g_fat_val
+                }
+            })
+            $.each(g_snf,function(i,d){
+                var s_id = $(d).attr('row_id').split('@')[0]
+                var g_snf_val = $(d).find('[data-fieldname="g_snf"]').val()
+                if(in_list(Object.keys(me.table_data),s_id) && g_snf_val){
+                    diff_snf = g_snf_val - me.table_data[s_id].vmcr_snf
+                    me.table_data[s_id].diff_snf = diff_snf
+                    me.table_data[s_id].g_snf = g_snf_val
+                }
+            })
+            $(me.page).find(".render-table").empty();
+            me.print = frappe.render_template("dairy_register_one",{
+                    "fmcr_data":me.table_data
+                    })
+            $(me.page).find(".render-table").append(me.print)
+            me.update_diff();
         })
     },
     set_filters:function(){
@@ -112,7 +146,9 @@ frappe.dairy_register_one = Class.extend({
             content: frappe.render_template("dairy_register_one_print",{
                                                         'fmcr_data':me.table_data,
                                                         'start_date':me.start_date.get_value(),
-                                                        'end_date':me.end_date.get_value()
+                                                        'end_date':me.end_date.get_value(),
+                                                        'vlcc_addr':me.vlcc_addr,
+                                                        'vlcc':me.vlcc
                                                     }),
             title:__("dairy_register_one_"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,

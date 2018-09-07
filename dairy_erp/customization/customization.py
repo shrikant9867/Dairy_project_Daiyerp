@@ -715,6 +715,7 @@ def create_item():
 			item_doc = frappe.new_doc("Item")
 			item_doc.item_code = i
 			item_doc.item_group = "Others/Miscellaneous" if i in ['Milk Incentives', 'Loan Emi', 'Advance Emi'] else 'Milk & Products'
+			item_doc.stock_uom = "Litre" if i in ['COW Milk', 'BUFFALO Milk'] else "Nos"
 			item_doc.flags.ignore_permissions = True
 			item_doc.flags.ignore_mandatory = True
 			item_doc.save()

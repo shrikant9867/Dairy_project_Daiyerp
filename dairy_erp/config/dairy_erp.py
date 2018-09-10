@@ -416,16 +416,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Vlcc Milk Collection Record",
 					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Vlcc Advance",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Vlcc Loan",
-					"description": _(" "),
 				}
 
 			]

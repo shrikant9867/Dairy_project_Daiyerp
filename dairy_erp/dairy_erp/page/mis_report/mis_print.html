@@ -325,8 +325,8 @@ th,td {
 				<tr>
 					<td>{%= ("7") %}</td>
 					<td>{%= ("Total") %}</td>
-					<td>{%= financial_data_dict.total_5_6[0] %}</td>
-					<td>{%= financial_data_dict.total_5_6[1] %}</td>
+					<td>{%= flt(financial_data_dict.total_5_6[0],2) %}</td>
+					<td>{%= flt(financial_data_dict.total_5_6[1],2) %}</td>
 				</tr>
 				<tr>
 					<td></td>
@@ -384,9 +384,9 @@ th,td {
 				<tr>
 					<td>13</td>
 					<td>{%= ("Total") %}</td>
-					<td>{%= financial_data_dict.s_total[0]
+					<td>{%= flt(financial_data_dict.s_total[0],2)
 					%}</td>
-					<td>{%= financial_data_dict.s_total[1]
+					<td>{%= flt(financial_data_dict.s_total[1],2)
 					%}</td>
 				</tr>
 				<tr>

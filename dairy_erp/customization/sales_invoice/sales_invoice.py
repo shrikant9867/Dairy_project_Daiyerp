@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2018, indictrans technologies and contributors
+# Copyright (c) 2018, Stellapps Technologies and Contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
+from dairy_erp.customization.stock_balance.stock_balance_report import get_actual_qty_from_bin
 from dairy_erp.dairy_erp.report.farmer_net_payoff.farmer_net_payoff import get_data
 from frappe.utils import flt, now_datetime, cstr,has_common
 
@@ -51,7 +52,7 @@ def fetch_balance_qty():
 			row_ = "cow_milk"
 		elif row == "BUFFALO Milk":
 			row_ = "buff_milk"
-		items_dict.update({row_ : get_balance_qty_from_sle(row,warehouse)})
+		items_dict.update({row_ : get_actual_qty_from_bin(row,warehouse)})
 
 	return items_dict
 
@@ -108,7 +109,7 @@ def validate_local_sale(doc, method):
 
 def validate_warehouse_qty(doc):
 	for item in doc.items:
-		warehouse_qty = get_balance_qty_from_sle(item.item_code,item.warehouse)
+		warehouse_qty = get_actual_qty_from_bin(item.item_code,item.warehouse)
 		if item.item_code not in ['COW Milk','BUFFALO Milk']:
 			if item.qty > warehouse_qty:
 				frappe.throw(_("Warehouse <b>{0}</b> have insufficient stock for item <b>{1}</b> (Available Qty: <b>{2}</b>)".format(item.warehouse,item.item_code,warehouse_qty)))

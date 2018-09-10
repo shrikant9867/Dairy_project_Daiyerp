@@ -10,6 +10,17 @@ frappe.ui.form.on('VLCC Settings', {
 	onload_post_render: function(frm){
 		frm.get_field("delete_fmcr_transactions").$input.addClass("btn-danger");
 	},
+	enable: function(frm) {
+		frappe.call({
+			method: "dairy_erp.dairy_erp.doctype.vlcc_settings.vlcc_settings.get_ag_rupay_url",
+			callback: function(r){
+					console.log(r.message)
+				if(r.message){
+					frm.set_value("url",r.message)
+				}
+			}
+		});
+	},
 	delete_fmcr_transactions: function(frm) {
 		if(frm.doc.upload_file){
 		return new Promise(function(resolve, reject) {

@@ -39,6 +39,20 @@ frappe.ui.form.on("Purchase Receipt", {
 			frappe.throw(__("Supplier Type Cannot be <b>Vlcc Type</b>"))
 		}
 	},
+	supplier_type:function(frm){
+		if(frappe.session.user != "Administrator" && has_common(frappe.user_roles, ["Vlcc Manager","Vlcc Operator"])) {	
+			$.each(frm.doc.items,function(i,d){
+				console.log("items",i,d)
+				if(d.material_request && frm.doc.supplier_type == "Farmer"){
+					frm.set_value("supplier_type","")
+					frm.set_value("supplier","")
+					frm.set_value("items","")
+					refresh_field("items")
+					frappe.throw("Can't select 'Material Indent' for supplier type as 'Farmer' ")
+				}
+			})
+		}
+	},
 	after_save: function(frm) {
 		console.log("abcd")
 		if(cur_frm.doc.name){

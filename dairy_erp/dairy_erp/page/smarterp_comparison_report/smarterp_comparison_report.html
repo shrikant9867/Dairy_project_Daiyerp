@@ -3,7 +3,34 @@ th,td {
 	text-align: center;
 }
 </style>
-<div class="container-fluid" style="overflow-x: auto;">
+<br>
+<div class="row">
+    <div class="col-xs-3" style="padding-left: 64px;">
+        <div class="row"><b>CC Id:</b>
+        	&nbsp;
+        	{%= cc_vlcc_details.cc_id %}
+        </div>
+        <div class="row"><b>VLCC Id:</b>
+        	&nbsp;
+        	{%= cc_vlcc_details.vlcc_id %}
+        </div>
+    </div>
+    <div class="col-xs-3">
+    </div>
+    <div class="col-xs-3">
+    </div>
+    <div class="col-xs-3" style="padding-left: 65px;">
+    	<div class="row"><b>CC Name:</b>
+    		&nbsp;
+    		{%= cc_vlcc_details.cc_name %}
+    	</div>
+        <div class="row"><b>VLCC Name:</b>
+        	&nbsp;
+        	{%= cc_vlcc_details.vlcc_name %}
+        </div>
+    </div>            
+</div>
+<div class="container-fluid" style="max-height: 500px; overflow-y: scroll;">
 	<div class = "row content">
 		<div class="col-xs-6">
 			<table class="table table-bordered">
@@ -68,24 +95,22 @@ th,td {
 						<td>{%= ("") %}</td>
 						<td>{%= val.si_qty %}</td>
 						<td>{%= val.si_grand_total %}</td>
-						{% if ((val.fmcr_qty >= 0) && (val.si_qty)>=0) { %}
-							<td>{%= val.fmcr_qty - val.si_qty %}</td>
-							}
-						{% } else if ((val.fmcr_qty >= 0) && (val.si_qty) == "-") { %}
-							<td>{%= val.fmcr_qty %}</td>	 
+						<td>{%= val.milk_sold_qty %}</td>
+						{% if (val.fmcr_qty) { %}
+							<td>{%= flt(val.w_fat/val.fmcr_qty,2) %}</td>
+							<td>{%= flt(val.w_snf/val.fmcr_qty,2) %}</td>
 						{% } else { %}
-							<td>{%= ("-") %}</td>
-						{% } %}
-						<td>{%= val.w_fat %}</td>
-						<td>{%= val.w_snf %}</td>
+							<td>{%= ("")%}</td>
+							<td>{%= ("")%}</td>
+						{% } %}	
 						<td>{%= ("") %}</td>
 						<td>{%= ("") %}</td>
 						<td>{%= val.vmcr_qty %}</td>
-						<td>{%= ("-") %}</td>
+						<td>{%= val.vmcr_qty_diff %}</td>
 						<td>{%= val.vmcr_fat %}</td>
-						<td>{%= ("-") %}</td>
+						<td>{%= val.vmcr_fat_diff %}</td>
 						<td>{%= val.vmcr_snf %}</td>
-						<td>{%= ("-") %}</td>
+						<td>{%= val.vmcr_snf_diff %}</td>
 						<td>{%= val.vmcr_rate %}</td>
 						<td>{%= val.vmcr_amount %}</td>
 					</tr>

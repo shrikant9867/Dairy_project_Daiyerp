@@ -35,9 +35,11 @@ frappe.smarterp_comparison_report = Class.extend({
                 callback: function(r){
                     if(r.message){
                         console.log("inside callback",r.message)
-                        me.amcu_data = r.message
+                        me.amcu_data = r.message.final_dict
+                        me.cc_vlcc_details = r.message.cc_vlcc_details
                         me.print = frappe.render_template("smarterp_comparison_report",{
                                 "amcu_data":me.amcu_data,
+                                "cc_vlcc_details":me.cc_vlcc_details
                                 })
                         $(me.page).find(".render-table").append(me.print)
                     }
@@ -192,7 +194,7 @@ frappe.smarterp_comparison_report = Class.extend({
         var me = this;
         var args = {
             cmd: 'dairy_erp.dairy_erp.page.smarterp_comparison_report.smarterp_comparison_report.get_xlsx',
-            data:me.amcu_data
+            data:{'amcu_data':me.amcu_data,'cc_vlcc_details':me.cc_vlcc_details},
         }
         open_url_post(frappe.request.url, args);
     }

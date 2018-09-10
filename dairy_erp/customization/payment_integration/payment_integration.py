@@ -6,5 +6,5 @@ import frappe, requests, json
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate,add_days,random_string
 from frappe import _
 
-def pay_ro farmer_account():
+def pay_ro_farmer_account():
 	pass

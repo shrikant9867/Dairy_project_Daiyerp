@@ -228,3 +228,8 @@ def make_dairy_log(**kwargs):
 	dlog.insert(ignore_permissions=True)
 	frappe.db.commit()
 	return dlog.name
+
+
+@frappe.whitelist()
+def get_ag_rupay_url():
+	return frappe.get_doc("Dairy Setting").get('url')

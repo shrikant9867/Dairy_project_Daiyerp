@@ -3,7 +3,7 @@
 
 from __future__ import print_function, unicode_literals
 import frappe
-from frappe.utils import has_common
+from frappe.utils import has_common, flt
 
 
 def get_associated_vlcc(doctype,text,searchfields,start,pagelen,filters):
@@ -73,4 +73,9 @@ def get_filtered_warehouse(doctype,text,searchfields,start,pagelen,filters):
 							format(text= "%%%s%%" % text))
 
 
+def get_actual_qty_from_bin(item_code, warehouse):
+	if item_code and warehouse:
+		balance_qty = frappe.db.sql("""select ifnull(actual_qty,0) from `tabBin`
+			where item_code=%s and warehouse=%s""", (item_code, warehouse))
 
+		return flt(balance_qty[0][0]) if balance_qty else 0.0

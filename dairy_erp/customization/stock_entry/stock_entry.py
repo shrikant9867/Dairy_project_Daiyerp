@@ -11,6 +11,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from frappe.utils import money_in_words, has_common
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
+from dairy_erp.customization.stock_balance.stock_balance_report import get_actual_qty_from_bin
 
 
 
@@ -27,7 +28,7 @@ def set_target_warehouse(doc,method):
 				row.s_warehouse = frappe.db.get_value("Address",user_.get('branch_office'),'warehouse')
 				row.t_warehouse = frappe.db.get_value("Address",chilling_centre,'warehouse')
 
-				warehouse_qty = get_balance_qty_from_sle(row.item_code,row.s_warehouse)
+				warehouse_qty = get_actual_qty_from_bin(row.item_code,row.s_warehouse)
 				if row.item_code not in ['COW Milk','BUFFALO Milk']:
 					if row.qty > warehouse_qty:
 						frappe.throw(_("Warehouse <b>{0}</b> have insufficient stock for item <b>{1}</b> (Available Qty: <b>{2}</b>)".format(row.s_warehouse,row.item_code,warehouse_qty)))

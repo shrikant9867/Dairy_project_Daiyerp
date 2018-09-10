@@ -1,5 +1,9 @@
 frappe.ui.form.on("Sales Invoice", {
-
+	refresh:function(frm){
+		if(frappe.session.user != "Administrator" && has_common(frappe.user_roles, ["Camp Manager","Camp Operator"])) {	
+			frm.set_df_property("is_negative", "hidden", 1);
+		}
+	},
 	onload: function(frm) {
 		if (get_session_user_type().operator_type == "Vet AI Technician")
 		{

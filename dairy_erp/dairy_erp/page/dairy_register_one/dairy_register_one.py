@@ -38,7 +38,9 @@ def get_fmcr_data(start_date=None,end_date=None):
 		vmcr['diff_fat'] = 0 - vmcr.get('vmcr_fat')
 		vmcr['diff_snf'] = 0 - vmcr.get('vmcr_snf')
 		vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
-	
+		
+	# print vmcr_dict,"vmcr_dict\n\n\n\n",vmcr_dict.keys()	
+		
 	for si in local_sale_list:
 		local_sale_dict = {}
 		if date_and_shift_wise_local_sale and str(si['posting_date'])+"#"+si['shift'] in date_and_shift_wise_local_sale:
@@ -69,18 +71,19 @@ def get_fmcr_data(start_date=None,end_date=None):
 	
 	# members = fetch_farmer_data(date_and_shift_wise_fmcr,filters)
 	members = fetch_farmer_data(fmcr_list,filters)
-	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+date_and_shift_wise_sample_local_sale.keys()
+	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+date_and_shift_wise_sample_local_sale.keys()+vmcr_dict.keys()
+	# print set(final_keys),"final_set keys________________________"
 	final_dict = {}
 	
 	for key in set(final_keys):
 		if (members.get(key) or date_and_shift_wise_local_sale.get(key)
-			or date_and_shift_wise_sample_local_sale.get(key)):
+			or date_and_shift_wise_sample_local_sale.get(key) or vmcr_dict.get(key)):
 			merged = {}
 			merged.update(members.get(key, {'member_qty': '-','total_milk_amt': '-', 'non_member_count': '-', 'date': key.split('#')[0], 'member_count': '-', 'member_amt': '-', 'shift': key.split('#')[1], 'non_member_amt': '-', 'non_member_qty': '-', 'total_milk_qty': '-'}))
 			merged.update(date_and_shift_wise_local_sale.get(key, {'si_amount': "-", 'si_qty': "-"}))
 			merged.update(date_and_shift_wise_sample_local_sale.get(key, {'stock_amount': "-", 'stock_qty': "-"}))
 			merged.update({'dairy_sales':calculate_dairy_sales(merged.get('total_milk_qty'),merged.get('si_qty'))})
-			merged.update(vmcr_dict.get(key,{'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
+			merged.update(vmcr_dict.get(key,{'g_snf':0, 'vmcr_qty':0,'rate': 0, 'g_fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0],"diff_fat":0,"diff_snf":0}))
 			final_dict[key] = merged
 		
 	return {"final_dict":final_dict,"vlcc_details":vlcc_details}

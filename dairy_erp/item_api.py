@@ -15,7 +15,7 @@ import json
 from dairy_erp.report.farmer_net_payoff.farmer_net_payoff import get_data
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
 from customization.price_list.price_list_customization import validate_price_list
-from dairy_erp.customization.stock_balance.stock_balance_report import get_actual_qty_from_bin
+from customization.stock_balance.stock_balance_report import get_actual_qty_from_bin
 #from dairy_erp.customization.sales_invoice.sales_invoice import get_effective_credit
 
 @frappe.whitelist()

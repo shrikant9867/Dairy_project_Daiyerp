@@ -113,8 +113,8 @@ th,td {
 				<tr>
 					<td></td>
 					<td>Total</td>
-					<td>{%= cattle_feed.month.procured + cattle_feed.month.sold_to_farmers %}</td>
-					<td>{%= cattle_feed.upto_month.procured + cattle_feed.upto_month.sold_to_farmers %}</td>
+					<td>{%= cattle_feed.month.procured - cattle_feed.month.sold_to_farmers %}</td>
+					<td>{%= cattle_feed.upto_month.procured - cattle_feed.upto_month.sold_to_farmers %}</td>
 				</tr>
 				</tbody>
 			</table>

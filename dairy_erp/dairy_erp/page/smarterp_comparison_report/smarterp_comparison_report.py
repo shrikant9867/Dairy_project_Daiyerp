@@ -79,9 +79,9 @@ def get_data(filters=None):
 
 	for vmcr in vmcr_data:
 		d_s = str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift')
-		vmcr["vmcr_qty_diff"] = vmcr['vmcr_qty'] - fmcr_date_shift.get(d_s).get('milk_sold_qty') if fmcr_date_shift.get(d_s) else ''
-		vmcr["vmcr_fat_diff"] = vmcr['vmcr_fat'] - fmcr_date_shift.get(d_s).get('w_fat') if fmcr_date_shift.get(d_s) else ''
-		vmcr["vmcr_snf_diff"] = vmcr['vmcr_snf'] - fmcr_date_shift.get(d_s).get('w_snf') if fmcr_date_shift.get(d_s) else ''
+		vmcr["vmcr_qty_diff"] = flt(fmcr_date_shift.get(d_s).get('milk_sold_qty') - vmcr['vmcr_qty'],2) if fmcr_date_shift.get(d_s) else ''
+		vmcr["vmcr_fat_diff"] = flt(fmcr_date_shift.get(d_s).get('w_fat') - vmcr['vmcr_fat'],2) if fmcr_date_shift.get(d_s) else ''
+		vmcr["vmcr_snf_diff"] = flt(fmcr_date_shift.get(d_s).get('w_snf') - vmcr['vmcr_snf'],2) if fmcr_date_shift.get(d_s) else ''
 		vmcr_date_shift[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
 			
 
@@ -93,8 +93,15 @@ def get_data(filters=None):
 			merged.update(fmcr_date_shift.get(key,{'count':'','fmcr_qty':'','diff':' ','grand_total':"",'w_snf':'','w_fat':'','milk_sold_qty':''}))
 			merged.update(l_sale_date_shift.get(key,{'si_qty':'','si_grand_total':''}))
 			merged.update(vmcr_date_shift.get(key,{"vmcr_qty":'','vmcr_fat':'','vmcr_snf':'','vmcr_rate':'','vmcr_amount':'','vmcr_qty_diff':'','vmcr_fat_diff':'','vmcr_snf_diff':''}))
+			# key = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]+"#"+key.split('#')[1]
+			# final_dict[key] = merged
 		final_dict[key] = merged
 
+	# for key in final_dict:
+	# 	row = key
+	# 	key = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]+"#"+key.split('#')[1]
+	# 	final_dict[key] = final_dict[row]	
+		
 	final_dict = collections.OrderedDict(sorted(final_dict.items()))	
 	return {'final_dict':final_dict,'cc_vlcc_details':cc_vlcc_details}
 

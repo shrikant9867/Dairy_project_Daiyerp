@@ -181,7 +181,7 @@ def get_fmcr_data_list(filters,date_range):
 		'date_range':date_range,
 	})
 	fmcr_data = frappe.db.sql("""select
-									COALESCE(round(sum(fmcr.milkquantity),2),0) as total_milk_purchase_society,
+									COALESCE(round(avg(fmcr.milkquantity),2),0) as total_milk_purchase_society,
 									COALESCE(round(sum(fmcr.fat*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_fat,
 									COALESCE(round(sum(fmcr.snf*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_snf,
 									COALESCE(round(avg(fmcr.milkquantity),2),0) as daliy_milk_purchase_society,
@@ -190,7 +190,7 @@ def get_fmcr_data_list(filters,date_range):
 									`tabFarmer Milk Collection Record` fmcr
 								where
 									docstatus = 1 {1}
-								""".format(filters.get('fmcr_cond'),get_fmcr_conditions(filters)),as_dict=True,debug=1)
+								""".format(filters.get('fmcr_cond'),get_fmcr_conditions(filters)),as_dict=True,debug=0)
 	return fmcr_data
 
 

@@ -554,7 +554,7 @@ def check_cycle(row_data,filters):
 	days = int(get_config)/24
 	settlement_day = add_days(getdate(filters.get('end_date')),days)
 
-	if getdate(nowdate()) < getdate(settlement_day):
+	if getdate(nowdate()) <= getdate(settlement_day):
 		msg = "Settlement can be done after <b>{0}</b>".format(settlement_day)
 
 	recv_msg = check_receivable(receivable_list)

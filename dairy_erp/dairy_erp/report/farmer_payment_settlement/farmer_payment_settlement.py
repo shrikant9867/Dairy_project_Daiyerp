@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_outstanding
 from frappe import _
 import json
 from dairy_erp import dairy_utils as utils
+from dairy_erp.customization.payment_integration.payment_integration import pay_to_farmers_account
 import calendar
 
 def execute(filters=None):
@@ -387,6 +388,11 @@ def make_payment_entry(**kwargs):
 		pe.total_allocated_amount = party_amount
 		pe.erp_ref_no = random_string(10)
 		pe.save()
+		vlcc_setting = frappe.get_doc("VLCC Settings",pe.company)
+		if vlcc_setting.enable:
+			pay_to_farmers_account(pe)
+		if not vlcc_setting.enable:
+			pe.submit()
 		if not kwargs.get('is_manual'):
 			#payment integration settlement
 			pe.submit()

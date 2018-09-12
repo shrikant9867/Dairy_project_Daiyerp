@@ -56,7 +56,7 @@ def get_data(curr_date=None,shift=None):
 			"fmcr_stock_data":fmcr_stock_data,
 			"avg_data":avg_data,
 			"local_sale_data":local_sale_data,
-			"member_data":guess_member(fmcr_stock_data,curr_date_),
+			"member_data":guess_member(fmcr_stock_data,curr_date_,shift),
 			"vlcc":vlcc,
 			"vlcc_addr":vlcc_addr,
 			"dairy_sale_qty":round(dairy_sale_qty,2)
@@ -105,7 +105,7 @@ def get_local_sale_data(curr_date_,shift_):
 	return local_sale_data
 
 	
-def guess_member(fmcr_data,curr_date_):
+def guess_member(fmcr_data,curr_date_,shift):
 
 	member_dict = {}
 
@@ -120,14 +120,14 @@ def guess_member(fmcr_data,curr_date_):
 			months_to_member = frappe.db.get_value("VLCC Settings",{"vlcc":vlcc},"months_to_member")
 			if farmer_id and months_to_member:
 				date_ = add_months(getdate(farmer_id.get('registration_date')),months_to_member)
-				if getdate() < date_  and not farmer_id.get('is_member'):
+				if getdate() < date_  and farmer_id.get('is_member') == 0:
 					non_member_count += 1
 					non_member_data = frappe.db.sql("""select ifnull(sum(milkquantity),0) as qty ,
 										ifnull(sum(amount),0) as amt 
 								from 
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1} 
-					""".format(farmer,get_conditions(curr_date_)),as_dict=1)
+					""".format(farmer,get_conditions(curr_date_,shift)),as_dict=1,debug=1)
 					non_member_qty += flt(non_member_data[0].get('qty'))
 					non_member_amt += flt(non_member_data[0].get('amt'))
 			if farmer_id and farmer_id.get('is_member'):
@@ -137,7 +137,7 @@ def guess_member(fmcr_data,curr_date_):
 								from 
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1}
-					""".format(farmer,get_conditions(curr_date_)),as_dict=1)
+					""".format(farmer,get_conditions(curr_date_,shift)),as_dict=1,debug=1)
 				member_qty += flt(member_data[0].get('qty'))
 				member_amt += flt(member_data[0].get('amt'))
 

@@ -1,15 +1,16 @@
 
 <div class="container-fluid" style="margin: 0 20px 0 20px">
 	<div class="row">
-		<div class="col-xs-6 text-left">
-			{% if (vlcc_addr) { %}
-				<header>
-                    {%= vlcc_addr %}
-				</header>
-            {% } %}
+		<div class="col-xs-2">
 		</div>
-		<div class="col-xs-6 text-right">
-			{%= vlcc %}
+		<div class="col-xs-8 text-center">
+	        {%= vlcc %},
+			{% if (vlcc_addr) { %}
+	            {%= vlcc_addr.split("<br>")[0] %}, {%=vlcc_addr.split("<br>")[1] %}, {%=vlcc_addr.split("<br>")[2] %}, {%=vlcc_addr.split("<br>")[3] %},
+	            {%= vlcc_addr.split("<br>")[4] %} 
+	        {% } %}
+		</div>
+		<div class="col-xs-2">
 		</div>
 	</div>
 	<div class="row">

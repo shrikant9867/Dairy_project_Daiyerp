@@ -113,8 +113,8 @@ th,td {
 				<tr>
 					<td></td>
 					<td>Total</td>
-					<td>{%= cattle_feed.month.procured + cattle_feed.month.sold_to_farmers %}</td>
-					<td>{%= cattle_feed.upto_month.procured + cattle_feed.upto_month.sold_to_farmers %}</td>
+					<td>{%= cattle_feed.month.procured - cattle_feed.month.sold_to_farmers %}</td>
+					<td>{%= cattle_feed.upto_month.procured - cattle_feed.upto_month.sold_to_farmers %}</td>
 				</tr>
 				</tbody>
 			</table>
@@ -163,12 +163,7 @@ th,td {
 					<tr>
 						<td>2</td>
 						<td>Bad Milk</td>
-						<td class="bad_milk">{%= milk_quality.bad %}</td>
-					</tr>
-					<tr>
-						<td>3</td>
-						<td>Formated Milk</td>
-						<td>
+						<td class="bad_milk">
 							<div class="row">
 								<div class="col-md-8">
 									<input type="number" autocomplete="off" class="input-with-feedback form-control" data-fieldtype="Float" data-fieldname="formated_milk" placeholder="" data-doctype="MIS Report Log">

@@ -195,7 +195,8 @@ frappe.individual_farmer_milk_report = Class.extend({
                                                         'vlcc':me.vlcc.get_value(),
                                                         'month':me.month.get_value(),
                                                         'cycle':me.cycle.get_value(),
-                                                        'farmer':me.farmer.get_value()
+                                                        'farmer':me.farmer.get_value(),
+                                                        'farmer_name':me.table_data.filters.farmer_full_name
                                                     }),
             title:__("individual_farmer_milk_report"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,

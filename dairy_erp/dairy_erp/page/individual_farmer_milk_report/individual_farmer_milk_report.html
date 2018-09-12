@@ -23,13 +23,13 @@
 						<th>SI No.</th>
 						<th>Date</th>
 						<th>Quantity</th>
-						<th>Milk Type</th>
+						<th>Milk<br>Type</th>
 						<th>FAT</th>
 						<th>SNF</th>
 						<th>Rate</th>
 						<th>Amount</th>
 						<th>Quantity</th>
-						<th>Milk Type</th>
+						<th>Milk<br>Type</th>
 						<th>FAT</th>
 						<th>SNF</th>
 						<th>Rate</th>
@@ -145,7 +145,7 @@
 					    	<td>{%= previous_balance %}</td>
 					    	<td>{%= ("Payment") %}</td>
 					    	<td>{%= payment %}</td>
-					    	<td>{%= previous_balance + payment%}</td>
+					    	<td>{%= previous_balance - payment%}</td>
 					    </tr>
 					    <tr>
 					    	<td>{{ (" ") }}</td>
@@ -153,7 +153,7 @@
 					    	<td>{%= total_milk_amount %}</td>
 					    	<td>{%= ("Cattle Feed") %}</td>
 					    	<td>{%= cattle_feed %}</td>
-					    	<td>{%= total_milk_amount + cattle_feed%}</td>
+					    	<td>{%= total_milk_amount - cattle_feed%}</td>
 					    </tr>
 					    <tr>
 					    	<td>{{ (" ") }}</td>
@@ -161,7 +161,7 @@
 					    	<td>{%= previous_balance + total_milk_amount %}</td>
 					    	<td>{%= ("Total") %}</td>
 					    	<td>{%= payment + cattle_feed %}</td>
-					    	<td>{%= previous_balance + total_milk_amount + payment + cattle_feed %}</td>
+					    	<td>{%= (previous_balance + total_milk_amount) - (payment + cattle_feed) %}</td>
 					    </tr>
 				</tbody>
 			</table>

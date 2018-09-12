@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 from six import string_types
+import collections
 from frappe.utils.xlsxutils import make_xlsx
 from dairy_erp.dairy_erp.page.dairy_register_one.dairy_register_one import get_local_sale_data
 from frappe.utils import flt, cstr, cint
@@ -94,6 +95,7 @@ def get_data(filters=None):
 			merged.update(vmcr_date_shift.get(key,{"vmcr_qty":'','vmcr_fat':'','vmcr_snf':'','vmcr_rate':'','vmcr_amount':'','vmcr_qty_diff':'','vmcr_fat_diff':'','vmcr_snf_diff':''}))
 		final_dict[key] = merged
 
+	final_dict = collections.OrderedDict(sorted(final_dict.items()))	
 	return {'final_dict':final_dict,'cc_vlcc_details':cc_vlcc_details}
 
 def get_fmcr_data(filters):

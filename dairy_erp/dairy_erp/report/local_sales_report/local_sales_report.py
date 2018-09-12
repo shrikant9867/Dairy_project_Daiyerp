@@ -13,7 +13,7 @@ def execute(filters=None):
 def get_columns():
 
 	columns = [
-		_("Date") + ":Date:90", 
+		_("Date") + ":Data:90", 
 		_("Customer") + ":Link/Customer:150",
 		_("Shift") + ":Data:90",
 		_("Sales Invoice") + ":Link/Sales Invoice:150",
@@ -29,9 +29,9 @@ def get_data(filters):
 
 	vlcc_comp = frappe.db.get_value("User",frappe.session.user,"company")
 
-	data = frappe.db.sql("""select si.posting_date,
+	data = frappe.db.sql("""select DATE_FORMAT(si.posting_date, "%d-%m-%y"),
 								   si.customer,
-								   si.shift,
+								   LEFT(si.shift,1),
 								   si.name,
 								   si_item.item_name,
 								   si_item.qty,
@@ -46,18 +46,31 @@ def get_data(filters):
 								si.customer = cus.name
 								and si.name = si_item.parent
 								and si.docstatus = 1 and si.company = '{0}'
-								{1}""".format(vlcc_comp,get_conditions(filters)),
-								filters,debug=0)
+								{1}""".format(vlcc_comp,get_conditions(filters)),as_list=1,debug=1)
+	
+	if data:
+		if filters.get('customer_type') == "Farmer":
+			g_total = 0
+			qty_total = 0
+			for row in data:
+				qty_total += row[5]
+				g_total += row[7]
+			data.append(["","","Grand Total","","",qty_total,"",g_total])		
+		else:
+			g_total = 0
+			for row in data:
+				g_total += row[7]
+			data.append(["","","Grand Total","","","","",g_total])
 	return data
 
 def get_conditions(filters):
 	conditions = " and 1=1"
 	if filters.get('customer_type'):
-		conditions += " and cus.customer_group = %(customer_type)s"
+		conditions += " and cus.customer_group = '{0}'".format(filters.get('customer_type'))
 	if filters.get('customer'):
-		conditions += " and si.customer = %(customer)s"
+		conditions += " and si.customer = '{0}'".format(filters.get('customer'))
 	if filters.get('from_date') and filters.get('to_date'):
-		conditions += " and si.posting_date between %(from_date)s and %(to_date)s"
+		conditions += " and si.posting_date between '{0}' and '{1}' ".format(filters.get('from_date'),filters.get('to_date'))
 
 	return conditions
 

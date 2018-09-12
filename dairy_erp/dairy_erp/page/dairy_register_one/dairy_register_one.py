@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import frappe
+import collections
 from frappe.model.document import Document
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,add_months,getdate,date_diff,add_days
 
@@ -33,14 +34,12 @@ def get_fmcr_data(start_date=None,end_date=None):
 	# 	else:
 	# 		date_and_shift_wise_fmcr[str(fmcr['date'])+"#"+fmcr['shift']] = [fmcr['name']+"@"+fmcr['farmerid']]
 	for vmcr in vmcr_data_list:
-		vmcr['g_fat'] = 0
-		vmcr['g_snf'] = 0
+		vmcr['g_fat'] = ""
+		vmcr['g_snf'] = ""
 		vmcr['diff_fat'] = 0 - vmcr.get('vmcr_fat')
 		vmcr['diff_snf'] = 0 - vmcr.get('vmcr_snf')
 		vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
-		
-	# print vmcr_dict,"vmcr_dict\n\n\n\n",vmcr_dict.keys()	
-		
+				
 	for si in local_sale_list:
 		local_sale_dict = {}
 		if date_and_shift_wise_local_sale and str(si['posting_date'])+"#"+si['shift'] in date_and_shift_wise_local_sale:
@@ -59,8 +58,8 @@ def get_fmcr_data(start_date=None,end_date=None):
 		sample_sale_dict = {}
 		if date_and_shift_wise_sample_local_sale and str(stock_entry['posting_date'])+"#"+stock_entry['shift'] in date_and_shift_wise_sample_local_sale:
 			pp = date_and_shift_wise_sample_local_sale[str(stock_entry['posting_date'])+"#"+stock_entry['shift']]
-			sample_sale_dict['stock_qty']  = pp.get('stock_qty') + stock_entry.get('qty')
-			sample_sale_dict['stock_amount']  = pp.get('stock_amount') + stock_entry.get('amount')
+			sample_sale_dict['stock_qty']  = flt(pp.get('stock_qty') + stock_entry.get('qty'),2)
+			sample_sale_dict['stock_amount']  = flt(pp.get('stock_amount') + stock_entry.get('amount'),2)
 			date_and_shift_wise_sample_local_sale[str(stock_entry['posting_date'])+"#"+stock_entry['shift']] = sample_sale_dict
 		else:
 			sample_sale_dict = {
@@ -72,20 +71,22 @@ def get_fmcr_data(start_date=None,end_date=None):
 	# members = fetch_farmer_data(date_and_shift_wise_fmcr,filters)
 	members = fetch_farmer_data(fmcr_list,filters)
 	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+date_and_shift_wise_sample_local_sale.keys()+vmcr_dict.keys()
-	# print set(final_keys),"final_set keys________________________"
 	final_dict = {}
 	
 	for key in set(final_keys):
 		if (members.get(key) or date_and_shift_wise_local_sale.get(key)
 			or date_and_shift_wise_sample_local_sale.get(key) or vmcr_dict.get(key)):
 			merged = {}
+			formatted_date = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]
 			merged.update(members.get(key, {'member_qty': '-','total_milk_amt': '-', 'non_member_count': '-', 'date': key.split('#')[0], 'member_count': '-', 'member_amt': '-', 'shift': key.split('#')[1], 'non_member_amt': '-', 'non_member_qty': '-', 'total_milk_qty': '-'}))
 			merged.update(date_and_shift_wise_local_sale.get(key, {'si_amount': "-", 'si_qty': "-"}))
 			merged.update(date_and_shift_wise_sample_local_sale.get(key, {'stock_amount': "-", 'stock_qty': "-"}))
 			merged.update({'dairy_sales':calculate_dairy_sales(merged.get('total_milk_qty'),merged.get('si_qty'))})
-			merged.update(vmcr_dict.get(key,{'g_snf':0, 'vmcr_qty':0,'rate': 0, 'g_fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0],"diff_fat":0,"diff_snf":0}))
+			merged.update(vmcr_dict.get(key,{'g_snf':'', 'vmcr_qty':0,'rate': 0, 'g_fat': '', 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0],"diff_fat":'',"diff_snf":''}))
+			key = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]
 			final_dict[key] = merged
 		
+	final_dict = collections.OrderedDict(sorted(final_dict.items()))
 	return {"final_dict":final_dict,"vlcc_details":vlcc_details}
 
 
@@ -99,7 +100,7 @@ def calculate_dairy_sales(total_milk_qty,local_sale_qty):
 		elif total_milk_qty == '-' and local_sale_qty == '-':
 			dairy_sales = '-'
 		else:
-			dairy_sales = total_milk_qty - local_sale_qty  	
+			dairy_sales = flt(total_milk_qty - local_sale_qty,2)  	
 	return dairy_sales		
 
 def fetch_farmer_data(fmcr_data,filters):
@@ -131,7 +132,7 @@ def get_member_non_menber(farmer_list,filters):
 			months_to_member = frappe.db.get_value("VLCC Settings",{"vlcc":filters.get('vlcc')},"months_to_member")
 			if farmer_id and months_to_member:
 				date_ = add_months(getdate(farmer_id.get('registration_date')),months_to_member)
-				if getdate() < date_  and not farmer_id.get('is_member'):
+				if getdate() < date_  and farmer_id.get('is_member') == 0:
 					non_member_count += 1
 					non_member_data = frappe.db.sql("""select ifnull(sum(milkquantity),0) as qty ,
 										ifnull(sum(amount),0) as amt 
@@ -205,6 +206,8 @@ def get_conditions(filters):
 		conditions += " and date(collectiontime) between '{0}' and '{1}' ".format(filters.get('start_date'),filters.get('end_date'))
 	if filters.get('shift') == "Both":
 		conditions += " and shift in ('MORNING','EVENING')"
+	if filters.get('shift') != "Both":
+		conditions += " and shift = '{0}' ".format(filters.get('shift'))	
 	if filters.get('date'):
 		conditions += " and date(collectiontime) = '{0}' ".format(filters.get('date'))
 	return conditions

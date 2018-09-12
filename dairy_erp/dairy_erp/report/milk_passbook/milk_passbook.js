@@ -100,7 +100,7 @@ frappe.query_reports["Milk Passbook"] = {
 				fieldname: ["address_display"]
 			},
 			callback: function(r) {
-				console.log("insidr e",r.message)
+				console.log("insidr e",r.message.address_display,r.message.address_display.split("<br>"))
 				if(!r.exc && r.message && !in_list(["Administrator", "Guest"], frappe.session.user)){
 					if(has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
 						// $('body').find("[data-fieldname=vlcc]").val(r.message.company)

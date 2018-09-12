@@ -13,9 +13,9 @@ def execute(filters=None):
 
 def get_columns(filters):
 
-	columns =[ ("Date") + ":Date:100",
-				("Shift") + ":Data:100",
-				("Milk Type") + ":Data:100",
+	columns =[ ("Date") + ":Data:80",
+				("Shift") + ":Data:50",
+				("Milk Type") + ":Data:80",
 				("Quantity") + ":Float:100",
 				("FAT") + ":Float:100",
 				("SNF") + ":Float:100",
@@ -31,14 +31,14 @@ def get_conditions(filters):
 	if filters.get('shift'):
 		conditions += " and shift = '{0}'".format(filters.get('shift'))
 	if filters.get('from_date') and filters.get('to_date'):
-		conditions += " and date(rcvdtime) between '{0}' and '{1}' ".format(filters.get('from_date'),filters.get('to_date'))
+		conditions += " and date(collectiontime) between '{0}' and '{1}' ".format(filters.get('from_date'),filters.get('to_date'))
 	return conditions
 
 def get_data(filters):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
 	data = frappe.db.sql("""select 
-									date(rcvdtime),
-									shift,
+									DATE_FORMAT(collectiontime, "%d-%m-%y"),
+									LEFT(shift,1),
 									milktype,
 									round(milkquantity,2),
 									round(fat,2),
@@ -54,9 +54,11 @@ def get_data(filters):
 					get_conditions(filters)),as_list=True)
 	if data:
 		g_total = 0
+		qty_total = 0
 		for row in data:
+			qty_total += row[3]
 			g_total += row[7]
-		data.append(["","","Grand Total","","","","",g_total])		
+		data.append(["","","Grand Total",qty_total,"","","",g_total])
 	return data
 
 @frappe.whitelist()

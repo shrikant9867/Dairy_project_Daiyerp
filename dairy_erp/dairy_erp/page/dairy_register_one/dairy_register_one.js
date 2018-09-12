@@ -52,7 +52,7 @@ frappe.dairy_register_one = Class.extend({
                 var g_fat_val = $(d).find('[data-fieldname="g_fat"]').val()
                 if(in_list(Object.keys(me.table_data),f_id) && g_fat_val){
                     var diff_fat = g_fat_val - me.table_data[f_id].vmcr_fat
-                    me.table_data[f_id].diff_fat = diff_fat
+                    me.table_data[f_id].diff_fat = isNaN(diff_fat) ? 0 : diff_fat
                     me.table_data[f_id].g_fat = g_fat_val
                 }
             })
@@ -61,7 +61,7 @@ frappe.dairy_register_one = Class.extend({
                 var g_snf_val = $(d).find('[data-fieldname="g_snf"]').val()
                 if(in_list(Object.keys(me.table_data),s_id) && g_snf_val){
                     diff_snf = g_snf_val - me.table_data[s_id].vmcr_snf
-                    me.table_data[s_id].diff_snf = diff_snf
+                    me.table_data[s_id].diff_snf = isNaN(diff_snf) ? 0 : diff_snf
                     me.table_data[s_id].g_snf = g_snf_val
                 }
             })

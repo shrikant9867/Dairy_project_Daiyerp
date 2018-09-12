@@ -104,6 +104,7 @@ def calculate_dairy_sales(total_milk_qty,local_sale_qty):
 	return dairy_sales		
 
 def fetch_farmer_data(fmcr_data,filters):
+	# print "inside fetch_farmer_data\n\n\n\n\n",fmcr_data
 	final_ = {}
 	date_and_shift_wise_fmcr = {}
 	for fmcr in fmcr_data:
@@ -124,6 +125,7 @@ def fetch_farmer_data(fmcr_data,filters):
 	return final_
 
 def get_member_non_menber(farmer_list,filters):
+	# print "inside get_member_non_menber\n\n\n\n"
 	non_member_count,member_count,non_member_qty,member_qty,member_amt,non_member_amt = 0 , 0 , 0, 0,0,0
 	member_dict = {}
 	if farmer_list:
@@ -181,6 +183,7 @@ def get_member_non_menber(farmer_list,filters):
 	return member_dict
 
 def get_fmcr_list(filters):
+	# print "inside get_fmcr_list\n\n\n\n",filters
 	fmcr_data = frappe.db.sql("""select 
 									date(collectiontime) as date,name,shift,farmerid
 								from
@@ -197,7 +200,8 @@ def get_conditions(filters):
 	if filters.get('from_report') == "MIS Report":
 		filters.update({
 						'start_date':filters.get('month_start_date'),
-						'end_date':filters.get('month_end_date')
+						'end_date':filters.get('month_end_date'),
+						'shift':"Both"
 		})
 	
 	if frappe.session.user != 'Administrator':
@@ -207,9 +211,9 @@ def get_conditions(filters):
 	if filters.get('shift') == "Both":
 		conditions += " and shift in ('MORNING','EVENING')"
 	if filters.get('shift') != "Both":
-		conditions += " and shift = '{0}' ".format(filters.get('shift'))	
-	if filters.get('date'):
-		conditions += " and date(collectiontime) = '{0}' ".format(filters.get('date'))
+		conditions += " and shift = '{0}' ".format(filters.get('shift'))
+	# if filters.get('date'):
+	# 	conditions += " and date(collectiontime) = '{0}' ".format(filters.get('date'))
 	return conditions
 
 # def get_conditions(filters):
@@ -253,7 +257,7 @@ def get_local_sale_data(filters,cond=None):
 								and si.shift  is NOT NULL
 								and si.docstatus = 1 {0}
 								{1}""".format(vlcc_comp,get_si_conditions(filters)),
-								filters,debug=1,as_dict=1)
+								filters,debug=0,as_dict=1)
 	return si_data
 
 def get_si_conditions(filters):
@@ -295,7 +299,7 @@ def get_vmcr_data_list(filters):
 								where
 									vmcr.docstatus = 1 and
 									vmcr.shift in ('MORNING','EVENING')
-									{0} """.format(get_vmcr_conditions(filters)),as_dict=1,debug=1)
+									{0} """.format(get_vmcr_conditions(filters)),as_dict=1,debug=0)
 	return vmcr_list
 
 def get_vmcr_conditions(filters):

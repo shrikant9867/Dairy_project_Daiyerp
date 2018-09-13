@@ -371,6 +371,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Mobile App Log",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "AgRupay Log",
+					"description": _(" "),
 				}
 			]
 		},

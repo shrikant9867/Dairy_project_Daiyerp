@@ -146,7 +146,7 @@ def get_vmcr_data(filters):
 								where
 									vmcr.docstatus = 1 and
 									vmcr.shift in ('MORNING','EVENING')
-									{0} order by vmcr.collectiontime """.format(get_vmcr_conditions(filters)),as_dict=1,debug=1)
+									{0} order by vmcr.collectiontime """.format(get_vmcr_conditions(filters)),as_dict=1,debug=0)
 	return vmcr_list
 
 def get_vmcr_conditions(filters):
@@ -162,6 +162,7 @@ def get_vmcr_conditions(filters):
 def get_xlsx(data=None):
 	raw_data = json.loads(data)
 	data = raw_data.get('amcu_data')
+	data = collections.OrderedDict(sorted(data.items()))
 	cc_vlcc_details = raw_data.get('cc_vlcc_details')
 	data_row = [
 		["CC ID",cc_vlcc_details.get('cc_id'),"","","","","","CC Name",cc_vlcc_details.get('cc_name')],

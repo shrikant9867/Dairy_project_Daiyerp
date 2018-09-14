@@ -59,3 +59,14 @@ def farmer_settings_permission(user):
 
 def get_vlcc():
 	return frappe.db.get_value("User", frappe.session.user, 'company')
+
+
+@frappe.whitelist()
+def check_record_exist():
+	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},
+			  ['operator_type','company','branch_office'], as_dict =1)
+	settings = frappe.get_all("Farmer Settings",filters = {"is_global": 1})
+	if len(settings):
+		return True
+	else:
+		return False

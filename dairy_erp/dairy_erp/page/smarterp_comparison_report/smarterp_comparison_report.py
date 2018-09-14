@@ -74,14 +74,12 @@ def get_data(filters=None):
 			else:
 				_fmcr['milk_sold_qty'] = _fmcr['fmcr_qty']
 			fmcr_date_shift[str(fmcr.get('fmcr_date'))+"#"+fmcr.get('shift')] = _fmcr
-			
-
 
 	for vmcr in vmcr_data:
 		d_s = str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift')
-		vmcr["vmcr_qty_diff"] = flt(fmcr_date_shift.get(d_s).get('milk_sold_qty') - vmcr['vmcr_qty'],2) if fmcr_date_shift.get(d_s) else ''
-		vmcr["vmcr_fat_diff"] = flt(fmcr_date_shift.get(d_s).get('w_fat') - vmcr['vmcr_fat'],2) if fmcr_date_shift.get(d_s) else ''
-		vmcr["vmcr_snf_diff"] = flt(fmcr_date_shift.get(d_s).get('w_snf') - vmcr['vmcr_snf'],2) if fmcr_date_shift.get(d_s) else ''
+		vmcr["vmcr_qty_diff"] = flt(fmcr_date_shift.get(d_s).get('milk_sold_qty') - vmcr['vmcr_qty'],2) if fmcr_date_shift.get(d_s) else - vmcr['vmcr_qty']
+		vmcr["vmcr_fat_diff"] = flt(fmcr_date_shift.get(d_s).get('w_fat') - vmcr['vmcr_fat'],2) if fmcr_date_shift.get(d_s) else - vmcr['vmcr_fat']
+		vmcr["vmcr_snf_diff"] = flt(fmcr_date_shift.get(d_s).get('w_snf') - vmcr['vmcr_snf'],2) if fmcr_date_shift.get(d_s) else - vmcr['vmcr_snf']
 		vmcr_date_shift[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
 			
 
@@ -92,7 +90,10 @@ def get_data(filters=None):
 			merged = {}
 			merged.update(fmcr_date_shift.get(key,{'count':'','fmcr_qty':'','diff':' ','grand_total':"",'w_snf':'','w_fat':'','milk_sold_qty':''}))
 			merged.update(l_sale_date_shift.get(key,{'si_qty':'','si_grand_total':''}))
-			merged.update(vmcr_date_shift.get(key,{"vmcr_qty":'','vmcr_fat':'','vmcr_snf':'','vmcr_rate':'','vmcr_amount':'','vmcr_qty_diff':'','vmcr_fat_diff':'','vmcr_snf_diff':''}))
+			if fmcr_date_shift.get(key):	
+				merged.update(vmcr_date_shift.get(key,{"vmcr_qty":'','vmcr_fat':'','vmcr_snf':'','vmcr_rate':'','vmcr_amount':'','vmcr_qty_diff':-fmcr_date_shift.get(key).get('milk_sold_qty'),'vmcr_fat_diff':-flt(fmcr_date_shift.get(key).get('w_fat')/fmcr_date_shift.get(key).get('fmcr_qty'),2),'vmcr_snf_diff':-flt(fmcr_date_shift.get(key).get('w_snf')/fmcr_date_shift.get(key).get('fmcr_qty'),2)}))
+			else:
+				merged.update(vmcr_date_shift.get(key,{"vmcr_qty":'','vmcr_fat':'','vmcr_snf':'','vmcr_rate':'','vmcr_amount':'','vmcr_qty_diff':'','vmcr_fat_diff':'','vmcr_snf_diff':''}))				
 			# key = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]+"#"+key.split('#')[1]
 			# final_dict[key] = merged
 		final_dict[key] = merged
@@ -174,10 +175,11 @@ def get_xlsx(data=None):
 	]	
 	for row in data:
 		val = data[row]
+		date_ = row.split('#')[0].split('-')[2]+"-"+row.split('#')[0].split('-')[1]+"-"+row.split('#')[0].split('-')[0][-2::]
 		if val.get("fmcr_qty"):
-			data_row.append([row.split("#")[0],row.split("#")[1],"","","",val.get('count'),val.get('fmcr_qty'),"",val.get('count'),val.get('grand_total'),"",val.get("si_qty"),val.get("si_grand_total"),val.get('milk_sold_qty'),flt(val.get('w_fat')/val.get('fmcr_qty'),2),flt(val.get('w_snf')/val.get('fmcr_qty'),2),"","",val.get("vmcr_qty"),val.get("vmcr_qty_diff"),val.get("vmcr_fat"),val.get('vmcr_fat_diff'),val.get("vmcr_snf"),val.get("vmcr_snf_diff"),val.get("vmcr_rate"),val.get("vmcr_amount")])
+			data_row.append([date_,row.split("#")[1][0],"","","",val.get('count'),val.get('fmcr_qty'),"",val.get('count'),val.get('grand_total'),"",val.get("si_qty"),val.get("si_grand_total"),val.get('milk_sold_qty'),flt(val.get('w_fat')/val.get('fmcr_qty'),2),flt(val.get('w_snf')/val.get('fmcr_qty'),2),"","",val.get("vmcr_qty"),val.get("vmcr_qty_diff"),val.get("vmcr_fat"),val.get('vmcr_fat_diff'),val.get("vmcr_snf"),val.get("vmcr_snf_diff"),val.get("vmcr_rate"),val.get("vmcr_amount")])
 		else:
-			data_row.append([row.split("#")[0],row.split("#")[1],"","","",val.get('count'),val.get('fmcr_qty'),"",val.get('count'),val.get('grand_total'),"",val.get("si_qty"),val.get("si_grand_total"),val.get('milk_sold_qty'),"","","","",val.get("vmcr_qty"),val.get("vmcr_qty_diff"),val.get("vmcr_fat"),val.get('vmcr_fat_diff'),val.get("vmcr_snf"),val.get("vmcr_snf_diff"),val.get("vmcr_rate"),val.get("vmcr_amount")])
+			data_row.append([date_,row.split("#")[1][0],"","","",val.get('count'),val.get('fmcr_qty'),"",val.get('count'),val.get('grand_total'),"",val.get("si_qty"),val.get("si_grand_total"),val.get('milk_sold_qty'),"","","","",val.get("vmcr_qty"),val.get("vmcr_qty_diff"),val.get("vmcr_fat"),val.get('vmcr_fat_diff'),val.get("vmcr_snf"),val.get("vmcr_snf_diff"),val.get("vmcr_rate"),val.get("vmcr_amount")])
 	xlsx_file = make_xlsx(data_row, "Admin Report")
 	frappe.response['filename'] = "Admin Report" + '.xlsx'
 	frappe.response['filecontent'] = xlsx_file.getvalue()

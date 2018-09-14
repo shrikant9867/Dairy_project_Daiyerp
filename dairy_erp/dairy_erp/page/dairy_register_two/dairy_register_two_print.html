@@ -6,15 +6,16 @@
 
 <div class="container-fluid" style="margin: 0 20px 0 20px">
 	<div class="row">
-		<div class="col-xs-6">
-			{%= vlcc %}
+		<div class="col-xs-2">
 		</div>
-		<div class="col-xs-6 text-right">
+		<div class="col-xs-8 text-center">
+	        {%= vlcc %},
 			{% if (vlcc_addr) { %}
-				<header>
-                    {%= vlcc_addr %}
-				</header>
-            {% } %}
+	            {%= vlcc_addr.split("<br>")[0] %}, {%=vlcc_addr.split("<br>")[1] %}, {%=vlcc_addr.split("<br>")[2] %}, {%=vlcc_addr.split("<br>")[3] %},
+	            {%= vlcc_addr.split("<br>")[4] %} 
+	        {% } %}
+		</div>
+		<div class="col-xs-2">
 		</div>
 	</div>
 	<div class="row">
@@ -50,8 +51,8 @@
 					    	Spoilage
 					    </th>
 					    <th rowspan="2">Excess Qty</th>
-					    <th rowspan="2">Profit</th>
 					    <th rowspan="2">Short Qty</th>
+					    <th rowspan="2">Profit</th>
 					    <th rowspan="2">Loss</th>
 					</tr>
 					<tr>
@@ -83,8 +84,8 @@
 						    <td></td>
 						    <td></td>
 						    <td>{%= val.excess_qty %}</td>
-						    <td>{%= val.profit %}</td>
 						    <td>{%= val.short_qty %}</td>
+						    <td>{%= val.profit %}</td>
 						    <td>{%= val.loss %}</td>
 						</tr>
 					{% }); %}

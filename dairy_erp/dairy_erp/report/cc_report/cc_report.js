@@ -18,11 +18,22 @@ frappe.query_reports["CC Report"] = {
 			"default": "MORNING"
 		},
 		{
+			"fieldname":"route",
+			"label": __("Route"),
+			"fieldtype": "Data",
+			"hidden": 0
+		},
+		{
 			"fieldname":"vlcc",
 			"label": __("VLCC"),
 			"fieldtype": "Link",
 			"options":"Company",
 			"read_only": 1
+		},
+		{
+			"fieldname":"rate_effective_date",
+			"label": __("Rate Effective from"),
+			"fieldtype": "Date"
 		},
 		{
 			"fieldname":"vlcc_id",
@@ -41,12 +52,6 @@ frappe.query_reports["CC Report"] = {
 			"label": __("Branch Office"),
 			"fieldtype": "Data",
 			"hidden": 1
-		},
-		{
-			"fieldname":"route",
-			"label": __("Route"),
-			"fieldtype": "Data",
-			"hidden": 0
 		},
 		{
 			"fieldname":"address",

@@ -145,23 +145,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Veterinary AI Technician",
 					"description": _(" "),
-				},
-				{
-					"type": "page",
-					"name": "individual_farmer_milk_report",
-					"label": _("Individual Farmer Milk Report"),
-					"description": _(" "),
-				},
-				
-				{
-					"type": "doctype",
-					"name": "Farmer Loan",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Farmer Advance",
-					"description": _(" "),
 				}
 			]
 		},
@@ -388,6 +371,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Mobile App Log",
 					"description": _(" "),
+				},
+				{
+					"type": "doctype",
+					"name": "AgRupay Log",
+					"description": _(" "),
 				}
 			]
 		},
@@ -432,16 +420,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vlcc Milk Collection Record",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Vlcc Advance",
-					"description": _(" "),
-				},
-				{
-					"type": "doctype",
-					"name": "Vlcc Loan",
 					"description": _(" "),
 				}
 

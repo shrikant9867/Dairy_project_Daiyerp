@@ -25,7 +25,18 @@ def make_dairy_log(**kwargs):
 	frappe.db.commit()
 	return dlog.name
 
-
+def make_agrupay_log(**kwargs):
+	ag_log = frappe.get_doc({"doctype": "AgRupay Log"})
+	ag_log.update({
+		"status": kwargs.get('status'),
+		"request_data": kwargs.get('request_data'),
+		"sync_time": kwargs.get('sync_time'),
+		"response_text": kwargs.get('response_text'),
+		"response_code": kwargs.get('response_code')
+		})
+	ag_log.insert(ignore_permissions=True)
+	frappe.db.commit()
+	return ag_log.name
 
 
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015, Indictrans and contributors
+# Copyright (c) 2015, Stellapps Technologies and Contributors
 # For license information, please see license.txt
-# Author Khushal Trivedi
+# Author Stellapps Technologies and Contributors
 
 from __future__ import unicode_literals
 import frappe
@@ -15,6 +15,7 @@ import json
 from dairy_erp.report.farmer_net_payoff.farmer_net_payoff import get_data
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
 from customization.price_list.price_list_customization import validate_price_list
+from customization.stock_balance.stock_balance_report import get_actual_qty_from_bin
 #from dairy_erp.customization.sales_invoice.sales_invoice import get_effective_credit
 
 @frappe.whitelist()
@@ -43,7 +44,7 @@ def get_item_qty(item):
 	
 	user_doc = frappe.get_doc("User",frappe.session.user)
 	warehouse = frappe.db.get_value("Village Level Collection Centre",user_doc.company,'warehouse')
-	return get_balance_qty_from_sle(item, warehouse)
+	return get_actual_qty_from_bin(item, warehouse)
 
 
 @frappe.whitelist()
@@ -327,7 +328,7 @@ def get_milk_attr(item):
 	if item:
 		user_doc = frappe.get_doc("User",frappe.session.user)
 		warehouse = frappe.db.get_value("Village Level Collection Centre",user_doc.company,'warehouse')
-		return get_balance_qty_from_sle(item, warehouse)
+		return get_actual_qty_from_bin(item, warehouse)
 	else:
 		frappe.throw(_("Item Does Not Exist"))
 

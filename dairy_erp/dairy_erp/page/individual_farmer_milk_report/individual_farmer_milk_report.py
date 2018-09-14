@@ -44,6 +44,7 @@ def get_fmcr_data(vlcc=None,cycle=None,farmer=None):
 				final_.append([date,0,'-','-','-','-',0,'-'] + date_and_shift_wise_fmcr.get(k.split('#')[0]+'#'+'EVENING').pop(0))
 			date_and_shift_wise_fmcr[k.split('#')[0]+'#'+'EVENING'] = []
 
+	final_.sort(key=lambda x: x[0])
 	final_.append(['',0,'','','','',0,0,'','','','',0,0,0])
 	for i,row in enumerate(final_):
 		if i < len(final_) - 1:
@@ -60,12 +61,13 @@ def get_fmcr_data(vlcc=None,cycle=None,farmer=None):
 			"previous_balance":get_pi_outstanding(filters),
 			"total_milk_amount":get_fmcr_milk_data(filters),
 			"payment":get_si_outstanding(filters),
-			"cattle_feed":cattle_feed_amount(filters)
+			"cattle_feed":cattle_feed_amount(filters),
+			"filters":filters
 			}
 
 def get_fmcr(filters):	
 	fmcr_list = frappe.db.sql("""select
-									date(fmcr.collectiontime),
+									DATE_FORMAT(fmcr.collectiontime, "%d-%m-%y"),
 									fmcr.milkquantity,
 									fmcr.milktype,
 									fmcr.fat,

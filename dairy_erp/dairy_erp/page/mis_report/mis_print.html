@@ -132,8 +132,8 @@ th,td {
 				<tr>
 					<td></td>
 					<td>Total</td>
-					<td>{%= cattle_feed.month.procured + cattle_feed.month.sold_to_farmers %}</td>
-					<td>{%= cattle_feed.upto_month.procured + cattle_feed.upto_month.sold_to_farmers %}</td>
+					<td>{%= cattle_feed.month.procured - cattle_feed.month.sold_to_farmers %}</td>
+					<td>{%= cattle_feed.upto_month.procured - cattle_feed.upto_month.sold_to_farmers %}</td>
 				</tr>
 				</tbody>
 			</table>
@@ -182,13 +182,7 @@ th,td {
 					<tr>
 						<td>2</td>
 						<td>Bad Milk</td>
-						<td class="bad_milk">{%= milk_quality.bad %}</td>
-					</tr>
-					<tr>
-						<td>3</td>
-						<td>Formated Milk</td>
-						<td>{%= formated_and_total_milk.formated_milk %}
-						</td>
+						<td class="bad_milk">{%= formated_and_total_milk.formated_milk %}</td>
 					</tr>
 					<tr>
 						<td></td>
@@ -325,8 +319,8 @@ th,td {
 				<tr>
 					<td>{%= ("7") %}</td>
 					<td>{%= ("Total") %}</td>
-					<td>{%= financial_data_dict.total_5_6[0] %}</td>
-					<td>{%= financial_data_dict.total_5_6[1] %}</td>
+					<td>{%= flt(financial_data_dict.total_5_6[0],2) %}</td>
+					<td>{%= flt(financial_data_dict.total_5_6[1],2) %}</td>
 				</tr>
 				<tr>
 					<td></td>
@@ -384,9 +378,9 @@ th,td {
 				<tr>
 					<td>13</td>
 					<td>{%= ("Total") %}</td>
-					<td>{%= financial_data_dict.s_total[0]
+					<td>{%= flt(financial_data_dict.s_total[0],2)
 					%}</td>
-					<td>{%= financial_data_dict.s_total[1]
+					<td>{%= flt(financial_data_dict.s_total[1],2)
 					%}</td>
 				</tr>
 				<tr>

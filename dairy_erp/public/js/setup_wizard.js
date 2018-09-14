@@ -17,7 +17,7 @@ dairy_erp.setup.slides_settings = [
 		// Domain
 		name: 'dairy_erp_configuration',
 		domains: ["all"],
-		title: __('Milma configuration'),
+		title: __('Dairy configuration'),
 		fields: [
 			{
 					fieldtype: 'Check',

@@ -10,15 +10,16 @@ th,td {
 
 <div class="container-fluid" style="margin: 0 20px 0 20px">
 	<div class="row">
-		<div class="col-xs-6">
-			{%= vlcc %}
+		<div class="col-xs-2">
 		</div>
-		<div class="col-xs-6 text-right">
+		<div class="col-xs-8 text-center">
+	        {%= vlcc %},
 			{% if (vlcc_addr) { %}
-				<header>
-                    {%= vlcc_addr %}
-				</header>
-            {% } %}
+	            {%= vlcc_addr.split("<br>")[0] %}, {%=vlcc_addr.split("<br>")[1] %}, {%=vlcc_addr.split("<br>")[2] %}, {%=vlcc_addr.split("<br>")[3] %},
+	            {%= vlcc_addr.split("<br>")[4] %} 
+	        {% } %}
+		</div>
+		<div class="col-xs-2">
 		</div>
 	</div>
 	<div class="row">
@@ -85,7 +86,7 @@ th,td {
 					
 					{% $.each(fmcr_data, function(i, val){ %}
 						<tr>
-						    <td>{%= val.date %}</td>
+						    <td>{%= i %}</td>
 						    <td>{%= val.shift[0] %}</td>
 						    <td>{%= val.member_count %}</td>
 						    <td>{%= val.member_qty %}</td>
@@ -99,8 +100,8 @@ th,td {
 						    <td>{%= val.g_snf %}</td>
 						    <td>{%= val.diff_fat %}</td>
 						    <td>{%= val.diff_snf %}</td>
-						    <td>{%= flt(val.si_qty,2) %}</td>
-						    <td>{%= flt(val.si_amount,2) %}</td>
+						    <td>{%= val.si_qty %}</td>
+						    <td>{%= val.si_amount %}</td>
 						    <td>{%= val.stock_qty %}</td>
 						    <td>{%= val.stock_amount %}</td>
 						    <td>{%= val.dairy_sales %}</td>

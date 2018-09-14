@@ -17,7 +17,7 @@ from dairy_erp.dairy_utils import make_dairy_log
 from dairy_erp.customization.price_list.price_list_customization \
 	import get_selling_price_list, get_buying_price_list
 from dairy_erp.customization.sales_invoice.sales_invoice import get_taxes_and_charges_template
-
+from dairy_erp.customization.stock_balance.stock_balance_report import get_actual_qty_from_bin
 
 def validate_dairy_company(doc,method=None):
 
@@ -1234,7 +1234,7 @@ def set_chilling_wrhouse(doc, method):
 
 def validate_dn(doc,method):
 	for item in doc.items:
-		warehouse_qty = get_balance_qty_from_sle(item.item_code,item.warehouse)
+		warehouse_qty = get_actual_qty_from_bin(item.item_code,item.warehouse)
 		if item.material_request:
 			mi=frappe.get_doc("Material Request",item.material_request)
 			if item.item_code not in ['COW Milk','BUFFALO Milk']:
@@ -1267,3 +1267,9 @@ def item_permissions(user):
 	elif user != 'Administrator' and ('Dairy Manager' in roles or 'Dairy Operator' in roles):
 		return """tabItem.name not in
 		 ('Advance Emi', 'Loan Emi', 'Milk Incentives')"""
+
+@frappe.whitelist()
+def get_filtered_customer(doctype, txt, searchfield, start, page_len, filters):
+	 return frappe.db.sql("""select name,customer_group from `tabCustomer` 
+	 		where customer_group !='Farmer'""",as_list=1)
+

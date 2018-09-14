@@ -1,15 +1,122 @@
-<div class="container-fluid" style="margin: 0 20px 0 20px">
+<style type="text/css">
+th,td {
+	text-align: center;
+}
+</style>
+<br>
+<div class="row">
+    <div class="col-xs-3" style="padding-left: 64px;">
+        <div class="row"><b>CC Id:</b>
+        	&nbsp;
+        	{%= cc_vlcc_details.cc_id %}
+        </div>
+        <div class="row"><b>VLCC Id:</b>
+        	&nbsp;
+        	{%= cc_vlcc_details.vlcc_id %}
+        </div>
+    </div>
+    <div class="col-xs-3">
+    </div>
+    <div class="col-xs-3">
+    </div>
+    <div class="col-xs-3" style="padding-left: 65px;">
+    	<div class="row"><b>CC Name:</b>
+    		&nbsp;
+    		{%= cc_vlcc_details.cc_name %}
+    	</div>
+        <div class="row"><b>VLCC Name:</b>
+        	&nbsp;
+        	{%= cc_vlcc_details.vlcc_name %}
+        </div>
+    </div>            
+</div>
+<div class="container-fluid" style="max-height: 500px; overflow-y: scroll;">
 	<div class = "row content">
 		<div class="col-xs-6">
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<th colspan="5">Part – A</th>
+						<th rowspan="3" style="padding:23px">Date</th>
+						<th rowspan="3">Session</th>
+						<th colspan="3">SmartAMCU</th>
+						<th colspan="13">SmartERP – Society</th>
+						<th colspan="8">SmartERP – Dairy</th>
 					</tr>
 					<tr>
-						<th>SI No.</th>
-						<th colspan="2">Milk purchase</th>
+						<th rowspan="3">No of records</th>
+						<th rowspan="3">Qty.</th>
+						<th rowspan="3">Amt.</th>
+						<th colspan="3">FMCR</th>
+						<th colspan="3">Purchase Invoice</th>
+						<th colspan="2">Local Sale</th>
+						<th colspan="3">Milk sold to Dairy</th>
+						<th colspan="2">General Test</th>
+						<th colspan="8">VMCR</th>
 					</tr>
+					<tr>
+						<th rowspan="5">No.</th>
+						<th rowspan="5">Qty.</th>
+						<th rowspan="5">Diff.</th>
+						<th rowspan="5">No.</th>
+						<th rowspan="5">Amt.</th>
+						<th rowspan="5">Diff.</th>
+						<th rowspan="5">Qty.</th>
+						<th rowspan="5">Amt.</th>
+						<th rowspan="5">Qty</th>
+						<th rowspan="5">Fat</th>
+						<th rowspan="5">Snf</th>
+						<th rowspan="5">Fat</th>
+						<th rowspan="5">Snf</th>
+						<th rowspan="5">Qty.</th>
+						<th rowspan="5">Qty. Diff</th>
+						<th rowspan="5">Fat</th>
+						<th rowspan="5">Fat Diff.</th>
+						<th rowspan="5">SNF</th>
+						<th rowspan="5">SNF Diff.</th>
+						<th rowspan="5">Rate</th>
+						<th rowspan="5">Amt.</th>
+					</tr>
+					{% $.each(amcu_data, function(i, val){ %}
+					<tr></tr>
+					<tr></tr>
+					<tr></tr>
+					<tr></tr>
+					<tr>
+						<td>{%= i.split("#")[0].split("-")[2] %}
+						-{%= i.split("#")[0].split("-")[1] %}
+						-{%= i.split("#")[0].split("-")[0].slice(-2) %}</td>
+						<td>{%= i.split("#")[1][0] %}</td>
+						<td>{%= ("") %}</td>
+						<td>{%= ("") %}</td>
+						<td>{%= ("") %}</td>
+						<td>{%= val.count %}</td>
+						<td>{%= val.fmcr_qty %}</td>
+						<td>{%= ("") %}</td>
+						<td>{%= val.count %}</td>
+						<td>{%= val.grand_total %}</td>
+						<td>{%= ("") %}</td>
+						<td>{%= val.si_qty %}</td>
+						<td>{%= val.si_grand_total %}</td>
+						<td>{%= val.milk_sold_qty %}</td>
+						{% if (val.fmcr_qty) { %}
+							<td>{%= flt(val.w_fat/val.fmcr_qty,2) %}</td>
+							<td>{%= flt(val.w_snf/val.fmcr_qty,2) %}</td>
+						{% } else { %}
+							<td>{%= ("")%}</td>
+							<td>{%= ("")%}</td>
+						{% } %}	
+						<td>{%= ("") %}</td>
+						<td>{%= ("") %}</td>
+						<td>{%= val.vmcr_qty %}</td>
+						<td>{%= val.vmcr_qty_diff %}</td>
+						<td>{%= val.vmcr_fat %}</td>
+						<td>{%= val.vmcr_fat_diff %}</td>
+						<td>{%= val.vmcr_snf %}</td>
+						<td>{%= val.vmcr_snf_diff %}</td>
+						<td>{%= val.vmcr_rate %}</td>
+						<td>{%= val.vmcr_amount %}</td>
+					</tr>
+					{% }); %}
 				</tbody>
 			</table>
 		</div>

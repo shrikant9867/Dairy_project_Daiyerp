@@ -6,9 +6,7 @@ th,td {
 </style>
 
 <br>
-<h2 class="text-center">{%= __(report.report_name) %}</h2>
 <h4 class="text-center">{%= filters.branch_office %}</h4>
-<h6 class="text-center">{%= filters.address %}</h6>
 <div class="row">
 	<div class="col-xs-3">
 		<b>Date</b>
@@ -46,6 +44,7 @@ th,td {
 <table class="table table-bordered">
 	<thead>
 		<tr>
+			<th>Sr. No.</th>
 			<th>{%= __("Quality Type") %}</th>
 			<th>{%= __("Cans") %}</th>
 			<th>{%= __("Qty") %}</th>
@@ -58,7 +57,8 @@ th,td {
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
-				<td>{%= data[i][__("Type")] %}</td>
+				<td>{%= i+1 %}</td>
+				<td>{%= data[i][__("Quality Type")] %}</td>
 				<td>{%= data[i][__("Cans")] %}</td>
 				<td>{%= data[i][__("Qty")] %}</td>
 				<td>{%= data[i][__("FAT")] %}</td>
@@ -69,3 +69,8 @@ th,td {
 		{% } %}
 	</tbody>
 </table>
+
+<div class="row">
+	<div class="col-xs-6"></div>
+	<div class="col-xs-6 text-right">"Rate as per new price chart w.e.f {%= filters.rate_effective_date %}"</div>	
+</div>

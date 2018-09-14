@@ -20,28 +20,32 @@ frappe.smarterp_comparison_report = Class.extend({
     },
     render_layout: function() {
         var me = this;
-        frappe.call({
-            method: "dairy_erp.dairy_erp.page.smarterp_comparison_report.smarterp_comparison_report.get_data",
-            args: {
-                "filters":{
-                	"from_date":me.from_date.get_value(),
-                	"to_date":me.to_date.get_value(),
-                	"vlcc":me.vlcc.get_value(),
-                	"cc":me.chilling_centre.get_value()
+        if (me.from_date.get_value() && me.to_date.get_value() && me.vlcc.get_value() && me.chilling_centre.get_value()){
+            frappe.call({
+                method: "dairy_erp.dairy_erp.page.smarterp_comparison_report.smarterp_comparison_report.get_data",
+                args: {
+                    "filters":{
+                        "from_date":me.from_date.get_value(),
+                        "to_date":me.to_date.get_value(),
+                        "vlcc":me.vlcc.get_value(),
+                        "cc":me.chilling_centre.get_value()
+                    }
+                },
+                async:false,
+                callback: function(r){
+                    if(r.message){
+                        console.log("inside callback",r.message)
+                        me.amcu_data = r.message.final_dict
+                        me.cc_vlcc_details = r.message.cc_vlcc_details
+                        me.print = frappe.render_template("smarterp_comparison_report",{
+                                "amcu_data":me.amcu_data,
+                                "cc_vlcc_details":me.cc_vlcc_details
+                                })
+                        $(me.page).find(".render-table").append(me.print)
+                    }
                 }
-            },
-            async:false,
-            callback: function(r){
-                if(r.message){
-                	console.log("inside callback",r.message)
-                    me.cc_vlcc_details = r.message
-                    me.print = frappe.render_template("smarterp_comparison_report",{
-                            "amcu_data":me.cc_vlcc_details,
-                            })
-                    $(me.page).find(".render-table").append(me.print)
-                }
-            }
-        })
+            })
+        }
     },
     set_filters:function(){
         var me = this;
@@ -139,8 +143,9 @@ frappe.smarterp_comparison_report = Class.extend({
             render_input: true
         });
         me.to_date.set_value(frappe.datetime.str_to_obj(frappe.datetime.get_today()))
-        me.wrapper_page.set_primary_action(__("Print"), function () {
-            me.create_pdf()
+        me.wrapper_page.set_primary_action(__("Export"), function () {
+            //me.create_pdf()
+            me.make_export()
         })
         me.wrapper_page.set_secondary_action(__("Refresh"),function() { 
             window.location.reload();
@@ -154,7 +159,10 @@ frappe.smarterp_comparison_report = Class.extend({
     cc_change:function(){
     	var me = this;
     	$(me.page).find(".render-table").empty();
-    	me.render_layout();
+    	if(me.vlcc.get_value()){
+            me.vlcc.set_value("")
+        }
+        me.render_layout();
     },
     from_date_change: function(date_){
         var me =this;
@@ -184,6 +192,10 @@ frappe.smarterp_comparison_report = Class.extend({
     },
     make_export:function(){
         var me = this;
-        
+        var args = {
+            cmd: 'dairy_erp.dairy_erp.page.smarterp_comparison_report.smarterp_comparison_report.get_xlsx',
+            data:{'amcu_data':me.amcu_data,'cc_vlcc_details':me.cc_vlcc_details},
+        }
+        open_url_post(frappe.request.url, args);
     }
-})    
+})

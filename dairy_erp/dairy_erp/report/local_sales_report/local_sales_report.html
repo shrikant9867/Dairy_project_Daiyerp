@@ -5,13 +5,16 @@ th,td {
 }
 </style>
 <div class="row">
-	<div class="col-xs-6 text-left">
+	<div class="col-xs-2">
+	</div>
+	<div class="col-xs-8 text-center">
+        {%= filters.vlcc %},
 		{% if (filters.vlcc_addr) { %}
-            {%= filters.vlcc_addr %}
+            {%= filters.vlcc_addr.split("<br>")[0] %}, {%=filters.vlcc_addr.split("<br>")[1] %}, {%=filters.vlcc_addr.split("<br>")[2] %}, {%=filters.vlcc_addr.split("<br>")[3] %},
+            {%= filters.vlcc_addr.split("<br>")[4] %} 
         {% } %}
 	</div>
-	<div class="col-xs-6 text-right">
-		{%= filters.vlcc %}
+	<div class="col-xs-2">
 	</div>
 </div>
 <div class="row">
@@ -31,7 +34,7 @@ th,td {
 		</center>
 	</div>
 </div>
-
+<br>
 <div class="row">
 	{% if (filters.customer_type == "Farmer") { %}
 	<div class="col-xs-6 text-right">
@@ -66,6 +69,19 @@ th,td {
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
+			{% if (i == l-1) { %}
+			<tr>
+				{% if (filters.customer_type == "Farmer") { %}
+				<td colspan="6" style="text-align: left;"><b>Grand Total</b></td>
+				<td><b>{%= data[i][__("Quantity")] %}</b></td>
+				<td></td>
+				<td><b>{%= data[i][__("Amount")] %}</b></td>
+				{% } else { %}
+				<td colspan="8" style="text-align: left;"><b>Grand Total</b></td>
+				<td><b>{%= data[i][__("Amount")] %}</b></td>
+				{% } %}
+			</tr>
+			{% } else { %}
 			<tr>
 			<td>{%= i+1 %}</td>
 			<td>{%= data[i][__("Date")] %}</td>
@@ -77,6 +93,7 @@ th,td {
 			<td>{%= data[i][__("Rate")] %}</td>
 			<td>{%= data[i][__("Amount")] %}</td>
 			</tr>
+			{% } %}
 		{% } %}
 	</tbody>
 </table>

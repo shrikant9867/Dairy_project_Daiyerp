@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import nowdate, cstr, flt, cint, now, getdate,add_days
+from frappe.utils import nowdate, cstr, flt, cint, now, getdate,add_days,random_string
 from erpnext.accounts.doctype.journal_entry.journal_entry \
 	import get_average_exchange_rate, get_default_bank_cash_account
 from erpnext.accounts.party import get_party_account
@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_outstanding
 from frappe import _
 import json
 from dairy_erp import dairy_utils as utils
+from dairy_erp.customization.payment_integration.payment_integration import pay_to_farmers_account
 import calendar
 
 def execute(filters=None):
@@ -385,8 +386,16 @@ def make_payment_entry(**kwargs):
 		pe.flags.ignore_permissions = True
 		pe.flags.ignore_mandatory = True
 		pe.total_allocated_amount = party_amount
+		pe.erp_ref_no = random_string(10)
 		pe.save()
-		pe.submit()
+		vlcc_setting = frappe.get_doc("VLCC Settings",pe.company)
+		if vlcc_setting.enable:
+			pay_to_farmers_account(pe)
+		if not vlcc_setting.enable:
+			pe.submit()
+		if not kwargs.get('is_manual'):
+			#payment integration settlement
+			pe.submit()
 		return pe.name
 	except Exception,e: 
 		utils.make_dairy_log(title="Payment Entry Creation Error in Farmer Payment",method="make_payment_entry", status="Error",

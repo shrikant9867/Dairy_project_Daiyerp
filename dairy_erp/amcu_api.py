@@ -84,9 +84,9 @@ def make_fmrc(data, response_dict):
 														farmer_supplier = frappe.db.get_value("Farmer",row.get('farmerid'),'full_name')
 														row.update(
 															{
-																# "collectiontime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000)),
-																"qualitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
-																"quantitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000))
+																"collectiontime": row.get('collectiontime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000)),
+																"qualitytime": row.get('qualitytime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
+																"quantitytime": row.get('quantitytime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000))
 															}
 														)
 														fmrc_doc = frappe.new_doc("Farmer Milk Collection Record")
@@ -100,8 +100,8 @@ def make_fmrc(data, response_dict):
 														fmrc_doc.collectiondate =  data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 														fmrc_doc.posting_date = getdate(data.get('collectiontime'))
 														fmrc_doc.shift = data.get('shift')
-														fmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
-														fmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
+														fmrc_doc.starttime = data.get('starttime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
+														fmrc_doc.endtime = data.get('endtime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
 														fmrc_doc.endshift = 1 if data.get('endshift') == True else 0
 									 					fmrc_doc.update(row)
 														fmrc_doc.flags.ignore_permissions = True
@@ -111,6 +111,7 @@ def make_fmrc(data, response_dict):
 														if row.get('status') == "Accept":
 															pr = make_purchase_receipt_vlcc(data, row, vlcc, farmer_supplier, response_dict, fmrc_doc.name )
 															purchase_invoice_against_farmer(data, row, vlcc,  farmer_supplier, pr.get('item_'), response_dict, pr.get('pr_obj'), fmrc_doc.name, resv_farmer.get('configurable_days'))
+															# handling loss/gain vmcr is there but fmcr is not
 													else:
 														traceback = "farmer does not exist"
 														frappe.throw(_("farmer does not exist"))
@@ -409,26 +410,23 @@ def delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,
 		vmcr_stock_qty = vmcr_stock_qty_computation(vmcr,se)
 
 		if si:
-			si_doc = frappe.get_doc("Sales Invoice",si)
-			si_doc.cancel()
-			frappe.delete_doc("Sales Invoice", si_doc.name)
+			frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(si))
+			frappe.db.sql("""delete from `tabSales Invoice` where name = %s""",(si))
 		if dn:
-			dn_doc = frappe.get_doc("Delivery Note",dn)
-			dn_doc.cancel()
-			frappe.delete_doc("Delivery Note", dn_doc.name)
+			frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(dn))
+			frappe.db.sql("""delete from `tabStock Ledger Entry` where voucher_no = %s""",(dn))
+			frappe.db.sql("""delete from `tabDelivery Note` where name = %s""",(dn))
 		if pi:
-			pi_doc = frappe.get_doc("Purchase Invoice",pi)
-			pi_doc.cancel()
-			frappe.delete_doc("Purchase Invoice", pi_doc.name)
+			frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(pi))
+			frappe.db.sql("""delete from `tabPurchase Invoice` where name = %s""",(pi))
 		if pr:
-			pr_doc = frappe.get_doc("Purchase Receipt",pr)
-			pr_doc.cancel()
-			frappe.delete_doc("Purchase Receipt", pr_doc.name)
-
+			frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(pr))
+			frappe.db.sql("""delete from `tabStock Ledger Entry` where voucher_no = %s""",(pr))
+			frappe.db.sql("""delete from `tabPurchase Receipt` where name = %s""",(pr))
 		if se.get('name'):
-			se_doc = frappe.get_doc("Stock Entry",se.get('name'))
-			se_doc.cancel()
-			frappe.delete_doc("Stock Entry", se_doc.name)
+			frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(se.get('name')))
+			frappe.db.sql("""delete from `tabStock Ledger Entry` where voucher_no = %s""",(se.get('name')))
+			frappe.db.sql("""delete from `tabStock Entry` where name = %s""",(se.get('name')))
 
 		vmcr_doc.cancel()
 		update_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,vmcr_stock_qty,response_dict)
@@ -458,10 +456,10 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			row.update(
 				{
 					"collectiontime": collectiontime,
-					"qualitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
-					"quantitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000)),		
-					"tippingendtime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingendtime'))/1000)),		
-					"tippingstarttime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingstarttime'))/1000)),
+					"qualitytime": row.get('qualitytime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
+					"quantitytime": row.get('quantitytime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000)),		
+					"tippingendtime": row.get('tippingendtime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingendtime'))/1000)),		
+					"tippingstarttime": row.get('tippingstarttime') ,#time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingstarttime'))/1000)),
 					"associated_vlcc": frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
 				})
 			vmrc_doc = frappe.new_doc("Vlcc Milk Collection Record")
@@ -474,8 +472,8 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			vmrc_doc.collectiondate =  collectiondate
 			vmrc_doc.posting_date = getdate(data.get('collectiontime'))
 			vmrc_doc.shift = data.get('shift')
-			vmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
-			vmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
+			vmrc_doc.starttime = data.get('starttime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
+			vmrc_doc.endtime = data.get('endtime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
 			vmrc_doc.endshift = 1 if data.get('endshift') == True else 0
 			vmrc_doc.update(row)
 			vmrc_doc.flags.ignore_permissions = True

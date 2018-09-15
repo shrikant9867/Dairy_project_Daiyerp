@@ -120,7 +120,7 @@ def guess_member(fmcr_data,curr_date_,shift):
 			months_to_member = frappe.db.get_value("VLCC Settings",{"vlcc":vlcc},"months_to_member")
 			if farmer_id and months_to_member:
 				date_ = add_months(getdate(farmer_id.get('registration_date')),months_to_member)
-				if getdate() < date_  and farmer_id.get('is_member') == 0:
+				if getdate() < date_  and not farmer_id.get('is_member'):
 					non_member_count += 1
 					non_member_data = frappe.db.sql("""select ifnull(sum(milkquantity),0) as qty ,
 										ifnull(sum(amount),0) as amt 

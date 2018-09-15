@@ -49,7 +49,7 @@ def get_data(filters):
 								`tabFarmer Milk Collection Record` 
 							where 
 								docstatus = 1 and
-								associated_vlcc = '{0}' {1}""".format(
+								associated_vlcc = '{0}' {1} order by date(collectiontime)""".format(
 					user_doc.get('company'),
 					get_conditions(filters)),as_list=True)
 	if data:

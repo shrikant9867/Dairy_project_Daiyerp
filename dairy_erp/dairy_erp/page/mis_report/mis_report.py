@@ -76,8 +76,8 @@ def get_mis_data(month=None,fiscal_year=None):
 		other_income = {'month':get_other_income(filters,'month'),
 						'upto_month':get_other_income(filters,'upto_month')}
 
-		fmcr_list = get_fmcr_list(filters)
-		member_data = fetch_farmer_data(fmcr_list,filters)
+		# fmcr_list = get_fmcr_list(filters)
+		# member_data = fetch_farmer_data(fmcr_list,filters)
 		milk_quality_data = {'good':get_vmcr_milk_quality_data(filters,"Accept").get('milk_quantity'),
 							'bad':get_vmcr_milk_quality_data(filters,"Reject").get('milk_quantity')}
 		
@@ -93,7 +93,7 @@ def get_mis_data(month=None,fiscal_year=None):
 				})
 		else:
 			formated_and_total_milk.update({
-				'total_milk':milk_quality_data.get('good')-milk_quality_data.get('bad'),
+				'total_milk':milk_quality_data.get('good')+milk_quality_data.get('bad'),
 				'formated_milk':0
 				})			
 
@@ -357,7 +357,7 @@ def add_formated_milk(filters=None):
 			mis_report_log.bad_milk_old = mis_report_log.bad_milk_new
 			mis_report_log.bad_milk_new = milk_data.get('formated_milk')
 			mis_report_log.good_milk = milk_data.get('good_milk')
-			mis_report_log.total_milk = milk_data.get('good_milk') - milk_data.get('formated_milk')
+			mis_report_log.total_milk = milk_data.get('good_milk') + milk_data.get('formated_milk')
 			mis_report_log.save()
 	else:
 		mis_report_log = frappe.new_doc("MIS Report Log")
@@ -367,7 +367,7 @@ def add_formated_milk(filters=None):
 		mis_report_log.bad_milk_new = milk_data.get('formated_milk')
 		mis_report_log.bad_milk_old = milk_data.get('formated_milk')
 		mis_report_log.good_milk = milk_data.get('good_milk')
-		mis_report_log.total_milk = milk_data.get('good_milk') - milk_data.get('formated_milk')
+		mis_report_log.total_milk = milk_data.get('good_milk') + milk_data.get('formated_milk')
 		mis_report_log.save()
 	return mis_report_log.name
 
@@ -376,26 +376,27 @@ def get_cattle_feed(filters,cond):
 	conditions_si = "1=1 and "
 	if cond == "month":
 		conditions_pr = "pr.posting_date between '{0}' and '{1}' ".format(filters.get('month_start_date'),filters.get('month_end_date')) 
-		conditions_si = "si.posting_date between '{0}' and '{1}'".format(filters.get('month_start_date'),filters.get('month_end_date'))
+		conditions_si = "si.posting_date between '{0}' and '{1}' ".format(filters.get('month_start_date'),filters.get('month_end_date'))
 	if cond == "upto_month":
 		conditions_pr += "pr.posting_date between '{0}' and '{1}' ".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
 		conditions_si += "si.posting_date between '{0}' and '{1}'".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
+
+	item_list = "(" + ",".join([ "'{0}'".format(item.get('name')) for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name") ]) + ")"
 
 	pr_data_list = frappe.db.sql("""
 			select 
 				COALESCE(sum(pr_item.qty),0) as procured
 			from
 				`tabPurchase Receipt` pr,
-				`tabPurchase Receipt Item` pr_item,
-				`tabItem Group` item_g
+				`tabPurchase Receipt Item` pr_item
 			where
 				pr_item.parent = pr.name and
 				{0}
 				and pr.company = '{1}'
-				and item_g.name = "Cattle feed"
+				and pr_item.item_code in {2}
 				and pr.docstatus = 1
 				and	pr.supplier_type in ("Dairy Type","VLCC Local")
-		""".format(conditions_pr,filters.get('vlcc')),as_dict=1,debug=0)
+		""".format(conditions_pr,filters.get('vlcc'),item_list),as_dict=1,debug=0)
 	
 	cattle_si_data = frappe.db.sql("""
 							select
@@ -406,9 +407,10 @@ def get_cattle_feed(filters,cond):
 							where
 								si.customer_or_farmer <> 'Vlcc Local Institution'
 								and si_item.parent = si.name
-								and si.docstatus = 1 and si.company = '{0}' and
-								{1} 
-								""".format(filters.get('vlcc'),conditions_si),debug=0,as_dict=1)
+								and si_item.item_code in {0}
+								and si.docstatus = 1 and si.company = '{1}' and
+								{2} 
+								""".format(item_list,filters.get('vlcc'),conditions_si),debug=0,as_dict=1)
 
 	return {'procured':pr_data_list[0]['procured'],'sold_to_farmers':cattle_si_data[0]['sold_to_farmers']}
 

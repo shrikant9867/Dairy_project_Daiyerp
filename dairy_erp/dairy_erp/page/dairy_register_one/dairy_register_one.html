@@ -57,8 +57,8 @@ th,td {
 					
 					{% $.each(fmcr_data, function(i, val){ %}
 						<tr>
-						    <td>{%= i %}</td>
-						    <td>{%= val.shift[0] %}</td>
+						    <td>{%= val.date %}</td>
+						    <td>{%= i.split("#")[1][2] %}</td>
 						    <td>{%= val.member_count %}</td>
 						    <td>{%= val.member_qty %}</td>
 						    <td>{%= val.member_amt %}</td>
@@ -68,10 +68,10 @@ th,td {
 						    <td>{%= val.total_milk_qty %}</td>
 						    <td>{%= val.total_milk_amt %}</td>
 						    <td class="g_fat" row_id={%= i  + "@d_fat" %}>
-						    <input type="number" class="form-control" data-fieldtype="Float" data-fieldname="g_fat" value={%= val.g_fat %}>	
+						    <input class="form-control" data-fieldtype="Float" data-fieldname="g_fat" value={%= val.g_fat %}>	
 						    </td>
 						    <td class="g_snf" row_id={%= i  + "@d_snf" %}>
-						    <input type="number" class="form-control" data-fieldtype="Float" data-fieldname="g_snf" value={%= val.g_snf %}>
+						    <input class="form-control" data-fieldtype="Float" data-fieldname="g_snf" value={%= val.g_snf %}>
 						    </td>
 						    <td row_id={%= i + "@diff_fat" %}>{%= val.diff_fat %}</td>
 						    <td row_id={%= i + "@diff_snf" %}>{%= val.diff_snf %}</td>

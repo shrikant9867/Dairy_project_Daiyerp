@@ -193,6 +193,7 @@ frappe.individual_farmer_milk_report = Class.extend({
                                                         'payment':me.table_data.payment ? me.table_data.payment : 0.00,
                                                         'cattle_feed':me.table_data.cattle_feed ? me.table_data.cattle_feed : 0.00,
                                                         'vlcc':me.vlcc.get_value(),
+                                                        'vlcc_addr':me.table_data.filters.vlcc_addr,
                                                         'month':me.month.get_value(),
                                                         'cycle':me.cycle.get_value(),
                                                         'farmer':me.farmer.get_value(),

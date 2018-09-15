@@ -9,12 +9,14 @@ def get_fmcr_data(vlcc=None,cycle=None,farmer=None):
 	farmer_full_name = frappe.db.get_value("Farmer",{'name':farmer},"full_name")
 	start_date = cyclewise_computation[0]['start_date']
 	end_date = cyclewise_computation[0]['end_date']	
+	vlcc_addr = frappe.db.get_value("Village Level Collection Centre",{"name":vlcc},"address_display")
 	filters = {
 				'start_date':start_date,
 				'end_date':end_date,
 				'vlcc':vlcc,
 				'farmer':farmer,
-				'farmer_full_name':farmer_full_name
+				'farmer_full_name':farmer_full_name,
+				'vlcc_addr':vlcc_addr
 				}
 	fmcr_list = get_fmcr(filters)
 	# previous_balance = get_pi_outstanding(filters)
@@ -94,7 +96,7 @@ def get_conditions(filters):
 def get_pi_outstanding(filters):
 	pi_data = frappe.db.sql("""
 		select
-			COALESCE(round(sum(pi.outstanding_amount),2))
+			COALESCE(round(sum(pi.outstanding_amount),2),0)
 		from
 			`tabPurchase Invoice` pi
 		where
@@ -109,7 +111,7 @@ def get_pi_outstanding(filters):
 def get_si_outstanding(filters):
 	si_data = frappe.db.sql("""
 								select
-									COALESCE(round(sum(si.outstanding_amount),2))
+									COALESCE(round(sum(si.outstanding_amount),2),0)
 								from
 									`tabSales Invoice` si
 								where
@@ -122,7 +124,7 @@ def get_si_outstanding(filters):
 def get_fmcr_milk_data(filters):
 	total_milk_amount = frappe.db.sql("""
 										select
-											COALESCE(round(sum(fmcr.amount),2))
+											COALESCE(round(sum(fmcr.amount),2),0)
 										from
 											`tabFarmer Milk Collection Record` fmcr
 										where
@@ -140,7 +142,7 @@ def get_fmcr_milk_data(filters):
 def cattle_feed_amount(filters):
 	cattle_feed_amount = frappe.db.sql("""
 		select
-			COALESCE(round(sum(si.outstanding_amount),2))
+			COALESCE(round(sum(si.outstanding_amount),2),0)
 		from
 			`tabSales Invoice` si
 		where

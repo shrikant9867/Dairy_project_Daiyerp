@@ -85,7 +85,7 @@ th,td {
 						<td>{%= i.split("#")[0].split("-")[2] %}
 						-{%= i.split("#")[0].split("-")[1] %}
 						-{%= i.split("#")[0].split("-")[0].slice(-2) %}</td>
-						<td>{%= i.split("#")[1][0] %}</td>
+						<td>{%= i.split("#")[1][2] %}</td>
 						<td>{%= ("") %}</td>
 						<td>{%= ("") %}</td>
 						<td>{%= ("") %}</td>
@@ -102,8 +102,8 @@ th,td {
 							<td>{%= flt(val.w_fat/val.fmcr_qty,2) %}</td>
 							<td>{%= flt(val.w_snf/val.fmcr_qty,2) %}</td>
 						{% } else { %}
-							<td>{%= ("")%}</td>
-							<td>{%= ("")%}</td>
+							<td>{%= ("0")%}</td>
+							<td>{%= ("0")%}</td>
 						{% } %}	
 						<td>{%= ("") %}</td>
 						<td>{%= ("") %}</td>

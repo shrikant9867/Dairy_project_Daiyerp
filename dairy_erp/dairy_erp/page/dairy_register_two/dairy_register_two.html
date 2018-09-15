@@ -35,11 +35,10 @@
 						<th>Rate</th>
 						<th>Amt</th>
 					</tr>
-					
 					{% $.each(vmcr_data, function(i, val){ %}
 						<tr>
 						    <td>{%= val.vmcr_date %}</td>
-						    <td>{%= val.shift[0] %}</td>
+						    <td>{%= i.split("#")[1][2] %}</td>
 						    <td>{%= val.daily_sales %}</td>
 						    <td>{%= val.vmcr_qty %}</td>
 						    <td>{%= val.fat %}</td>

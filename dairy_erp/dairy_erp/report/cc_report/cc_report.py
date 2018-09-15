@@ -26,7 +26,10 @@ def get_columns():
 def get_data(filters=None):
 	vmcr_list = frappe.db.sql("""
 								select
-									vmcr.milkquality,
+									CASE
+									    WHEN vmcr.status = "Accept" THEN "G"
+									    WHEN vmcr.status = "Reject" THEN "B"
+									END,
 									CASE
 									    WHEN vmcr.milkquantity <= 40 THEN 1
 									    WHEN vmcr.milkquantity > 40 THEN CEIL(vmcr.milkquantity/40)

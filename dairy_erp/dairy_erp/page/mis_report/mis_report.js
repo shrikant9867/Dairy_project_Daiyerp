@@ -65,14 +65,14 @@ frappe.mis_report = Class.extend({
                 me.add_formated_milk(milk_data);
             }
             else{
-                frappe.throw(__("Please Add Formated Milk Qty"))
+                frappe.throw(__("Please Add Bad Milk Qty"))
             }
         })
     },
     add_formated_milk:function(milk_data){
         var me = this;
         $(me.page).find('[data-fieldname="formated_milk"]').val(milk_data.formated_milk)
-        $(me.page).find(".total_milk").html(milk_data.good_milk-milk_data.formated_milk);
+        $(me.page).find(".total_milk").html(milk_data.good_milk + milk_data.formated_milk);
         frappe.call({
             method: "dairy_erp.dairy_erp.page.mis_report.mis_report.add_formated_milk",
             args: {
@@ -87,7 +87,7 @@ frappe.mis_report = Class.extend({
                 if(r.message){  
                     console.log(r.message)
                     me.formated_and_total_milk.formated_milk = flt(milk_data.formated_milk)
-                    me.formated_and_total_milk.total_milk = flt(milk_data.good_milk) - flt(milk_data.formated_milk)
+                    me.formated_and_total_milk.total_milk = flt(milk_data.good_milk) + flt(milk_data.formated_milk)
                 }
             }
         });

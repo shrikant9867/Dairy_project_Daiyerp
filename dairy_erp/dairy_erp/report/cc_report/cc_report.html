@@ -8,34 +8,18 @@ th,td {
 <br>
 <h4 class="text-center">{%= filters.branch_office %}</h4>
 <div class="row">
-	<div class="col-xs-3">
-		<b>Date</b>
+	<div class="col-xs-4">
+		<b>Date:</b>
 		&nbsp;
 		{%= filters.start_date %}
 	</div>
-	<div class="col-xs-3">
-		<b>Shift</b>
+	<div class="col-xs-4">
+		<b>Shift:</b>
 		&nbsp;
 		{%= filters.shift %}
 	</div>
-	{% if (filters.operator_type == "VLCC") { %}
-	<div class="col-xs-3">
-		<div class="row">
-			<b>Society Name</b>
-			&nbsp;
-			{%= filters.vlcc %}
-		</div>
-		<div class="row">
-			<b>Society Id</b>
-			&nbsp;
-			{%= filters.vlcc_id %}
-		</div>
-	</div>
-	{% } else { %}
-	<div class="col-xs-3"></div>
-	{% } %}
-	<div class="col-xs-3">
-		<b>Route</b>
+	<div class="col-xs-4">
+		<b>Route:</b>
 		&nbsp;
 		{%= filters.route %}
 	</div>

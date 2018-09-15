@@ -10,8 +10,17 @@ th,td {
 	<div class="col-xs-8 text-center">
         {%= filters.vlcc %},
 		{% if (filters.vlcc_addr) { %}
-            {%= filters.vlcc_addr.split("<br>")[0] %}, {%=filters.vlcc_addr.split("<br>")[1] %}, {%=filters.vlcc_addr.split("<br>")[2] %}, {%=filters.vlcc_addr.split("<br>")[3] %},
-            {%= filters.vlcc_addr.split("<br>")[4] %} 
+            {% for(var i=0, l=filters.vlcc_addr.split("<br>").length; i < l; i++) { %}
+            	{% if (i == l-1) { %}
+					{%= ("") %}
+				{% } else { %}
+					{% if (i == l-2) { %}
+						{%= filters.vlcc_addr.split("<br>")[i] %}
+					{% } else { %}
+						{%= filters.vlcc_addr.split("<br>")[i] %},
+					{% } %}
+				{% } %}
+			{% } %}
         {% } %}
 	</div>
 	<div class="col-xs-2">

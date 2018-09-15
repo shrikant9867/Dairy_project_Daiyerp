@@ -192,10 +192,15 @@ frappe.smarterp_comparison_report = Class.extend({
     },
     make_export:function(){
         var me = this;
-        var args = {
-            cmd: 'dairy_erp.dairy_erp.page.smarterp_comparison_report.smarterp_comparison_report.get_xlsx',
-            data:{'amcu_data':me.amcu_data,'cc_vlcc_details':me.cc_vlcc_details},
+        if(me.amcu_data){
+            var args = {
+                cmd: 'dairy_erp.dairy_erp.page.smarterp_comparison_report.smarterp_comparison_report.get_xlsx',
+                data:{'amcu_data':me.amcu_data,'cc_vlcc_details':me.cc_vlcc_details},
+            }
+            open_url_post(frappe.request.url, args);
         }
-        open_url_post(frappe.request.url, args);
+        else{
+            frappe.throw(__("No Data To Export"))
+        }
     }
 })

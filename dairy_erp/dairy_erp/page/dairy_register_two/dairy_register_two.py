@@ -7,7 +7,6 @@ from dairy_erp.dairy_erp.page.dairy_register_one.dairy_register_one import get_f
 
 @frappe.whitelist()
 def get_vmcr_data(start_date=None,end_date=None):
-	# return start_date,end_date
 	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
 	vlcc_addr = frappe.db.get_value("Village Level Collection Centre",vlcc,"address_display")
 	vlcc_details = {'vlcc_addr':vlcc_addr,"vlcc":vlcc}
@@ -25,6 +24,7 @@ def get_vmcr_data(start_date=None,end_date=None):
 	vmcr_data_list = get_vmcr_data_list(filters)
 	date_and_shift_wise_local_sale = {}
 	vmcr_dict = {}
+
 	for si in local_sale_list:
 		local_sale_dict = {}
 		if date_and_shift_wise_local_sale and str(si['posting_date'])+"#"+si['shift'] in date_and_shift_wise_local_sale:
@@ -51,22 +51,24 @@ def get_vmcr_data(start_date=None,end_date=None):
 			merged.update(members.get(key, {'total_milk_amt': 0,'total_milk_qty': 0}))
 			merged.update(date_and_shift_wise_local_sale.get(key, {'si_amount': 0, 'si_qty': 0}))
 			merged.update(vmcr_dict.get(key,{'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
-			merged.update({'daily_sales':flt(merged.get('total_milk_qty')-merged.get('si_qty'),2)})		
-			merged.update({'excess_qty':flt(merged.get('daily_sales') + merged.get('vmcr_qty'),2)})
-			merged.update({'short_qty':flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2)})
+			merged.update({'daily_sales':flt(merged.get('total_milk_qty')-merged.get('si_qty'),2)})
+			merged.update({
+				'excess_qty':flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) if flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) > 0 else 0
+				})
+			merged.update({
+						'short_qty':flt(merged.get('vmcr_qty') - merged.get('daily_sales'),2) if flt(merged.get('vmcr_qty') - merged.get('daily_sales'),2) > 0 else 0
+						})
 			if merged.get('total_milk_amt') > merged.get('vmcr_amount') + merged.get('si_amount'):
 				merged.update({'profit': flt(merged.get('total_milk_amt') - (merged.get('vmcr_amount')) + merged.get('si_amount'),2)})
 				merged.update({'loss': 0})
 			if merged.get('total_milk_amt') < merged.get('vmcr_amount') + merged.get('si_amount'):
 				merged.update({'loss':flt((merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt'),2)})
 				merged.update({'profit': 0})
-			# if merged.get('vmcr_amount') + merged.get('si_amount') > merged.get('total_milk_amt'):
-			# 	merged.update({'profit': (merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt')})
-			# 	merged.update({'loss': 0})
-			# if merged.get('vmcr_amount') + merged.get('si_amount') < merged.get('total_milk_amt'):
-			# 	merged.update({'loss': merged.get('total_milk_amt') - (merged.get('vmcr_amount') + merged.get('si_amount'))})
-			# 	merged.update({'profit': 0})
-			final_dict[key] = merged
+			formatted_date = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]
+			merged.update({'vmcr_date':formatted_date})
+			_shift = "aa"+key.split("#")[1] if key.split("#")[1] == "MORNING" else "ae"+key.split("#")[1]
+			_key = key.split("#")[0]+"#"+_shift
+			final_dict[_key] = merged
 		else:
 			pass
 	final_dict = collections.OrderedDict(sorted(final_dict.items()))

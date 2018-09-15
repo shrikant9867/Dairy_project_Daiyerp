@@ -26,6 +26,8 @@ frappe.dairy_register_one = Class.extend({
                 "start_date":_start_date,
                 "end_date":_end_date
             },
+            freeze: true,
+            freeze_message: __("Loading... Please Wait"),
             callback: function(r){
                 if(r.message){
                 	console.log("inside callback",r.message)
@@ -44,6 +46,15 @@ frappe.dairy_register_one = Class.extend({
     },
     update_diff:function(){
         var me = this;
+        /*console.log($(me.page).find('[data-fieldname="g_fat"]'),"g_fatttttttt")
+        var regExp = /[a-z]/i;
+        $(me.page).find('[data-fieldname="g_fat"]').change(function(){
+            console.log("insdie my conde",$(me.page).find('[data-fieldname="g_fat"]').val())
+            value = $(me.page).find('[data-fieldname="g_fat"]').val()
+            if (regExp.test(value)) {
+                $(me.page).find('[data-fieldname="g_fat"]').val("")
+            }
+        })*/
         $(me.page).find('#update_diff').click(function(){
             var g_fat = $(me.page).find('.g_fat')
             var g_snf = $(me.page).find('.g_snf')
@@ -51,7 +62,7 @@ frappe.dairy_register_one = Class.extend({
                 var f_id = $(d).attr('row_id').split('@')[0]
                 var g_fat_val = $(d).find('[data-fieldname="g_fat"]').val()
                 if(in_list(Object.keys(me.table_data),f_id) && g_fat_val){
-                    var diff_fat = g_fat_val - me.table_data[f_id].vmcr_fat
+                    var diff_fat = flt(g_fat_val - me.table_data[f_id].vmcr_fat,2)
                     me.table_data[f_id].diff_fat = isNaN(diff_fat) ? 0 : diff_fat
                     me.table_data[f_id].g_fat = g_fat_val
                 }
@@ -60,7 +71,7 @@ frappe.dairy_register_one = Class.extend({
                 var s_id = $(d).attr('row_id').split('@')[0]
                 var g_snf_val = $(d).find('[data-fieldname="g_snf"]').val()
                 if(in_list(Object.keys(me.table_data),s_id) && g_snf_val){
-                    diff_snf = g_snf_val - me.table_data[s_id].vmcr_snf
+                    diff_snf = flt(g_snf_val - me.table_data[s_id].vmcr_snf,2)
                     me.table_data[s_id].diff_snf = isNaN(diff_snf) ? 0 : diff_snf
                     me.table_data[s_id].g_snf = g_snf_val
                 }

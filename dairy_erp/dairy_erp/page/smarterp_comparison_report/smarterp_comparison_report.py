@@ -142,7 +142,7 @@ def get_vmcr_data(filters):
 									ifnull(vmcr.fat,0) as vmcr_fat,
 									ifnull(vmcr.snf,0) as vmcr_snf,
 									ifnull(vmcr.rate,0) as vmcr_rate,
-									ifnull(vmcr.amount,0) as vmcr_amount,
+									ifnull(round(vmcr.amount,2),0) as vmcr_amount,
 									date(vmcr.collectiontime) as vmcr_date,
 									vmcr.shift
 								from

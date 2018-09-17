@@ -241,17 +241,17 @@ th,td {
 					<tr>
 						<td>1</td>
 						<td>{%= ("Average Daily Purchase") %}</td>
-						<td>{%= mis_data.fmcr_data[1][0].daliy_milk_purchase_society  + (" ltrs.") %}</td>
+						<td>{%= flt(mis_data.fmcr_data[1][0].daliy_milk_purchase_society/month_days,2)  + (" ltrs.") %}</td>
 					</tr>
 					<tr>
 						<td>2</td>
 						<td>{%= ("Members") %}</td>
-						<td>{%= member_data.member_qty  + (" ltrs.") %}</td>
+						<td>{%= flt(member_data.member_qty/month_days,2) + (" ltrs.") %}</td>
 					</tr>
 					<tr>
 						<td>3</td>
 						<td>{%= ("Non Members") %}</td>
-						<td>{%= member_data.non_member_qty  + (" ltrs.") %}
+						<td>{%= flt(member_data.non_member_qty/month_days,2)  + (" ltrs.") %}
 					</tr>
 				</tbody>
 			</table>

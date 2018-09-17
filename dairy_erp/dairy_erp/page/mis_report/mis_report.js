@@ -37,6 +37,7 @@ frappe.mis_report = Class.extend({
                     me.cattle_feed = r.message.cattle_feed
                     me.financial_data_dict = r.message.financial_data_dict
                     me.vlcc_addr = r.message.vlcc_addr
+                    me.month_days = r.message.month_days
                     $(me.page).find(".render-table").empty();
                     me.print = frappe.render_template("mis_report",{
                             "mis_data":me.mis_data,
@@ -44,7 +45,8 @@ frappe.mis_report = Class.extend({
                             "milk_quality":me.milk_quality,
                             "cattle_feed":me.cattle_feed,
                             "financial_data_dict":me.financial_data_dict,
-                            "month":month_
+                            "month":month_,
+                            "month_days":me.month_days
                             })
                     $(me.page).find(".render-table").append(me.print)
                     me.update_total_milk()
@@ -175,7 +177,8 @@ frappe.mis_report = Class.extend({
                                                         "vlcc_addr":me.vlcc_addr,
                                                         'vlcc':frappe.boot.user.first_name,
                                                         'cattle_feed':me.cattle_feed,
-                                                        'financial_data_dict':me.financial_data_dict
+                                                        'financial_data_dict':me.financial_data_dict,
+                                                        "month_days":me.month_days
                                                     }),
             title:__("MIS Report"),
             base_url: base_url,

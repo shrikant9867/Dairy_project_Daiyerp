@@ -1271,5 +1271,5 @@ def item_permissions(user):
 @frappe.whitelist()
 def get_filtered_customer(doctype, txt, searchfield, start, page_len, filters):
 	 return frappe.db.sql("""select name,customer_group from `tabCustomer` 
-	 		where customer_group !='Farmer'""",as_list=1)
+	 		where customer_group not in ('Farmer', 'Vlcc Local Customer', 'Vlcc Local Institution')""",as_list=1)
 

@@ -77,15 +77,18 @@ def get_fmcr_data(start_date=None,end_date=None):
 		if (members.get(key) or date_and_shift_wise_local_sale.get(key)
 			or date_and_shift_wise_sample_local_sale.get(key) or vmcr_dict.get(key)):
 			merged = {}
-			formatted_date = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]
+			# formatted_date = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]
 			merged.update(members.get(key, {'member_qty': '-','total_milk_amt': '-', 'non_member_count': '-', 'date': key.split('#')[0], 'member_count': '-', 'member_amt': '-', 'shift': key.split('#')[1], 'non_member_amt': '-', 'non_member_qty': '-', 'total_milk_qty': '-'}))
 			merged.update(date_and_shift_wise_local_sale.get(key, {'si_amount': "-", 'si_qty': "-"}))
 			merged.update(date_and_shift_wise_sample_local_sale.get(key, {'stock_amount': "-", 'stock_qty': "-"}))
 			merged.update({'dairy_sales':calculate_dairy_sales(merged.get('total_milk_qty'),merged.get('si_qty'))})
 			merged.update(vmcr_dict.get(key,{'g_snf':'', 'vmcr_qty':0,'rate': 0, 'g_fat': '', 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0],"diff_fat":'',"diff_snf":''}))
-			key = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]
-			final_dict[key] = merged
-		
+			formatted_date = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]
+			merged.update({'date':formatted_date})
+			_shift = "aa"+key.split("#")[1] if key.split("#")[1] == "MORNING" else "ae"+key.split("#")[1]
+			_key = key.split("#")[0]+"#"+_shift
+			final_dict[_key] = merged
+
 	final_dict = collections.OrderedDict(sorted(final_dict.items()))
 	return {"final_dict":final_dict,"vlcc_details":vlcc_details}
 
@@ -121,37 +124,38 @@ def fetch_farmer_data(fmcr_data,filters):
 				'date':row.split('#')[0],
 				'shift':row.split('#')[1]
 				})
-		final_[row] = get_member_non_menber(farmer_list,filters)
+		final_[row] = get_member_non_menber(filters)
 	return final_
 
-def get_member_non_menber(farmer_list,filters):
+def get_member_non_menber(filters):
 	# print "inside get_member_non_menber\n\n\n\n"
+	farmer_list = frappe.db.get_all("Farmer", { "vlcc_name": filters.get('vlcc') }, "name")
 	non_member_count,member_count,non_member_qty,member_qty,member_amt,non_member_amt = 0 , 0 , 0, 0,0,0
 	member_dict = {}
 	if farmer_list:
-		for farmer in set(farmer_list):
-			farmer_id = frappe.db.get_value("Farmer",farmer,["registration_date","is_member"],as_dict=1)
+		for farmer in farmer_list:
+			farmer_id = frappe.db.get_value("Farmer",farmer.get('name'),["registration_date","is_member"],as_dict=1)
 			months_to_member = frappe.db.get_value("VLCC Settings",{"vlcc":filters.get('vlcc')},"months_to_member")
 			if farmer_id and months_to_member:
 				date_ = add_months(getdate(farmer_id.get('registration_date')),months_to_member)
-				if getdate() < date_  and farmer_id.get('is_member') == 0:
+				if getdate() < date_  and not farmer_id.get('is_member'):
 					non_member_count += 1
-					non_member_data = frappe.db.sql("""select ifnull(sum(milkquantity),0) as qty ,
-										ifnull(sum(amount),0) as amt 
+					non_member_data = frappe.db.sql("""select ifnull(milkquantity,0) as qty ,
+										ifnull(amount,0) as amt 
 								from 
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1} 
-					""".format(farmer,get_conditions(filters)),as_dict=1,debug=0)
+					""".format(farmer.get('name'),get_conditions(filters)),as_dict=1,debug=1)
 					non_member_qty += flt(non_member_data[0].get('qty'))
 					non_member_amt += flt(non_member_data[0].get('amt'))
 			if farmer_id and farmer_id.get('is_member'):
 				member_count += 1
-				member_data = frappe.db.sql("""select ifnull(sum(milkquantity),0) as qty ,
-										ifnull(sum(amount),0) as amt 
+				member_data = frappe.db.sql("""select ifnull(milkquantity,0) as qty ,
+										ifnull(amount,0) as amt 
 								from
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1}
-					""".format(farmer,get_conditions(filters)),as_dict=1,debug=0)
+					""".format(farmer.get('name'),get_conditions(filters)),as_dict=1,debug=1)
 				member_qty += flt(member_data[0].get('qty'))
 				member_amt += flt(member_data[0].get('amt'))
 

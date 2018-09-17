@@ -27,6 +27,8 @@ frappe.dairy_register_two = Class.extend({
                 "start_date":_start_date,
                 "end_date":_end_date
             },
+            freeze: true,
+            freeze_message: __("Loading... Please Wait"),
             callback: function(r){
                 if(r.message){
                 	console.log("inside callback",r.message)

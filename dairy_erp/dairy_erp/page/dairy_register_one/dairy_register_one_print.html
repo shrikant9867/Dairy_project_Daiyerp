@@ -13,11 +13,22 @@ th,td {
 		<div class="col-xs-2">
 		</div>
 		<div class="col-xs-8 text-center">
-	        {%= vlcc %},
-			{% if (vlcc_addr) { %}
-	            {%= vlcc_addr.split("<br>")[0] %}, {%=vlcc_addr.split("<br>")[1] %}, {%=vlcc_addr.split("<br>")[2] %}, {%=vlcc_addr.split("<br>")[3] %},
-	            {%= vlcc_addr.split("<br>")[4] %} 
-	        {% } %}
+	        <h3>
+		        {%= vlcc %},
+				{% if (vlcc_addr) { %}
+		            {% for(var i=0, l=vlcc_addr.split("<br>").length; i < l; i++) { %}
+		            	{% if (i == l-1) { %}
+							{%= ("") %}
+						{% } else { %}
+							{% if (i == l-2) { %}
+								{%= vlcc_addr.split("<br>")[i] %}
+							{% } else { %}
+								{%= vlcc_addr.split("<br>")[i] %},
+							{% } %}
+						{% } %}
+					{% } %}
+		        {% } %}
+        	</h3>
 		</div>
 		<div class="col-xs-2">
 		</div>
@@ -32,10 +43,10 @@ th,td {
 	<div class="row">
 		<div class="col-xs-12" style="font-size: 16px;">
 			<center>
-			<b>{%= __("Start Date") %}</b>
-		{%= start_date %}
-			<b>{%= __("End Date") %}</b>
-		{%= end_date %}
+			<b>{%= __("Start Date:") %}</b>
+			{%= start_date %}
+			<b>{%= __("End Date:") %}</b>
+			{%= end_date %}
 			</center>
 		</div>
 	</div>
@@ -86,8 +97,8 @@ th,td {
 					
 					{% $.each(fmcr_data, function(i, val){ %}
 						<tr>
-						    <td>{%= i %}</td>
-						    <td>{%= val.shift[0] %}</td>
+						    <td>{%= val.date %}</td>
+						    <td>{%= i.split("#")[1][2] %}</td>
 						    <td>{%= val.member_count %}</td>
 						    <td>{%= val.member_qty %}</td>
 						    <td>{%= val.member_amt %}</td>
@@ -98,8 +109,8 @@ th,td {
 						    <td>{%= val.total_milk_amt %}</td>
 						    <td>{%= val.g_fat %}</td>
 						    <td>{%= val.g_snf %}</td>
-						    <td>{%= val.diff_fat %}</td>
-						    <td>{%= val.diff_snf %}</td>
+						    <td>{%= flt(val.diff_fat,2) %}</td>
+						    <td>{%= flt(val.diff_snf,2) %}</td>
 						    <td>{%= val.si_qty %}</td>
 						    <td>{%= val.si_amount %}</td>
 						    <td>{%= val.stock_qty %}</td>

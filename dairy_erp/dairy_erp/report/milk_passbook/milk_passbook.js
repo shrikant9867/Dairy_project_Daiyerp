@@ -104,6 +104,7 @@ frappe.query_reports["Milk Passbook"] = {
 				if(!r.exc && r.message && !in_list(["Administrator", "Guest"], frappe.session.user)){
 					if(has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
 						// $('body').find("[data-fieldname=vlcc]").val(r.message.company)
+						//r.message.address_display = r.message.address_display.split("<br>")
 						frappe.query_report_filters_by_name.vlcc_addr.set_input(r.message.address_display);
 					}
 					query_report.trigger_refresh();

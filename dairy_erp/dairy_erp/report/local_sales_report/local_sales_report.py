@@ -46,21 +46,21 @@ def get_data(filters):
 								si.customer = cus.name
 								and si.name = si_item.parent
 								and si.docstatus = 1 and si.company = '{0}'
-								{1}""".format(vlcc_comp,get_conditions(filters)),as_list=1,debug=1)
+								{1} order by date(si.posting_date) """.format(vlcc_comp,get_conditions(filters)),as_list=1,debug=1)
 	
 	if data:
-		if filters.get('customer_type') == "Farmer":
-			g_total = 0
-			qty_total = 0
-			for row in data:
-				qty_total += row[5]
-				g_total += row[7]
-			data.append(["","","Grand Total","","",qty_total,"",g_total])		
-		else:
-			g_total = 0
-			for row in data:
-				g_total += row[7]
-			data.append(["","","Grand Total","","","","",g_total])
+		# if filters.get('customer_type') == "Farmer":
+		g_total = 0
+		qty_total = 0
+		for row in data:
+			qty_total += row[5]
+			g_total += row[7]
+		data.append(["","","Grand Total","","",qty_total,"",g_total])		
+		# else:
+		# 	g_total = 0
+		# 	for row in data:
+		# 		g_total += row[7]
+		# 	data.append(["","","Grand Total","","","","",g_total])
 	return data
 
 def get_conditions(filters):

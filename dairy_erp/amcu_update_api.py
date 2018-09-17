@@ -59,13 +59,12 @@ def update_fmcr_amt(fmcr_doc,data,row,response_dict):
 	pr = frappe.db.get_value("Purchase Receipt",{"farmer_milk_collection_record":fmcr_doc.name},"name")
 
 	if pi:
-		pi_doc = frappe.get_doc("Purchase Invoice",pi)
-		pi_doc.cancel()
-		frappe.delete_doc("Purchase Invoice", pi_doc.name)
+		frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(pi))
+		frappe.db.sql("""delete from `tabPurchase Invoice` where name = %s""",(pi))
 	if pr:
-		pr_doc = frappe.get_doc("Purchase Receipt",pr)
-		pr_doc.cancel()
-		frappe.delete_doc("Purchase Receipt", pr_doc.name)
+		frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(pr))
+		frappe.db.sql("""delete from `tabStock Ledger Entry` where voucher_no = %s""",(pr))
+		frappe.db.sql("""delete from `tabPurchase Receipt` where name = %s""",(pr))
 
 	fmcr_doc.cancel()
 
@@ -88,8 +87,8 @@ def make_fmcr(data,row,response_dict,is_fmcr_created=0):
 								farmer_supplier = frappe.db.get_value("Farmer",row.get('farmerid'),'full_name')
 								row.update(
 									{
-										"qualitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
-										"quantitytime": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000))
+										"qualitytime": row.get('qualitytime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('qualitytime'))/1000)),
+										"quantitytime": row.get('quantitytime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000))
 									}
 								)
 								fmrc_doc = frappe.new_doc("Farmer Milk Collection Record")
@@ -103,8 +102,8 @@ def make_fmcr(data,row,response_dict,is_fmcr_created=0):
 								fmrc_doc.societyid = data.get('societyid')
 								fmrc_doc.collectiondate = data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 								fmrc_doc.shift = data.get('shift')
-								fmrc_doc.starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
-								fmrc_doc.endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
+								fmrc_doc.starttime = data.get('starttime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
+								fmrc_doc.endtime = data.get('endtime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
 								fmrc_doc.endshift = 1 if data.get('endshift') == True else 0
 			 					fmrc_doc.update(row)
 								fmrc_doc.flags.ignore_permissions = True

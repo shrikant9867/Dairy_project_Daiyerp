@@ -13,7 +13,7 @@ def execute(filters=None):
 def get_columns():
 
 	columns = [
-		_("Date") + ":Date:90", 
+		_("Date") + ":Data:90", 
 		_("Sales Invoice") + ":Link/Sales Invoice:150",
 		_("Item Code") + ":Data:150",
 		_("Quantity") + ":Float:150",
@@ -26,7 +26,7 @@ def get_columns():
 
 def get_data(filters):
 	data = frappe.db.sql("""select
-									si.posting_date, 
+									DATE_FORMAT(si.posting_date, "%d-%m-%y"), 
 									si.name,
 									si_item.item_name,
 									si_item.qty,
@@ -41,7 +41,7 @@ def get_data(filters):
 								and si.customer_or_farmer = "Farmer"
 								and si_item.item_code not in ('COW Milk','BUFFALO Milk')
 								and si.docstatus = 1 and si.company = '{0}'
-								{1}""".format(filters.get('vlcc'),get_conditions(filters)),filters,as_list=1,debug=0)
+								{1} order by si.posting_date """.format(filters.get('vlcc'),get_conditions(filters)),as_list=1,debug=0)
 	if data:
 		g_total = 0
 		for row in data:
@@ -52,7 +52,9 @@ def get_data(filters):
 def get_conditions(filters):
 	conditions = " and 1=1"
 	if filters.get('farmer') and filters.get('start_date') and filters.get('end_date'):	
-		conditions += " and si.posting_date between %(start_date)s and %(end_date)s and si.farmer = %(farmer)s"
+		conditions += " and si.posting_date between '{0}' and '{1}' and si.farmer = '{2}'".format(filters.get('start_date'),filters.get('end_date'),filters.get('farmer'))
 	elif filters.get('start_date') and filters.get('end_date'):
-		conditions += " and si.posting_date between %(start_date)s and %(end_date)s"
+		conditions += " and si.posting_date between '{0}' and '{1}' ".format(filters.get('start_date'),filters.get('end_date'))
 	return conditions
+
+

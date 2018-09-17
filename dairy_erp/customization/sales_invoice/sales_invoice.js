@@ -1,6 +1,6 @@
 frappe.ui.form.on("Sales Invoice", {
 	refresh:function(frm){
-		if(frappe.session.user != "Administrator" && has_common(frappe.user_roles, ["Camp Manager","Camp Operator"])) {	
+		if(frappe.session.user != "Administrator" && has_common(frappe.user_roles, ["Camp Manager","Camp Operator","Vlcc Manager","Vlcc Operator"])) {	
 			frm.set_df_property("is_negative", "hidden", 1);
 		}
 	},

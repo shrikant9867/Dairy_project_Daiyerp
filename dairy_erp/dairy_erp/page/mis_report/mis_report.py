@@ -27,18 +27,19 @@ def get_mis_data(month=None,fiscal_year=None):
 	other_income = {}
 	financial_data_dict = {}
 	vlcc_addr = ""
+	member_non_member_data = {}
 
 	if fiscal_year:
 
 		start_date = get_month_details(fiscal_year,month_mapper[month]).month_start_date
 		end_date = get_month_details(fiscal_year,month_mapper[month]).month_end_date
-		if month_mapper[month]-1 == 0:
+		if month_mapper[month] - 1 == 0:
 			previous_month_end_date = get_month_details(fiscal_year,12).month_end_date
 		if month_mapper[month] == 4:
 			previous_month_end_date = get_month_details(fiscal_year,4).month_end_date
-		else:
+		if month_mapper[month] - 1 != 0:
 			previous_month_end_date = get_month_details(fiscal_year,month_mapper[month]-1).month_end_date
-		
+
 		filters = {
 			'month_start_date':start_date,
 			'month_end_date':end_date,
@@ -75,8 +76,8 @@ def get_mis_data(month=None,fiscal_year=None):
 		other_income = {'month':get_other_income(filters,'month'),
 						'upto_month':get_other_income(filters,'upto_month')}
 
-		fmcr_list = get_fmcr_list(filters)
-		member_data = fetch_farmer_data(fmcr_list,filters)
+		# fmcr_list = get_fmcr_list(filters)
+		# member_data = fetch_farmer_data(fmcr_list,filters)
 		milk_quality_data = {'good':get_vmcr_milk_quality_data(filters,"Accept").get('milk_quantity'),
 							'bad':get_vmcr_milk_quality_data(filters,"Reject").get('milk_quantity')}
 		
@@ -92,28 +93,29 @@ def get_mis_data(month=None,fiscal_year=None):
 				})
 		else:
 			formated_and_total_milk.update({
-				'total_milk':milk_quality_data.get('good')-milk_quality_data.get('bad'),
+				'total_milk':milk_quality_data.get('good')+milk_quality_data.get('bad'),
 				'formated_milk':0
-				})					
-							
-		for row in member_data:
-			if member_non_member.get('non_member_qty'):
-				member_non_member['non_member_qty'] += member_data[row]['non_member_qty']
+				})			
 
-			if member_non_member.get('member_qty'):
-				member_non_member['member_qty'] += member_data[row]['member_qty']
+		member_non_member_data = get_member_non_member_data(filters)				
+		# for row in member_data:
+		# 	if member_non_member.get('non_member_qty'):
+		# 		member_non_member['non_member_qty'] += member_data[row]['non_member_qty']
 
-			if member_non_member.get('non_member_count'):
-				member_non_member['non_member_count'] += member_data[row]['non_member_count']
+		# 	if member_non_member.get('member_qty'):
+		# 		member_non_member['member_qty'] += member_data[row]['member_qty']
 
-			if member_non_member.get('member_count'):
-				member_non_member['member_count'] += member_data[row]['member_count']
+		# 	if member_non_member.get('non_member_count'):
+		# 		member_non_member['non_member_count'] += member_data[row]['non_member_count']
 
-			else:
-				member_non_member['non_member_qty'] = member_data[row]['non_member_qty']
-				member_non_member['member_qty'] = member_data[row]['member_qty']
-				member_non_member['non_member_count'] = member_data[row]['non_member_count']
-				member_non_member['member_count'] = member_data[row]['member_count']
+		# 	if member_non_member.get('member_count'):
+		# 		member_non_member['member_count'] += member_data[row]['member_count']
+
+		# 	else:
+		# 		member_non_member['non_member_qty'] = member_data[row]['non_member_qty']
+		# 		member_non_member['member_qty'] = member_data[row]['member_qty']
+		# 		member_non_member['non_member_count'] = member_data[row]['non_member_count']
+		# 		member_non_member['member_count'] = member_data[row]['member_count']
 
 		vmcr = milk_purchase_dict.get('vmcr_data')
 		fmcr = milk_purchase_dict.get('fmcr_data')
@@ -165,7 +167,7 @@ def get_mis_data(month=None,fiscal_year=None):
 								"profit_in":profit_in}
 
 	return {"milk_purchase_dict":milk_purchase_dict,
-	"member_data":member_non_member,
+	"member_data":member_non_member_data,
 	'milk_quality':milk_quality_data,
 	'formated_and_total_milk':formated_and_total_milk,
 	'cattle_feed':cattle_feed,
@@ -175,6 +177,53 @@ def get_mis_data(month=None,fiscal_year=None):
 	'financial_data_dict':financial_data_dict,
 	'vlcc_addr':vlcc_addr
 	}
+
+def get_member_non_member_data(filters):
+	farmer_list = frappe.db.get_all("Farmer", { "vlcc_name": filters.get('vlcc') }, "name")
+	member_dict = {}
+
+	non_member_count,member_count,non_member_qty,member_qty = 0 , 0 , 0, 0
+	for farmer in farmer_list:
+		farmer_id = frappe.db.get_value("Farmer",farmer.get('name'),["registration_date","is_member"],as_dict=1)
+		months_to_member = frappe.db.get_value("VLCC Settings",{"vlcc":filters.get('vlcc')},"months_to_member")
+		if farmer_id and months_to_member:
+			date_ = add_months(getdate(farmer_id.get('registration_date')),months_to_member)
+			if getdate() < date_  and farmer_id.get('is_member') == 0:
+				non_member_count += 1
+				non_member_data = frappe.db.sql("""select ifnull(sum(milkquantity),0) as qty
+							from 
+								`tabFarmer Milk Collection Record`
+							where docstatus = 1 and farmerid = '{0}' {1} 
+				""".format(farmer.get('name'),get_conditions(filters)),as_dict=1,debug=0)
+				non_member_qty += flt(non_member_data[0].get('qty'))
+		
+		if farmer_id and farmer_id.get('is_member'):
+			member_count += 1
+			member_data = frappe.db.sql("""select ifnull(sum(milkquantity),0) as qty
+							from 
+								`tabFarmer Milk Collection Record`
+							where docstatus = 1 and farmerid = '{0}' {1}
+				""".format(farmer.get('name'),get_conditions(filters)),as_dict=1,debug=0)
+			member_qty += flt(member_data[0].get('qty'))
+			
+	member_dict.update({'member_count':member_count if member_qty > 0 else 0,
+						'member_qty':member_qty,
+						'non_member_count':non_member_count if non_member_qty > 0 else 0,
+						'non_member_qty':non_member_qty
+						})
+	return member_dict								
+
+def get_conditions(filters=None):
+	conditions = " and 1=1"
+	vlcc = frappe.db.get_value("User",frappe.session.user,"company")
+
+	if frappe.session.user != 'Administrator':
+		conditions += " and associated_vlcc = '{0}'".format(vlcc)
+	if filters.get('month_start_date') and filters.get('month_end_date'):
+		conditions += " and date(collectiontime) between '{0}' and '{1}' ".format(filters.get('month_start_date'),filters.get('month_end_date'))
+	return conditions
+
+
 
 def get_fmcr_data_list(filters,date_range):
 	filters.update({
@@ -251,7 +300,6 @@ def get_vmcr_data_list(filters,date_range):
 	return vmcr_list
 
 def get_fmcr_conditions(filters):
-	print "filters\n\n\n",filters.get('previous_month_end_date')
 	conditions = " and 1=1"
 	if frappe.session.user != 'Administrator':
 		conditions += " and fmcr.associated_vlcc = '{0}'".format(filters.get('vlcc'))
@@ -309,7 +357,7 @@ def add_formated_milk(filters=None):
 			mis_report_log.bad_milk_old = mis_report_log.bad_milk_new
 			mis_report_log.bad_milk_new = milk_data.get('formated_milk')
 			mis_report_log.good_milk = milk_data.get('good_milk')
-			mis_report_log.total_milk = milk_data.get('good_milk') - milk_data.get('formated_milk')
+			mis_report_log.total_milk = milk_data.get('good_milk') + milk_data.get('formated_milk')
 			mis_report_log.save()
 	else:
 		mis_report_log = frappe.new_doc("MIS Report Log")
@@ -319,7 +367,7 @@ def add_formated_milk(filters=None):
 		mis_report_log.bad_milk_new = milk_data.get('formated_milk')
 		mis_report_log.bad_milk_old = milk_data.get('formated_milk')
 		mis_report_log.good_milk = milk_data.get('good_milk')
-		mis_report_log.total_milk = milk_data.get('good_milk') - milk_data.get('formated_milk')
+		mis_report_log.total_milk = milk_data.get('good_milk') + milk_data.get('formated_milk')
 		mis_report_log.save()
 	return mis_report_log.name
 
@@ -328,26 +376,27 @@ def get_cattle_feed(filters,cond):
 	conditions_si = "1=1 and "
 	if cond == "month":
 		conditions_pr = "pr.posting_date between '{0}' and '{1}' ".format(filters.get('month_start_date'),filters.get('month_end_date')) 
-		conditions_si = "si.posting_date between '{0}' and '{1}'".format(filters.get('month_start_date'),filters.get('month_end_date'))
+		conditions_si = "si.posting_date between '{0}' and '{1}' ".format(filters.get('month_start_date'),filters.get('month_end_date'))
 	if cond == "upto_month":
 		conditions_pr += "pr.posting_date between '{0}' and '{1}' ".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
 		conditions_si += "si.posting_date between '{0}' and '{1}'".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
+
+	item_list = "(" + ",".join([ "'{0}'".format(item.get('name')) for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name") ]) + ")"
 
 	pr_data_list = frappe.db.sql("""
 			select 
 				COALESCE(sum(pr_item.qty),0) as procured
 			from
 				`tabPurchase Receipt` pr,
-				`tabPurchase Receipt Item` pr_item,
-				`tabItem Group` item_g
+				`tabPurchase Receipt Item` pr_item
 			where
 				pr_item.parent = pr.name and
 				{0}
 				and pr.company = '{1}'
-				and item_g.name = "Cattle feed"
+				and pr_item.item_code in {2}
 				and pr.docstatus = 1
 				and	pr.supplier_type in ("Dairy Type","VLCC Local")
-		""".format(conditions_pr,filters.get('vlcc')),as_dict=1,debug=0)
+		""".format(conditions_pr,filters.get('vlcc'),item_list),as_dict=1,debug=0)
 	
 	cattle_si_data = frappe.db.sql("""
 							select
@@ -358,9 +407,10 @@ def get_cattle_feed(filters,cond):
 							where
 								si.customer_or_farmer <> 'Vlcc Local Institution'
 								and si_item.parent = si.name
-								and si.docstatus = 1 and si.company = '{0}' and
-								{1} 
-								""".format(filters.get('vlcc'),conditions_si),debug=0,as_dict=1)
+								and si_item.item_code in {0}
+								and si.docstatus = 1 and si.company = '{1}' and
+								{2} 
+								""".format(item_list,filters.get('vlcc'),conditions_si),debug=0,as_dict=1)
 
 	return {'procured':pr_data_list[0]['procured'],'sold_to_farmers':cattle_si_data[0]['sold_to_farmers']}
 

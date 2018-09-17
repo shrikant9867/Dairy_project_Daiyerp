@@ -50,7 +50,7 @@ def create_user(doc, operator_manager,role=None):
 def address_permission(user):
 	roles = frappe.get_roles()
 	user_comp = frappe.db.get_value("User", frappe.session.user, \
-		['company','operator_type','vet','branch_office'],as_dict=1)
+		['company','operator_type','vet','branch_office','email'],as_dict=1)
 	head_office = frappe.db.get_value("Address", {"address_type": "Head Office"}, "name")
 	
 	if ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) and \
@@ -66,7 +66,9 @@ def address_permission(user):
 	
 	if ('Camp Manager' in roles or 'Camp Operator' in roles) and \
 		user != "Administrator":
-			return """(`tabAddress`.name = '{0}')""".format(user_comp.get('branch_office'))
+			cc_list = [cc.get('name') for cc in frappe.get_all("Address",{"associated_camp_office":user_comp.get('branch_office')},"name")]
+			cc_list.append(user_comp.get('branch_office'))
+			return """(`tabAddress`.name in {0})""".format("(" + ",".join(["'{0}'".format(cc) for cc in cc_list ]) + ")")
 			# return """(`tabAddress`.associated_camp_office = '{0}' 
 			# or `tabAddress`.name = '{0}')""".format(user_comp.get('branch_office'))
 	
@@ -74,8 +76,10 @@ def address_permission(user):
 		user != "Administrator":
 		camp = frappe.db.get_value("Address", user_comp.get('branch_office'),\
 			'associated_camp_office')
-		return """(`tabAddress`.associated_camp_office = '{0}'
-			or `tabAddress`.name = '{0}')""".format(camp)
+		cc = frappe.db.get_value("Address",{'manager_email':user_comp.email},'name')
+		return """(`tabAddress`.name in {0})""".format("(" + ",".join(["'{0}'".format(cc) for cc in [camp,cc] ]) + ")")
+		# return """(`tabAddress`.associated_camp_office = '{0}'
+		# 	or `tabAddress`.name = '{0}')""".format(camp)
 
 
 

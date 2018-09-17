@@ -18,7 +18,9 @@ def get_columns():
 		_("FAT") + ":Float:100",
 		_("SNF") + ":Float:100",
 		_("Rate") + ":Float:100",
-		_("Milk Value") + ":Float:150"
+		_("Milk Value") + ":Float:150",
+		_("Vlcc Name") + ":Data:0",
+		_("Vlcc Id") + ":Data:0",
 	]
 
 	return columns
@@ -38,61 +40,44 @@ def get_data(filters=None):
 									vmcr.fat,
 									vmcr.snf,
 									vmcr.rate,
-									vmcr.amount
+									vmcr.amount,
+									vmcr.associated_vlcc,
+									vmcr.farmerid
 								from
 									`tabVlcc Milk Collection Record` vmcr
 								where
 									vmcr.docstatus = 1 and
 									vmcr.shift = '{0}' and
-									{1} and date(vmcr.collectiontime) = '{2}' """.format(filters.get('shift'),get_conditions(filters),filters.get('start_date')),as_list=1,debug=1)	
-	return vmcr_list
+									{1} and date(vmcr.collectiontime) = '{2}' """.format(filters.get('shift'),get_conditions(filters),filters.get('start_date')),as_list=1,debug=0)	
+	
+	if filters.get('operator_type') == "Chilling Centre" and (filters.get('vlcc') or filters.get('all_vlcc')):
+		return vmcr_list
+	elif filters.get('branch_office') and not filters.get('operator_type') == "Chilling Centre":
+		return vmcr_list
+	else:
+		return []	 	
 
 def get_conditions(filters):
 	cond = "1=1"
-	if filters.get('operator_type') == "Chilling Centre":
-		vlcc = frappe.db.get_values("Village Level Collection Centre",{"chilling_centre":filters.get('branch_office')},"name",as_dict=1)
-		company = ['"%s"'%comp.get('name') for comp in vlcc]
-		cond += " and vmcr.associated_vlcc in  ({company})""".format(company=','.join(company))
-	elif filters.get('operator_type') == "VLCC":
-		cond += " and vmcr.associated_vlcc = '{0}' """.format(filters.get('vlcc'))
+	if filters.get('branch_office'):
+		if filters.get('vlcc'):
+			cond += " and vmcr.associated_vlcc = '{0}' ".format(filters.get('vlcc'))
+		if filters.get('all_vlcc'):
+			vlcc = frappe.db.get_values("Village Level Collection Centre",{"chilling_centre":filters.get('branch_office')},"name",as_dict=1)
+			company = ['"%s"'%comp.get('name') for comp in vlcc]
+			cond += " and vmcr.associated_vlcc in  ({company})""".format(company=','.join(company))
+		else:
+			cc_id = frappe.db.get_value("Address",{"name":filters.get('branch_office')},"centre_id")
+			cond += " and vmcr.societyid = '{0}' ".format(cc_id)
 	return cond
 
 @frappe.whitelist()
 def get_other_data(role):
 	data = {}
 	user_doc = frappe.get_doc("User",frappe.session.user)
-	if "Vlcc Operator" in role or "Vlcc Manager" in role:
-		data['vlcc'] = user_doc.company
-		data['operator_type'] = user_doc.operator_type
-		data['vlcc_id'] = frappe.db.get_value("Village Level Collection Centre",{'name':user_doc.company},"amcu_id")
-		data['branch_office'] = frappe.db.get_value("Village Level Collection Centre",{'name':user_doc.company},"chilling_centre")
-		data['address'] = get_address(data.get('branch_office'))
+	data.update({"effective_date":frappe.get_doc("Dairy Setting").rate_effective_from})
 	if "Chilling Center Manager" in role or "Chilling Center Operator" in role:
 		data['vlcc'] = ""
 		data['operator_type'] = user_doc.operator_type
 		data['branch_office'] = user_doc.branch_office
-		data['address'] = get_address(user_doc.branch_office)
 	return data
-		
-def get_address(name):
-	final_addr = ""
-	addr = frappe.get_doc("Address",name)
-	if addr.get('address_line1'):
-		final_addr += addr.get('address_line1') + "<br>"
-	if addr.get('address_line2'):
-	    final_addr += addr.get('address_line2') + "<br>"
-	if addr.get('city'):
-	    final_addr += addr.get('city') + "<br>" 
-	if addr.get('state'):
-	    final_addr += addr.get('state') + "<br>" 
-	if addr.get('pincode'):
-	    final_addr += addr.get('pincode') + "<br>" 
-	if addr.get('country'):
-	    final_addr += addr.get('country') + "<br>" 
-	if addr.get('phone'):
-	    final_addr += addr.get('phone') + "<br>"
-	if addr.get('fax'):
-	    final_addr += addr.get('fax') + "<br>"
-	if addr.get('email_id'):
-	    final_addr += addr.get('email_id') + "<br>"
-	return final_addr

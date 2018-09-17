@@ -4,7 +4,7 @@ import json
 from frappe.model.document import Document
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,add_months,getdate,date_diff,add_days
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
-from dairy_erp.dairy_erp.page.dairy_register_one.dairy_register_one import get_fmcr_list,fetch_farmer_data
+# from dairy_erp.dairy_erp.page.dairy_register_one.dairy_register_one import get_fmcr_list,fetch_farmer_data
 
 @frappe.whitelist()
 def get_mis_data(month=None,fiscal_year=None):

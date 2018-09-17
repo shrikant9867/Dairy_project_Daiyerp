@@ -107,7 +107,6 @@ def calculate_dairy_sales(total_milk_qty,local_sale_qty):
 	return dairy_sales		
 
 def fetch_farmer_data(fmcr_data,filters):
-	# print "inside fetch_farmer_data\n\n\n\n\n",fmcr_data
 	final_ = {}
 	date_and_shift_wise_fmcr = {}
 	for fmcr in fmcr_data:
@@ -140,22 +139,22 @@ def get_member_non_menber(filters):
 				date_ = add_months(getdate(farmer_id.get('registration_date')),months_to_member)
 				if getdate() < date_  and not farmer_id.get('is_member'):
 					non_member_count += 1
-					non_member_data = frappe.db.sql("""select ifnull(milkquantity,0) as qty ,
-										ifnull(amount,0) as amt 
+					non_member_data = frappe.db.sql("""select ifnull(round(sum(milkquantity),2),0) as qty ,
+										ifnull(round(sum(amount),2),0) as amt 
 								from 
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1} 
-					""".format(farmer.get('name'),get_conditions(filters)),as_dict=1,debug=1)
+					""".format(farmer.get('name'),get_member_non_menber_cond(filters)),as_dict=1,debug=1)
 					non_member_qty += flt(non_member_data[0].get('qty'))
 					non_member_amt += flt(non_member_data[0].get('amt'))
 			if farmer_id and farmer_id.get('is_member'):
 				member_count += 1
-				member_data = frappe.db.sql("""select ifnull(milkquantity,0) as qty ,
-										ifnull(amount,0) as amt 
+				member_data = frappe.db.sql("""select ifnull(round(sum(milkquantity),2),0) as qty ,
+										ifnull(round(sum(amount),2),0) as amt 
 								from
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1}
-					""".format(farmer.get('name'),get_conditions(filters)),as_dict=1,debug=1)
+					""".format(farmer.get('name'),get_member_non_menber_cond(filters)),as_dict=1,debug=1)
 				member_qty += flt(member_data[0].get('qty'))
 				member_amt += flt(member_data[0].get('amt'))
 
@@ -163,13 +162,6 @@ def get_member_non_menber(filters):
 		 	member_dict.update({
 					"total_milk_qty":round(member_qty+non_member_qty,2),
 					"total_milk_amt":round(member_amt+non_member_amt,2)
-					})
-		if filters.get('from_report') == "MIS Report":
-		 	member_dict.update({
-					"non_member_qty":round(non_member_qty,2),
-					"member_qty":round(member_qty,2),
-					"non_member_count":non_member_count,
-					"member_count":member_count
 					})
 		else:
 			member_dict.update({"non_member_count":non_member_count,
@@ -185,6 +177,16 @@ def get_member_non_menber(filters):
 					}) 	
 
 	return member_dict
+
+def get_member_non_menber_cond(filters):
+	conditions = " and 1=1"
+	if frappe.session.user != 'Administrator':
+		conditions += " and associated_vlcc = '{0}'".format(filters.get("vlcc"))
+	if filters.get('date'):
+		conditions += " and date(collectiontime) = '{0}' ".format(filters.get('date'))
+	if  filters.get('shift') and filters.get('shift') != "Both":
+		conditions += " and shift = '{0}' ".format(filters.get('shift'))
+	return conditions
 
 def get_fmcr_list(filters):
 	# print "inside get_fmcr_list\n\n\n\n",filters

@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2018-09-17 13:09:12.557831", 
+ "modified": "2018-09-18 11:44:38.327705", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "CC Report", 
@@ -24,6 +24,12 @@
   }, 
   {
    "role": "Dairy Manager"
+  }, 
+  {
+   "role": "Vlcc Operator"
+  }, 
+  {
+   "role": "Vlcc Manager"
   }
  ]
 }

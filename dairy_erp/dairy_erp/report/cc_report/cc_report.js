@@ -16,6 +16,30 @@ var field_list = [
 			"default": "MORNING"
 		},
 		{
+			"fieldname":"rate_effective_date",
+			"label": __("Rate Effective from"),
+			"fieldtype": "Date",
+			"hidden":1
+		},
+		{
+			"fieldname":"vlcc_id",
+			"label": __("VLCC Id"),
+			"fieldtype": "Data",
+			"hidden": 1
+		}
+	]
+
+var all_vlcc_field = {
+			"fieldname":"all_vlcc",
+			"label": __("All Vlcc"),
+			"fieldtype": "Check",
+			"on_change": function(query_report) {
+				frappe.query_report_filters_by_name.vlcc.set_input("");
+				query_report.trigger_refresh();
+			}
+		}
+
+var vlcc_field = {
 			"fieldname":"vlcc",
 			"label": __("VLCC"),
 			"fieldtype": "Link",
@@ -31,44 +55,11 @@ var field_list = [
 				frappe.query_report_filters_by_name.all_vlcc.set_input(0);
 				query_report.trigger_refresh();
 			}
-		},
-		{
-			"fieldname":"all_vlcc",
-			"label": __("All Vlcc"),
-			"fieldtype": "Check",
-			"on_change": function(query_report) {
-				frappe.query_report_filters_by_name.vlcc.set_input("");
-				query_report.trigger_refresh();
-			}
-		},
-		{
-			"fieldname":"route",
-			"label": __("Route"),
-			"fieldtype": "Data"
-		},
-		{
-			"fieldname":"rate_effective_date",
-			"label": __("Rate Effective from"),
-			"fieldtype": "Date",
-			"hidden":1
-		},
-		{
-			"fieldname":"vlcc_id",
-			"label": __("VLCC Id"),
-			"fieldtype": "Data",
-			"hidden": 1
-		},
-		{
-			"fieldname":"operator_type",
-			"label": __("Operator Type"),
-			"fieldtype": "Data",
-			"hidden": 1
 		}
-	]
 
 var cc_field = {
 	"fieldname":"branch_office",
-	"label": __("Branch Office"),
+	"label": __("Chilling Center"),
 	"fieldtype": "Link",
 	"options":"Address",
 	"get_query": function (query_report) {
@@ -77,16 +68,43 @@ var cc_field = {
 				"address_type": "Chilling Centre"					
 			}
 		}
+	},
+	"on_change": function(query_report) {
+		frappe.query_report_filters_by_name.vlcc.set_input("");
+		query_report.trigger_refresh();
 	}
+}
+
+var route_field = {
+			"fieldname":"route",
+			"label": __("Route"),
+			"fieldtype": "Data"
+		}
+
+if(has_common(frappe.user_roles, ["Vlcc Manager", "Vlcc Operator"])){
+	vlcc_field["hidden"] = 1
+	all_vlcc_field["hidden"] = 1
+	cc_field["hidden"] = 1
+	route_field["hidden"] = 1
+	field_list.splice(0, 0, cc_field);
+	field_list.splice(3, 0, vlcc_field);
+	field_list.splice(4, 0, all_vlcc_field);
+	field_list.splice(5, 0, route_field);
 }
 
 if(has_common(frappe.user_roles, ["Chilling Center Manager", "Chilling Center Operator"])){
 	cc_field["hidden"] = 1
 	field_list.splice(0, 0, cc_field);
+	field_list.splice(3, 0, vlcc_field);
+	field_list.splice(4, 0, all_vlcc_field);
+	field_list.splice(5, 0, route_field);
 }
 
 if(has_common(frappe.user_roles, ["Dairy Manager"])){
 	field_list.splice(2, 0, cc_field);
+	field_list.splice(3, 0, vlcc_field);
+	field_list.splice(4, 0, all_vlcc_field);
+	field_list.splice(5, 0, route_field);
 }
 
 frappe.query_reports["CC Report"] = {
@@ -101,7 +119,6 @@ frappe.query_reports["CC Report"] = {
                 if(r.message){
                 	console.log("inside callback",r.message)
                 	frappe.query_report_filters_by_name.vlcc.set_input(r.message.vlcc);
-					frappe.query_report_filters_by_name.operator_type.set_input(r.message.operator_type);
 					frappe.query_report_filters_by_name.branch_office.set_input(r.message.branch_office);
 					frappe.query_report_filters_by_name.vlcc_id.set_input(r.message.vlcc_id);
                 	frappe.query_report_filters_by_name.rate_effective_date.set_input(r.message.effective_date);

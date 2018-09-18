@@ -4,7 +4,7 @@ import json
 from frappe.model.document import Document
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,add_months,getdate,date_diff,add_days
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
-from dairy_erp.dairy_erp.page.dairy_register_one.dairy_register_one import get_fmcr_list,fetch_farmer_data
+# from dairy_erp.dairy_erp.page.dairy_register_one.dairy_register_one import get_fmcr_list,fetch_farmer_data
 
 @frappe.whitelist()
 def get_mis_data(month=None,fiscal_year=None):
@@ -28,11 +28,13 @@ def get_mis_data(month=None,fiscal_year=None):
 	financial_data_dict = {}
 	vlcc_addr = ""
 	member_non_member_data = {}
+	month_days = ""
 
 	if fiscal_year:
 
 		start_date = get_month_details(fiscal_year,month_mapper[month]).month_start_date
 		end_date = get_month_details(fiscal_year,month_mapper[month]).month_end_date
+		month_days = get_month_details(fiscal_year,month_mapper[month]).month_days
 		if month_mapper[month] - 1 == 0:
 			previous_month_end_date = get_month_details(fiscal_year,12).month_end_date
 		if month_mapper[month] == 4:
@@ -155,7 +157,8 @@ def get_mis_data(month=None,fiscal_year=None):
 								"total_5_6":total_5_6,
 								"gross_profit_4_7":gross_profit_4_7,
 								"Blank_3":"",
-								"other_income":other_income,
+								"other_income":[get_expenses(filters,'month','Other Income').get('Salary'),get_expenses(filters,'upto_month','Other Income').get('Salary')],
+								"cattle_feed_commission":other_income,
 								"total_income":total_income,
 								"Blank_4":"",
 								"salary":[get_expenses(filters,'month','Salary').get('Salary'),get_expenses(filters,'upto_month','Salary').get('Salary')],
@@ -175,7 +178,8 @@ def get_mis_data(month=None,fiscal_year=None):
 	'expenses_data':expenses_data,
 	'other_income':other_income,
 	'financial_data_dict':financial_data_dict,
-	'vlcc_addr':vlcc_addr
+	'vlcc_addr':vlcc_addr,
+	'month_days':month_days
 	}
 
 def get_member_non_member_data(filters):
@@ -229,11 +233,22 @@ def get_fmcr_data_list(filters,date_range):
 	filters.update({
 		'date_range':date_range,
 	})
+	# fmcr_data = frappe.db.sql("""select
+	# 								COALESCE(round(avg(fmcr.milkquantity),2),0) as total_milk_purchase_society,
+	# 								COALESCE(round(sum(fmcr.fat*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_fat,
+	# 								COALESCE(round(sum(fmcr.snf*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_snf,
+	# 								COALESCE(round(avg(fmcr.milkquantity),2),0) as daliy_milk_purchase_society,
+	# 								COALESCE(round(sum(fmcr.amount),2),0) as total_amount_of_milk_purchased
+	# 							from
+	# 								`tabFarmer Milk Collection Record` fmcr
+	# 							where
+	# 								docstatus = 1 {1}
+	# 							""".format(filters.get('fmcr_cond'),get_fmcr_conditions(filters)),as_dict=True,debug=0)
 	fmcr_data = frappe.db.sql("""select
 									COALESCE(round(avg(fmcr.milkquantity),2),0) as total_milk_purchase_society,
 									COALESCE(round(sum(fmcr.fat*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_fat,
 									COALESCE(round(sum(fmcr.snf*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_snf,
-									COALESCE(round(avg(fmcr.milkquantity),2),0) as daliy_milk_purchase_society,
+									COALESCE(round(sum(fmcr.milkquantity),2),0) as daliy_milk_purchase_society,
 									COALESCE(round(sum(fmcr.amount),2),0) as total_amount_of_milk_purchased
 								from
 									`tabFarmer Milk Collection Record` fmcr
@@ -468,30 +483,46 @@ def get_other_income(filters,cond):
 		conditions_pi += "pi.posting_date between '{0}' and '{1}'".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
 		conditions_si += "si.posting_date between '{0}' and '{1}'".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
 	
-	pi_data = frappe.db.sql("""
-			select
-				ifnull(round(sum(pi.grand_total),2),0)
-			from
-				`tabPurchase Invoice` pi
-			where
-				pi.docstatus = 1 and
-				pi.supplier_type = "Dairy Type" and
-				pi.supplier = '{0}' and
-				pi.company = '{1}'
-				and {2}
-		""".format(camp_office,filters.get('vlcc'),conditions_pi),as_list=1,debug=0)
+	item_selling = {}
+	cattle_feed_item = [item.get('name') for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name")]
+	buying_price_list = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTCOVLCCB"},"name"))
+	item_price_list = {row.item:row.price for row in buying_price_list.items}
+	for item in cattle_feed_item:
+		# pi_data = frappe.db.sql("""
+		# 		select
+		# 			round(pi_item.qty*pi_item.rate,2) as amount
+		# 		from
+		# 			`tabPurchase Invoice` pi,
+		# 			`tabPurchase Invoice Item` pi_item
+		# 		where
+		# 			pi.docstatus = 1 and
+		# 			pi.name = pi_item.parent and
+		# 			pi.supplier_type = "Dairy Type" and
+		# 			pi.supplier = '{0}' and
+		# 			pi.company = '{1}' and 
+		# 			pi.buying_price_list = 'GTCOVLCCB' and
+		# 			pi_item.item_code = '{2}'
+		# 			and {3}
+		# 	""".format(camp_office,filters.get('vlcc'),item,conditions_pi),as_dict=1,debug=0)
+		si_data = frappe.db.sql("""
+					select
+						si_item.qty,
+						si_item.rate
+					from
+						`tabSales Invoice` si,
+						`tabSales Invoice Item` si_item
+					where
+						si.docstatus = 1 and
+						si.name = si_item.parent and
+						si.company = '{0}' and
+						si.local_sale = 1 and
+						si.selling_price_list in ("GTFS","LTFS") and
+						si_item.item_code = '{1}' and
+						si.customer_or_farmer = 'Farmer' and
+						{2}	
+			""".format(filters.get('vlcc'),item,conditions_si),as_dict=1,debug=1)
+		if item in item_price_list:
+			if si_data and si_data[0].get('rate') and si_data[0].get('qty'):
+				item_selling[item] = flt(si_data[0].get('rate') - item_price_list.get(item),2)*si_data[0].get('qty')
 
-	si_data = frappe.db.sql("""
-				select
-					ifnull(round(sum(si.grand_total),2),0)	
-				from
-					`tabSales Invoice` si
-				where
-					si.docstatus = 1 and
-					si.company = '{0}' and
-					si.local_sale = 1 and
-					si.customer_or_farmer = 'Farmer' and
-					{1}	
-		""".format(filters.get('vlcc'),conditions_si),as_list=1,debug=0)
-
-	return {"other_income":si_data[0][0] - pi_data[0][0]}
+	return {"other_income":sum(item_selling.values())}

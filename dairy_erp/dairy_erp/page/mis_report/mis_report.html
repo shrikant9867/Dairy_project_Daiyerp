@@ -53,8 +53,8 @@ th,td {
 					<tr>
 						<td>3</td>
 					    <td colspan="2">{%= ("Total Milk Sold to Dairy (Society )") %}</td>
-					    <td>{%= (mis_data.fmcr_data[1][0].total_milk_purchase_society) - (mis_data.local_sale[1][0].local_sale) %}</td>
-					    <td>{%= (mis_data.fmcr_data[0][0].total_milk_purchase_society) - (mis_data.local_sale[0][0].local_sale) %}</td>
+					    <td>{%= flt((mis_data.fmcr_data[1][0].total_milk_purchase_society) - (mis_data.local_sale[1][0].local_sale),2) %}</td>
+					    <td>{%= flt((mis_data.fmcr_data[0][0].total_milk_purchase_society) - (mis_data.local_sale[0][0].local_sale),2) %}</td>
 					</tr>
 					<tr>
 						<td>4</td>
@@ -231,17 +231,17 @@ th,td {
 					<tr>
 						<td>1</td>
 						<td>{%= ("Average Daily Purchase") %}</td>
-						<td>{%= mis_data.fmcr_data[1][0].daliy_milk_purchase_society  + (" ltrs.") %}</td>
+						<td>{%= flt(mis_data.fmcr_data[1][0].daliy_milk_purchase_society/month_days,2)  + (" ltrs.") %}</td>
 					</tr>
 					<tr>
 						<td>2</td>
 						<td>{%= ("Members") %}</td>
-						<td>{%= member_data.member_qty  + (" ltrs.") %}</td>
+						<td>{%= flt(member_data.member_qty/month_days,2)  + (" ltrs.") %}</td>
 					</tr>
 					<tr>
 						<td>3</td>
 						<td>{%= ("Non Members") %}</td>
-						<td>{%= member_data.non_member_qty  + (" ltrs.") %}
+						<td>{%= flt(member_data.non_member_qty/month_days,2)  + (" ltrs.") %}
 					</tr>
 				</tbody>
 			</table>
@@ -328,14 +328,22 @@ th,td {
 				</tr>
 				<tr>
 					<td>9</td>
-					<td>{%= ("Other Income (including cattle feed commission)") %}</td>
-					<td>{%= flt(financial_data_dict.other_income.month.other_income,2) %}</td>
+					<td>{%= ("Other Income") %}</td>
+					<td>{%= flt(financial_data_dict.other_income[0],2) %}</td>
 					<td>
-						{%= flt(financial_data_dict.other_income.upto_month.other_income,2) %}
+						{%= flt(financial_data_dict.other_income[1],2) %}
 					</td>
 				</tr>
 				<tr>
 					<td>10</td>
+					<td>{%= ("Cattle feed commission") %}</td>
+					<td>{%= flt(financial_data_dict.cattle_feed_commission.month.other_income,2) %}</td>
+					<td>
+						{%= flt(financial_data_dict.cattle_feed_commission.upto_month.other_income,2) %}
+					</td>
+				</tr>
+				<tr>
+					<td>11</td>
 					<td>{%= ("Total Income") %}</td>
 					<td>{%= flt(financial_data_dict.total_income[0],2)
 					%}</td>
@@ -349,7 +357,7 @@ th,td {
 					<td></td>
 				</tr>
 				<tr>
-					<td>11</td>
+					<td>12</td>
 					<td>{%= ("Salary") %}</td>
 					<td>{%= financial_data_dict.salary[0] %}</td>
 					<td>
@@ -357,7 +365,7 @@ th,td {
 					</td>
 				</tr>
 				<tr>
-					<td>12</td>
+					<td>13</td>
 					<td>{%= ("Other Expenses") %}</td>
 					<td>{%= financial_data_dict.other_expenses[0] %}</td>
 					<td>
@@ -365,7 +373,7 @@ th,td {
 					</td>
 				</tr>
 				<tr>
-					<td>13</td>
+					<td>14</td>
 					<td>{%= ("Total") %}</td>
 					<td>{%= financial_data_dict.s_total[0]
 					%}</td>
@@ -379,7 +387,7 @@ th,td {
 					<td></td>
 				</tr>
 				<tr>
-					<td>14</td>
+					<td>15</td>
 					<td>{%= ("Net Profit") %}</td>
 					<td>{%= flt(financial_data_dict.net_profit[0],2)
 					%}
@@ -395,7 +403,7 @@ th,td {
 					<td></td>
 				</tr>
 				<tr>
-					<td>15</td>
+					<td>16</td>
 					<td>Profit in %</td>
 					<td>{%= flt(financial_data_dict.profit_in[0],2)
 					%}

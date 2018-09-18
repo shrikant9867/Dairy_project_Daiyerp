@@ -7,7 +7,7 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2018-08-22 08:33:57.134447", 
+ "modified": "2018-09-18 11:44:38.327705", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "CC Report", 
@@ -17,16 +17,19 @@
  "report_type": "Script Report", 
  "roles": [
   {
-   "role": "Vlcc Manager"
+   "role": "Chilling Center Manager"
+  }, 
+  {
+   "role": "Chilling Center Operator"
+  }, 
+  {
+   "role": "Dairy Manager"
   }, 
   {
    "role": "Vlcc Operator"
   }, 
   {
-   "role": "Chilling Center Manager"
-  }, 
-  {
-   "role": "Chilling Center Operator"
+   "role": "Vlcc Manager"
   }
  ]
 }

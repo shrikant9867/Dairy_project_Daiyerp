@@ -51,4 +51,15 @@ def get_emi(name = None, total = None, no_of_instalments = None, extension=None,
 		outstanding_amount = (float(total) - float(get_si_amount(name)))
 		instalment = (float(no_of_instalments) + float(extension)) - float(paid_instalment)
 		emi = outstanding_amount / instalment
-		return emi if emi else 0 
+		return emi if emi else 0
+
+@frappe.whitelist()
+def calculate_interest(name = None, principle = None, no_of_instalments = None, extension=None, paid_instalment = None, interest = None):
+	if name:
+		if extension:
+			interest_ = float(interest) + ((float(interest)/float(no_of_instalments)) * float(extension))
+			total_amount = float(principle) + float(interest_)
+			outstanding_amount = (float(total_amount) - float(get_si_amount(name)))
+			instalment = (float(no_of_instalments) + float(extension)) - float(paid_instalment)
+			emi_amount = outstanding_amount / instalment
+			return {'emi': emi_amount or 0,'interest':interest_,'outstanding':outstanding_amount,'total':total_amount}

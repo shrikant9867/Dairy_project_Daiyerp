@@ -2,59 +2,93 @@
 
 th,td {
 	text-align: center;
+	font-size: 20px;
+},
+
+td {
+    border-left: 0px solid;
+    border-right: 0px solid;
 }
+
+.cc {
+	font-size: 20px;
+}
+
+.dd {
+	font-size: 15px;
+	font-style: italic;
+}
+
 </style>
-
-<br>
-<h4 class="text-center">{%= filters.branch_office %}</h4>
-<div class="row">
-	<div class="col-xs-4">
-		<b>Date:</b>
-		&nbsp;
-		{%= filters.start_date %}
+{% for(var i=0, l=data.length; i<l; i++) { %}
+	<h4 class="text-center">MRCMPU Ltd, {%= filters.branch_office %}</h4>
+	<div class="row">
+		<div class="col-xs-3 col-md-3 cc">
+			Date
+			&nbsp;
+			{%= dateutil.str_to_user(filters.start_date) %}
+		</div>	
+		<div class="col-xs-2 col-md-2 text-left cc">
+			Shift
+			&nbsp;
+			{% if (filters.shift == "MORNING") { %}
+				{%= ("1") %}
+			{% } else { %}
+				{%= ("2") %}
+			{% } %}
+		</div>
+		<div class="col-xs-3 col-md-3">		
+		</div>
+		<div class="col-xs-4 col-md-4 cc text-left" style="
+    padding-left: 190px">
+			Route:
+			&nbsp;
+			{%= filters.route %}
+		</div>
 	</div>
-	<div class="col-xs-4">
-		<b>Shift:</b>
-		&nbsp;
-		{%= filters.shift %}
+	<div class="row">
+		<div class="col-xs-7 col-md-7 cc">
+			Society :
+			&nbsp;
+			{%= data[i][__("Vlcc Id")] %}
+			&nbsp;
+			&nbsp;
+			{%= data[i][__("Vlcc Name")] %}
+		</div>
+		<div class="col-xs-5 col-md-5">		
+		</div>
 	</div>
-	<div class="col-xs-4">
-		<b>Route:</b>
-		&nbsp;
-		{%= filters.route %}
-	</div>
-</div>
-<hr>
-<table class="table table-bordered">
-	<thead>
-		<tr>
-			<th>Sr. No.</th>
-			<th>{%= __("Quality Type") %}</th>
-			<th>{%= __("Cans") %}</th>
-			<th>{%= __("Qty") %}</th>
-			<th>{%= __("FAT") %}</th>
-			<th>{%= __("SNF") %}</th>
-			<th>{%= __("Rate") %}</th>	
-			<th>{%= __("Milk Value") %}</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for(var i=0, l=data.length; i<l; i++) { %}
+	<table class="table">
+		<thead>
 			<tr>
-				<td>{%= i+1 %}</td>
-				<td>{%= data[i][__("Quality Type")] %}</td>
-				<td>{%= data[i][__("Cans")] %}</td>
-				<td>{%= data[i][__("Qty")] %}</td>
-				<td>{%= data[i][__("FAT")] %}</td>
-				<td>{%= data[i][__("SNF")] %}</td>
-				<td>{%= data[i][__("Rate")] %}</td>
-				<td>{%= data[i][__("Milk Value")] %}</td>
+				<td>{%= __("Qlty Type") %}</td>
+				<td>{%= __("Cans") %}</td>
+				<td>{%= __("Qty") %}</td>
+				<td>{%= __("FAT") %}</td>
+				<td>{%= __("SNF") %}</td>
+				<td>{%= __("Rate") %}</td>	
+				<td></td>
+				<td></td>
+				<td>{%= __("Milk Value") %}</td>
 			</tr>
-		{% } %}
-	</tbody>
-</table>
-
-<div class="row">
-	<div class="col-xs-6"></div>
-	<div class="col-xs-6 text-right">"Rate as per new price chart w.e.f {%= filters.rate_effective_date %}"</div>	
-</div>
+		</thead>
+		<tbody>
+				<tr>
+					<td>{%= data[i][__("Quality Type")] %}</td>
+					<td>{%= data[i][__("Cans")] %}</td>
+					<td>{%= data[i][__("Qty")] %}</td>
+					<td>{%= data[i][__("FAT")] %}</td>
+					<td>{%= data[i][__("SNF")] %}</td>
+					<td>{%= data[i][__("Rate")] %}</td>
+					<td></td>
+					<td></td>
+					<td>{%= data[i][__("Milk Value")] %}</td>
+				</tr>
+		</tbody>
+	</table>
+	<div class="row">
+		<div class="col-xs-6"></div>
+		<div class="col-xs-6 text-right dd">"Rate as per new price chart w.e.f {%= dateutil.str_to_user(filters.rate_effective_date) %}"</div>	
+	</div>
+	<br>
+{% } %}

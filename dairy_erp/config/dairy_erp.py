@@ -213,7 +213,7 @@ def get_data():
 				{
 					"type": "report",
 					"name": "CC Report",
-					"label":_("Chilling Center Report"),
+					"label":_("CC Report"),
 					"doctype": "Vlcc Milk Collection Record",
 					"is_query_report": True
 				},

@@ -11,6 +11,9 @@ frappe.ui.form.on('Farmer Loan', {
 			console.log(frm.doc.no_of_instalments,frm.doc.extension,frm.doc.paid_instalment,cint(frm.doc.no_of_instalments)+cint(frm.doc.extension) - cint(frm.doc.paid_instalment))
 			frm.set_df_property("extension", "hidden", 0);
 		}
+		if(frm.doc.docstatus == 1) {
+			frm.set_value('interest_amount', frm.doc.interest)
+		}
 
 	},
 	emi_deduction_start_cycle: function(frm) {
@@ -49,7 +52,9 @@ frappe.ui.form.on('Farmer Loan', {
 	interest: function(frm) {
 		frm.events.no_of_instalments(frm)
 		frm.events.calculate_total(frm)
-		frm.events.calculate_updated_ami(frm)
+		if(frm.doc.extension == 0) {
+			frm.events.calculate_updated_ami(frm)
+		}
 	},
 	calculate_total: function(frm) {
 		frm.set_value('advance_amount',cint(frm.doc.principle) + cint(frm.doc.interest))
@@ -73,7 +78,26 @@ frappe.ui.form.on('Farmer Loan', {
 		}
 	},
 	extension: function(frm) {
-		frm.events.calculate_updated_ami(frm)
+		if(frm.doc.docstatus == 1){
+			frappe.call({
+					method:"dairy_erp.dairy_erp.doctype.farmer_loan.farmer_loan.calculate_interest",
+					args : {
+							"name": frm.doc.name,
+							"principle": frm.doc.principle,
+							"no_of_instalments": frm.doc.no_of_instalments,
+							"extension": frm.doc.extension,
+							"paid_instalment": frm.doc.paid_instalment,
+							"interest": frm.doc.interest_amount,
+							},
+					callback : function(r){
+						frm.set_value('advance_amount',r.message.total)
+						frm.set_value('emi_amount',r.message.emi)
+						frm.set_value('interest',r.message.interest)
+						frm.set_value('outstanding_amount',r.message.outstanding)
+					}
+				})
+			frm.refresh_fields();
+		}
 	}
 
 });

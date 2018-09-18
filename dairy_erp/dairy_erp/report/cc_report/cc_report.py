@@ -49,27 +49,45 @@ def get_data(filters=None):
 									vmcr.docstatus = 1 and
 									vmcr.shift = '{0}' and
 									{1} and date(vmcr.collectiontime) = '{2}' """.format(filters.get('shift'),get_conditions(filters),filters.get('start_date')),as_list=1,debug=0)	
-	
-	if filters.get('operator_type') == "Chilling Centre" and (filters.get('vlcc') or filters.get('all_vlcc')):
-		return vmcr_list
-	elif filters.get('branch_office') and not filters.get('operator_type') == "Chilling Centre":
-		return vmcr_list
+
+	if str(get_conditions(filters)) == "1=1":
+		return []
 	else:
-		return []	 	
+		return vmcr_list
 
 def get_conditions(filters):
+	roles = frappe.get_roles()
+	user = frappe.session.user
 	cond = "1=1"
+	cc_id = ""
 	if filters.get('branch_office'):
-		if filters.get('vlcc'):
-			cond += " and vmcr.associated_vlcc = '{0}' ".format(filters.get('vlcc'))
-		if filters.get('all_vlcc'):
+		cc_id = frappe.db.get_value("Address",{"name":filters.get('branch_office')},"centre_id")
+		filters["cc_id"] = cc_id
+	if ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) and \
+		user != 'Administrator':
+		cond += " and vmcr.associated_vlcc = '{0}' and vmcr.societyid = '{1}' ".format(filters.get('vlcc'),filters.get('cc_id'))
+	
+	if ('Chilling Center Manager' in roles or 'Chilling Center Operator' in roles) and \
+		user != 'Administrator':		
+		if filters.get("vlcc"):
+			cond += " and vmcr.associated_vlcc = '{0}' and vmcr.societyid = '{1}' ".format(filters.get('vlcc'),filters.get('cc_id'))
+		if filters.get("all_vlcc"):
 			vlcc = frappe.db.get_values("Village Level Collection Centre",{"chilling_centre":filters.get('branch_office')},"name",as_dict=1)
 			company = ['"%s"'%comp.get('name') for comp in vlcc]
-			cond += " and vmcr.associated_vlcc in  ({company})""".format(company=','.join(company))
-		else:
-			cc_id = frappe.db.get_value("Address",{"name":filters.get('branch_office')},"centre_id")
-			cond += " and vmcr.societyid = '{0}' ".format(cc_id)
-	return cond
+			cond += " and vmcr.societyid = '{0}' and vmcr.associated_vlcc in  ({company})""".format(filters.get('cc_id'),company=','.join(company))
+
+	if ('Dairy Manager' in roles) and user != 'Administrator':
+		if not filters.get("branch_office") and not filters.get("vlcc") and filters.get("all_vlcc"):
+ 			vlcc_list = [vlcc.get('name') for vlcc in frappe.get_all("Village Level Collection Centre", 'name')]
+ 			cond += " and vmcr.associated_vlcc in  {0} """.format("(" + ",".join(["'{0}'".format(vlcc) for vlcc in vlcc_list ]) + ")")
+ 		if filters.get("branch_office") and filters.get("vlcc"):
+ 			cond += " and vmcr.associated_vlcc = '{0}' and vmcr.societyid = '{1}' ".format(filters.get('vlcc'),filters.get('cc_id'))
+ 		if filters.get("branch_office") and not filters.get("vlcc") and filters.get("all_vlcc"):
+ 			cc_vlcc = [vlcc.get('name') for vlcc in frappe.get_all("Village Level Collection Centre",{'chilling_centre':filters.get("branch_office")},'name')]
+ 			cond += " and vmcr.societyid = '{0}' and vmcr.associated_vlcc in  {1}".format(filters.get('cc_id'),"(" + ",".join(["'{0}'".format(vlcc) for vlcc in cc_vlcc ]) + ")")
+ 		if not filters.get("branch_office") and filters.get("vlcc"):
+ 			cond += " and vmcr.associated_vlcc = '{0}' ".format(filters.get('vlcc'))
+ 	return cond		
 
 @frappe.whitelist()
 def get_other_data(role):
@@ -78,6 +96,8 @@ def get_other_data(role):
 	data.update({"effective_date":frappe.get_doc("Dairy Setting").rate_effective_from})
 	if "Chilling Center Manager" in role or "Chilling Center Operator" in role:
 		data['vlcc'] = ""
-		data['operator_type'] = user_doc.operator_type
 		data['branch_office'] = user_doc.branch_office
+	if "Vlcc Manager" in role or "Vlcc Operator" in role:
+		data['vlcc'] = user_doc.company
+		data['branch_office'] = frappe.db.get_value("Village Level Collection Centre",{"name":user_doc.company},"chilling_centre")	
 	return data

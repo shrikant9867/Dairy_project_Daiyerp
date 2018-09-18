@@ -28,11 +28,13 @@ def get_mis_data(month=None,fiscal_year=None):
 	financial_data_dict = {}
 	vlcc_addr = ""
 	member_non_member_data = {}
+	month_days = ""
 
 	if fiscal_year:
 
 		start_date = get_month_details(fiscal_year,month_mapper[month]).month_start_date
 		end_date = get_month_details(fiscal_year,month_mapper[month]).month_end_date
+		month_days = get_month_details(fiscal_year,month_mapper[month]).month_days
 		if month_mapper[month] - 1 == 0:
 			previous_month_end_date = get_month_details(fiscal_year,12).month_end_date
 		if month_mapper[month] == 4:
@@ -175,7 +177,8 @@ def get_mis_data(month=None,fiscal_year=None):
 	'expenses_data':expenses_data,
 	'other_income':other_income,
 	'financial_data_dict':financial_data_dict,
-	'vlcc_addr':vlcc_addr
+	'vlcc_addr':vlcc_addr,
+	'month_days':month_days
 	}
 
 def get_member_non_member_data(filters):
@@ -229,17 +232,28 @@ def get_fmcr_data_list(filters,date_range):
 	filters.update({
 		'date_range':date_range,
 	})
+	# fmcr_data = frappe.db.sql("""select
+	# 								COALESCE(round(avg(fmcr.milkquantity),2),0) as total_milk_purchase_society,
+	# 								COALESCE(round(sum(fmcr.fat*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_fat,
+	# 								COALESCE(round(sum(fmcr.snf*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_snf,
+	# 								COALESCE(round(avg(fmcr.milkquantity),2),0) as daliy_milk_purchase_society,
+	# 								COALESCE(round(sum(fmcr.amount),2),0) as total_amount_of_milk_purchased
+	# 							from
+	# 								`tabFarmer Milk Collection Record` fmcr
+	# 							where
+	# 								docstatus = 1 {1}
+	# 							""".format(filters.get('fmcr_cond'),get_fmcr_conditions(filters)),as_dict=True,debug=0)
 	fmcr_data = frappe.db.sql("""select
 									COALESCE(round(avg(fmcr.milkquantity),2),0) as total_milk_purchase_society,
 									COALESCE(round(sum(fmcr.fat*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_fat,
 									COALESCE(round(sum(fmcr.snf*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_snf,
-									COALESCE(round(avg(fmcr.milkquantity),2),0) as daliy_milk_purchase_society,
+									COALESCE(round(sum(fmcr.milkquantity),2),0) as daliy_milk_purchase_society,
 									COALESCE(round(sum(fmcr.amount),2),0) as total_amount_of_milk_purchased
 								from
 									`tabFarmer Milk Collection Record` fmcr
 								where
 									docstatus = 1 {1}
-								""".format(filters.get('fmcr_cond'),get_fmcr_conditions(filters)),as_dict=True,debug=0)
+								""".format(filters.get('fmcr_cond'),get_fmcr_conditions(filters)),as_dict=True,debug=1)
 	return fmcr_data
 
 

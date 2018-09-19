@@ -138,7 +138,7 @@ def get_mis_data(month=None,fiscal_year=None):
 											get_expenses(filters,'upto_month','Office Expenses').get('Office Expenses')
 								]
 		gross_profit_4_7 = 	[total_1_2_3[0]-total_5_6[0],total_1_2_3[1]-total_5_6[1]]				
-		total_income = [other_income.get('month').get('other_income')+gross_profit_4_7[0],other_income.get('upto_month').get('other_income')+gross_profit_4_7[1]]
+		total_income = [flt(other_income.get('month').get('other_income')+get_expenses(filters,'month','Other Income').get('Other Income')+gross_profit_4_7[0],2),flt(other_income.get('upto_month').get('other_income')+get_expenses(filters,'upto_month','Other Income').get('Other Income')+gross_profit_4_7[1],2)]
 		s_total = [get_expenses(filters,'month','Salary').get('Salary')+
 					get_expenses(filters,'month','Other Expenses').get('Other Expenses'),
 					get_expenses(filters,'upto_month','Salary').get('Salary')+
@@ -157,7 +157,7 @@ def get_mis_data(month=None,fiscal_year=None):
 								"total_5_6":total_5_6,
 								"gross_profit_4_7":gross_profit_4_7,
 								"Blank_3":"",
-								"other_income":[get_expenses(filters,'month','Other Income').get('Salary'),get_expenses(filters,'upto_month','Other Income').get('Salary')],
+								"other_income":[get_expenses(filters,'month','Other Income').get('Other Income'),get_expenses(filters,'upto_month','Other Income').get('Other Income')],
 								"cattle_feed_commission":other_income,
 								"total_income":total_income,
 								"Blank_4":"",

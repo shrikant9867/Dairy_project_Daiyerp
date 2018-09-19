@@ -17,7 +17,7 @@ def auto_fpcr():
 		for farmer in farmer_list:
 			cur_cycle = get_current_cycle(farmer)
 			if len(cur_cycle):
-				generate_fpcr(cur_cycle[0].get('name'))
+				generate_fpcr(cur_cycle[0].get('name'), farmer.get('farmer_id'))
 	except Exception,e:
 		make_dairy_log(title="Auto Fpcr Failed",method="auto_fpcr", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())
@@ -32,6 +32,7 @@ def get_current_cycle(data):
 		""",(data.get('vlcc_name')),as_dict=1)
 
 def generate_fpcr(cur_cycle, farmer):
+	fmcr = get_fmcr()
 	fpcr_doc = frappe.new_doc("Farmer Payment Cycle Report")
 	fpcr_doc.vlcc_name = farmer.get('vlcc_name')
 	fpcr_doc.date = nowdate
@@ -40,3 +41,12 @@ def generate_fpcr(cur_cycle, farmer):
 	fpcr_doc.append('fmcr_details',{
 
 		})
+
+def get_fmcr():
+	fmcr = fmcr =  frappe.db.sql("""
+			select rcvdtime,shift,milkquantity,fat,snf,rate,amount
+		from 
+			`tabFarmer Milk Collection Record`
+		where 
+			associated_vlcc = '{0}' and rcvdtime between '{1}' and '{2}' and farmerid= '{3}'
+			""".format(vlcc, start_date, end_date, farmer_id),as_dict=1)

@@ -49,7 +49,7 @@ def get_item_qty(item):
 
 @frappe.whitelist()
 def get_masters():
-	#generic: master paramenters as json object
+	#generic: master paramenters as json object,bulk data as app can be in offline mode
 	response_dict = {}
 	try:
 		if frappe.session.user != "Administrator":

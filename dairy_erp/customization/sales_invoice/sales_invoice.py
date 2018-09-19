@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from erpnext.stock.stock_balance import get_balance_qty_from_sle
 from dairy_erp.customization.stock_balance.stock_balance_report import get_actual_qty_from_bin
 from dairy_erp.dairy_erp.report.farmer_net_payoff.farmer_net_payoff import get_data
-from frappe.utils import flt, now_datetime, cstr,has_common
+from frappe.utils import flt, now_datetime, cstr,has_common,nowdate
 
 @frappe.whitelist()
 def get_local_customer(company):
@@ -25,12 +25,12 @@ def get_local_institution(company):
 
 
 @frappe.whitelist()
-def get_farmer_config(farmer, invoice=None):
+def get_farmer_config(farmer, invoice=None, company =None):
 	# check local eff credit % else take global eff credit % defined on vlcc iff not ignored
 	if farmer:
 		data = fetch_balance_qty()
 		doc = frappe.get_doc("Farmer",farmer)
-		eff_credit = get_effective_credit(doc.full_name, invoice)
+		eff_credit = get_net_off(farmer,company)
 		eff_percent = doc.percent_effective_credit if doc.percent_effective_credit and not doc.ignore_effective_credit_percent else 0
 		if not eff_percent and not doc.ignore_effective_credit_percent:
 			eff_percent = frappe.db.get_value("Village Level Collection Centre", doc.vlcc_name, "global_percent_effective_credit")
@@ -286,3 +286,15 @@ def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filter
 		item_list_update = [item for item in item_list if item[0] not in p_item]
 	return item_list_update
 
+
+def get_net_off(farmer, company):
+	#filters are must as it is net off report data retrival
+	fliters = {
+	"ageing_based_on": "Posting Date",
+	"report_date": nowdate(),
+	"company": company,
+	"farmer": farmer
+	}
+	if len(get_data(fliters)):
+		return round(get_data(fliters)[0][10],2)
+	else: return 0

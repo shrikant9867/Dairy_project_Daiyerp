@@ -37,11 +37,17 @@ def confirm_farmer_payment(**kwargs):
 				pe_doc.flags.inore_permission = True
 				pe_doc.submit()
 				response_dict.update({"status": "Success","remarks":"Payment entry submitted successfully","payment_entry": pe_doc.name})
+				make_agrupay_log(status="Success",request_data=kwargs,sync_time=now_datetime(),
+				response_text=response_dict,response_code="")
 			else:
 				frappe.delete_doc("Payment Entry", pe)
 				response_dict.update({"status":"Error","remarks": "Payment Entry rolled back", "payment_entry": pe})
+				make_agrupay_log(status="Error",request_data=kwargs,sync_time=now_datetime(),
+				response_text=response_dict,response_code="")
 		else:
 			response_dict.update({"status":"Error","remarks":"erp_ref_no does not exist"})
+			make_agrupay_log(status="Error",request_data=kwargs,sync_time=now_datetime(),
+				response_text=response_dict,response_code="")
 			frappe.throw("<b>erp_ref_no</b> does not exist")
 	except Exception,e:
 		make_dairy_log(title="Sync failed for Farmer payment ",method="pay_to_farmers_account", status="Error",

@@ -59,6 +59,7 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 	min_time = get_datetime(fmcr.get('min_time')) + timedelta(hours=int(config_hrs))
 	
 	if now_datetime() > min_time:
+		print "inside time....\n"
 		vmcr_records = frappe.db.sql("""select name,sum(milkquantity) as qty,
 								rcvdtime as recv_date,shift,farmerid,milktype
 							from 
@@ -76,6 +77,7 @@ def loss_gain_computation(fmcr_stock_qty,fmcr,stock=None):
 		if vmcr_data:
 			for vmcr in vmcr_records:
 				se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr.get('name')},
+					['name','wh_type'],as_dict=1) or frappe.db.get_value('Stock Entry',{'fmcr':fmcr.get('name')},
 					['name','wh_type'],as_dict=1) or {}
 				se_qty = frappe.db.get_value('Stock Entry Detail',
 					{'parent':se.get('name')},'qty') or 0

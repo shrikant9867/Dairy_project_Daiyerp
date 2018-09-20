@@ -141,3 +141,110 @@ def set_se_flag(stock):
 						posting_date = '{2}' and societyid = '{3}' """.
 						format(stock.get('shift'),stock.get('milktype'),
 						getdate(stock.get('posting_date')),stock.get('societyid')))
+
+
+def handling_loss_gain_after_vmcr(data, row,fmcr,response_dict):
+
+	vlcc = frappe.db.get_value("Village Level Collection Centre",
+		{"amcu_id":data.get('societyid')},["name","chilling_centre",
+		"warehouse","edited_gain","edited_loss"],as_dict=True) or {}
+	cc = frappe.db.get_value("Address",vlcc.get('chilling_centre'),"centre_id")
+	fmcr_stock_qty = 0
+
+	vmcr_records = frappe.db.sql("""select name,ifnull(sum(milkquantity),0) as qty,
+								rcvdtime as recv_date,shift,farmerid,milktype
+							from 
+								`tabVlcc Milk Collection Record` 
+							where 
+								docstatus = 1 and is_stock_settled = 0 and
+								shift = '{0}' and milktype = '{1}' and 
+								date(rcvdtime) = '{2}' and farmerid = '{3}' and
+								societyid = '{4}'
+			""".format(data.get('shift'),row.get('milktype'),
+				getdate(data.get('rcvdtime')),
+				data.get('societyid'),cc),as_dict=1,debug=0)
+
+	stock_record = frappe.db.sql("""select ifnull(sum(se.qty),0) as qty ,
+								s.shift,
+								s.societyid,s.milktype,s.posting_date
+							from 
+								`tabStock Entry` s, `tabStock Entry Detail` se 
+							where 
+								s.name = se.parent and 
+								s.shift = '{0}' and s.milktype = '{1}' and 
+								s.posting_date = '{2}' and s.societyid = '{3}' 
+								and s.docstatus = 1 and s.is_stock_settled_after_fmcr = 0
+								and s.is_reserved_farmer = 1 
+			""".format(data.get('shift'),row.get('milktype'),
+				getdate(data.get('rcvdtime')),
+				data.get('societyid')),as_dict=1,debug=0)
+
+	vmcr_data = vmcr_records[0].get('qty') if vmcr_records and vmcr_records[0].get('qty') else []
+	stock_data = stock_record[0].get('qty') if stock_record and stock_record[0].get('qty') else []
+	
+	if stock_data:
+		fmcr_stock_qty = flt(row.get('milkquantity'),2) + flt(stock_record[0].get('qty'),2)
+	else:
+		fmcr_stock_qty = flt(row.get('milkquantity'),2)
+
+	if vmcr_data:
+		for vmcr in vmcr_records:
+			se = frappe.db.get_value('Stock Entry',{'vmcr':vmcr.get('name')},
+					'name',as_dict=1) or {}
+			if not se:
+				guess_loss_gain(vmcr_qty=vmcr.get('qty'),fmcr_stock_qty = fmcr_stock_qty,row=row,
+					data=data,fmcr=fmcr,cc=cc,response_dict=response_dict)
+
+def guess_loss_gain(vmcr_qty,fmcr_stock_qty,row,data,fmcr,cc,response_dict):
+
+	vlcc = frappe.db.get_value("Village Level Collection Centre",
+		{"amcu_id":data.get('societyid')},
+		["name","warehouse","handling_loss","calibration_gain"],as_dict=True)
+	if vmcr_qty:
+		if flt(vmcr_qty,2) < flt(fmcr_stock_qty,2):
+			qty = flt(fmcr_stock_qty,2) - flt(vmcr_qty,2)
+			make_stock_receipt(
+				message="Material Receipt for Handling Loss",method="handling_loss_after_vmcr",
+				data=data,row=row,response_dict=response_dict,
+				qty=qty,warehouse=vlcc.get('handling_loss'),
+				societyid=data.get('societyid'),fmcr=fmcr)
+		elif flt(vmcr_qty,2) > flt(fmcr_stock_qty,2):
+			qty = flt(vmcr_qty,2) - flt(fmcr_stock_qty,2)
+			make_stock_receipt(
+				message="Material Receipt for Calibration Gain",
+				method="handling_gain_after_vmcr",data=data,row=row,
+				response_dict=response_dict,
+				qty=qty,warehouse=vlcc.get('calibration_gain'),
+				societyid=data.get('societyid'),fmcr=fmcr)
+		elif flt(vmcr_qty,2) == flt(fmcr_stock_qty,2):
+			utils.make_dairy_log(title="Quantity Balanced after FMCR Creation",
+				method="guess_loss_gain", status="Success",data="Qty" ,
+				message= "Quantity is Balanced so stock entry is not created",
+				traceback="Scheduler")
+		set_vmcr_flag(fmcr,cc)
+
+def set_vmcr_flag(fmcr,cc):
+
+	frappe.db.sql("""update 
+						`tabVlcc Milk Collection Record`
+					set 
+						is_stock_settled=1
+					where  
+						docstatus = 1  and
+						shift = '{0}' and milktype = '{1}' and 
+						date(rcvdtime) = '{2}' and farmerid = '{3}' and 
+						societyid = '{4}'""".
+						format(fmcr.get('shift'),fmcr.get('milktype'),
+						getdate(fmcr.get('rcvdtime')),fmcr.get('societyid'),
+						cc))
+
+	frappe.db.sql("""update 
+						`tabStock Entry`
+					set 
+						is_stock_settled_after_fmcr=1
+					where  
+						docstatus = 1 and is_reserved_farmer = 1 and
+						shift = '{0}' and milktype = '{1}' and 
+						posting_date = '{2}' and societyid = '{3}' """.
+						format(fmcr.get('shift'),fmcr.get('milktype'),
+						getdate(fmcr.get('rcvdtime')),fmcr.get('societyid')))

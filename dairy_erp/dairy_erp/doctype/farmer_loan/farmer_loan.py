@@ -61,5 +61,5 @@ def calculate_interest(name = None, principle = None, no_of_instalments = None, 
 			total_amount = float(principle) + float(interest_)
 			outstanding_amount = (float(total_amount) - float(get_si_amount(name)))
 			instalment = (float(no_of_instalments) + float(extension)) - float(paid_instalment)
-			emi_amount = outstanding_amount / instalment
+			emi_amount = float(outstanding_amount) / instalment
 			return {'emi': emi_amount or 0,'interest':interest_,'outstanding':outstanding_amount,'total':total_amount}

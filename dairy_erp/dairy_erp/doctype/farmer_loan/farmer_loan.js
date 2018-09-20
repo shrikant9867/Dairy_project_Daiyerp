@@ -11,10 +11,9 @@ frappe.ui.form.on('Farmer Loan', {
 			console.log(frm.doc.no_of_instalments,frm.doc.extension,frm.doc.paid_instalment,cint(frm.doc.no_of_instalments)+cint(frm.doc.extension) - cint(frm.doc.paid_instalment))
 			frm.set_df_property("extension", "hidden", 0);
 		}
-		if(frm.doc.docstatus == 1) {
+		if(frm.doc.docstatus == 1){
 			frm.set_value('interest_amount', frm.doc.interest)
 		}
-
 	},
 	emi_deduction_start_cycle: function(frm) {
 		if(cint(frm.doc.emi_deduction_start_cycle) > 6) {
@@ -33,7 +32,7 @@ frappe.ui.form.on('Farmer Loan', {
 		}
 	},
 	no_of_instalments: function(frm) {
-		emi_amount = (cint(frm.doc.principle) + cint(frm.doc.interest)) / frm.doc.no_of_instalments
+		emi_amount = (flt(frm.doc.principle) + flt(frm.doc.interest)) / frm.doc.no_of_instalments
 		if(emi_amount > 0 && emi_amount != 'Infinity') {
 			frm.set_value('emi_amount', emi_amount.toFixed(2))		
 		}
@@ -57,7 +56,7 @@ frappe.ui.form.on('Farmer Loan', {
 		}
 	},
 	calculate_total: function(frm) {
-		frm.set_value('advance_amount',cint(frm.doc.principle) + cint(frm.doc.interest))
+		frm.set_value('advance_amount',flt(frm.doc.principle) + flt(frm.doc.interest))
 	},
 	calculate_updated_ami(frm) {
 		if(frm.doc.docstatus == 1){

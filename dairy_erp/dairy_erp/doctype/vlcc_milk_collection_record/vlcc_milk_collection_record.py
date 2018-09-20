@@ -15,7 +15,7 @@ class VlccMilkCollectionRecord(Document):
 		self.validate_duplicate_entry()
 		self.validate_status()
 		self.validate_vlcc_chilling_centre()
-		self.check_stock()
+		# self.check_stock()
 		self.calculate_amount()
 		self.set_posting_date()
 

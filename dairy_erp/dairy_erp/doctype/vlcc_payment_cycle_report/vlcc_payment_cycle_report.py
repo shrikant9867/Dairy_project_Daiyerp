@@ -16,7 +16,7 @@ class VLCCPaymentCycleReport(Document):
 		if frappe.db.get_value("VLCC Payment Cycle Report",{'cycle':self.cycle,\
 			 'vlcc_name':self.vlcc_name},'name') and self.is_new():
 			frappe.throw(_("VPCR has already been generated for this cycle against vlcc <b>{0}</b>".format(self.vlcc_name)))
-		if self.collection_to > nowdate() :
+		if self.collection_to >= nowdate() :
 			frappe.throw(_("You can generate VPCR after <b>'{0}'</b>".format(self.collection_to)))
 
 	def before_submit(self):

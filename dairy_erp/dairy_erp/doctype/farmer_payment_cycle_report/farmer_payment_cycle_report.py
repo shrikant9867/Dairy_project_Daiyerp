@@ -15,7 +15,7 @@ class FarmerPaymentCycleReport(Document):
 		if frappe.db.get_value("Farmer Payment Cycle Report",{'cycle':self.cycle,\
 			 'vlcc_name':self.vlcc_name, 'farmer_id':self.farmer_id},'name') and self.is_new():
 			frappe.throw(_("FPCR has already been generated for this cycle against farmer <b>{0}</b>".format(self.farmer_id)))
-		if self.collection_to > nowdate() :
+		if self.collection_to >= nowdate() :
 			frappe.throw(_("You can generate FPCR after <b>'{0}'</b>".format(self.collection_to)))
 		
 	

@@ -1,0 +1,29 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2018-09-20 12:50:55.767582", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2018-09-20 12:51:17.777412", 
+ "modified_by": "Administrator", 
+ "module": "Dairy Erp", 
+ "name": "Milk Bill txt", 
+ "owner": "Administrator", 
+ "ref_doctype": "Vlcc Milk Collection Record", 
+ "report_name": "Milk Bill txt", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Chilling Center Manager"
+  }, 
+  {
+   "role": "Chilling Center Operator"
+  }, 
+  {
+   "role": "Dairy Manager"
+  }
+ ]
+}

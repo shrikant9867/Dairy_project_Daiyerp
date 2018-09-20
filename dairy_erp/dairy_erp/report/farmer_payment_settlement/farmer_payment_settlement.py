@@ -389,7 +389,7 @@ def make_payment_entry(**kwargs):
 		pe.erp_ref_no = random_string(10)
 		pe.save()
 		vlcc_setting = frappe.get_doc("VLCC Settings",pe.company)
-		if vlcc_setting.enable:
+		if vlcc_setting.enable and kwargs.get('is_manual'):
 			pay_to_farmers_account(pe)
 		if not vlcc_setting.enable:
 			pe.submit()

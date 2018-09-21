@@ -29,8 +29,8 @@ def get_columns():
 		_("Party") + ":Data:100",
 		_("Route") + ":Data:100",
 		_("Qty") + ":Data:100",
-		_("FAT") + ":Float:100",
-		_("SNF") + ":Float:100",
+		_("FAT") + ":Data:100",
+		_("SNF") + ":Data:100",
 		_("Q") + ":Data:100"
 	]
 
@@ -48,9 +48,9 @@ def get_data(filters=None):
 								"001",
 								RIGHT(farmerid,6),
 								ifnull(collectionroute,"    "),
-								milkquantity,
-								fat,
-								snf,
+								round(milkquantity,1),
+								round(fat,1),
+								round(snf,1),
 								CASE
 								    WHEN status = "Accept" THEN "G"
 								    WHEN status = "Reject" THEN "CS"
@@ -61,15 +61,19 @@ def get_data(filters=None):
 							{0} and docstatus = 1 order by date(collectiontime)""".format(get_conditions(filters)),as_list=1,debug=1)
 	for row in vmcr_data:
 		farmerid = row[4].split("_")
+		qty = str(row[6]).split(".")
+		fat = str(row[7]).split(".")
+		snf = str(row[8]).split(".")
 		if len(farmerid) > 1:
 			row[4] = farmerid[0]+farmerid[1]
 		if len(farmerid) == 1:
 			row[4] = farmerid[0][0:5]
-		qty = str(row[6]).split(".")
-		if len(str(row[6])) < 10 and len(qty[1]) == 2:
-			row[6] = (10 - len(str(row[6])))*"0"+"0"+str(row[6])
-		if len(str(row[6])) < 10 and len(qty[1]) == 1:
-			row[6] = (10 - len(str(row[6])))*"0"+str(row[6])+"0"
+		if len(str(row[6])) < 10 and len(qty) == 2:
+			row[6] = (10 - len(str(row[6])))*"0"+qty[0]+"."+qty[1][0]
+		if len(str(row[7])) < 6 and len(fat) == 2:
+			row[7] = (6 - len(str(row[7])))*"0"+fat[0]+"."+fat[1][0]	
+		if len(str(row[8])) < 6 and len(snf) == 2:
+			row[8] = (6 - len(str(row[8])))*"0"+snf[0]+"."+snf[1][0]
 	return vmcr_data
 
 def get_conditions(filters=None):

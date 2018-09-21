@@ -101,9 +101,9 @@ th,td {
 			<td>{%= data[i][__("Shift")] %}</td>
 			<td>{%= data[i][__("Sales Invoice")] %}</td>
 			<td>{%= data[i][__("Item Code")] %}</td>
-			<td>{%= data[i][__("Quantity")] %}</td>
+			<td>{%= flt(data[i][__("Quantity")],2) %}</td>
 			<td>{%= data[i][__("Rate")] %}</td>
-			<td>{%= data[i][__("Amount")] %}</td>
+			<td>{%= flt(data[i][__("Amount")],2) %}</td>
 			</tr>
 			{% } %}
 		{% } %}

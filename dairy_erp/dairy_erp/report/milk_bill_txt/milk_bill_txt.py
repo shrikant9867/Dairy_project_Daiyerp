@@ -6,11 +6,13 @@ import frappe
 from frappe import _
 from frappe.utils import has_common
 import json
+import datetime
 from dairy_erp import dairy_utils as utils
 import os
 
 def execute(filters=None):
-	societyid = frappe.db.get_value('Address',{'manager_email':'attapadiccm@gmail.com','address_type':'Chilling Centre'},'centre_id')
+	user_email = frappe.get_doc("User",frappe.session.user).email
+	societyid = frappe.db.get_value('Address',{'manager_email':user_email,'address_type':'Chilling Centre'},'centre_id')
 	filters.update({
 		'societyid':societyid
 		})
@@ -35,7 +37,6 @@ def get_columns():
 	return columns
 
 def get_data(filters=None):
-	print "filters"
 	vmcr_data = frappe.db.sql("""
 							select
 								"009",
@@ -46,18 +47,18 @@ def get_data(filters=None):
 								END,
 								"001",
 								RIGHT(farmerid,6),
-								collectionroute,
+								ifnull(collectionroute,"    "),
 								milkquantity,
 								fat,
 								snf,
 								CASE
 								    WHEN status = "Accept" THEN "G"
-								    WHEN status = "Reject" THEN "B"
+								    WHEN status = "Reject" THEN "CS"
 								END
 							from
 								`tabVlcc Milk Collection Record`
 							where
-							{0} and docstatus = 1 """.format(get_conditions(filters)),as_list=1,debug=1)
+							{0} and docstatus = 1 order by date(collectiontime)""".format(get_conditions(filters)),as_list=1,debug=1)
 	for row in vmcr_data:
 		farmerid = row[4].split("_")
 		if len(farmerid) > 1:
@@ -87,14 +88,18 @@ def add_txt_in_file(filters=None):
 	try:
 		filters = json.loads(filters)
 		file_path = frappe.local.site_path+"/public/files"
-		societyid = frappe.db.get_value('Address',{'manager_email':'attapadiccm@gmail.com','address_type':'Chilling Centre'},'centre_id')
+		user_email = frappe.get_doc("User",frappe.session.user).email
+		societyid = frappe.db.get_value('Address',{'manager_email':user_email,'address_type':'Chilling Centre'},'centre_id')
 		filters.update({
 			'societyid':societyid
 		})
 		data = get_data(filters)
 		if data:
-			txt_data = "#TS From "+filters.get('start_date')+" to "+filters.get('end_date')+"\n"
+			start_date = datetime.datetime.strptime(filters.get('start_date'),  "%Y-%m-%d").strftime("%d-%b-%Y")
+			end_date = datetime.datetime.strptime(filters.get('end_date'),  "%Y-%m-%d").strftime("%d-%b-%Y")
+			txt_data = "#TS From "+start_date+" to "+end_date+"\n"
 			txt_data += "DRY|Date      |S|Type|Party|Route|        Qty|    FAT|    SNF|Q"+"\n"
+			txt_data += "#----------------------------------------------------------------"+"\n"
 			for row in data:
 				my_date = str(row[1])
 				my_date = my_date[8:10]+'-'+my_date[5:7]+'-'+my_date[0:4]	

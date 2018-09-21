@@ -8,6 +8,7 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getda
 from frappe import _
 import dairy_utils as utils
 from datetime import timedelta
+from amcu_loss_gain import handling_loss_gain,loss_gain_computation,handling_loss_gain_after_vmcr
 import amcu_api as amcu_api
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 import requests
@@ -42,7 +43,9 @@ def update_fmcr(data, row,response_dict):
 				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "Allowed updation time has been elapsed for {0}".format(fmcr_doc.name)})
 		else:
 			is_fmcr_created = 1
-			make_fmcr(data,row,response_dict,is_fmcr_created)
+			fmrc_doc = make_fmcr(data,row,response_dict,is_fmcr_created)
+			# handling loss/gain vmcr is there but fmcr is not
+			handling_loss_gain_after_vmcr(data, row,fmrc_doc,response_dict)
 			fmcr = frappe.db.get_value('Farmer Milk Collection Record',
 				{"transactionid":row.get('transactionid'),"farmerid":row.get('farmerid')},"name")
 			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),fmcr)})
@@ -55,8 +58,9 @@ def update_fmcr(data, row,response_dict):
 	
 def update_fmcr_amt(fmcr_doc,data,row,response_dict):
 
-	pi = frappe.db.get_value("Purchase Invoice",{"farmer_milk_collection_record":fmcr_doc.name},"name")
-	pr = frappe.db.get_value("Purchase Receipt",{"farmer_milk_collection_record":fmcr_doc.name},"name")
+	pi = frappe.db.get_value("Purchase Invoice",{"farmer_milk_collection_record":fmcr_doc.name},"name") or ""
+	pr = frappe.db.get_value("Purchase Receipt",{"farmer_milk_collection_record":fmcr_doc.name},"name") or ""
+	se = frappe.db.get_value("Stock Entry",{"fmcr":fmcr_doc.name},"name") or ""
 
 	if pi:
 		frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(pi))
@@ -68,7 +72,9 @@ def update_fmcr_amt(fmcr_doc,data,row,response_dict):
 
 	fmcr_doc.cancel()
 
-	make_fmcr(data,row,response_dict)
+	fmcr = make_fmcr(data,row,response_dict)
+	if se:
+		frappe.db.sql("""update `tabStock Entry` set fmcr = %s where name = %s""",(fmcr.name,se))
 
 def make_fmcr(data,row,response_dict,is_fmcr_created=0):
 	
@@ -132,4 +138,4 @@ def make_fmcr(data,row,response_dict,is_fmcr_created=0):
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})		
-	return response_dict
+	return fmrc_doc

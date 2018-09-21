@@ -28,8 +28,10 @@ def get_conditions(filters):
 	conditions = " and 1=1"
 	if filters.get('farmer_id'):
 		conditions += " and farmerid = '{0}'".format(filters.get('farmer_id'))
-	if filters.get('shift'):
+	if  filters.get('shift') and filters.get('shift') != "Both":
 		conditions += " and shift = '{0}'".format(filters.get('shift'))
+	if  filters.get('shift') and filters.get('shift') == "Both":
+		conditions += " and shift in ('MORNING','EVENING') "
 	if filters.get('from_date') and filters.get('to_date'):
 		conditions += " and date(collectiontime) between '{0}' and '{1}' ".format(filters.get('from_date'),filters.get('to_date'))
 	return conditions
@@ -51,7 +53,7 @@ def get_data(filters):
 								docstatus = 1 and
 								associated_vlcc = '{0}' {1} order by date(collectiontime)""".format(
 					user_doc.get('company'),
-					get_conditions(filters)),as_list=True)
+					get_conditions(filters)),as_list=True,debug=0)
 	if data:
 		g_total = 0
 		qty_total = 0

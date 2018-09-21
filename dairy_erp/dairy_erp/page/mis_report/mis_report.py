@@ -8,179 +8,192 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 
 @frappe.whitelist()
 def get_mis_data(month=None,fiscal_year=None):
-	fiscal_year_date = frappe.db.get_values("Fiscal Year",{"name":fiscal_year},["year_start_date","year_end_date"],as_dict=1)
-	month_mapper = {"Jan":1,"Feb":2,"Mar":3,"Apr":4,"May":5,"Jun":6,
-					"Jul":7,"Aug":8,"Sep":9,"Oct":10,"Nov":11,"Dec":12}
-	
-	member_non_member = {'non_member_qty':0,
-						'member_qty':0,
-						'non_member_count':0,
-						'member_count':0
-						}
-							
-	milk_purchase_dict = {}
-	milk_quality_data = {}
-	formated_and_total_milk = {}
-	cattle_feed = {}
-	sample_sale_data = {}
-	expenses_data = {}
-	other_income = {}
-	financial_data_dict = {}
-	vlcc_addr = ""
-	member_non_member_data = {}
-	month_days = ""
+	user = frappe.session.user
+	roles = frappe.get_roles()
+	if ('Vlcc Manager' in roles or 'Vlcc Operator' in roles) and \
+		user != 'Administrator':
+		fiscal_year_date = frappe.db.get_values("Fiscal Year",{"name":fiscal_year},["year_start_date","year_end_date"],as_dict=1)
+		month_mapper = {"Jan":1,"Feb":2,"Mar":3,"Apr":4,"May":5,"Jun":6,
+						"Jul":7,"Aug":8,"Sep":9,"Oct":10,"Nov":11,"Dec":12}
+		
+		member_non_member = {'non_member_qty':0,
+							'member_qty':0,
+							'non_member_count':0,
+							'member_count':0
+							}
+								
+		milk_purchase_dict = {}
+		milk_quality_data = {}
+		formated_and_total_milk = {}
+		cattle_feed = {}
+		sample_sale_data = {}
+		expenses_data = {}
+		other_income = {}
+		financial_data_dict = {}
+		vlcc_addr = ""
+		member_non_member_data = {}
+		month_days = ""
 
-	if fiscal_year:
+		if fiscal_year:
 
-		start_date = get_month_details(fiscal_year,month_mapper[month]).month_start_date
-		end_date = get_month_details(fiscal_year,month_mapper[month]).month_end_date
-		month_days = get_month_details(fiscal_year,month_mapper[month]).month_days
-		if month_mapper[month] - 1 == 0:
-			previous_month_end_date = get_month_details(fiscal_year,12).month_end_date
-		if month_mapper[month] == 4:
-			previous_month_end_date = get_month_details(fiscal_year,4).month_end_date
-		if month_mapper[month] - 1 != 0:
-			previous_month_end_date = get_month_details(fiscal_year,month_mapper[month]-1).month_end_date
+			start_date = get_month_details(fiscal_year,month_mapper[month]).month_start_date
+			end_date = get_month_details(fiscal_year,month_mapper[month]).month_end_date
+			month_days = get_month_details(fiscal_year,month_mapper[month]).month_days
+			if month_mapper[month] - 1 == 0:
+				previous_month_end_date = get_month_details(fiscal_year,12).month_end_date
+			if month_mapper[month] == 4:
+				previous_month_end_date = get_month_details(fiscal_year,4).month_end_date
+			if month_mapper[month] - 1 != 0 and not month_mapper[month] == 4:
+				previous_month_end_date = get_month_details(fiscal_year,month_mapper[month]-1).month_end_date
 
-		filters = {
-			'month_start_date':start_date,
-			'month_end_date':end_date,
-			'previous_month_end_date':previous_month_end_date,
-			'year_start_date':fiscal_year_date[0].get('year_start_date'),
-			'vlcc':frappe.db.get_value("User",frappe.session.user,"company"),
-			'from_report':"MIS Report"
+			filters = {
+				'month_start_date':start_date,
+				'month_end_date':end_date,
+				'previous_month_end_date':previous_month_end_date,
+				'year_start_date':fiscal_year_date[0].get('year_start_date'),
+				'vlcc':frappe.db.get_value("User",frappe.session.user,"company"),
+				'from_report':"MIS Report"
+			}
+
+			vlcc_addr = frappe.db.get_value("Village Level Collection Centre",
+					filters.get('vlcc'),"address_display")
+			
+			milk_purchase_dict = {
+								'fmcr_data':[
+								get_fmcr_data_list(filters,'upto_month'),
+								get_fmcr_data_list(filters,'month')],
+								'local_sale':[
+								get_local_sale_data(filters,'upto_month'),
+								get_local_sale_data(filters,'month')],
+								'vmcr_data':[
+								get_vmcr_data_list(filters,'upto_month'),
+								get_vmcr_data_list(filters,'month')]
+			}
+
+			cattle_feed = {'month':get_cattle_feed(filters,'month'),
+							'upto_month':get_cattle_feed(filters,'upto_month')}
+
+			sample_sale_data = {'month':get_sample_sale_data(filters,'month'),
+							'upto_month':get_sample_sale_data(filters,'upto_month')}				
+			
+			expenses_data = {'month':get_expenses(filters,'month','Trade Expenses'),
+							'upto_month':get_expenses(filters,'upto_month','Trade Expenses')}
+
+			other_income = {'month':get_other_income(filters,'month'),
+							'upto_month':get_other_income(filters,'upto_month')}
+
+			# fmcr_list = get_fmcr_list(filters)
+			# member_data = fetch_farmer_data(fmcr_list,filters)
+			milk_quality_data = {'good':get_vmcr_milk_quality_data(filters,"Accept").get('milk_quantity'),
+								'bad':get_vmcr_milk_quality_data(filters,"Reject").get('milk_quantity')}
+			
+			mis_report_log = frappe.db.get_value("MIS Report Log",{"vlcc_name":frappe.db.get_value("User",frappe.session.user,"company"),
+												"fiscal_year":fiscal_year,
+												"month":month
+												},['name'],as_dict=True)
+			if mis_report_log:
+				mis_report_doc = frappe.get_doc("MIS Report Log",mis_report_log.get('name'))
+				formated_and_total_milk.update({
+					'total_milk':mis_report_doc.total_milk,
+					'formated_milk':mis_report_doc.bad_milk_new
+					})
+			else:
+				formated_and_total_milk.update({
+					'total_milk':milk_quality_data.get('good')+milk_quality_data.get('bad'),
+					'formated_milk':0
+					})			
+
+			member_non_member_data = get_member_non_member_data(filters)				
+			# for row in member_data:
+			# 	if member_non_member.get('non_member_qty'):
+			# 		member_non_member['non_member_qty'] += member_data[row]['non_member_qty']
+
+			# 	if member_non_member.get('member_qty'):
+			# 		member_non_member['member_qty'] += member_data[row]['member_qty']
+
+			# 	if member_non_member.get('non_member_count'):
+			# 		member_non_member['non_member_count'] += member_data[row]['non_member_count']
+
+			# 	if member_non_member.get('member_count'):
+			# 		member_non_member['member_count'] += member_data[row]['member_count']
+
+			# 	else:
+			# 		member_non_member['non_member_qty'] = member_data[row]['non_member_qty']
+			# 		member_non_member['member_qty'] = member_data[row]['member_qty']
+			# 		member_non_member['non_member_count'] = member_data[row]['non_member_count']
+			# 		member_non_member['member_count'] = member_data[row]['member_count']
+
+			vmcr = milk_purchase_dict.get('vmcr_data')
+			fmcr = milk_purchase_dict.get('fmcr_data')
+			local_sale_data = milk_purchase_dict.get('local_sale')
+
+			total_1_2_3 = [vmcr[1][0].get('revenue_from_dairy_sale')+
+													local_sale_data[1][0].get('local_sale_of_milk')+
+													sample_sale_data.get("month")[0].get('sample_own_milk_sale'),
+													vmcr[0][0].get('revenue_from_dairy_sale')+
+													local_sale_data[0][0].get('local_sale_of_milk')+
+													sample_sale_data.get("upto_month")[0].get('sample_own_milk_sale')
+									]
+			total_5_6 = [fmcr[1][0].get('total_amount_of_milk_purchased')+
+												get_expenses(filters,'month','Trade Expenses').get('Trade Expenses')+
+												get_expenses(filters,'month','Office Expenses').get('Office Expenses'),
+												fmcr[0][0].get('total_amount_of_milk_purchased')+
+												get_expenses(filters,'upto_month','Trade Expenses').get('Trade Expenses')+
+												get_expenses(filters,'upto_month','Office Expenses').get('Office Expenses')
+									]
+			gross_profit_4_7 = 	[total_1_2_3[0]-total_5_6[0],total_1_2_3[1]-total_5_6[1]]				
+			total_income = [flt(other_income.get('month').get('other_income')+get_expenses(filters,'month','Other Income').get('Other Income')+gross_profit_4_7[0],2),flt(other_income.get('upto_month').get('other_income')+get_expenses(filters,'upto_month','Other Income').get('Other Income')+gross_profit_4_7[1],2)]
+			s_total = [get_expenses(filters,'month','Salary').get('Salary')+
+						get_expenses(filters,'month','Other Expenses').get('Other Expenses'),
+						get_expenses(filters,'upto_month','Salary').get('Salary')+
+						get_expenses(filters,'upto_month','Other Expenses').get('Other Expenses')]
+			net_profit = [total_income[0]-s_total[0],total_income[1]-s_total[1]]
+
+			if total_5_6[0] != 0 and gross_profit_4_7[0] != 0:
+				profit_in = [flt((gross_profit_4_7[0]/total_5_6[0])*100,2)]
+			else:
+				profit_in = [0]
+			
+			if total_5_6[1] != 0 and gross_profit_4_7[1] != 0:
+				profit_in.append(flt((gross_profit_4_7[1]/total_5_6[1])*100,2))
+			else:
+				profit_in.append(0)
+			financial_data_dict = {"revenue_from_dairy_sale":[vmcr[1][0].get('revenue_from_dairy_sale'),vmcr[0][0].get('revenue_from_dairy_sale')],
+									"local_sale_of_milk":[local_sale_data[1][0].get('local_sale_of_milk'),local_sale_data[0][0].get('local_sale_of_milk')],
+									"sample_own_milk_sale":[sample_sale_data.get("month")[0].get('sample_own_milk_sale'),sample_sale_data.get("upto_month")[0].get('sample_own_milk_sale')],
+									"total_1_2_3":total_1_2_3,
+									"total_amount_of_milk_purchased":[fmcr[1][0].get('total_amount_of_milk_purchased'),fmcr[0][0].get('total_amount_of_milk_purchased')],
+									"trade_expenses_or_office_expenses":[get_expenses(filters,'month','Trade Expenses').get('Trade Expenses')+get_expenses(filters,'month','Office Expenses').get('Office Expenses'),get_expenses(filters,'upto_month','Trade Expenses').get('Trade Expenses')+get_expenses(filters,'upto_month','Office Expenses').get('Office Expenses')],
+									"total_5_6":total_5_6,
+									"gross_profit_4_7":gross_profit_4_7,
+									"Blank_3":"",
+									"other_income":[get_expenses(filters,'month','Other Income').get('Other Income'),get_expenses(filters,'upto_month','Other Income').get('Other Income')],
+									"cattle_feed_commission":other_income,
+									"total_income":total_income,
+									"Blank_4":"",
+									"salary":[get_expenses(filters,'month','Salary').get('Salary'),get_expenses(filters,'upto_month','Salary').get('Salary')],
+									"other_expenses":[get_expenses(filters,'month','Other Expenses').get('Other Expenses'),get_expenses(filters,'upto_month','Other Expenses').get('Other Expenses')],
+									"s_total":s_total,
+									"Blank_5":"",
+									"net_profit":net_profit,
+									"Blank_6":"",
+									"profit_in":profit_in}
+
+		return {"milk_purchase_dict":milk_purchase_dict,
+		"member_data":member_non_member_data,
+		'milk_quality':milk_quality_data,
+		'formated_and_total_milk':formated_and_total_milk,
+		'cattle_feed':cattle_feed,
+		'sample_sale_data':sample_sale_data,
+		'expenses_data':expenses_data,
+		'other_income':other_income,
+		'financial_data_dict':financial_data_dict,
+		'vlcc_addr':vlcc_addr,
+		'month_days':month_days
 		}
-
-		vlcc_addr = frappe.db.get_value("Village Level Collection Centre",
-				filters.get('vlcc'),"address_display")
+	else:
+		frappe.msgprint("This Report is For Vlcc Only")	
 		
-		milk_purchase_dict = {
-							'fmcr_data':[
-							get_fmcr_data_list(filters,'upto_month'),
-							get_fmcr_data_list(filters,'month')],
-							'local_sale':[
-							get_local_sale_data(filters,'upto_month'),
-							get_local_sale_data(filters,'month')],
-							'vmcr_data':[
-							get_vmcr_data_list(filters,'upto_month'),
-							get_vmcr_data_list(filters,'month')]
-		}
-
-		cattle_feed = {'month':get_cattle_feed(filters,'month'),
-						'upto_month':get_cattle_feed(filters,'upto_month')}
-
-		sample_sale_data = {'month':get_sample_sale_data(filters,'month'),
-						'upto_month':get_sample_sale_data(filters,'upto_month')}				
-		
-		expenses_data = {'month':get_expenses(filters,'month','Trade Expenses'),
-						'upto_month':get_expenses(filters,'upto_month','Trade Expenses')}
-
-		other_income = {'month':get_other_income(filters,'month'),
-						'upto_month':get_other_income(filters,'upto_month')}
-
-		# fmcr_list = get_fmcr_list(filters)
-		# member_data = fetch_farmer_data(fmcr_list,filters)
-		milk_quality_data = {'good':get_vmcr_milk_quality_data(filters,"Accept").get('milk_quantity'),
-							'bad':get_vmcr_milk_quality_data(filters,"Reject").get('milk_quantity')}
-		
-		mis_report_log = frappe.db.get_value("MIS Report Log",{"vlcc_name":frappe.db.get_value("User",frappe.session.user,"company"),
-											"fiscal_year":fiscal_year,
-											"month":month
-											},['name'],as_dict=True)
-		if mis_report_log:
-			mis_report_doc = frappe.get_doc("MIS Report Log",mis_report_log.get('name'))
-			formated_and_total_milk.update({
-				'total_milk':mis_report_doc.total_milk,
-				'formated_milk':mis_report_doc.bad_milk_new
-				})
-		else:
-			formated_and_total_milk.update({
-				'total_milk':milk_quality_data.get('good')+milk_quality_data.get('bad'),
-				'formated_milk':0
-				})			
-
-		member_non_member_data = get_member_non_member_data(filters)				
-		# for row in member_data:
-		# 	if member_non_member.get('non_member_qty'):
-		# 		member_non_member['non_member_qty'] += member_data[row]['non_member_qty']
-
-		# 	if member_non_member.get('member_qty'):
-		# 		member_non_member['member_qty'] += member_data[row]['member_qty']
-
-		# 	if member_non_member.get('non_member_count'):
-		# 		member_non_member['non_member_count'] += member_data[row]['non_member_count']
-
-		# 	if member_non_member.get('member_count'):
-		# 		member_non_member['member_count'] += member_data[row]['member_count']
-
-		# 	else:
-		# 		member_non_member['non_member_qty'] = member_data[row]['non_member_qty']
-		# 		member_non_member['member_qty'] = member_data[row]['member_qty']
-		# 		member_non_member['non_member_count'] = member_data[row]['non_member_count']
-		# 		member_non_member['member_count'] = member_data[row]['member_count']
-
-		vmcr = milk_purchase_dict.get('vmcr_data')
-		fmcr = milk_purchase_dict.get('fmcr_data')
-		local_sale_data = milk_purchase_dict.get('local_sale')
-
-		total_1_2_3 = [vmcr[1][0].get('revenue_from_dairy_sale')+
-												local_sale_data[1][0].get('local_sale_of_milk')+
-												sample_sale_data.get("month")[0].get('sample_own_milk_sale'),
-												vmcr[0][0].get('revenue_from_dairy_sale')+
-												local_sale_data[0][0].get('local_sale_of_milk')+
-												sample_sale_data.get("upto_month")[0].get('sample_own_milk_sale')
-								]
-		total_5_6 = [fmcr[1][0].get('total_amount_of_milk_purchased')+
-											get_expenses(filters,'month','Trade Expenses').get('Trade Expenses')+
-											get_expenses(filters,'month','Office Expenses').get('Office Expenses'),
-											fmcr[0][0].get('total_amount_of_milk_purchased')+
-											get_expenses(filters,'upto_month','Trade Expenses').get('Trade Expenses')+
-											get_expenses(filters,'upto_month','Office Expenses').get('Office Expenses')
-								]
-		gross_profit_4_7 = 	[total_1_2_3[0]-total_5_6[0],total_1_2_3[1]-total_5_6[1]]				
-		total_income = [flt(other_income.get('month').get('other_income')+get_expenses(filters,'month','Other Income').get('Other Income')+gross_profit_4_7[0],2),flt(other_income.get('upto_month').get('other_income')+get_expenses(filters,'upto_month','Other Income').get('Other Income')+gross_profit_4_7[1],2)]
-		s_total = [get_expenses(filters,'month','Salary').get('Salary')+
-					get_expenses(filters,'month','Other Expenses').get('Other Expenses'),
-					get_expenses(filters,'upto_month','Salary').get('Salary')+
-					get_expenses(filters,'upto_month','Other Expenses').get('Other Expenses')]
-		net_profit = [total_income[0]-s_total[0],total_income[1]-s_total[1]]
-		if total_5_6[0] != 0 and gross_profit_4_7[0] != 0 and total_5_6[1] != 0 and gross_profit_4_7[1] != 0:
-			profit_in = [round((gross_profit_4_7[0]/total_5_6[0])*100,2),round((gross_profit_4_7[1]/total_5_6[1])*100,2)]
-		else:
-			profit_in = [0,0]
-		financial_data_dict = {"revenue_from_dairy_sale":[vmcr[1][0].get('revenue_from_dairy_sale'),vmcr[0][0].get('revenue_from_dairy_sale')],
-								"local_sale_of_milk":[local_sale_data[1][0].get('local_sale_of_milk'),local_sale_data[0][0].get('local_sale_of_milk')],
-								"sample_own_milk_sale":[sample_sale_data.get("month")[0].get('sample_own_milk_sale'),sample_sale_data.get("upto_month")[0].get('sample_own_milk_sale')],
-								"total_1_2_3":total_1_2_3,
-								"total_amount_of_milk_purchased":[fmcr[1][0].get('total_amount_of_milk_purchased'),fmcr[0][0].get('total_amount_of_milk_purchased')],
-								"trade_expenses_or_office_expenses":[get_expenses(filters,'month','Trade Expenses').get('Trade Expenses')+get_expenses(filters,'month','Office Expenses').get('Office Expenses'),get_expenses(filters,'upto_month','Trade Expenses').get('Trade Expenses')+get_expenses(filters,'upto_month','Office Expenses').get('Office Expenses')],
-								"total_5_6":total_5_6,
-								"gross_profit_4_7":gross_profit_4_7,
-								"Blank_3":"",
-								"other_income":[get_expenses(filters,'month','Other Income').get('Other Income'),get_expenses(filters,'upto_month','Other Income').get('Other Income')],
-								"cattle_feed_commission":other_income,
-								"total_income":total_income,
-								"Blank_4":"",
-								"salary":[get_expenses(filters,'month','Salary').get('Salary'),get_expenses(filters,'upto_month','Salary').get('Salary')],
-								"other_expenses":[get_expenses(filters,'month','Other Expenses').get('Other Expenses'),get_expenses(filters,'upto_month','Other Expenses').get('Other Expenses')],
-								"s_total":s_total,
-								"Blank_5":"",
-								"net_profit":net_profit,
-								"Blank_6":"",
-								"profit_in":profit_in}
-
-	return {"milk_purchase_dict":milk_purchase_dict,
-	"member_data":member_non_member_data,
-	'milk_quality':milk_quality_data,
-	'formated_and_total_milk':formated_and_total_milk,
-	'cattle_feed':cattle_feed,
-	'sample_sale_data':sample_sale_data,
-	'expenses_data':expenses_data,
-	'other_income':other_income,
-	'financial_data_dict':financial_data_dict,
-	'vlcc_addr':vlcc_addr,
-	'month_days':month_days
-	}
 
 def get_member_non_member_data(filters):
 	farmer_list = frappe.db.get_all("Farmer", { "vlcc_name": filters.get('vlcc') }, "name")
@@ -245,7 +258,7 @@ def get_fmcr_data_list(filters,date_range):
 	# 								docstatus = 1 {1}
 	# 							""".format(filters.get('fmcr_cond'),get_fmcr_conditions(filters)),as_dict=True,debug=0)
 	fmcr_data = frappe.db.sql("""select
-									COALESCE(round(avg(fmcr.milkquantity),2),0) as total_milk_purchase_society,
+									COALESCE(round(sum(fmcr.milkquantity),2),0) as total_milk_purchase_society,
 									COALESCE(round(sum(fmcr.fat*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_fat,
 									COALESCE(round(sum(fmcr.snf*fmcr.milkquantity)/sum(fmcr.milkquantity),2),0) as society_account_snf,
 									COALESCE(round(sum(fmcr.milkquantity),2),0) as daliy_milk_purchase_society,
@@ -396,7 +409,7 @@ def get_cattle_feed(filters,cond):
 		conditions_pr += "pr.posting_date between '{0}' and '{1}' ".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
 		conditions_si += "si.posting_date between '{0}' and '{1}'".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
 
-	item_list = "(" + ",".join([ "'{0}'".format(item.get('name')) for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name") ]) + ")"
+	item_list = "(" + ",".join([ "'{0}'".format(item.get('name')) for item in frappe.get_all("Item", filters=[("item_group", "in", ('Cattle feed','Fodder','Mineral Mixtures'))]) ]) + ")"
 
 	pr_data_list = frappe.db.sql("""
 			select 
@@ -425,7 +438,7 @@ def get_cattle_feed(filters,cond):
 								and si_item.item_code in {0}
 								and si.docstatus = 1 and si.company = '{1}' and
 								{2} 
-								""".format(item_list,filters.get('vlcc'),conditions_si),debug=0,as_dict=1)
+								""".format(item_list,filters.get('vlcc'),conditions_si),debug=1,as_dict=1)
 
 	return {'procured':pr_data_list[0]['procured'],'sold_to_farmers':cattle_si_data[0]['sold_to_farmers']}
 
@@ -485,8 +498,10 @@ def get_other_income(filters,cond):
 	
 	item_selling = {}
 	cattle_feed_item = [item.get('name') for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name")]
-	buying_price_list = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTCOVLCCB"},"name"))
-	item_price_list = {row.item:row.price for row in buying_price_list.items}
+	buying_price_list_1 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTCOVLCCB"},"name"))
+	buying_price_list_2 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTVLCCB"},"name"))
+	item_price_list = {row.item:row.price for row in buying_price_list_1.items}
+	item_price_list.update({row.item:row.price for row in buying_price_list_2.items})
 	for item in cattle_feed_item:
 		# pi_data = frappe.db.sql("""
 		# 		select
@@ -520,7 +535,7 @@ def get_other_income(filters,cond):
 						si_item.item_code = '{1}' and
 						si.customer_or_farmer = 'Farmer' and
 						{2}	
-			""".format(filters.get('vlcc'),item,conditions_si),as_dict=1,debug=1)
+			""".format(filters.get('vlcc'),item,conditions_si),as_dict=1,debug=0)
 		if item in item_price_list:
 			if si_data and si_data[0].get('rate') and si_data[0].get('qty'):
 				item_selling[item] = flt(si_data[0].get('rate') - item_price_list.get(item),2)*si_data[0].get('qty')

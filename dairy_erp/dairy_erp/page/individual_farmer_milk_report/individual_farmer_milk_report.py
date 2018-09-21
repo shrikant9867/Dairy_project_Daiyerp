@@ -118,7 +118,7 @@ def get_si_outstanding(filters):
 									si.docstatus = 1
 									and si.customer = '{0}'
 									and si.posting_date < '{1}'
-								""".format(filters.get('farmer_full_name'),filters.get('start_date')),as_list=1,debug=1)
+								""".format(filters.get('farmer_full_name'),filters.get('start_date')),as_list=1,debug=0)
 	return si_data[0][0]
 
 def get_fmcr_milk_data(filters):
@@ -142,7 +142,7 @@ def get_fmcr_milk_data(filters):
 def cattle_feed_amount(filters):
 	cattle_feed_amount = frappe.db.sql("""
 		select
-			COALESCE(round(sum(si.outstanding_amount),2),0)
+			COALESCE(round(sum(si.grand_total),2),0)
 		from
 			`tabSales Invoice` si
 		where

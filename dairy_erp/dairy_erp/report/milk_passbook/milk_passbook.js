@@ -37,8 +37,8 @@ frappe.query_reports["Milk Passbook"] = {
 			"fieldname":"shift",
 			"label": __("Shift"),
 			"fieldtype": "Select",
-			"options": ['MORNING','EVENING'],
-			"default": " "
+			"options": ['Both','MORNING','EVENING'],
+			"default": "Both"
 		},
 		{
 			"fieldname":"from_date",

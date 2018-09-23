@@ -63,7 +63,7 @@ class VLCCPaymentCycleReport(Document):
 				self.update_pi(row, self.cycle, pi_exist)
 				self.update_advance_vpcr(row)
 		if flag:	
-			frappe.msgprint(_("Purchase invoice against incentive AND Sales invoice against loan,advance has been created successfully"))
+			frappe.msgprint(_("Sales Invoice has been created successfully against Advances"))
 
 	def loan_operation(self):
 		flag = False

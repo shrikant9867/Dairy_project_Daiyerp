@@ -34,11 +34,13 @@ frappe.mis_report = Class.extend({
                     me.member_data = r.message.member_data
                     me.milk_quality = r.message.milk_quality
                     me.formated_and_total_milk = r.message.formated_and_total_milk
+                    me.cattle_feed = r.message.cattle_feed
                     $(me.page).find(".render-table").empty();
                     me.print = frappe.render_template("mis_report",{
                             "mis_data":me.mis_data,
                             "member_data":me.member_data,
-                            "milk_quality":me.milk_quality
+                            "milk_quality":me.milk_quality,
+                            "cattle_feed":me.cattle_feed
                             })
                     $(me.page).find(".render-table").append(me.print)
                     me.update_total_milk()
@@ -162,7 +164,8 @@ frappe.mis_report = Class.extend({
                                                         "member_data":me.member_data,
                                                         "milk_quality":me.milk_quality,
                                                         "month":me.month.get_value(),
-                                                        "fiscal_year":me.fiscal_year.get_value()
+                                                        "fiscal_year":me.fiscal_year.get_value(),
+                                                        "formated_and_total_milk":me.formated_and_total_milk
                                                     }),
             title:__("mis_report"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,

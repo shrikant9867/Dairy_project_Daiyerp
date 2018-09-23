@@ -36,8 +36,8 @@ def get_vmcr_data(start_date=None,end_date=None):
 			}
 			date_and_shift_wise_local_sale[str(si['posting_date'])+"#"+si['shift']] = local_sale_dict
 	
-		for vmcr in vmcr_data_list:
-			vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
+	for vmcr in vmcr_data_list:
+		vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
 
 	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+vmcr_dict.keys()
 	final_dict = {}
@@ -49,14 +49,20 @@ def get_vmcr_data(start_date=None,end_date=None):
 			merged.update(date_and_shift_wise_local_sale.get(key, {'si_amount': 0, 'si_qty': 0}))
 			merged.update(vmcr_dict.get(key,{'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
 			merged.update({'daily_sales':merged.get('total_milk_qty')-merged.get('si_qty')})		
-			merged.update({'excess_qty':merged.get('daily_sales') - merged.get('vmcr_qty')})
-			merged.update({'short_qty':merged.get('vmcr_qty') - merged.get('daily_sales')})
-			if merged.get('vmcr_amount') + merged.get('si_amount') > merged.get('total_milk_amt'):
-				merged.update({'profit': (merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt')})
+			merged.update({'excess_qty':merged.get('daily_sales') + merged.get('vmcr_qty')})
+			merged.update({'short_qty':merged.get('daily_sales') - merged.get('vmcr_qty')})
+			if merged.get('total_milk_amt') > merged.get('vmcr_amount') + merged.get('si_amount'):
+				merged.update({'profit': merged.get('total_milk_amt') - (merged.get('vmcr_amount') + merged.get('si_amount'))})
 				merged.update({'loss': 0})
-			if merged.get('vmcr_amount') + merged.get('si_amount') < merged.get('total_milk_amt'):
-				merged.update({'loss': merged.get('total_milk_amt') - (merged.get('vmcr_amount') + merged.get('si_amount'))})
+			if merged.get('total_milk_amt') < merged.get('vmcr_amount') + merged.get('si_amount'):
+				merged.update({'loss':(merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt')})
 				merged.update({'profit': 0})
+			# if merged.get('vmcr_amount') + merged.get('si_amount') > merged.get('total_milk_amt'):
+			# 	merged.update({'profit': (merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt')})
+			# 	merged.update({'loss': 0})
+			# if merged.get('vmcr_amount') + merged.get('si_amount') < merged.get('total_milk_amt'):
+			# 	merged.update({'loss': merged.get('total_milk_amt') - (merged.get('vmcr_amount') + merged.get('si_amount'))})
+			# 	merged.update({'profit': 0})
 			final_dict[key] = merged
 		else:
 			pass
@@ -71,14 +77,14 @@ def get_vmcr_data_list(filters):
 									vmcr.snf,
 									vmcr.rate,
 									vmcr.amount as vmcr_amount,
-									date(vmcr.collectiondate) as vmcr_date,
+									date(vmcr.collectiontime) as vmcr_date,
 									vmcr.shift
 								from
 									`tabVlcc Milk Collection Record` vmcr
 								where
 									vmcr.docstatus = 1 and
 									vmcr.shift in ('MORNING','EVENING') and
-									{0} """.format(get_conditions(filters)),as_dict=1,debug=0)	
+									{0} """.format(get_conditions(filters)),as_dict=1,debug=1)	
 	return vmcr_list
 
 def get_conditions(filters):
@@ -86,5 +92,5 @@ def get_conditions(filters):
 	if filters.get('operator_type') == "VLCC":
 		cond += " and vmcr.associated_vlcc = '{0}' """.format(filters.get('vlcc'))
 	if filters.get('start_date') and filters.get('end_date'):
-		cond += " and date(vmcr.collectiondate) between '{0}' and '{1}'".format(filters.get('start_date'),filters.get('end_date'))
+		cond += " and date(vmcr.collectiontime) between '{0}' and '{1}'".format(filters.get('start_date'),filters.get('end_date'))
 	return cond

@@ -150,7 +150,7 @@ def get_member_non_menber(farmer_list,filters):
 
 def get_fmcr_list(filters):
 	fmcr_data = frappe.db.sql("""select 
-									date(collectiondate) as date,name,shift,farmerid
+									date(collectiontime) as date,name,shift,farmerid
 								from
 									`tabFarmer Milk Collection Record`
 								where
@@ -171,11 +171,11 @@ def get_conditions(filters):
 	if frappe.session.user != 'Administrator':
 		conditions += " and associated_vlcc = '{0}'".format(vlcc)
 	if filters.get('start_date') and filters.get('end_date'):
-		conditions += " and date(collectiondate) between '{0}' and '{1}' ".format(filters.get('start_date'),filters.get('end_date'))
+		conditions += " and date(collectiontime) between '{0}' and '{1}' ".format(filters.get('start_date'),filters.get('end_date'))
 	if filters.get('shift') == "Both":
 		conditions += " and shift in ('MORNING','EVENING')"
 	if filters.get('date'):
-		conditions += " and date(collectiondate) = '{0}' ".format(filters.get('date'))
+		conditions += " and date(collectiontime) = '{0}' ".format(filters.get('date'))
 	return conditions
 
 # def get_conditions(filters):

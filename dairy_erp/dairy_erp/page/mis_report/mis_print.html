@@ -36,7 +36,7 @@
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<th colspan="2">milk purchase</th>
+						<th colspan="2">Milk purchase</th>
 						<th>This Month</th>
 						<th>Up to the Month</th>
 					</tr>
@@ -92,8 +92,8 @@
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
-						<td rowspan="2">{%= ("1) No of first aids given") %}
-						<td>COW</td>	
+						<td rowspan="2" style="width: 135px;">{%= ("1) No of first aids given") %}
+						<td style="width: 168px;">COW</td>
 						<td></td>
 					</tr>
 					<tr>
@@ -151,17 +151,16 @@
 						<td>
 							<div class="row">
 								<div class="col-xs-8">
-									<input type="number" autocomplete="off" class="input-with-feedback form-control" data-fieldtype="Float" data-fieldname="formated_milk" placeholder="" data-doctype="MIS Report Log">
+									{%= formated_and_total_milk.formated_milk %}
 								</div>
 								<div class="col-xs-4">
-									<button class="input-with-feedback form-control" btn btn-primary btn-sm primary-actiondata-fieldtype="Button" data-fieldname="update_total_milk" data-doctype="MIS Report Log" style="color: blue">Update</button>
 								</div>
 							</div>
 						</td>
 					</tr>
 					<tr>
 						<td>Total Qty</td>
-						<td class="total_milk"></td>
+						<td class="total_milk">{%= formated_and_total_milk.total_milk %}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -250,7 +249,6 @@
 				</tbody>
 			</table>
 		</div>
-	</div>
 	<div class="row pagebreak">
 		<div class="col-xs-6">
 			<table class="table table-bordered">

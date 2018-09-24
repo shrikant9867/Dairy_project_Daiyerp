@@ -138,6 +138,14 @@ frappe.ui.form.on('VLCC Settings', {
 			frm.set_value("cycle_hours",24)
 			frm.reload_doc();
 		}
+	},
+	enable_negative_effective_credit: function(frm){
+		frm.set_value("allow_negative_effective_credit",1)
+		frm.set_value("flag_negative_effective_credit",1)
+	},
+	disable_negative_effective_credit: function(frm){
+		frm.set_value("allow_negative_effective_credit",0)
+		frm.set_value("flag_negative_effective_credit",1)
 	}
 });
 

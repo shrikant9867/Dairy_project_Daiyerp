@@ -20,7 +20,7 @@ def auto_cycle_create():
 	vlcc_setting = frappe.get_all("VLCC Settings",fields=['no_of_cycles','no_of_interval','name'])
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 	current_month = getdate(nowdate()).month
-	month_details = get_month_details(current_fiscal_year.get('name'),current_month)
+	month_details = get_month_details(current_fiscal_year.get('name'),cint(current_month))
 	cycle_data = {}
 	s_date,e_date = "",""
 
@@ -30,17 +30,18 @@ def auto_cycle_create():
 			if vlcc.get('no_of_cycles') and vlcc.get('no_of_interval'):
 				for cycle_index in range(1,cint(vlcc.get('no_of_cycles'))+cint(1)):
 					if cycle_index == 1:
-         				s_date = get_month_details(current_fiscal_year.get('name'),cint(current_month)).month_start_date
+         				s_date = month_details.month_start_date
          				e_date = datetime.date(current_fiscal_year.get('name'), cint(current_month), cint(vlcc.get('no_of_interval')))
-         				test.update({"Cycle"+str(cycle_index):[s_date,e_date]})
-     				elif cycle_index == 4:
-         				s_date = add_days(getdate(s_date),interval)
-         				e_date = datetime.date(s_date.year, cint(current_month), cint(30))
-         				test.update({"Cycle"+str(cycle_index):[s_date,e_date]})
+         				cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
+     				elif cycle_index == cint(vlcc.get('no_of_cycles')):
+         				s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
+         				e_date = month_details.month_end_date
+         				cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
      				else:
-         				s_date = add_days(getdate(s_date),interval)
-         				e_date = add_days(getdate(e_date),interval)
-         				test.update({"Cycle"+str(cycle_index):[s_date,e_date]})
+         				s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
+         				e_date = add_days(getdate(e_date),cint(vlcc.get('no_of_interval')))
+         				cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
+        print cycle_data
 
 
 

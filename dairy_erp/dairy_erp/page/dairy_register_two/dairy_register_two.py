@@ -53,17 +53,23 @@ def get_vmcr_data(start_date=None,end_date=None):
 			merged.update(vmcr_dict.get(key,{'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
 			merged.update({'daily_sales':flt(merged.get('total_milk_qty')-merged.get('si_qty'),2)})
 			merged.update({
-				'excess_qty':flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) if flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) > 0 else 0
+				'short_qty':flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) if flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) > 0 else 0
 				})
 			merged.update({
-						'short_qty':flt(merged.get('vmcr_qty') - merged.get('daily_sales'),2) if flt(merged.get('vmcr_qty') - merged.get('daily_sales'),2) > 0 else 0
-						})
-			if merged.get('total_milk_amt') > merged.get('vmcr_amount') + merged.get('si_amount'):
-				merged.update({'profit': flt(merged.get('total_milk_amt') - (merged.get('vmcr_amount')) + merged.get('si_amount'),2)})
+				'excess_qty':flt(merged.get('vmcr_qty') - merged.get('daily_sales'),2) if flt(merged.get('vmcr_qty') - merged.get('daily_sales'),2) > 0 else 0
+			})
+			if ((merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt')) > 0:
+				merged.update({'profit': flt(((merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt')),2)})
 				merged.update({'loss': 0})
-			if merged.get('total_milk_amt') < merged.get('vmcr_amount') + merged.get('si_amount'):
-				merged.update({'loss':flt((merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt'),2)})
+			if ((merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt')) < 0:
+				merged.update({'loss': flt(((merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt')),2)})
 				merged.update({'profit': 0})
+			# if merged.get('total_milk_amt') > merged.get('vmcr_amount') + merged.get('si_amount'):
+			# 	merged.update({'profit': flt(merged.get('total_milk_amt') - (merged.get('vmcr_amount')) + merged.get('si_amount'),2)})
+			# 	merged.update({'loss': 0})
+			# if merged.get('total_milk_amt') < merged.get('vmcr_amount') + merged.get('si_amount'):
+			# 	merged.update({'loss':flt((merged.get('vmcr_amount') + merged.get('si_amount')) - merged.get('total_milk_amt'),2)})
+			# 	merged.update({'profit': 0})
 			formatted_date = key.split('#')[0].split('-')[2]+"-"+key.split('#')[0].split('-')[1]+"-"+key.split('#')[0].split('-')[0][-2::]
 			merged.update({'vmcr_date':formatted_date})
 			_shift = "aa"+key.split("#")[1] if key.split("#")[1] == "MORNING" else "ae"+key.split("#")[1]

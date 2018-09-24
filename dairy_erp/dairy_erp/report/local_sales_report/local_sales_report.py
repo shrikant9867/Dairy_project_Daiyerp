@@ -19,7 +19,7 @@ def get_columns():
 		_("Shift") + ":Data:90",
 		_("Sales Invoice") + ":Link/Sales Invoice:150",
 		_("Item Code") + ":Link/Item:150",
-		_("Quantity") + ":Float:150",
+		_("Quantity") + ":Data:150",
 		_("Rate") + ":Float:150",
 		_("Amount") + ":Currency:100"
 	]
@@ -35,9 +35,9 @@ def get_data(filters):
 								   LEFT(si.shift,1),
 								   si.name,
 								   si_item.item_name,
-								   si_item.qty,
+								   round(si_item.qty,2),
 								   si_item.rate,
-								   si.grand_total
+								   round(si.grand_total,2)
 							from 
 								`tabSales Invoice` si,
 								`tabSales Invoice Item` si_item,
@@ -47,16 +47,16 @@ def get_data(filters):
 								si.customer = cus.name
 								and si.name = si_item.parent
 								and si.docstatus = 1 and si.company = '{0}'
-								{1} order by date(si.posting_date) """.format(vlcc_comp,get_conditions(filters)),as_list=1,debug=1)
+								{1} order by date(si.posting_date) """.format(vlcc_comp,get_conditions(filters)),as_list=1,debug=0)
 	
 	if data:
 		# if filters.get('customer_type') == "Farmer":
 		g_total = 0
 		qty_total = 0
 		for row in data:
-			qty_total += flt(row[5],2)
-			g_total += flt(row[7],2)
-		data.append(["","","Grand Total","","",qty_total,"",g_total])		
+			qty_total += row[5]
+			g_total += row[7]
+		data.append(["","","Grand Total","","",str(flt(qty_total,2)),"",str(flt(g_total,2))])		
 		# else:
 		# 	g_total = 0
 		# 	for row in data:

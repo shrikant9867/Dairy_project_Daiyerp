@@ -19,6 +19,7 @@ def get_columns():
 		_("SNF") + ":Float:100",
 		_("Rate") + ":Float:100",
 		_("Milk Value") + ":Float:150",
+		_("Route") + ":Data:100",
 		_("Vlcc Name") + ":Data:0",
 		_("Vlcc Id") + ":Data:0",
 	]
@@ -39,6 +40,7 @@ def get_data(filters=None):
 									vmcr.milkquantity,
 									vmcr.fat,
 									vmcr.snf,
+									vmcr.collectionroute,
 									vmcr.rate,
 									vmcr.amount,
 									vmcr.associated_vlcc,

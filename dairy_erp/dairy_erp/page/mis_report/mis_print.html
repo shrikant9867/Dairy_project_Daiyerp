@@ -16,18 +16,33 @@
 
 th,td {
 	text-align: center;
+	height:10px;
 }
 
 </style>
 	<div class="row">
-		<div class="col-xs-3"></div>
-		<div class="col-xs-3 text-right">
-			{%= vlcc %}
+		<div class="col-xs-2">
 		</div>
-		<div class="col-xs-3 text-left">
-			{%= vlcc_addr %}
+		<div class="col-xs-8 text-center">
+	        <h3>
+		        {%= vlcc %},
+				{% if (vlcc_addr) { %}
+		            {% for(var i=0, l=vlcc_addr.split("<br>").length; i < l; i++) { %}
+		            	{% if (i == l-1) { %}
+							{%= ("") %}
+						{% } else { %}
+							{% if (i == l-2) { %}
+								{%= vlcc_addr.split("<br>")[i] %}
+							{% } else { %}
+								{%= vlcc_addr.split("<br>")[i] %},
+							{% } %}
+						{% } %}
+					{% } %}
+		        {% } %}
+        	</h3>
 		</div>
-		<div class="col-xs-3"></div>
+		<div class="col-xs-2">
+		</div>
 	</div>
 	<div class="row">
 		<div class="col-xs-8" style="font-size: 16px;">
@@ -36,9 +51,13 @@ th,td {
 			</center>
 		</div>
 		<div class="col-xs-2">
+			Month:
+			&nbsp;
 			{%= month %}
 		</div>
 		<div class="col-xs-2">
+			Fiscal Year:
+			&nbsp;
 			{%= fiscal_year %}
 		</div>
 	</div>

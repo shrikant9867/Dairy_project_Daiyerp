@@ -213,6 +213,9 @@ frappe.ui.form.on('VLCC Loan Child',  {
 					if (r.message){
 						frm.set_value("loan_outstanding",r.message)
 					}
+					else if(row.amount == row.outstanding){
+						frm.set_value("loan_outstanding",0)
+					}
 				}
 			});
 		}
@@ -230,6 +233,9 @@ frappe.ui.form.on('VLCC Advance Child', 'amount', function(frm, cdt, cdn){
 			callback: function(r) {
 				if (r.message){
 					frm.set_value("advance_outstanding",r.message)
+				}
+				else if(row.amount == row.outstanding){
+					frm.set_value("advance_outstanding",0)
 				}
 			}
 		});

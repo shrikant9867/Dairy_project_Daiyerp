@@ -1,0 +1,124 @@
+<style type="text/css">
+
+th,td {
+	text-align: center;
+	border-left: 0px solid;
+    border-right: 0px solid;
+    font-size: 20px;
+}
+
+.cc {
+	font-size: 20px;
+}
+
+.dd {
+	font-size: 25px;
+}
+
+</style>
+<div class="row dd"><center>
+	<b>Malbar Regional Co-operative Milk Producers' Union Ltd.</b>
+</center>
+</div>
+<div class="row cc"><center>MRCMPU Ltd, {%= filters.branch_office %}</center></div>
+<div class="row dd"><center><b>FAT & SNF Statement</b></center>
+</div>
+<div class="row">
+	<div class="col-xs-6 cc">
+		Period From {%= dateutil.str_to_user(filters.from_date) %} To {%= dateutil.str_to_user(filters.to_date) %}
+	</div>
+	<div class="col-xs-6"></div>
+</div>
+<hr>
+<div class="row">
+	<div class="col-xs-3 cc">
+		<b>Quality Type</b>&nbsp; {{ "CS" }}
+	</div>
+</div>
+<table class="table">
+	<thead>
+		<tr>
+			<td><b>{%= __("Date") %}</b></td>
+			<td><b>{%= __("Shift") %}</b></td>
+			<td><b>{%= __("Fat Per") %}</b></td>
+			<td><b>{%= __("Snf Per") %}</b></td>	
+			<td><b>{%= __("Fat Kg") %}</b></td>
+			<td><b>{%= __("Snf Kg") %}</b></td>
+			<td><b>{%= __("Tot Quantity") %}</b></td>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			{% if (data[i][__("Quality Type")] == "CS") { %}
+				{% if (i == l-1) { %}
+				<tr>
+					<td><b>Total</b></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td><b>{%= data[i][__("Fat Kg")] %}</b></td>
+					<td><b>{%= data[i][__("Snf Kg")] %}</b></td>
+					<td><b>{%= data[i][__("Tot Quantity")] %}</b></td>
+				</tr>
+				{% } else { %}
+				<tr>
+					<td>{%= data[i][__("Date")] %}</td>
+					<td>{%= data[i][__("Shift")] %}</td>
+					<td>{%= flt(data[i][__("Fat Per")],2) %}</td>
+					<td>{%= flt(data[i][__("Snf Per")],2) %}</td>
+					<td>{%= flt(data[i][__("Fat Kg")],2) %}</td>
+					<td>{%= flt(data[i][__("Snf Kg")],2) %}</td>
+					<td>{%= flt(data[i][__("Tot Quantity")],2) %}</td>
+				</tr>
+				{% } %}
+			{% } %}		
+		{% } %}
+	</tbody>
+</table>
+<hr>
+<hr>
+<div class="row">
+	<div class="col-xs-3 cc">
+		<b>Quality Type</b>&nbsp; {{ "G" }}
+	</div>
+</div>
+<table class="table">
+	<thead>
+		<tr>
+			<td><b>{%= __("Date") %}</b></td>
+			<td><b>{%= __("Shift") %}</b></td>
+			<td><b>{%= __("Fat Per") %}</b></td>
+			<td><b>{%= __("Snf Per") %}</b></td>	
+			<td><b>{%= __("Fat Kg") %}</b></td>
+			<td><b>{%= __("Snf Kg") %}</b></td>
+			<td><b>{%= __("Tot Quantity") %}</b></td>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			{% if (data[i][__("Quality Type")] == "G") { %}
+				{% if (i == l-2) { %}
+				<tr>
+					<td><b>Total</b></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td><b>{%= data[i][__("Fat Kg")] %}</b></td>
+					<td><b>{%= data[i][__("Snf Kg")] %}</b></td>
+					<td><b>{%= data[i][__("Tot Quantity")] %}</b></td>
+				</tr>
+				{% } else { %}
+				<tr>
+					<td>{%= data[i][__("Date")] %}</td>
+					<td>{%= data[i][__("Shift")] %}</td>
+					<td>{%= flt(data[i][__("Fat Per")],2) %}</td>
+					<td>{%= flt(data[i][__("Snf Per")],2) %}</td>
+					<td>{%= flt(data[i][__("Fat Kg")],2) %}</td>
+					<td>{%= flt(data[i][__("Snf Kg")],2) %}</td>
+					<td>{%= flt(data[i][__("Tot Quantity")],2) %}</td>
+				</tr>
+				{% } %}
+			{% } %}		
+		{% } %}
+	</tbody>
+</table>

@@ -84,8 +84,13 @@ def get_effective_credit(customer, invoice=None):
 
 @frappe.whitelist()
 def validate_local_sale(doc, method):
-	dairy_setting = frappe.db.get_singles_dict('Dairy Setting').get('allow_negative_effective_credit')
-	doc.is_negative = dairy_setting
+	"""
+	Fetch allow_negative_effective_credit from VLCC
+	"""
+	vlcc = frappe.get_doc("User",frappe.session.user).company
+	allow_negative_effective_credit = frappe.get_doc("VLCC Settings",vlcc).get('allow_negative_effective_credit')
+	# dairy_setting = frappe.db.get_singles_dict('Dairy Setting').get('allow_negative_effective_credit')
+	doc.is_negative = allow_negative_effective_credit
 	if doc.effective_credit <= 0.000 and doc.service_note and not doc.by_cash:
 		frappe.throw(_("Cannot create Service Note, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
 	elif (doc.grand_total > doc.effective_credit and doc.service_note and not doc.by_cash) \

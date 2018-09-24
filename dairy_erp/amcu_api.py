@@ -340,7 +340,7 @@ def create_vmrc(data):
 		for i,v in api_data.items():
 			if i != "collectionEntryList":
 				api_data[i.lower()] = api_data.pop(i)
-			else: 
+			else:
 				for d in v:
 					for m,n in d.items():
 						d[m.lower()] = d.pop(m)
@@ -364,7 +364,7 @@ def make_vmrc(data, response_dict):
 						response_dict.update({row.get('farmerid')+"-"+row.get('milktype'):[]})
 						if frappe.db.get_singles_dict('Dairy Setting').get('configurable_days'):
 							if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
-								if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') and row.get('milkquantity') and row.get('rate') and row.get('status'):
+								if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('collectionroute'):
 									collectiontime = row.get('collectiontime') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000))
 									collectiondate = data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 									vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
@@ -385,7 +385,7 @@ def make_vmrc(data, response_dict):
 											response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),vmrc_doc.name)})
 											# response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
 								else:
-									response_dict.update({"status":["Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate are manadatory"]})
+									response_dict.update({"status":["Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate,collectionroute are manadatory"]})
 							else:
 								response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"Error","response":"Data Missing","message":"imeinumber,collectionDate,shift,rcvdTime are manadatory"})
 						else:

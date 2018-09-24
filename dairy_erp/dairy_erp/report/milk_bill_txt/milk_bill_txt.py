@@ -58,7 +58,7 @@ def get_data(filters=None):
 							from
 								`tabVlcc Milk Collection Record`
 							where
-							{0} and docstatus = 1 order by date(collectiontime)""".format(get_conditions(filters)),as_list=1,debug=1)
+							{0} and docstatus = 1 order by date(collectiontime)""".format(get_conditions(filters)),as_list=1,debug=0)
 	for row in vmcr_data:
 		farmerid = row[4].split("_")
 		qty = str(row[6]).split(".")

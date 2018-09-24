@@ -215,6 +215,10 @@ frappe.ui.form.on('Loan Child',  {
 					if (r.message){
 						frm.set_value("loan_outstanding",r.message)
 					}
+					else if(row.amount == row.outstanding){
+						frm.set_value("loan_outstanding",0)
+						console.log("+++++Value becomes Zero+++++")
+					}
 				}
 			});
 		}
@@ -231,8 +235,13 @@ frappe.ui.form.on('Advance Child', 'amount', function(frm, cdt, cdn){
 			method: "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_updated_advance",
 			args: {"cycle": frm.doc.cycle, "adv_id": row.adv_id, "amount": row.amount, "total": row.principle},
 			callback: function(r) {
+				console.log(r.message)
 				if (r.message){
 					frm.set_value("advance_outstanding",r.message)
+				}
+				else if(row.amount == row.outstanding){
+					frm.set_value("advance_outstanding",0)
+					console.log("+++++Value becomes Zero+++++")
 				}
 			}
 		});

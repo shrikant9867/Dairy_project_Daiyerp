@@ -532,7 +532,7 @@ def get_loans_child(start_date, end_date, vlcc, farmer_id, cycle=None):
 				`tabFarmer Loan`
 			where
 				farmer_id = '{0}' and outstanding_amount != 0 and date_of_disbursement < now()	and docstatus =1
-				""".format(farmer_id),as_dict=1)
+				""".format(farmer_id),as_dict=1,debug=0)
 	loans = []
 	for row in loans_:
 		req_cycle = req_cycle_computation(row)

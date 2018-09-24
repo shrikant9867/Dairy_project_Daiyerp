@@ -4,6 +4,10 @@
 frappe.ui.form.on('VLCC Settings', {
 	refresh: function(frm) {
 		frm.events.set_vlcc(frm)
+		frm.events.set_vlcc_setting(frm)
+		if(frm.doc.flag_negative_effective_credit){
+			frm.set_df_property("allow_negative_effective_credit","read_only",1)
+		}
 		// frm.set_df_property("farmer_id1", "read_only", frm.doc.__islocal ? 0:1);
 		// frm.set_df_property("farmer_id2", "read_only", frm.doc.__islocal ? 0:1);
 	},
@@ -111,6 +115,27 @@ frappe.ui.form.on('VLCC Settings', {
 				}
 			});
 	},
+	set_vlcc_setting: function(frm){
+		console.log("inside my cond")
+		frappe.call({
+			method: "dairy_erp.dairy_erp.doctype.vlcc_settings.vlcc_settings.get_eff_credit",
+			async : false,
+			callback: function(r){
+				if(r.message){
+					if(!frm.doc.flag_negative_effective_credit){
+						frm.set_value("allow_negative_effective_credit",r.message)
+						frm.set_df_property("allow_negative_effective_credit","read_only",1)
+					}
+				}
+				else{
+					if(!frm.doc.flag_negative_effective_credit){
+						frm.set_value("allow_negative_effective_credit",0)
+						frm.set_df_property("allow_negative_effective_credit","read_only",1)						
+					}
+				}	
+			}
+		});
+	},
 	check_record_exist: function(frm){
 		if(frm.doc.__islocal){	
 			frappe.call({	
@@ -142,10 +167,12 @@ frappe.ui.form.on('VLCC Settings', {
 	enable_negative_effective_credit: function(frm){
 		frm.set_value("allow_negative_effective_credit",1)
 		frm.set_value("flag_negative_effective_credit",1)
+		frm.set_df_property("allow_negative_effective_credit","read_only",1)
 	},
 	disable_negative_effective_credit: function(frm){
 		frm.set_value("allow_negative_effective_credit",0)
 		frm.set_value("flag_negative_effective_credit",1)
+		frm.set_df_property("allow_negative_effective_credit","read_only",1)
 	}
 });
 

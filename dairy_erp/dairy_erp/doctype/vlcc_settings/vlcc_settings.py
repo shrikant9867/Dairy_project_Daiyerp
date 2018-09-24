@@ -255,3 +255,12 @@ def make_dairy_log(**kwargs):
 @frappe.whitelist()
 def get_ag_rupay_url():
 	return frappe.get_doc("Dairy Setting").get('url')
+
+@frappe.whitelist()
+def get_eff_credit():
+	"""
+	Fetch allow_negative_effective_credit from Dairy Settings
+	"""
+	dairy_setting = frappe.get_doc("Dairy Setting")
+	allow_negative_effective_credit = dairy_setting.get('allow_negative_effective_credit')
+	return allow_negative_effective_credit

@@ -1,13 +1,12 @@
 <style type="text/css">
-.width-increase {
-  		width: 9%;
-},
 
 th,td {
-	height:10;
-}	
+	text-align: center;
+}
+
+
 </style>
-<div class="row">
+<div class="row" id="header-html">
 	<div class="col-xs-2">
 	</div>
 	<div class="col-xs-8 text-center">
@@ -31,7 +30,6 @@ th,td {
 	<div class="col-xs-2">
 	</div>
 </div>
-<div class="container-fluid" style="margin: 0 20px 0 20px">
 	<div class="row">
 		<div class="col-xs-12" style="font-size: 16px;">
 			<center>
@@ -48,165 +46,160 @@ th,td {
 	</div>
 	<div style="border-top: double #d1d8dd; margin: 4px 0 4px 0"></div>
 
-	<div class = "row">
-		<div class="col-md-12">
-			<table class="table table-bordered">
-				<tbody>
-					<tr>
-					    <th colspan="8" style="text-align: center;">
-					    	Morning
-					    </th>
-						<th colspan="6" style="text-align: center;">
-					    	Evening
-					    </th>
-					    <th colspan="2" style="text-align: center;">
-					    	Total
-					    </th>
-					</tr>
-					<tr>
-						<th>SI No.</th>
-						<th>Date</th>
-						<th>Quantity</th>
-						<th>Milk<br>Type</th>
-						<th>FAT</th>
-						<th>SNF</th>
-						<th>Rate</th>
-						<th>Amount</th>
-						<th>Quantity</th>
-						<th>Milk<br>Type</th>
-						<th>FAT</th>
-						<th>SNF</th>
-						<th>Rate</th>
-						<th>Amount</th>
-						<th>Quantity</th>
-						<th>Amount</th>
-					</tr>
-					{% for(var i=0, l=fmcr.length; i < l; i++) { %}
-						{% if (i < l-1) { %}
-							<tr>
-							    <td>{%= i+1 %}</td>
-							    <td class="width-increase">{%= fmcr[i][0] %}</td>
-							    {% if (fmcr[i][1] == 0) { %}
-									<td>{{ ("-") }}</td>
-									{% }	
-									else { %}
-									<td>{%= fmcr[i][1] %}</td>		
-									{% } %}
-							    <td>{%= fmcr[i][2] %}</td>
-							    <td>{%= fmcr[i][3] %}</td>
-							    <td>{%= fmcr[i][4] %}</td>
-							    <td>{%= fmcr[i][5] %}</td>
-							     {% if (fmcr[i][6] == 0) { %}
-									<td>{{ ("-") }}</td>
-									{% }	
-									else { %}
-									<td>{%= fmcr[i][6] %}</td>		
-									{% } %}
-							    {% if (fmcr[i][9] == 0) { %}
-									<td>{{ ("-") }}</td>
-									{% }	
-									else { %}
-									<td>{%= fmcr[i][9] %}</td>		
-									{% } %}
-								<td>{%= fmcr[i][10] %}</td>	
-							    <td>{%= fmcr[i][11] %}</td>
-							    <td>{%= fmcr[i][12] %}</td>
-							    <td>{%= fmcr[i][13] %}</td>
-							    {% if (fmcr[i][14] == 0) { %}
-									<td>{{ ("-") }}</td>
-									{% }	
-									else { %}
-									<td>{%= fmcr[i][14] %}</td>		
-									{% } %}
-							    <td>{%= fmcr[i][16] %}</td>
-							    <td>{%= fmcr[i][17] %}</td>
-							</tr> 
-						{% } 
-						else { %} 
-						<tr>
-						    <td><b>{%= ("Total") %}</b></td>
-						    <td>{%= fmcr[i][0] %}</td>
-						    {% if (fmcr[i][1] == 0) { %}
-									<td>{{ ("-") }}</td>
-									{% }	
-									else { %}
-									<td>{%= fmcr[i][1] %}</td>		
-									{% } %}
-						    <td>{%= fmcr[i][2] %}</td>
-						    <td>{%= fmcr[i][3] %}</td>
-						    <td>{%= fmcr[i][4] %}</td>
-						    <td>{%= fmcr[i][5] %}</td>
-						    {% if (fmcr[i][6] == 0) { %}
-									<td>{{ ("-") }}</td>
-									{% }	
-									else { %}
-									<td>{%= fmcr[i][6] %}</td>		
-									{% } %}
-							{% if (fmcr[i][7] == 0) { %}
-									<td>{{ ("-") }}</td>
-									{% }	
-									else { %}
-									<td>{%= fmcr[i][7] %}</td>		
-									{% } %}		
-						    <td>{%= fmcr[i][8] %}</td>
-						    <td>{%= fmcr[i][9] %}</td>
-						    <td>{%= fmcr[i][10] %}</td>
-						    <td>{%= fmcr[i][11] %}</td>
-						    {% if (fmcr[i][12] == 0) { %}
-									<td>{{ ("-") }}</td>
-									{% }	
-									else { %}
-									<td>{%= fmcr[i][12] %}</td>
-									{% } %}	
-						    <td>{%= fmcr[i][13] %}</td>
-						    <td>{%= fmcr[i][14] %}</td>
-						</tr> 
+<table class="table table-bordered">
+	<thead>
+		<tr>
+		    <th colspan="8" style="text-align: center;">
+		    	Morning
+		    </th>
+			<th colspan="6" style="text-align: center;">
+		    	Evening
+		    </th>
+		    <th colspan="2" style="text-align: center;">
+		    	Total
+		    </th>
+		</tr>
+		<tr>
+			<th>SI No.</th>
+			<th>Date</th>
+			<th>Quantity</th>
+			<th>Milk<br>Type</th>
+			<th>FAT</th>
+			<th>SNF</th>
+			<th>Rate</th>
+			<th>Amount</th>
+			<th>Quantity</th>
+			<th>Milk<br>Type</th>
+			<th>FAT</th>
+			<th>SNF</th>
+			<th>Rate</th>
+			<th>Amount</th>
+			<th>Quantity</th>
+			<th>Amount</th>
+		</tr>
+	</thead>
+	<tbody>	
+		{% for(var i=0, l=fmcr.length; i < l; i++) { %}
+			{% if (i < l-1) { %}
+				<tr>
+				    <td>{%= i+1 %}</td>
+				    <td class="width-increase">{%= fmcr[i][0] %}</td>
+				    {% if (fmcr[i][1] == 0) { %}
+						<td>{{ ("-") }}</td>
+						{% }	
+						else { %}
+						<td>{%= fmcr[i][1] %}</td>		
 						{% } %}
-					{% } %}
-				</tbody>
-			</table>
-		</div>
-	</div>
-	<div class = "row">
-		<div class="col-md-12">
-			<table class="table table-bordered" style="table-layout: fixed; width: 100%">
-				<tbody>
-					<tr>
-						<th>Date</th>
-					    <th colspan="2" style="text-align: center;">
-					    	Earning
-					    </th>
-						<th colspan="2" style="text-align: center;">
-					    	Deduction
-					    </th>
-					    <th style="text-align: center;">
-					    	Balance Amount
-					    </th>
-					</tr>    
-					    <tr>
-					    	<td>{%= frappe.datetime.get_today()%}</td>
-					    	<td>{%= ("Previous Balance") %}</td>
-					    	<td>{%= previous_balance %}</td>
-					    	<td>{%= ("Payment") %}</td>
-					    	<td>{%= payment %}</td>
-					    </tr>
-					    <tr>
-					    	<td>{{ (" ") }}</td>
-					    	<td>{%= ("Total Milk Amount") %}</td>
-					    	<td>{%= total_milk_amount %}</td>
-					    	<td>{%= ("Cattle Feed") %}</td>
-					    	<td>{%= cattle_feed %}</td>
-					    </tr>
-					    <tr>
-					    	<td>{{ (" ") }}</td>
-					    	<td>{%= ("Total") %}</td>
-					    	<td>{%= previous_balance + total_milk_amount %}</td>
-					    	<td>{%= ("Total") %}</td>
-					    	<td>{%= payment + cattle_feed %}</td>
-					    	<td>{%= (previous_balance + total_milk_amount) - (payment + cattle_feed) %}</td>
-					    </tr>
-				</tbody>
-			</table>
-		</div>
-	</div>
-</div>
+				    <td>{%= fmcr[i][2] %}</td>
+				    <td>{%= fmcr[i][3] %}</td>
+				    <td>{%= fmcr[i][4] %}</td>
+				    <td>{%= fmcr[i][5] %}</td>
+				     {% if (fmcr[i][6] == 0) { %}
+						<td>{{ ("-") }}</td>
+						{% }	
+						else { %}
+						<td>{%= fmcr[i][6] %}</td>		
+						{% } %}
+				    {% if (fmcr[i][9] == 0) { %}
+						<td>{{ ("-") }}</td>
+						{% }	
+						else { %}
+						<td>{%= fmcr[i][9] %}</td>		
+						{% } %}
+					<td>{%= fmcr[i][10] %}</td>	
+				    <td>{%= fmcr[i][11] %}</td>
+				    <td>{%= fmcr[i][12] %}</td>
+				    <td>{%= fmcr[i][13] %}</td>
+				    {% if (fmcr[i][14] == 0) { %}
+						<td>{{ ("-") }}</td>
+						{% }	
+						else { %}
+						<td>{%= fmcr[i][14] %}</td>		
+						{% } %}
+				    <td>{%= fmcr[i][16] %}</td>
+				    <td>{%= fmcr[i][17] %}</td>
+				</tr> 
+			{% } 
+			else { %} 
+			<tr>
+			    <td><b>{%= ("Total") %}</b></td>
+			    <td>{%= fmcr[i][0] %}</td>
+			    {% if (fmcr[i][1] == 0) { %}
+						<td>{{ ("-") }}</td>
+						{% }	
+						else { %}
+						<td>{%= fmcr[i][1] %}</td>		
+						{% } %}
+			    <td>{%= fmcr[i][2] %}</td>
+			    <td>{%= fmcr[i][3] %}</td>
+			    <td>{%= fmcr[i][4] %}</td>
+			    <td>{%= fmcr[i][5] %}</td>
+			    {% if (fmcr[i][6] == 0) { %}
+						<td>{{ ("-") }}</td>
+						{% }	
+						else { %}
+						<td>{%= fmcr[i][6] %}</td>		
+						{% } %}
+				{% if (fmcr[i][7] == 0) { %}
+						<td>{{ ("-") }}</td>
+						{% }	
+						else { %}
+						<td>{%= fmcr[i][7] %}</td>		
+						{% } %}		
+			    <td>{%= fmcr[i][8] %}</td>
+			    <td>{%= fmcr[i][9] %}</td>
+			    <td>{%= fmcr[i][10] %}</td>
+			    <td>{%= fmcr[i][11] %}</td>
+			    {% if (fmcr[i][12] == 0) { %}
+						<td>{{ ("-") }}</td>
+						{% }	
+						else { %}
+						<td>{%= fmcr[i][12] %}</td>
+						{% } %}	
+			    <td>{%= fmcr[i][13] %}</td>
+			    <td>{%= fmcr[i][14] %}</td>
+			</tr> 
+			{% } %}
+		{% } %}
+	</tbody>
+</table>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th>Date</th>
+		    <th colspan="2" style="text-align: center;">
+		    	Earning
+		    </th>
+			<th colspan="2" style="text-align: center;">
+		    	Deduction
+		    </th>
+		    <th style="text-align: center;">
+		    	Balance Amount
+		    </th>
+		</tr>
+	</thead>
+	<tbody>	    
+		    <tr>
+		    	<td>{%= frappe.datetime.get_today()%}</td>
+		    	<td>{%= ("Previous Balance") %}</td>
+		    	<td>{%= previous_balance %}</td>
+		    	<td>{%= ("Payment") %}</td>
+		    	<td>{%= payment %}</td>
+		    </tr>
+		    <tr>
+		    	<td>{{ (" ") }}</td>
+		    	<td>{%= ("Total Milk Amount") %}</td>
+		    	<td>{%= total_milk_amount %}</td>
+		    	<td>{%= ("Cattle Feed") %}</td>
+		    	<td>{%= cattle_feed %}</td>
+		    </tr>
+		    <tr>
+		    	<td>{{ (" ") }}</td>
+		    	<td>{%= ("Total") %}</td>
+		    	<td>{%= previous_balance + total_milk_amount %}</td>
+		    	<td>{%= ("Total") %}</td>
+		    	<td>{%= payment + cattle_feed %}</td>
+		    	<td>{%= (previous_balance + total_milk_amount) - (payment + cattle_feed) %}</td>
+		    </tr>
+	</tbody>
+</table>	

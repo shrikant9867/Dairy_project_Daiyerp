@@ -44,11 +44,12 @@ def generate_fpcr(cur_cycle, farmer, vlcc, start_date, end_date):
 	for row in  get_fmcr(cur_cycle, farmer, vlcc, start_date, end_date):
 		total_bill += row.get('amount')
 		tota_qty += row.get('milkquantity')
+		print "############",row.get('milkquantity')
 		fpcr_doc.append('fmcr_details',{
 			'amount': row.get('amount'),
 			'date': row.get('rcvdtime'),
 			'shift': row.get('shift'),
-			'milkquantity': row.get('milkquantity'),
+			'litres': row.get('milkquantity'),
 			'fat': row.get('fat'),
 			'snf': row.get('snf'),
 			'rate': row.get('rate'),
@@ -76,11 +77,12 @@ def generate_fpcr(cur_cycle, farmer, vlcc, start_date, end_date):
 			'no_of_instalment': row.get('no_of_instalment')
 			})
 	incentives = get_incentives(total_bill, tota_qty, vlcc)
+	fpcr_doc.total_amount = total_bill
 	fpcr_doc.incentives = incentives if incentives else 0
+	fpcr_doc.total_bill = flt(total_bill) + flt(fpcr_doc.incentives)
 	fpcr_doc.flags.ignore_permissions = True
 	fpcr_doc.save()
 	fpcr_doc.submit()
-	print "#################",get_incentives(total_bill, tota_qty, vlcc),farmer
 
 
 def get_fmcr(cur_cycle, farmer, vlcc, start_date, end_date):

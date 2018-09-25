@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, today, getdate
+from frappe.utils import flt, today, getdate, nowdate
 from frappe.model.document import Document
 
 class FarmerAdvance(Document):
@@ -13,7 +13,7 @@ class FarmerAdvance(Document):
 	def on_submit(self):
 		if flt(self.emi_amount) > flt(self.outstanding_amount):
 			frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
-
+		self.create_je()
 
 	def validate(self):
 		self.status = "Unpaid"
@@ -22,13 +22,23 @@ class FarmerAdvance(Document):
 		if self.advance_amount <= 0:
 			frappe.throw(_("Advance Amount cannot be zero"))
 
-
-	def on_update_after_submit(self):
-		pass
-		# if self.emi_amount > self.outstanding_amount:
-		# 	frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
-		# if (self.no_of_instalment - self.paid_instalment) == 1 and self.emi_amount != self.outstanding_amount and int(self.extension) == 0:
-		# 		frappe.throw(_("EMI must be equal to outstanding in last instalment please use extension"))
+	def create_je(self):
+		abbr = frappe.db.get_value("Company", self.vlcc, 'abbr')
+		je_doc = frappe.new_doc("Journal Entry")
+		je_doc.voucher_type = "Journal Entry"
+		je_doc.company = self.vlcc
+		je_doc.posting_date = nowdate()
+		je_doc.append('accounts', {
+			'account': "Loans and Advances - "+ abbr,
+			'debit_in_account_currency': self.advance_amount
+			}) 
+		je_doc.append('accounts', {
+			'account': "Cash - "+ abbr,
+			'credit_in_account_currency': self.advance_amount
+			})
+		je_doc.flags.ignore_permissions =True	
+		je_doc.save()
+		je_doc.submit()
 
 def farmer_advance_permission(user):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)
@@ -37,8 +47,6 @@ def farmer_advance_permission(user):
 	if user != 'Administrator' and "Vlcc Manager" in roles:
 		return """(`tabFarmer Advance`.vlcc = '{0}')""".format(user_doc.get('company'))
 	
-
-
 @frappe.whitelist()
 def get_emi(name = None, total = None, no_of_instalments = None,extension = None, paid_instalment=None):
 	if name:
@@ -46,7 +54,6 @@ def get_emi(name = None, total = None, no_of_instalments = None,extension = None
 		instalment = (float(no_of_instalments) + float(extension)) - float(paid_instalment)
 		emi = outstanding_amount / instalment
 		return emi if emi else 0 
-
 
 def get_si_amount(data):
 	sum_ = frappe.db.sql("""

@@ -37,7 +37,7 @@ def get_data(filters):
 								   si_item.item_name,
 								   round(si_item.qty,2),
 								   si_item.rate,
-								   round(si.grand_total,2)
+								   round(si_item.rate*si_item.qty,2)
 							from 
 								`tabSales Invoice` si,
 								`tabSales Invoice Item` si_item,

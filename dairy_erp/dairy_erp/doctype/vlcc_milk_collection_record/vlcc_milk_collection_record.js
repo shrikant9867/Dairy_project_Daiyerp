@@ -10,6 +10,14 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 		frm.trigger("calculate_amount");
 	},
 
+	collectionroute:function(frm){
+		var route = String(frm.doc.collectionroute)
+		if(route.length > 3 && frm.doc.collectionroute){
+			frm.set_value("collectionroute","")
+			frappe.throw("Collection Route contain Only 3 Characters")
+		}
+	},
+
 	validate: function(frm) {
 		frm.trigger("calculate_amount");
 	},

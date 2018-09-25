@@ -14,6 +14,7 @@ class VlccMilkCollectionRecord(Document):
 	def validate(self):
 		self.validate_duplicate_entry()
 		self.validate_status()
+		self.validate_route()
 		self.validate_vlcc_chilling_centre()
 		# self.check_stock()
 		self.calculate_amount()
@@ -42,6 +43,11 @@ class VlccMilkCollectionRecord(Document):
 	def set_posting_date(self):
 		self.posting_date = getdate(self.collectiontime)
 
+	def validate_route(self):
+		if self.collectionroute and len(str(self.collectionroute)) > 3:
+			self.collectionroute = 0
+			frappe.throw("Collection Route contain Only 3 Characters")
+			
 	def validate_duplicate_entry(self):
 		if not self.flags.is_api:
 			filters = {

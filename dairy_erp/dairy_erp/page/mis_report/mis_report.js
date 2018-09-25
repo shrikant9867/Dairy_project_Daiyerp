@@ -56,10 +56,12 @@ frappe.mis_report = Class.extend({
     },
     update_total_milk:function() {
         var me = this;
+        me.flag_update = 0
         $(me.page).find('[data-fieldname="formated_milk"]').val(me.formated_and_total_milk.formated_milk)
-        $(me.page).find(".total_milk").html(me.formated_and_total_milk.total_milk);
+        //$(me.page).find(".total_milk").html(me.formated_and_total_milk.total_milk);
         $(me.page).find('[data-fieldname="update_total_milk"]').click(function(){
             if($(me.page).find('[data-fieldname="formated_milk"]').val()){
+                me.flag_update = 1
                 var milk_data =  {"formated_milk":flt($(me.page).find('[data-fieldname="formated_milk"]').val()),
                              "good_milk":flt($(me.page).find(".good_milk").html()),
                              "total_milk":flt($(me.page).find(".total_milk").html())
@@ -70,6 +72,9 @@ frappe.mis_report = Class.extend({
                 frappe.throw(__("Please Add Bad Milk Qty"))
             }
         })
+        if(me.flag_update == 0){
+            me.formated_and_total_milk.total_milk = ""
+        }
     },
     add_formated_milk:function(milk_data){
         var me = this;

@@ -45,13 +45,8 @@ class VlccMilkCollectionRecord(Document):
 		self.posting_date = getdate(self.collectiontime)
 
 	def validate_route(self):
-		if self.collectionroute and len(str(self.collectionroute)) > 3:
-			frappe.throw("Collection Route contain Only 3 Digit")
-
-		if self.collectionroute and len(str(self.collectionroute)) <= 3:
-			route = re.search(r'^[-+]?[0-9]+$',str(self.collectionroute))
-			if not route:
-				frappe.throw("Collection Route contain Only Numeric Value")
+		if self.collectionroute and len(str(self.collectionroute)) < 3:
+			frappe.throw("Collection Route contain aleast 3 Charaters")
 				
 	def validate_duplicate_entry(self):
 		if not self.flags.is_api:

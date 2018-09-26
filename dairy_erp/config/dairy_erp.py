@@ -174,6 +174,13 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Truck sheet",
+					"label":_("Truck sheet"),
+					"doctype": "Vlcc Milk Collection Record",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Milk Passbook",
 					"label":_("Milk Passbook"),
 					"doctype": "Farmer Milk Collection Record",

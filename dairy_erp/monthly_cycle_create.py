@@ -20,16 +20,32 @@ def auto_cycle_create():
 	vlcc_setting = frappe.get_all("VLCC Settings",fields=['no_of_cycles','no_of_interval','name'])
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 	current_month = getdate(nowdate()).month
-	s_date = get_month_details(current_fiscal_year.get('name'),current_month).month_start_date
+	month_details = get_month_details(current_fiscal_year.get('name'),cint(current_month))
+	cycle_data = {}
+	s_date,e_date = "",""
 
-	# start_date = s_date
-	for setting in vlcc_setting:
-		e_date = datetime.date(s_date.year, cint(current_month), cint(setting.get('no_of_interval'))) 
-		# print e_date,"e_date______________________\n\n"
-		for cycle in range(setting.get('no_of_cycles')):
-			cycle_date_computation(s_date,e_date)
-			s_date = add_days(getdate(s_date),setting.get('no_of_interval'))
-			# print a,"aaaa"
+	vlcc_settings = vlcc_setting[0].get('name') if vlcc_setting and vlcc_setting[0].get('name') else []
+	if vlcc_settings:
+		for vlcc in vlcc_setting:
+			if vlcc.get('no_of_cycles') and vlcc.get('no_of_interval'):
+				for cycle_index in range(1,cint(vlcc.get('no_of_cycles'))+cint(1)):
+					if cycle_index == 1:
+         				s_date = month_details.month_start_date
+         				e_date = datetime.date(current_fiscal_year.get('name'), cint(current_month), cint(vlcc.get('no_of_interval')))
+         				cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
+     				elif cycle_index == cint(vlcc.get('no_of_cycles')):
+         				s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
+         				e_date = month_details.month_end_date
+         				cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
+     				else:
+         				s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
+         				e_date = add_days(getdate(e_date),cint(vlcc.get('no_of_interval')))
+         				cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
+        print cycle_data
+
+
+
+
 
 def cycle_date_computation():
 	date_computation = frappe.new_doc("Farmer Date Computation")

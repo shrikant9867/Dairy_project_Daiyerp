@@ -17,8 +17,8 @@ def get_columns():
 		_("Qty") + ":Float:100",
 		_("FAT") + ":Float:100",
 		_("SNF") + ":Float:100",
-		_("Rate") + ":Float:100",
-		_("Milk Value") + ":Float:150",
+		_("Rate") + ":Data:100",
+		_("Milk Value") + ":Data:150",
 		_("Route") + ":Data:100",
 		_("Vlcc Name") + ":Data:0",
 		_("Vlcc Id") + ":Data:0",
@@ -40,9 +40,9 @@ def get_data(filters=None):
 									vmcr.milkquantity,
 									vmcr.fat,
 									vmcr.snf,
+									round(vmcr.rate,2),
+									round(vmcr.amount,2),
 									vmcr.collectionroute,
-									vmcr.rate,
-									vmcr.amount,
 									vmcr.associated_vlcc,
 									vmcr.farmerid
 								from
@@ -50,7 +50,7 @@ def get_data(filters=None):
 								where
 									vmcr.docstatus = 1 and
 									vmcr.shift = '{0}' and
-									{1} and date(vmcr.collectiontime) = '{2}' """.format(filters.get('shift'),get_conditions(filters),filters.get('start_date')),as_list=1,debug=0)	
+									{1} and date(vmcr.collectiontime) = '{2}' """.format(filters.get('shift'),get_conditions(filters),filters.get('start_date')),as_list=1,debug=1)	
 
 	if str(get_conditions(filters)) == "1=1":
 		return []

@@ -39,14 +39,14 @@ def get_columns():
 def get_data(filters=None):
 	vmcr_data = frappe.db.sql("""
 							select
-								"009",
+								" 009",
 								date(collectiontime),
 								CASE
 								    WHEN shift = "MORNING" THEN "1"
 								    WHEN shift = "EVENING" THEN "2"
 								END,
-								"001",
-								RIGHT(farmerid,6),
+								" 001",
+								RIGHT(farmerid,5),
 								ifnull(collectionroute,"    "),
 								round(milkquantity,1),
 								round(fat,1),
@@ -58,16 +58,16 @@ def get_data(filters=None):
 							from
 								`tabVlcc Milk Collection Record`
 							where
-							{0} and docstatus = 1 order by date(collectiontime)""".format(get_conditions(filters)),as_list=1,debug=1)
+							{0} and docstatus = 1 order by date(collectiontime)""".format(get_conditions(filters)),as_list=1,debug=0)
 	for row in vmcr_data:
-		farmerid = row[4].split("_")
+		farmerid = row[4].strip().split("_")
 		qty = str(row[6]).split(".")
 		fat = str(row[7]).split(".")
 		snf = str(row[8]).split(".")
-		if len(farmerid) > 1:
-			row[4] = farmerid[0]+farmerid[1]
-		if len(farmerid) == 1:
-			row[4] = farmerid[0][0:5]
+		if len(farmerid) == 2 and farmerid[1] and len(farmerid[1]) < 5:
+			row[4] = (5 - len(farmerid[1]))*"0"+str(farmerid[1])
+		if len(farmerid) == 1 and farmerid[0] and len(farmerid[0]) < 5:
+			row[4] = (5 - len(farmerid[0]))*"0"+str(farmerid[0])
 		if len(str(row[6])) < 10 and len(qty) == 2:
 			row[6] = (10 - len(str(row[6])))*"0"+qty[0]+"."+qty[1][0]
 		if len(str(row[7])) < 6 and len(fat) == 2:
@@ -102,12 +102,14 @@ def add_txt_in_file(filters=None):
 			start_date = datetime.datetime.strptime(filters.get('start_date'),  "%Y-%m-%d").strftime("%d-%b-%Y")
 			end_date = datetime.datetime.strptime(filters.get('end_date'),  "%Y-%m-%d").strftime("%d-%b-%Y")
 			txt_data = "#TS From "+start_date+" to "+end_date+"\n"
-			txt_data += "DRY|Date      |S|Type|Party|Route|        Qty|    FAT|    SNF|Q"+"\n"
+			txt_data += "  DRY|Date      |S| Type| Party| Rout|        Qty|    Fat|    SNF|Q"+"\n"
 			txt_data += "#----------------------------------------------------------------"+"\n"
 			for row in data:
 				my_date = str(row[1])
 				my_date = my_date[8:10]+'-'+my_date[5:7]+'-'+my_date[0:4]	
-				row_str = str(row[0])+"|"+str(my_date)+"|"+str(row[2])+"|"+str(row[3])+" |"+str(row[4])+"|"+str(row[5])+" |"+str(row[6])+"|   "+str(row[7])+"|   "+str(row[8])+"|"+str(row[9])+"\n"
+				
+				row_str = " "+str(row[0])+"|"+str(my_date)+"|"+str(row[2])+"| "+str(row[3])+"| "+str(row[4])+"| "+str(row[5])+"| "+str(row[6])+"| "+str(row[7])+"| "+str(row[8])+"|"+str(row[9])+"\n"
+				
 				txt_data += row_str
 			file_name = "milk_bill_"+filters.get('start_date')+"_"+filters.get('end_date')+".txt"
 			completeName = os.path.join(file_path, file_name)

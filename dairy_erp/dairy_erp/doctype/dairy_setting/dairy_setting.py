@@ -9,7 +9,17 @@ import json
 from frappe.utils.csvutils import read_csv_content_from_attached_file
 from frappe.utils import flt, now_datetime, cstr, random_string
 class DairySetting(Document):
-	pass
+
+	def validate(self):
+		vlcc_list = [vlcc.get('name') for vlcc in frappe.get_all("Village Level Collection Centre")]
+		for vlcc in vlcc_list:
+			if frappe.db.exists("VLCC Settings",vlcc):
+				vlcc_settings = frappe.get_doc("VLCC Settings",vlcc)
+				if vlcc_settings and vlcc_settings.flag_negative_effective_credit == 0:
+					frappe.db.set_value("VLCC Settings",vlcc,'allow_negative_effective_credit',\
+							self.allow_negative_effective_credit)
+
+
 
 @frappe.whitelist()
 def get_csv(doc):
@@ -92,4 +102,5 @@ def make_dairy_log(**kwargs):
 	dlog.insert(ignore_permissions=True)
 	frappe.db.commit()
 	return dlog.name
-			
+
+

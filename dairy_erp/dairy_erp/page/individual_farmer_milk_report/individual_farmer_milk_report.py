@@ -151,5 +151,5 @@ def cattle_feed_amount(filters):
 			si.docstatus = 1
 			and si.customer = '{1}'
 			and si.posting_date between '{2}' and '{3}'
-		""".format(filters.get('farmer'),filters.get('farmer_full_name'),filters.get('start_date'),filters.get('end_date')),as_list=1,debug=1)
+		""".format(filters.get('farmer'),filters.get('farmer_full_name'),filters.get('start_date'),filters.get('end_date')),as_list=1,debug=0)
 	return cattle_feed_amount[0][0]

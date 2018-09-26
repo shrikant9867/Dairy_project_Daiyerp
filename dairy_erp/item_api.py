@@ -371,6 +371,10 @@ def get_po_references():
 	return po_list
 
 def get_config_settings():
+	"""
+	Fetch allow_negative_effective_credit from VLCC Settings
+	"""
+	vlcc = frappe.get_doc("User",frappe.session.user).company
 	return {
-		"allow_negative_eff_credit": cint(frappe.db.get_singles_dict('Dairy Setting').get('allow_negative_effective_credit'))
+		"allow_negative_eff_credit": frappe.get_doc("VLCC Settings",vlcc).get('allow_negative_effective_credit')
 	}

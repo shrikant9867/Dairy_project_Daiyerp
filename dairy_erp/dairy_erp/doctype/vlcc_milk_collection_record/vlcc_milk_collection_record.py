@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import re
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import add_to_date
@@ -14,6 +15,7 @@ class VlccMilkCollectionRecord(Document):
 	def validate(self):
 		self.validate_duplicate_entry()
 		self.validate_status()
+		self.validate_route()
 		self.validate_vlcc_chilling_centre()
 		# self.check_stock()
 		self.calculate_amount()
@@ -42,6 +44,15 @@ class VlccMilkCollectionRecord(Document):
 	def set_posting_date(self):
 		self.posting_date = getdate(self.collectiontime)
 
+	def validate_route(self):
+		if self.collectionroute and len(str(self.collectionroute)) > 3:
+			frappe.throw("Collection Route contain Only 3 Digit")
+
+		if self.collectionroute and len(str(self.collectionroute)) <= 3:
+			route = re.search(r'^[-+]?[0-9]+$',str(self.collectionroute))
+			if not route:
+				frappe.throw("Collection Route contain Only Numeric Value")
+				
 	def validate_duplicate_entry(self):
 		if not self.flags.is_api:
 			filters = {

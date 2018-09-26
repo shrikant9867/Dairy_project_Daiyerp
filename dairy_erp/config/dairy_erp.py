@@ -167,6 +167,13 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "10 Days STMT",
+					"label":_("10 Days STMT"),
+					"doctype": "Vlcc Milk Collection Record",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Milk Passbook",
 					"label":_("Milk Passbook"),
 					"doctype": "Farmer Milk Collection Record",

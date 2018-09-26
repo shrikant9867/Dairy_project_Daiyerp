@@ -497,18 +497,19 @@ def get_other_income(filters,cond):
 		conditions_si += "si.posting_date between '{0}' and '{1}'".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
 	
 	item_selling = {}
+	buying_price_list_1 = ""
+	buying_price_list_2 = ""
 	cattle_feed_item = [item.get('name') for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name")]
-	buying_price_list_1 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTCOVLCCB"},"name"))
-	buying_price_list_2 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTVLCCB"},"name"))
+	if frappe.db.exists("Material Price List",{"price_list":"GTCOVLCCBc"}):
+		buying_price_list_1 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTCOVLCCB"},"name"))
+	if frappe.db.exists("Material Price List",{"price_list":"GTVLCCB"}):
+		buying_price_list_2 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTVLCCB"},"name"))
 	if buying_price_list_1 and buying_price_list_2:
-		print "insdie 1\n\n\n"
 		item_price_list = {row.item:row.price for row in buying_price_list_1.items}
 		item_price_list.update({row.item:row.price for row in buying_price_list_2.items})
 	if buying_price_list_1 and not buying_price_list_2:
-		print "insdie 2\n\n\n"
 		item_price_list = {row.item:row.price for row in buying_price_list_1.items}
 	if buying_price_list_2 and not buying_price_list_1:
-		print "insdie 3\n\n\n"
 		item_price_list = {row.item:row.price for row in buying_price_list_2.items}
 	for item in cattle_feed_item:
 		# pi_data = frappe.db.sql("""

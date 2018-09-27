@@ -37,8 +37,10 @@ def get_columns():
 
 def get_data(filters=None):
 	date_filters = " 1=1 "
-	if filters.get("from_date") and filters.get("to_date"):
-		date_filters += " and date(collectiondate) between '{0}' and '{1}' ".format(filters.get('from_date'),filters.get('to_date'))
+	if filters.get("from_date"):
+		date_filters += " and date(collectiondate) = '{0}'".format(filters.get('from_date'))
+	if filters.get("shift"):
+		date_filters += " and shift = '{0}'".format(filters.get('shift'))	
 	if filters.get('societyid'):
 		date_filters += " and societyid = '{0}'".format(filters.get("societyid"))
 	vmcr_data = frappe.db.sql("""
@@ -49,21 +51,28 @@ def get_data(filters=None):
 								    WHEN shift = "EVENING" THEN "PM"
 								END,
 								collectionroute,
-								societyid,
-								associated_vlcc,
-								cans,
-								milkquantity,
-								fat,
-								snf,
-								"TS",
+								group_concat(societyid),
+								group_concat(associated_vlcc),
+								group_concat(numberofcans),
+								group_concat(milkquantity),
+								group_concat(fat),
+								group_concat(snf),
+								group_concat("TS"),
 								CASE
-								    WHEN status = "Accept" THEN "G"
-								    WHEN status = "Reject" THEN "CS"
+								    WHEN status = "Accept" THEN group_concat("G")
+								    WHEN status = "Reject" THEN group_concat("CS")
 								END,
-								rate,
-								round(rate*milkquantity,2)
+								group_concat(rate),
+								group_concat(round(rate*milkquantity,2))
 							from
 								`tabVlcc Milk Collection Record`
 							where
-							{0} and docstatus = 1 order by date(collectiontime)""".format(date_filters),as_list=1,debug=0)
+							{0} and docstatus = 1
+							group by collectionroute
+							order by date(collectiontime)""".format(date_filters),as_list=1,debug=1)
+	for row in vmcr_data:
+		for index,data in enumerate(row):	
+			if index > 2:
+				row[index] = data.split(',')
+	print vmcr_data,"row\n\n\n\n"
 	return vmcr_data

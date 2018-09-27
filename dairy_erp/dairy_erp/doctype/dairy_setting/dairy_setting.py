@@ -41,7 +41,7 @@ def get_csv(doc):
 		for row in rows:
 
 			if count != 0:
-				if  not frappe.db.exists("Village Level Collection Centre",row[0]):
+				if  not frappe.db.exists("Village Level Collection Centre",row[0]) and row[0] !="":
 					if not frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row[7]},"name"):
 						vlcc = frappe.new_doc("Village Level Collection Centre")
 						vlcc.vlcc_name = row[0]
@@ -80,18 +80,19 @@ def get_csv(doc):
 						vlcc.save()
 						flag = 1
 					else:
-						traceback="AMCU ID Alreadry Exists"+row[7]
+						traceback="AMCU ID Alreadry Exists"+str(row[7])
 						make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",data = "data", message=traceback, traceback=frappe.get_traceback())
 
 				else:
-					traceback="VLCC Alreadry Exists"+row[0]
+					traceback="VLCC Alreadry Exists"+str(row[0])
 					make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",data = "data", message=traceback, traceback=frappe.get_traceback())
 						
 			count +=1
 		if flag == 1:
 			frappe.msgprint("Record Inserted")
+			email=frappe.get_doc("User",frappe.session.user).email
 			frappe.sendmail(
-				recipients = frappe.db.get_value("User",frappe.session.User, "email"),
+				recipients = email,
 				subject="Bulk VLCC Creation Done ",
 				message = "Your Bulk Vlcc Record Created Please Check and If Problem Occurce Call to Support team or Check Dairy Log"
 			)			

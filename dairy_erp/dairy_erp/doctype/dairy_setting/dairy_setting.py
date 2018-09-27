@@ -23,13 +23,15 @@ class DairySetting(Document):
 
 @frappe.whitelist()
 def get_csv(doc):
+	traceback = ""
 	try:
 		doc = json.loads(doc)
 		count=0
+		flag = 0
 		max_rows = 500
 		msg,fmcr_msg = "",""
 		rows = read_csv_content_from_attached_file(frappe.get_doc("Dairy Setting",doc.get('name')))
-		print "---------------> CSV 1",rows
+
 		if not rows:
 			frappe.throw(_("Please select a valid csv file with data"))
 
@@ -37,8 +39,10 @@ def get_csv(doc):
 			frappe.throw(_("Maximum {0} rows allowed").format(max_rows))
 
 		for row in rows:
-			print "----------------------",row
+
 			if count != 0:
+				if  not frappe.db.exists("Village Level Collection Centre",row[0]):
+					if not frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row[7]},"name"):
 						vlcc = frappe.new_doc("Village Level Collection Centre")
 						vlcc.vlcc_name = row[0]
 						vlcc.abbr = row[1]
@@ -52,7 +56,7 @@ def get_csv(doc):
 						vlcc.global_percent_effective_credit = row[9]
 						vlcc.chilling_centre =row[10]
 						if int(row[11]) == 1:	
-							print row[11],"-----------+++++++++++++++++++++++------------------------+++++++++++++----------"
+
 							vlcc.operator_same_as_agent = 1
 							vlcc.operator_number = row[12]
 							vlcc.operator_email_id = row[13]
@@ -67,18 +71,30 @@ def get_csv(doc):
 						addr.city = row[17]
 						addr.vlcc = row[0]
 						addr.append("links", {
-								"link_doctype": "Company",
-								"link_name": row[0],
-								
-							})
+									"link_doctype": "Company",
+									"link_name": row[0]
+								})
 						addr.save()
 						vlcc.address = row[0]+"-Vlcc"
-						vlcc.address_display = row[16]
-						vlcc.save()	
+						vlcc.address_display = row[16]+"\n"+row[17]+"\n"+addr.country
+						vlcc.save()
+						flag = 1
+					else:
+						traceback="AMCU ID Alreadry Exists"+row[7]
+						make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",data = "data", message=traceback, traceback=frappe.get_traceback())
 
+				else:
+					traceback="VLCC Alreadry Exists"+row[0]
+					make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",data = "data", message=traceback, traceback=frappe.get_traceback())
 						
 			count +=1
-			frappe.msgprint("Record Inserted")			
+		if flag == 1:
+			frappe.msgprint("Record Inserted")
+			frappe.sendmail(
+				recipients = frappe.db.get_value("User",frappe.session.User, "email"),
+				subject="Bulk VLCC Creation Done ",
+				message = "Your Bulk Vlcc Record Created Please Check and If Problem Occurce Call to Support team or Check Dairy Log"
+			)			
 	except Exception as e:
 		frappe.db.rollback()
 		make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",data = "data", message=e, traceback=frappe.get_traceback())

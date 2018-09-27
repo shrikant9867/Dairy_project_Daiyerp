@@ -28,6 +28,8 @@ frappe.ui.form.on('Dairy Setting', {
 		frappe.call({
 				method:"dairy_erp.dairy_erp.doctype.dairy_setting.dairy_setting.get_csv",
 				args: {"doc":frm.doc},
+				freeze: true,
+            	freeze_message: __("Loading... Please Wait"),
 				callback: function(r){
 					if(r.message) {
 

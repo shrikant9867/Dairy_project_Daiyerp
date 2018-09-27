@@ -12,15 +12,9 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 
 	collectionroute:function(frm){
 		var route = String(frm.doc.collectionroute)
-		if(route.length > 3 && frm.doc.collectionroute){
+		if(route.length < 3 && frm.doc.collectionroute){
 			frm.set_value("collectionroute","")
-			frappe.throw("Collection Route contain Only 3 digit")
-		}
-
-		if(route.length <= 3 && frm.doc.collectionroute){
-			var result = frm.doc.collectionroute.match(/^\d*(?:\.\d{1,2})?$/)
-			result ? "":frm.set_value("collectionroute","")
-			result ? "":frappe.throw("Collection Route contain Numeric Value Only")
+			frappe.throw("Collection Route contain aleast 3 Charaters")
 		}
 	},
 

@@ -13,7 +13,7 @@ class FarmerAdvance(Document):
 	def on_submit(self):
 		if flt(self.emi_amount) > flt(self.outstanding_amount):
 			frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
-		self.create_je()
+		# self.create_je()
 
 	def validate(self):
 		self.status = "Unpaid"

@@ -13,6 +13,8 @@ class FarmerLoan(Document):
 	def on_submit(self):
 		if self.emi_amount > self.outstanding_amount:
 			frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
+		
+	def after_insert(self):
 		self.interest_amount = self.interest
 
 	def validate(self):

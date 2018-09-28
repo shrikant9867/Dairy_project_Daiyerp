@@ -46,7 +46,7 @@ class VlccMilkCollectionRecord(Document):
 
 	def validate_route(self):
 		if self.collectionroute and len(str(self.collectionroute)) < 3:
-			frappe.throw("Collection Route contain aleast 3 Charaters")
+			frappe.throw("Collection Route contain atleast 3 Charaters")
 				
 	def validate_duplicate_entry(self):
 		if not self.flags.is_api:

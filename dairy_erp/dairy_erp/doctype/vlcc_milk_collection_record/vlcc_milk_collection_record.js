@@ -14,7 +14,7 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 		var route = String(frm.doc.collectionroute)
 		if(route.length < 3 && frm.doc.collectionroute){
 			frm.set_value("collectionroute","")
-			frappe.throw("Collection Route contain aleast 3 Charaters")
+			frappe.throw("Collection Route contain atleast 3 Charaters")
 		}
 	},
 

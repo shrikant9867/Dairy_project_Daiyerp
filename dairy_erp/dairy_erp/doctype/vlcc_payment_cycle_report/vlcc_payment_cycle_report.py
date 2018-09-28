@@ -372,6 +372,7 @@ def get_vlcc_advance_child(start_date, end_date, vlcc, cycle=None):
 			""".format(vlcc),as_dict=1,debug=0)
 	advance = []
 	for row in advance_:
+		req_cycle_computation_advance(row)
 		if cycle in req_cycle_computation_advance(row):
 			advance.append(row)
 	return advance
@@ -388,19 +389,18 @@ def req_cycle_computation(data):
 				'{0}' < start_date order by start_date limit {2}""".
 			format(data.get('date_of_disbursement'),data.get('vlcc_id'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
+		
 		instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
-		if len(not_req_cycl):
-			req_cycle = frappe.db.sql("""
+		req_cycle = frappe.db.sql("""
 					select name
 				from
 					`tabCyclewise Date Computation`
 				where
-					'{date}' < start_date and name not in ({cycle}) order by start_date limit {instalment}
+					'{date}' <= end_date  order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc_id'),
 					instalment = instalment),as_dict=1,debug=0)
-			
-			req_cycl_list = [i.get('name') for i in req_cycle]
-			return req_cycl_list
+		req_cycl_list = [i.get('name') for i in req_cycle]
+		return req_cycl_list
 	
 
 	elif data.get('emi_deduction_start_cycle') == 0:
@@ -411,7 +411,7 @@ def req_cycle_computation(data):
 					from
 						`tabCyclewise Date Computation`
 					where
-					'{date}' < end_date
+					'{date}' <= end_date
 						order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=0)
 		req_cycl_list = [i.get('name') for i in req_cycle]
@@ -438,36 +438,15 @@ def req_cycle_computation_advance(data):
 				from
 					`tabCyclewise Date Computation`
 				where
-					'{date}' < start_date and name not in ({cycle}) order by start_date limit {instalment}
+					'{date}' <= end_date order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),
 					instalment = instalment),as_dict=1)
 			
 			req_cycl_list = [i.get('name') for i in req_cycle]
 			return req_cycl_list
 
+	
 	elif data.get('emi_deduction_start_cycle') == 0:
-
-		not_req_cycl = frappe.db.sql("""
-				select name
-			from
-				`tabCyclewise Date Computation`
-			where
-				'{0}' < start_date  order by start_date limit {1}""".
-			format(data.get('date_of_disbursement'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
-		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
-		instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
-		req_cycle = frappe.db.sql("""
-					select name
-				from
-					`tabCyclewise Date Computation`
-				where
-					'{date}' < start_date  order by start_date limit {instalment}
-				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),
-					instalment = instalment),as_dict=1,debug=0)
-		req_cycl_list = [i.get('name') for i in req_cycle]
-		return req_cycl_list
-
-	elif data.get('emi_deduction_start_cycle') == -1:
 		instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
 		req_cycle = frappe.db.sql("""
 					select
@@ -475,9 +454,9 @@ def req_cycle_computation_advance(data):
 					from
 						`tabCyclewise Date Computation`
 					where
-					'{date}' < end_date
+					'{date}' <= end_date
 						order by start_date limit {instalment}
-				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=0)
+				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=1)
 		req_cycl_list = [i.get('name') for i in req_cycle]
 		return req_cycl_list
 

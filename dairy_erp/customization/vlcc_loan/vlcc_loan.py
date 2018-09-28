@@ -118,7 +118,7 @@ def req_cycle_computation(data):
 				from
 					`tabCyclewise Date Computation`
 				where
-					'{date}' < start_date and name not in ({cycle}) order by start_date limit {instalment}
+					'{date}' <= start_date order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),
 					instalment = instalment),as_dict=1)
 			
@@ -133,7 +133,7 @@ def req_cycle_computation(data):
 					from
 						`tabCyclewise Date Computation`
 					where
-					'{date}' < end_date
+					'{date}' <= end_date
 						order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=0)
 		req_cycl_list = [i.get('name') for i in req_cycle]

@@ -217,7 +217,6 @@ frappe.ui.form.on('Loan Child',  {
 					}
 					else if(row.amount == row.outstanding){
 						frm.set_value("loan_outstanding",0)
-						console.log("+++++Value becomes Zero+++++")
 					}
 				}
 			});
@@ -241,7 +240,6 @@ frappe.ui.form.on('Advance Child', 'amount', function(frm, cdt, cdn){
 				}
 				else if(row.amount == row.outstanding){
 					frm.set_value("advance_outstanding",0)
-					console.log("+++++Value becomes Zero+++++")
 				}
 			}
 		});

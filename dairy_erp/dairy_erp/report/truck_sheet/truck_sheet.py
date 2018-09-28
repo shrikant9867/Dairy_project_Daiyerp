@@ -23,12 +23,12 @@ def get_columns():
 		_("Route") + ":Data:100",
 		_("CC") + ":Data:100",
 		_("VLCC") + ":Data:100",
+		_("Qlty") + ":Data:100",
+		_("TS") + ":Data:100",
 		_("Cans") + ":Data:100",
 		_("Qty") + ":Data:100",
 		_("Fat") + ":Data:100", 
 		_("Snf") + ":Data:100",
-		_("TS") + ":Data:100",
-		_("Qlty") + ":Data:100",
 		_("Rate") + ":Data:100",
 		_("Value") + ":Data:100"
 	]
@@ -53,15 +53,15 @@ def get_data(filters=None):
 								collectionroute,
 								group_concat(societyid),
 								group_concat(associated_vlcc),
-								group_concat(numberofcans),
-								group_concat(milkquantity),
-								group_concat(fat),
-								group_concat(snf),
 								group_concat("TS"),
 								CASE
 								    WHEN status = "Accept" THEN group_concat("G")
 								    WHEN status = "Reject" THEN group_concat("CS")
 								END,
+								group_concat(numberofcans),
+								group_concat(milkquantity),
+								group_concat(fat),
+								group_concat(snf),
 								group_concat(rate),
 								group_concat(round(rate*milkquantity,2))
 							from
@@ -73,6 +73,11 @@ def get_data(filters=None):
 	for row in vmcr_data:
 		for index,data in enumerate(row):	
 			if index > 2:
-				row[index] = data.split(',')
+				if index > 6:
+					row_ = [float(val) for val in data.split(',')]
+					row[index] = row_
+					row[index].append(sum(row_))
+				else:
+					row[index] = [str(val) for val in data.split(',')]
 	print vmcr_data,"row\n\n\n\n"
 	return vmcr_data

@@ -122,7 +122,8 @@ def validate_warehouse_qty(doc):
 @frappe.whitelist()
 def payment_entry(doc, method):
 	if doc.local_sale  or doc.service_note :
-		input_ = get_farmer_config(doc.farmer,doc.name).get('percent_eff_credit') if doc.farmer else 0
+		input_ = get_farmer_config(doc.farmer,doc.name, doc.company).get('percent_eff_credit') if doc.farmer else 0
+		input_ = input_ + doc.grand_total
 		if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.by_cash and not int(doc.is_negative):
 			frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
 		elif doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment:

@@ -158,9 +158,9 @@ def get_conditions(curr_date=None,shift=None):
 		conditions += " and associated_vlcc = '{0}'".format(vlcc)
 	if curr_date:
 		conditions += " and date(collectiontime) = '{0}'".format(curr_date)
-	if shift and shift != "Both":
+	if shift and shift != "BOTH":
 		conditions += " and shift = '{0}'".format(shift)
-	if shift and shift == "Both":
+	if shift and shift == "BOTH":
 		conditions += " and shift in ('MORNING','EVENING')"
 	return conditions
 
@@ -177,8 +177,8 @@ def local_sale_condn(curr_date=None):
 
 def local_sale_shift_cond(shift=None):
 	conditions = " and 1=1"
-	if shift and shift != "Both":
+	if shift and shift != "BOTH":
 		conditions += " and s.shift = '{0}'".format(shift)
-	if shift and shift == "Both":
+	if shift and shift == "BOTH":
 		conditions += " and s.shift in ('MORNING','EVENING')"
 	return conditions

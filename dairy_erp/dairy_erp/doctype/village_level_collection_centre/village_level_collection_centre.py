@@ -63,7 +63,8 @@ class VillageLevelCollectionCentre(Document):
 			self.save()
 
 			# message for address
-			frappe.msgprint("Please add address details for <b>{0}</b>".format(self.name))
+			if self.is_auto_society_id == 0:
+				frappe.msgprint("Please add address details for <b>{0}</b>".format(self.name))
 		except Exception as e:
 			frappe.db.rollback()
 			make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",

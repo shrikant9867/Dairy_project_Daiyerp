@@ -31,7 +31,6 @@ frappe.ui.form.on('Dairy Setting', {
 				freeze: true,
             	freeze_message: __("Loading... Please Wait"),
 				callback: function(r){
-					window.reload();
 					if(r.message) {
 
 					}

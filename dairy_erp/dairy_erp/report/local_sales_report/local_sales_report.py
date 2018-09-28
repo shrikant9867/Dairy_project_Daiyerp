@@ -49,14 +49,14 @@ def get_data(filters):
 								and si.docstatus = 1 and si.company = '{0}'
 								{1} order by date(si.posting_date) """.format(vlcc_comp,get_conditions(filters)),as_list=1,debug=0)
 	
-	if data:
+	# if data:
 		# if filters.get('customer_type') == "Farmer":
-		g_total = 0
-		qty_total = 0
-		for row in data:
-			qty_total += row[5]
-			g_total += row[7]
-		data.append(["","","Grand Total","","",str(flt(qty_total,2)),"",str(flt(g_total,2))])		
+		# g_total = 0
+		# qty_total = 0
+		# for row in data:
+		# 	qty_total += row[5]
+		# 	g_total += row[7]
+		# data.append(["","","Grand Total","","",str(flt(qty_total,2)),"",str(flt(g_total,2))])		
 		# else:
 		# 	g_total = 0
 		# 	for row in data:

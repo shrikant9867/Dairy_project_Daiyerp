@@ -54,13 +54,13 @@ def get_data(filters):
 								associated_vlcc = '{0}' {1} order by date(collectiontime)""".format(
 					user_doc.get('company'),
 					get_conditions(filters)),as_list=True,debug=0)
-	if data:
-		g_total = 0
-		qty_total = 0
-		for row in data:
-			qty_total += row[3]
-			g_total += row[7]
-		data.append(["","","Grand Total",qty_total,"","","",g_total])
+	# if data:
+	# 	g_total = 0
+	# 	qty_total = 0
+	# 	for row in data:
+	# 		qty_total += row[3]
+	# 		g_total += row[7]
+	# 	data.append(["","","Grand Total",qty_total,"","","",g_total])
 	return data
 
 @frappe.whitelist()

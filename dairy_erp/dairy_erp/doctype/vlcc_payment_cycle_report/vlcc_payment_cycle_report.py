@@ -372,7 +372,6 @@ def get_vlcc_advance_child(start_date, end_date, vlcc, cycle=None):
 			""".format(vlcc),as_dict=1,debug=0)
 	advance = []
 	for row in advance_:
-		req_cycle_computation_advance(row)
 		if cycle in req_cycle_computation_advance(row):
 			advance.append(row)
 	return advance

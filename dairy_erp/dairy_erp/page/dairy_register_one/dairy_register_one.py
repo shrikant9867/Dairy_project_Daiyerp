@@ -144,7 +144,7 @@ def get_member_non_menber(filters):
 								from 
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1} 
-					""".format(farmer.get('name'),get_member_non_menber_cond(filters)),as_dict=1,debug=1)
+					""".format(farmer.get('name'),get_member_non_menber_cond(filters)),as_dict=1,debug=0)
 					non_member_qty += flt(non_member_data[0].get('qty'))
 					non_member_amt += flt(non_member_data[0].get('amt'))
 			if farmer_id and farmer_id.get('is_member'):
@@ -154,7 +154,7 @@ def get_member_non_menber(filters):
 								from
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1}
-					""".format(farmer.get('name'),get_member_non_menber_cond(filters)),as_dict=1,debug=1)
+					""".format(farmer.get('name'),get_member_non_menber_cond(filters)),as_dict=1,debug=0)
 				member_qty += flt(member_data[0].get('qty'))
 				member_amt += flt(member_data[0].get('amt'))
 

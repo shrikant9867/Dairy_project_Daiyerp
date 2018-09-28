@@ -1,5 +1,60 @@
+<style type="text/css">
+.cc {
+	font-size: 15px;
+}
+</style>
 <div class="row dd"><center>
 	<b>Malbar Regional Co-operative Milk Producers' Union Ltd.</b>
 </center>
 </div>
 <div class="row cc"><center>MRCMPU Ltd, {%= filters.branch_office %}</center></div>
+<table class="table cc">
+	<tr>
+		<td><b><center>
+	Truck Sheet Report</b></center></td>	
+	</tr>
+	<tr>
+		<td></td>
+	</tr>
+</table>
+{% for(var i=0, l=data.length; i<l; i++) { %}
+<div class="row">
+	<div class="col-xs-10 col-md-10">
+		Date
+		&nbsp;
+		{%= dateutil.str_to_user(filters.from_date) %}
+		&nbsp;&nbsp;
+		Shift
+		&nbsp;
+		{% if (filters.shift == "MORNING") { %}
+			{%= ("AM") %}
+		{% } else { %}
+			{%= ("PM") %}
+		{% } %}
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		Route:
+		&nbsp;
+		{%= data[i][__("Route")] %}
+	</div>
+	<div class="col-xs-2 col-md-2"></div>
+</div>
+<table class="table">
+	<thead>
+		<tr>
+			<th>{%= __("SNo") %}</th>
+			<th>{%= __("Code") %}</th>
+			<th>{%= __("SocName") %}</th>
+			<th>{%= __("Cans") %}</th>
+			<th>{%= __("Qty") %}</th>
+			<th>{%= __("Fat") %}</th>	
+			<th>{%= __("SNF") %}</th>
+			<th>{%= __("TS") %}</th>
+			<th>{%= __("Qlty") %}</th>
+			<th>{%= __("Rate") %}</th>
+			<th>{%= __("Value") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+{% } %}

@@ -129,7 +129,7 @@ def payment_entry(doc, method):
 			frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
 		elif (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and doc.grand_total > input_ and not int(doc.is_negative):
 			frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))
-		elif (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.by_credit > input_:
+		elif (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.by_credit > input_ and not int(doc.is_negative):
 			frappe.throw(_("By Credit Amount must be less than or equal to Effective Credit."))
 		elif doc.local_sale and not doc.update_stock:
 			frappe.throw(_("Please set <b>Update Stock</b> checked"))

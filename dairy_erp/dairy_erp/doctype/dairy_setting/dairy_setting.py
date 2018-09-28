@@ -8,6 +8,8 @@ from frappe.model.document import Document
 import json
 from frappe.utils.csvutils import read_csv_content_from_attached_file
 from frappe.utils import flt, now_datetime, cstr, random_string
+import time
+
 class DairySetting(Document):
 
 	def validate(self):
@@ -26,8 +28,7 @@ def get_csv(doc):
 	traceback = ""
 	try:
 		doc = json.loads(doc)
-		count=0
-		flag = 0
+		count, flag = 0, 0
 		max_rows = 500
 		msg,fmcr_msg = "",""
 		rows = read_csv_content_from_attached_file(frappe.get_doc("Dairy Setting",doc.get('name')))
@@ -43,6 +44,7 @@ def get_csv(doc):
 			if count != 0:
 				if  not frappe.db.exists("Village Level Collection Centre",row[0]) and row[0] !="":
 					if not frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row[7]},"name"):
+						
 						vlcc = frappe.new_doc("Village Level Collection Centre")
 						vlcc.vlcc_name = row[0]
 						vlcc.abbr = row[1]
@@ -62,22 +64,15 @@ def get_csv(doc):
 							vlcc.operator_email_id = row[13]
 							vlcc.operator_name = row[14]
 
-						vlcc.flags.ignore_permissions = True	
-						vlcc.save()	
-						addr = frappe.new_doc("Address")
-						addr.address_title = row[15]
-						addr.address_type = "Vlcc"
-						addr.address_line1 = row[16]
-						addr.city = row[17]
-						addr.vlcc = row[0]
-						addr.append("links", {
-									"link_doctype": "Company",
-									"link_name": row[0]
-								})
-						addr.save()
-						vlcc.address = row[0]+"-Vlcc"
-						vlcc.address_display = row[16]+"\n"+row[17]+"\n"+addr.country
+						vlcc.flags.ignore_permissions = True
+						# vlcc_address = address
+						# if address:			
+						# 	vlcc.address = address
 						vlcc.save()
+						address=make_address(address_title=row[15],address_type=row[16],address_line1=row[17],city=row[18],vlcc_name=vlcc.name)
+						frappe.db.set_value("Village Level Collection Centre",vlcc.name,"address",address.name)
+						address_display = address.address_line1+"\n"+address.city+"\n"+address.country
+						frappe.db.set_value("Village Level Collection Centre",vlcc.name,"address_display",address_display)
 						flag = 1
 					else:
 						traceback="AMCU ID Alreadry Exists"+str(row[7])
@@ -120,4 +115,21 @@ def make_dairy_log(**kwargs):
 	frappe.db.commit()
 	return dlog.name
 
+def make_address(**kwargs):
+	
+	addr = frappe.new_doc("Address")
+	addr.address_title = kwargs.get("address_title")
+	addr.address_type = kwargs.get("address_type")
+	addr.address_line1 = kwargs.get("address_line1")
+	addr.city = kwargs.get("city")
+	addr.vlcc = kwargs.get("vlcc_name")
+	addr.append("links",{
+		"link_doctype":"Company",
+		"link_name":kwargs.get("vlcc_name")
+		})	
+	
+	addr.save()
+	# frappe.db.commit()
+	return addr
+	
 

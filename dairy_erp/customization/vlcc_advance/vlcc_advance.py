@@ -130,28 +130,6 @@ def req_cycle_computation(data):
 			return req_cycl_list
 
 	elif data.get('emi_deduction_start_cycle') == 0:
-
-		not_req_cycl = frappe.db.sql("""
-				select name
-			from
-				`tabCyclewise Date Computation`
-			where
-				'{0}' < start_date order by start_date limit {1}""".
-			format(data.get('date_of_disbursement'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
-		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
-		instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
-		req_cycle = frappe.db.sql("""
-					select name
-				from
-					`tabCyclewise Date Computation`
-				where
-					'{date}' < start_date  order by start_date limit {instalment}
-				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),
-					instalment = instalment),as_dict=1,debug=0)
-		req_cycl_list = [i.get('name') for i in req_cycle]
-		return req_cycl_list
-
-	elif data.get('emi_deduction_start_cycle') == -1:
 		instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
 		req_cycle = frappe.db.sql("""
 					select

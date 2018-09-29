@@ -153,6 +153,7 @@ frappe.dairy_register_one = Class.extend({
         var me = this;
         var base_url = frappe.urllib.get_base_url();
         var print_css = frappe.boot.print_css;
+        var print_settings = locals[":Print Settings"]["Print Settings"];
         var html = frappe.render_template("dr_one",{
             content: frappe.render_template("dairy_register_one_print",{
                                                         'fmcr_data':me.table_data,
@@ -163,7 +164,8 @@ frappe.dairy_register_one = Class.extend({
                                                     }),
             title:__("dairy_register_one_"+frappe.datetime.str_to_user(frappe.datetime.get_today())),
             base_url: base_url,
-            print_css: print_css
+            print_css: print_css,
+            print_settings:print_settings
         });
         open_pdf(html)
     }

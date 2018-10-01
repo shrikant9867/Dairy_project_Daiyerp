@@ -283,7 +283,7 @@ th,td {
 				</tr>
 				<tr>
 					<td>{%= ("4") %}</td>
-					<td>{%= ("Total ") %}</td>
+					<td>{%= ("Total (1+2+3)") %}</td>
 				<td>{%= flt(financial_data_dict.total_1_2_3[0],2) %}</td>
 				<td>{%= flt(financial_data_dict.total_1_2_3[1],2) %}</td>
 				</tr>
@@ -307,7 +307,7 @@ th,td {
 				</tr>
 				<tr>
 					<td>{%= ("7") %}</td>
-					<td>{%= ("Total") %}</td>
+					<td>{%= ("Total (5+6)") %}</td>
 					<td>{%= flt(financial_data_dict.total_5_6[0],2) %}</td>
 					<td>{%= flt(financial_data_dict.total_5_6[1],2) %}</td>
 				</tr>
@@ -319,7 +319,7 @@ th,td {
 				</tr>
 				<tr>
 					<td>8</td>
-					<td>{%= ("Gross Profit  (4-7)") %}</td>
+					<td>{%= ("Gross Profit (4-7)") %}</td>
 					<td>{%= flt(financial_data_dict.gross_profit_4_7[0],2) %}
 					</td>
 					<td>{%= flt(financial_data_dict.gross_profit_4_7[1],2)
@@ -344,7 +344,7 @@ th,td {
 				</tr>
 				<tr>
 					<td>11</td>
-					<td>{%= ("Total Income") %}</td>
+					<td>{%= ("Total Income (8+9+10)") %}</td>
 					<td>{%= flt(financial_data_dict.total_income[0],2)
 					%}</td>
 					<td>{%= flt(financial_data_dict.total_income[1],2)
@@ -374,7 +374,7 @@ th,td {
 				</tr>
 				<tr>
 					<td>14</td>
-					<td>{%= ("Total") %}</td>
+					<td>{%= ("Total (12+13)") %}</td>
 					<td>{%= financial_data_dict.s_total[0]
 					%}</td>
 					<td>{%= financial_data_dict.s_total[1]
@@ -388,7 +388,7 @@ th,td {
 				</tr>
 				<tr>
 					<td>15</td>
-					<td>{%= ("Net Profit") %}</td>
+					<td>{%= ("Net Profit (11-14)") %}</td>
 					<td>{%= flt(financial_data_dict.net_profit[0],2)
 					%}
 					</td>
@@ -404,7 +404,7 @@ th,td {
 				</tr>
 				<tr>
 					<td>16</td>
-					<td>Profit in %</td>
+					<td>Profit in % (11-14)</td>
 					<td>{%= flt(financial_data_dict.profit_in[0],2)
 					%}
 					</td>

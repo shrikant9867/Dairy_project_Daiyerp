@@ -88,7 +88,7 @@ def validate_local_sale(doc, method):
 	Fetch allow_negative_effective_credit from VLCC
 	"""
 	if doc.farmer and not doc.local_sale_type:
-		frappe.throw("Please Select Local Sale Type Either <b>Traditional</b> or <b>Feed And Fooder Advance</b>")	
+		frappe.throw("Please Select Local Sale Type Either <b>No Advance</b> or <b>Feed And Fooder Advance</b>")	
 	
 	if doc.local_sale:
 		vlcc = frappe.get_doc("User",frappe.session.user).company
@@ -124,7 +124,7 @@ def validate_warehouse_qty(doc):
 
 @frappe.whitelist()
 def payment_entry(doc, method):
-	if doc.local_sale  or doc.service_note and doc.local_sale_type == "Traditional":
+	if doc.local_sale  or doc.service_note and doc.local_sale_type == "No Advance":
 		input_ = get_farmer_config(doc.farmer,doc.name, doc.company).get('percent_eff_credit') if doc.farmer else 0
 		if doc.local_sale and doc.customer_or_farmer == "Farmer":
 		# if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.multimode_payment:
@@ -165,6 +165,7 @@ def feed_fooder_advance(doc, method):
 			farmer_advance.emi_deduction_start_cycle = 0
 			farmer_advance.feed_and_fodder_si = '<a href="#Form/Sales Invoice/'+doc.name+'">'+doc.name+'</a>'
 			farmer_advance.save(ignore_permissions=True)
+			farmer_advance.submit()
 
 
 @frappe.whitelist()

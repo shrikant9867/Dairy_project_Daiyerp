@@ -19,7 +19,7 @@ def get_columns():
 		_("Shift") + ":Data:90",
 		_("Sales Invoice") + ":Link/Sales Invoice:150",
 		_("Item Code") + ":Link/Item:150",
-		_("Quantity") + ":Data:150",
+		_("Quantity") + ":Float:150",
 		_("Rate") + ":Float:150",
 		_("Amount") + ":Currency:100"
 	]

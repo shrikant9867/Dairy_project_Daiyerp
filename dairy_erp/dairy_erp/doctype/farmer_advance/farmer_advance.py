@@ -24,9 +24,14 @@ class FarmerAdvance(Document):
 			frappe.throw(_("Advance Amount cannot be zero"))
 
 	def create_je(self):
-		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc,posting_date = nowdate(),
-			debit_account = "Loan and Advances - ",credit_account = "Cash - ", type = "Debit to Advance",
-			amount = self.advance_amount, master_no = self.name)
+		if self.advance_type == "Money Advance":
+			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc,posting_date = nowdate(),
+				debit_account = "Loan and Advances - ",credit_account = "Cash - ", type = "Debit to Advance",
+				amount = self.advance_amount, master_no = self.name,advance_type=self.advance_type)
+		elif self.advance_type == "Feed And Fodder Advance":
+			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc,posting_date = nowdate(),
+				debit_account = "Feed And Fodder Advance - ",credit_account = "Debtors - ", type = "Debit to Advance",
+				amount = self.advance_amount, master_no = self.name,party_type="Customer",party=self.farmer_name,advance_type=self.advance_type)
 
 def farmer_advance_permission(user):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)

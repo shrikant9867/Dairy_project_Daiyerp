@@ -8,7 +8,7 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getda
 from frappe import _
 import dairy_utils as utils
 from datetime import timedelta
-from amcu_loss_gain import handling_loss_gain,loss_gain_computation,handling_loss_gain_after_vmcr
+from amcu_loss_gain import handling_loss_gain,loss_gain_computation
 import amcu_api as amcu_api
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 import requests
@@ -22,7 +22,7 @@ def update_fmcr(data, row,response_dict):
 		config_hrs = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},'hours') or 0
 		fmcr = frappe.db.get_value('Farmer Milk Collection Record',
 				{"transactionid":row.get('transactionid'),"farmerid":row.get('farmerid')},"name")
-		min_rcvdtm_fmcr = frappe.db.sql("""select min(rcvdtime) as min_time
+		min_rcvdtm_fmcr = frappe.db.sql("""select min(collectiontime) as min_time
 							from  
 								`tabFarmer Milk Collection Record` 
 							where 
@@ -30,9 +30,9 @@ def update_fmcr(data, row,response_dict):
 								milktype = %s and 
 								shift = %s and 
 								docstatus =1 and 
-								date(rcvdtime) = %s""",
+								date(collectiontime) = %s""",
 								(data.get('societyid'),row.get('milktype'),
-								data.get('shift'),getdate(data.get('rcvdtime'))),
+								data.get('shift'),getdate(row.get('collectiontime'))),
 							as_dict=True,debug=0)
 		if fmcr:
 			fmcr_doc = frappe.get_doc("Farmer Milk Collection Record",fmcr)
@@ -44,8 +44,6 @@ def update_fmcr(data, row,response_dict):
 		else:
 			is_fmcr_created = 1
 			fmrc_doc = make_fmcr(data,row,response_dict,is_fmcr_created)
-			# handling loss/gain vmcr is there but fmcr is not
-			handling_loss_gain_after_vmcr(data, row,fmrc_doc,response_dict)
 			fmcr = frappe.db.get_value('Farmer Milk Collection Record',
 				{"transactionid":row.get('transactionid'),"farmerid":row.get('farmerid')},"name")
 			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),fmcr)})
@@ -73,8 +71,6 @@ def update_fmcr_amt(fmcr_doc,data,row,response_dict):
 	fmcr_doc.cancel()
 
 	fmcr = make_fmcr(data,row,response_dict)
-	if se:
-		frappe.db.sql("""update `tabStock Entry` set fmcr = %s where name = %s""",(fmcr.name,se))
 
 def make_fmcr(data,row,response_dict,is_fmcr_created=0):
 	

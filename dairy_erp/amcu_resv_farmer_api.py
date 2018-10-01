@@ -78,10 +78,10 @@ def stock_entry_creation(message,item_,method,data,row,qty,warehouse,societyid,v
 		stock_doc.snf = row.get('snf')
 		stock_doc.clr = row.get('clr')
 		remarks.update({"Farmer ID":row.get('farmerid'),"Transaction Id":row.get('transactionid'),
-			"Rcvd Time":data.get('rcvdtime'),"Message": message,"shift":data.get('shift')})
+			"Collection Time":row.get('collectiontime'),"Message": message,"shift":data.get('shift')})
 	else:
 		remarks.update({"Farmer ID":row.get('farmerid'),
-			"Rcvd Time":data.get('rcvdtime'),"Message": message,"shift":data.get('shift')})
+			"Collection Time":row.get('collectiontime'),"Message": message,"shift":data.get('shift')})
 
 	stock_doc.remarks = "\n".join("{}: {}".format(k, v) for k, v in remarks.items())
 	stock_doc.append("items",

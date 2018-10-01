@@ -15,7 +15,7 @@ from amcu_delete_api import delete_fmcr
 from amcu_resv_farmer_api import make_stock_receipt
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
 from frappe.utils.data import add_to_date
-from amcu_loss_gain import handling_loss_gain,loss_gain_computation,handling_loss_gain_after_vmcr
+from amcu_loss_gain import handling_loss_gain,loss_gain_computation
 import dairy_utils as utils
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 import requests
@@ -111,8 +111,6 @@ def make_fmrc(data, response_dict):
 														if row.get('status') == "Accept":
 															pr = make_purchase_receipt_vlcc(data, row, vlcc, farmer_supplier, response_dict, fmrc_doc.name )
 															purchase_invoice_against_farmer(data, row, vlcc,  farmer_supplier, pr.get('item_'), response_dict, pr.get('pr_obj'), fmrc_doc.name, resv_farmer.get('configurable_days'))
-															# handling loss/gain vmcr is there but fmcr is not
-															handling_loss_gain_after_vmcr(data, row,fmrc_doc,response_dict)
 													else:
 														traceback = "farmer does not exist"
 														frappe.throw(_("farmer does not exist"))
@@ -392,9 +390,9 @@ def make_vmrc(data, response_dict):
 							response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"Error","response":"Data Missing","message":"Please Create dairy settings"})
 							# frappe.throw(_("Please create dairy settings first"))
 					except Exception,e:
-						utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
+						utils.make_dairy_log(title="Sync failed for Data push",method="create_vmrc", status="Error",
 						data = data, message=e, traceback=frappe.get_traceback())
-						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": traceback})
+						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": frappe.get_traceback()})
 
 def delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict):
 

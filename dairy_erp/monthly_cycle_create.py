@@ -30,22 +30,17 @@ def auto_cycle_create():
 			if vlcc.get('no_of_cycles') and vlcc.get('no_of_interval'):
 				for cycle_index in range(1,cint(vlcc.get('no_of_cycles'))+cint(1)):
 					if cycle_index == 1:
-         				s_date = month_details.month_start_date
-         				e_date = datetime.date(current_fiscal_year.get('name'), cint(current_month), cint(vlcc.get('no_of_interval')))
-         				cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
-     				elif cycle_index == cint(vlcc.get('no_of_cycles')):
-         				s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
-         				e_date = month_details.month_end_date
-         				cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
-     				else:
-         				s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
-         				e_date = add_days(getdate(e_date),cint(vlcc.get('no_of_interval')))
-         				cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
-        print cycle_data
-
-
-
-
+						s_date = month_details.month_start_date
+						e_date = datetime.date(month_details.year, cint(current_month), cint(vlcc.get('no_of_interval')))
+						cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
+					elif cycle_index == cint(vlcc.get('no_of_cycles')):
+						s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
+						e_date = month_details.month_end_date
+						cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
+					else:
+						s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
+						e_date = add_days(getdate(e_date),cint(vlcc.get('no_of_interval')))
+						cycle_data.update({"Cycle "+str(cycle_index):[s_date,e_date]})
 
 def cycle_date_computation():
 	date_computation = frappe.new_doc("Farmer Date Computation")

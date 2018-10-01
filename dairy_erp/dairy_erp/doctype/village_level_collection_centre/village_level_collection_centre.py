@@ -304,6 +304,7 @@ class VillageLevelCollectionCentre(Document):
 	def create_missing_accounts(self, company):
 		try:
 			if company:
+				abbr = frappe.db.get_value("Company",{"name":company},"abbr")
 				duties_and_taxes_acc = frappe.db.sql("""
 					select distinct account_name from `tabAccount` 
 					where parent_account like 'Duties and Taxes - %'
@@ -313,25 +314,30 @@ class VillageLevelCollectionCentre(Document):
 					"company": company,
 					"account_name": "Duties and Taxes"
 				}, "name")
-				# loan_and_advance = frappe.db.sql("""
-				# 	select account_name from `tabAccount` 
-				# 	where parent_account like 'Loans and Advances (Assets) - %'
-				# 	and company = '{0}'
-				# 	""".format(company), as_dict=True)
-				# if not frappe.db.get_value("Account", {
-				# 							"company": company,
-				# 							"account_name": loan_and_advance.get('account_name')
-				# 						}, "name"):
-				# 	account = frappe.new_doc("Account")
-				# 	account.update({
-				# 		"company": company,
-				# 		"account_name": "Feed And Fodder Advance",
-				# 		"parent_account": "Loans and Advances (Assets) - "+"AT"+
-				# 		"root_type": "Asset",
-				# 		"account_type": "Tax"
-				# 	})
-				# 	account.flags.ignore_permissions = True
-				# 	account.save()
+				
+				if not frappe.db.get_value("Account", {"company": company,"account_name": "Feed And Fodder Advance"}, "name"):
+					account = frappe.new_doc("Account")
+					account.update({
+						"company": company,
+						"account_name": "Feed And Fodder Advance",
+						"parent_account": "Loans and Advances (Assets) - "+abbr,
+						"root_type": "Asset",
+						"account_type": ""
+					})
+					account.flags.ignore_permissions = True
+					account.save()
+
+				if not frappe.db.get_value("Account", {"company": company,"account_name": "Feed And Fodder Advance"}, "name"):
+					account = frappe.new_doc("Account")
+					account.update({
+						"company": company,
+						"account_name": "Loans and Advances",
+						"parent_account": "Loans and Advances (Assets) - "+abbr,
+						"root_type": "Asset",
+						"account_type": ""
+					})
+					account.flags.ignore_permissions = True
+					account.save()
 
 				if vlcc_duties_acc:
 					for acc in duties_and_taxes_acc:

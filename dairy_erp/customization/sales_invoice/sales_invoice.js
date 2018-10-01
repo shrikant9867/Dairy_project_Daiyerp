@@ -106,7 +106,19 @@ frappe.ui.form.on("Sales Invoice", {
 			frm.set_df_property("cash_payment", "hidden", 1);
 		}
 	},
-
+	local_sale_type: function(frm){
+		if (frm.doc.local_sale_type == "Feed And Fooder Advance"){
+			frm.set_df_property("multimode_payment","hidden",1)
+			frm.set_df_property("no_of_instalment","reqd",1)
+			frm.set_value("multimode_payment", 0);
+			frm.trigger("multimode_payment")
+			refresh_many(["multimode_payment", "effective_credit","local_sale_type"])
+		}
+		if (frm.doc.local_sale_type == "Traditional"){
+			frm.set_df_property("multimode_payment","hidden",0)
+			frm.set_df_property("no_of_instalment","reqd",0)
+		}
+	},
 	farmer: function(frm){
 		if(frm.doc.farmer){
 			set_farmer_config(frm)
@@ -127,9 +139,10 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frm.doc.customer_or_farmer == "Vlcc Local Customer" || frm.doc.customer_or_farmer == "Vlcc Local Institution"){
 			frm.set_value("effective_credit","")
 			local_sale_operations(frm)
+			frm.set_value("local_sale_type","")
 			frm.set_value("multimode_payment", 0);
 			frm.trigger("multimode_payment")
-			refresh_many(["multimode_payment", "effective_credit"])
+			refresh_many(["multimode_payment", "effective_credit","local_sale_type"])
 			if (frm.doc.items){
 				frm.set_value("items","")
 				refresh_field("items")

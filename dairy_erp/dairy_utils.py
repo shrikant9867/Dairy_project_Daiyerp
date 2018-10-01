@@ -7,8 +7,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import requests
-from frappe.utils import flt, now_datetime, cstr, random_string
+from frappe.utils import flt, now_datetime, cstr, random_string, nowdate
 import json
+from dairy_erp.report.farmer_net_payoff.farmer_net_payoff import get_data
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+
+
 
 
 def make_dairy_log(**kwargs):
@@ -74,3 +78,5 @@ def make_journal_entry(**kwargs):
 	je_doc.save()
 	je_doc.submit()
 	return je_doc
+
+	

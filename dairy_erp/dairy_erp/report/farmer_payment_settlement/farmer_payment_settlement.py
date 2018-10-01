@@ -11,12 +11,12 @@ from erpnext.accounts.utils import get_outstanding_invoices, get_account_currenc
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_outstanding_reference_documents
 from frappe import _
 import json
-from dairy_erp import dairy_utils as utils
+# from dairy_erp.dairy_utils import  make_dairy_log,get_receivable_farmer
 from dairy_erp.customization.payment_integration.payment_integration import pay_to_farmers_account
 import calendar
 
-def execute(filters=None):
 
+def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
 
@@ -34,7 +34,6 @@ def get_columns():
 	return columns
 
 def get_data(filters):
-
 	vlcc = frappe.db.get_value("User",{"name":frappe.session.user},'company')
 
 	supplier_data = frappe.db.sql(""" select 'test' as test,
@@ -82,8 +81,36 @@ def get_data(filters):
 				group by g1.against_voucher, g1.party  
 				order by g1.posting_date,g1.party,g1.voucher_type)  g3 having debit > 0""".
 				format(vlcc,get_conditions(filters)),filters,as_list=True)
+		
 
-	return supplier_data + customer_data
+	jv_data = frappe.db.sql("""select 'test' as test,g3.posting_date, g3.account,g3.party_type,
+			g3.party,(g3.debit - ifnull((select sum(credit) from `tabGL Entry` where against_voucher = g3.voucher_no
+			and against_voucher_type = g3.voucher_type and party_type = g3.party_type 
+			and party=g3.party), 0)) as debit, 0 as credit, g3.voucher_type,g3.voucher_no,
+			g3.against_voucher_type, g3.against_voucher,g3.remarks,g3.name 
+		from 
+			`tabGL Entry` g3
+		where 
+			voucher_type = 'Journal Entry' and company = '{0}' {1}
+		having debit > 0
+		""".format(vlcc,get_conditions_jv(filters)),filters,as_list=1,debug=1)
+
+	return supplier_data + customer_data + jv_data 
+
+
+def get_conditions_jv(filters):
+
+
+	conditions = " and 1=1"
+
+	if filters.get('farmer') and filters.get('prev_transactions'):
+		farmer_name = frappe.db.get_value("Farmer",filters.get('farmer'),"full_name")
+		conditions += " and g3.posting_date <= %(end_date)s and g3.party = '{farmer_name}'".format(farmer_name=farmer_name)
+	elif filters.get('farmer') and filters.get('cycle') and not filters.get('prev_transactions'):
+		farmer_name = frappe.db.get_value("Farmer",filters.get('farmer'),"full_name")
+		conditions += " and g3.party = '{farmer_name}' and g3.posting_date between %(start_date)s and %(end_date)s".format(farmer_name=farmer_name)
+
+	return conditions
 
 def get_conditions(filters):
 
@@ -147,7 +174,7 @@ def make_payment(data,row_data,filters):
 		return {"payable":payable,"receivable":receivable,"due_pay":due_pay}
 	except Exception,e:
 		frappe.db.rollback() 
-		utils.make_dairy_log(title="Farmer Payment Entry Error",method="make_payment", status="Error",
+		make_dairy_log(title="Farmer Payment Entry Error",method="make_payment", status="Error",
 					 message=e, traceback=frappe.get_traceback())
 
 
@@ -230,7 +257,7 @@ def make_farmer_voucher_log(cycle, args):
 			log_doc.flags.ignore_permissions = True
 			log_doc.save()
 	except Exception, e:
-		utils.make_dairy_log(title="Farmer Payment Log Error",method="make_farmer_voucher_log", status="Error",
+		make_dairy_log(title="Farmer Payment Log Error",method="make_farmer_voucher_log", status="Error",
 							 message=e, traceback=frappe.get_traceback())
 
 def get_previous_amt(cycle, farmer):
@@ -398,9 +425,8 @@ def make_payment_entry(**kwargs):
 			pe.submit()
 		return pe.name
 	except Exception,e: 
-		utils.make_dairy_log(title="Payment Entry Creation Error in Farmer Payment",method="make_payment_entry", status="Error",
+		make_dairy_log(title="Payment Entry Creation Error in Farmer Payment",method="make_payment_entry", status="Error",
 					 message=e, traceback=frappe.get_traceback())
-
 
 @frappe.whitelist()
 def get_dates(filters):
@@ -649,3 +675,5 @@ def is_fpcr_generated(filters):
 			return "creat"
 		elif not len(si_records):
 			return "ncreat"
+
+

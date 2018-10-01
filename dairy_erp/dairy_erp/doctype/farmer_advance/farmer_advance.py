@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, today, getdate, nowdate
+from dairy_erp.dairy_utils import make_journal_entry
 from frappe.model.document import Document
 
 class FarmerAdvance(Document):
@@ -13,7 +14,7 @@ class FarmerAdvance(Document):
 	def on_submit(self):
 		if flt(self.emi_amount) > flt(self.outstanding_amount):
 			frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
-		# self.create_je()
+		self.create_je()
 
 	def validate(self):
 		self.status = "Unpaid"
@@ -23,22 +24,9 @@ class FarmerAdvance(Document):
 			frappe.throw(_("Advance Amount cannot be zero"))
 
 	def create_je(self):
-		abbr = frappe.db.get_value("Company", self.vlcc, 'abbr')
-		je_doc = frappe.new_doc("Journal Entry")
-		je_doc.voucher_type = "Journal Entry"
-		je_doc.company = self.vlcc
-		je_doc.posting_date = nowdate()
-		je_doc.append('accounts', {
-			'account': "Loans and Advances - "+ abbr,
-			'debit_in_account_currency': self.advance_amount
-			}) 
-		je_doc.append('accounts', {
-			'account': "Cash - "+ abbr,
-			'credit_in_account_currency': self.advance_amount
-			})
-		je_doc.flags.ignore_permissions =True	
-		je_doc.save()
-		je_doc.submit()
+		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc,posting_date = nowdate(),
+			debit_account = "Loan and Advances - ",credit_account = "Cash - ", type = "Debit to Advance",
+			amount = self.advance_amount, master_no = self.name)
 
 def farmer_advance_permission(user):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)

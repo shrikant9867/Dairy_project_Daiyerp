@@ -123,10 +123,12 @@ def validate_warehouse_qty(doc):
 def payment_entry(doc, method):
 	if doc.local_sale  or doc.service_note :
 		input_ = get_farmer_config(doc.farmer,doc.name, doc.company).get('percent_eff_credit') if doc.farmer else 0
-		input_ = input_ + doc.grand_total
+		if doc.local_sale and doc.customer_or_farmer == "Farmer":
+		# if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.multimode_payment:
+			input_ = input_ + doc.grand_total
 		if doc.local_sale and doc.customer_or_farmer == "Farmer" and input_ == 0 and not doc.by_cash and not int(doc.is_negative):
 			frappe.throw(_("Cannot create local sale, If <b>Effective Credit</b> is zero, use Multimode Payment option for cash "))
-		elif doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment:
+		elif doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit > input_ and doc.by_credit and doc.multimode_payment and not int(doc.is_negative):
 			frappe.throw(_("<b>By Credit - {0}</b> Amount must be less than OR equal to <b>Effective Credit</b>.{1}".format(doc.by_credit, input_)))
 		elif (doc.local_sale or doc.service_note) and doc.customer_or_farmer == "Farmer" and not doc.multimode_payment and doc.grand_total > input_ and not int(doc.is_negative):
 			frappe.throw(_("Outstanding amount should not be greater than Effective Credit"))

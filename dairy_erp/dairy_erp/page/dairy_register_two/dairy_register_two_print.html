@@ -83,7 +83,7 @@
 						<tr>
 						    <td>{%= val.vmcr_date %}</td>
 						    <td>{%= i.split("#")[1][2] %}</td>
-						    <td>{%= val.daily_sales %}</td>
+						    <td>{%= flt(val.daily_sales,2) %}</td>
 						    <td>{%= val.vmcr_qty %}</td>
 						    <td>{%= val.fat %}</td>
 						    <td>{%= val.snf %}</td>
@@ -94,10 +94,10 @@
 						    <td></td>
 						    <td></td>
 						    <td></td>
-						    <td>{%= val.excess_qty %}</td>
-						    <td>{%= val.short_qty %}</td>
-						    <td>{%= val.profit %}</td>
-						    <td>{%= val.loss %}</td>
+						    <td>{%= flt(val.excess_qty,2) %}</td>
+						    <td>{%= flt(val.short_qty,2) %}</td>
+						    <td>{%= flt(val.profit,2) %}</td>
+						    <td>{%= flt(val.loss,2) %}</td>
 						</tr>
 					{% }); %}
 				</tbody>

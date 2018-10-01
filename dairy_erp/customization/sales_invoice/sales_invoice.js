@@ -114,7 +114,7 @@ frappe.ui.form.on("Sales Invoice", {
 			frm.trigger("multimode_payment")
 			refresh_many(["multimode_payment", "effective_credit","local_sale_type"])
 		}
-		if (frm.doc.local_sale_type == "Traditional"){
+		if (frm.doc.local_sale_type == "No Advance"){
 			frm.set_df_property("multimode_payment","hidden",0)
 			frm.set_df_property("no_of_instalment","reqd",0)
 		}

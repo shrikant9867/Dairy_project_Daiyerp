@@ -102,13 +102,13 @@ def add_txt_in_file(filters=None):
 			start_date = datetime.datetime.strptime(filters.get('start_date'),  "%Y-%m-%d").strftime("%d-%b-%Y")
 			end_date = datetime.datetime.strptime(filters.get('end_date'),  "%Y-%m-%d").strftime("%d-%b-%Y")
 			txt_data = "#TS From "+start_date+" to "+end_date+"\n"
-			txt_data += "  DRY|Date      |S| Type| Party| Rout|        Qty|    Fat|    SNF|Q"+"\n"
+			txt_data += " DRY|Date      |S| Type| Party| Rout|        Qty|    Fat|    SNF|Q"+"\n"
 			txt_data += "#----------------------------------------------------------------"+"\n"
 			for row in data:
 				my_date = str(row[1])
 				my_date = my_date[8:10]+'-'+my_date[5:7]+'-'+my_date[0:4]	
 				
-				row_str = " "+str(row[0])+"|"+str(my_date)+"|"+str(row[2])+"| "+str(row[3])+"| "+str(row[4])+"| "+str(row[5])+"| "+str(row[6])+"| "+str(row[7])+"| "+str(row[8])+"|"+str(row[9])+"\n"
+				row_str = str(row[0])+"|"+str(my_date)+"|"+str(row[2])+"| "+str(row[3])+"| "+str(row[4])+"| "+str(row[5])+"| "+str(row[6])+"| "+str(row[7])+"| "+str(row[8])+"|"+str(row[9])+"\n"
 				
 				txt_data += row_str
 			file_name = "milk_bill_"+filters.get('start_date')+"_"+filters.get('end_date')+".txt"

@@ -153,7 +153,7 @@ doc_events = {
     },
     "Sales Invoice":{
         "validate": ["dairy_erp.customization.sales_invoice.sales_invoice.validate_local_sale", "dairy_erp.customization.sales_invoice.sales_invoice.set_camp_office_accounts"],
-        "on_submit": "dairy_erp.customization.sales_invoice.sales_invoice.payment_entry"
+        "on_submit": ["dairy_erp.customization.sales_invoice.sales_invoice.payment_entry","dairy_erp.customization.sales_invoice.sales_invoice.feed_fooder_advance"]
     },
     "Stock Entry":{
         "validate": "dairy_erp.customization.stock_entry.stock_entry.set_target_warehouse",

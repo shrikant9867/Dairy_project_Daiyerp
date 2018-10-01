@@ -87,6 +87,9 @@ def validate_local_sale(doc, method):
 	"""
 	Fetch allow_negative_effective_credit from VLCC
 	"""
+	if doc.farmer and not doc.local_sale_type:
+		frappe.throw("Please Select Local Sale Type Either <b>Traditional</b> or <b>Feed And Fooder Advance</b>")	
+	
 	if doc.local_sale:
 		vlcc = frappe.get_doc("User",frappe.session.user).company
 		allow_negative_effective_credit = frappe.get_doc("VLCC Settings",vlcc).get('allow_negative_effective_credit')
@@ -121,7 +124,7 @@ def validate_warehouse_qty(doc):
 
 @frappe.whitelist()
 def payment_entry(doc, method):
-	if doc.local_sale  or doc.service_note :
+	if doc.local_sale  or doc.service_note and doc.local_sale_type == "Traditional":
 		input_ = get_farmer_config(doc.farmer,doc.name, doc.company).get('percent_eff_credit') if doc.farmer else 0
 		if doc.local_sale and doc.customer_or_farmer == "Farmer":
 		# if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.multimode_payment:
@@ -144,6 +147,24 @@ def payment_entry(doc, method):
 			make_payment_entry(doc)
 		print (doc.local_sale or doc.service_note),has_common([doc.customer_or_farmer],["Farmer", "Vlcc Local Customer","Vlcc Local Institution"]),(doc.by_cash or not doc.multimode_payment),(not doc.effective_credit or doc.by_cash),\
 		doc.effective_credit,doc.effective_credit,doc.by_cash,"\n\n\n",input_
+
+@frappe.whitelist()
+def feed_fooder_advance(doc, method):
+	roles = frappe.get_roles()
+	user = frappe.db.get_value("User",frappe.session.user,'company')
+	if ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
+		if doc.local_sale and doc.local_sale_type == "Feed And Fooder Advance" and doc.farmer and doc.no_of_instalment:
+			farmer_advance = frappe.new_doc("Farmer Advance")
+			farmer_advance.advance_type = "Feed And Fodder Advance"
+			farmer_advance.farmer_id = doc.farmer
+			farmer_advance.farmer_name = doc.customer
+			farmer_advance.no_of_instalment = doc.no_of_instalment
+			farmer_advance.advance_amount = doc.grand_total
+			farmer_advance.emi_amount = flt(doc.grand_total/doc.no_of_instalment,2)
+			farmer_advance.vlcc = user
+			farmer_advance.emi_deduction_start_cycle = 0
+			farmer_advance.feed_and_fodder_si = '<a href="#Form/Sales Invoice/'+doc.name+'">'+doc.name+'</a>'
+			farmer_advance.save(ignore_permissions=True)
 
 
 @frappe.whitelist()

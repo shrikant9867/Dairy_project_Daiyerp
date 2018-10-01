@@ -5,11 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, nowdate
 from dairy_erp.dairy_utils import make_dairy_log
 import re
 import datetime
-from dairy_erp.dairy_utils import make_dairy_log
+from dairy_erp.dairy_utils import make_dairy_log, make_journal_entry
 from frappe.utils import flt, today, getdate
 from frappe.model.document import Document
 
@@ -26,60 +26,48 @@ def create_si():
 	for row in docs:
 		cur_cycl = get_current_cycle(row)
 		child_cycl = frappe.db.sql("""select cycle from `tabFarmer Cycle` where parent =%s""",(row.get('name')),as_dict=1)
-		cc = [i.get('cycle') for i in child_cycl]	
+		cc = [i.get('cycle') for i in child_cycl]
 		if len(cur_cycl):
 			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
-				make_si(row,cur_cycl[0].get('name'))
+				make_jv(row,cur_cycl[0].get('name'))
 
-
-def make_si(data, cur_cycl=None):
+def make_jv(data, cur_cycl=None):
 	try:
 		if data.get('outstanding_amount') > 0:
-			si_doc = frappe.new_doc("Sales Invoice")
-			si_doc.type = "Advance"
-			si_doc.customer = data.get('farmer_name')
-			si_doc.company = data.get('vlcc')
-			si_doc.farmer_advance = data.get('name')
-			si_doc.cycle_ = cur_cycl
-			si_doc.append("items",{
-				"item_code":"Advance Emi",
-				"qty": 1,
-				"rate": data.get('emi_amount'),
-				"cost_center": frappe.db.get_value("Company", data.get('vlcc'), "cost_center")
-				})
-			si_doc.flags.ignore_permissions = True
-			si_doc.insert()
-			si_doc.submit()
-
-			#update advance doc
-			paid_instlmnt = 0
-			advance_doc = frappe.get_doc("Farmer Advance",data.get('name'))
-			advance_doc.append("cycle",{
-				"cycle":cur_cycl,
-				"sales_invoice": si_doc.name
-				})
-			advance_doc.outstanding_amount = data.get('advance_amount') - get_si_amount(data)
-			if advance_doc.outstanding_amount == 0:
-				advance_doc.outstanding_amount = 0
-				advance_doc.status = "Paid"
-			for i in advance_doc.cycle:
-				paid_instlmnt += 1
-			advance_doc.paid_instalment = paid_instlmnt
-			advance_doc.flags.ignore_permissions = True
-			advance_doc.save()
-	
+			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
+				posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loan and Advances - ", 
+				type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), 
+				party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
+			if je_doc.name:
+				update_advance_doc(data, je_doc, cur_cycl)
 	except Exception,e:
-		make_dairy_log(title="Sync failed for Data push",method="get_items", status="Error",
+		make_dairy_log(title="JV creation Against Advance Failed",method="make_jv", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())
 
+def update_advance_doc(data, je_doc, cur_cycl):
+	paid_instlmnt = 0
+	advance_doc = frappe.get_doc("Farmer Advance",data.get('name'))
+	advance_doc.append("cycle",{
+		"cycle":cur_cycl,
+		"sales_invoice": je_doc.name
+		})
+	advance_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data)
+	if advance_doc.outstanding_amount == 0:
+		advance_doc.outstanding_amount = 0
+		advance_doc.status = "Paid"
+	for i in advance_doc.cycle:
+		paid_instlmnt += 1
+	advance_doc.paid_instalment = paid_instlmnt
+	advance_doc.flags.ignore_permissions = True
+	advance_doc.save()
 
-def get_si_amount(data):
+def get_jv_amount(data):
 	sum_ = frappe.db.sql("""
-			select ifnull(sum(grand_total),0) as total
+			select ifnull(sum(total_debit),0) as total
 		from 
-			`tabSales Invoice` 
+			`tabJournal Entry` 
 		where 
-		farmer_advance =%s""",(data.get('name')),as_dict=1)
+		farmer_advance =%s""",(data.get('name')),as_dict=1,debug=0)
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
 	else: return 0
@@ -91,8 +79,8 @@ def get_current_cycle(data):
 		from
 			`tabFarmer Date Computation`
 		where
-			vlcc = %s and now() between start_date and end_date
-		""",(data.get('vlcc')),as_dict=1)
+			vlcc = %s and date(now()) between start_date and end_date
+		""",(data.get('vlcc')),as_dict=1,debug=1)
 
 
 def req_cycle_computation(data):

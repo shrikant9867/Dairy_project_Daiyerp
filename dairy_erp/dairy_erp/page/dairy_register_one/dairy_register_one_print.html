@@ -3,6 +3,10 @@
   		width: 9%;
 	}
 
+.increase {
+  		width: 7%;
+	}	
+
 th,td {
 	text-align: center;
 }	
@@ -87,8 +91,8 @@ th,td {
 						<th>Total Milk Amt</th>
 						<th>FAT</th>
 						<th>SNF</th>
-						<th>FAT</th>
-						<th>SNF</th>
+						<th class="increase">FAT</th>
+						<th class="increase">SNF</th>
 						<th>Qty</th>
 						<th>Amt</th>
 						<th>Qty</th>
@@ -105,17 +109,17 @@ th,td {
 						    <td>{%= val.non_member_count %}</td>
 						    <td>{%= val.non_member_qty %}</td>
 						    <td>{%= val.non_member_amt %}</td>
-						    <td>{%= val.total_milk_qty %}</td>
-						    <td>{%= val.total_milk_amt %}</td>
+						    <td>{%= flt(val.total_milk_qty,2) %}</td>
+						    <td>{%= flt(val.total_milk_amt,2) %}</td>
 						    <td>{%= val.g_fat %}</td>
 						    <td>{%= val.g_snf %}</td>
 						    <td>{%= flt(val.diff_fat,2) %}</td>
 						    <td>{%= flt(val.diff_snf,2) %}</td>
-						    <td>{%= val.si_qty %}</td>
-						    <td>{%= val.si_amount %}</td>
-						    <td>{%= val.stock_qty %}</td>
-						    <td>{%= val.stock_amount %}</td>
-						    <td>{%= val.dairy_sales %}</td>
+						    <td>{%= flt(val.si_qty,2) %}</td>
+						    <td>{%= flt(val.si_amount,2) %}</td>
+						    <td>{%= flt(val.stock_qty,2) %}</td>
+						    <td>{%= flt(val.stock_amount,2) %}</td>
+						    <td>{%= flt(val.dairy_sales,2) %}</td>
 						</tr>
 					{% }); %}
 				</tbody>

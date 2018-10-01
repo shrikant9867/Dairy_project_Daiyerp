@@ -94,6 +94,7 @@ if(has_common(frappe.user_roles, ["Vlcc Manager", "Vlcc Operator"])){
 
 if(has_common(frappe.user_roles, ["Chilling Center Manager", "Chilling Center Operator"])){
 	cc_field["hidden"] = 1
+	route_field["hidden"] = 1
 	field_list.splice(0, 0, cc_field);
 	field_list.splice(3, 0, vlcc_field);
 	field_list.splice(4, 0, all_vlcc_field);
@@ -101,6 +102,7 @@ if(has_common(frappe.user_roles, ["Chilling Center Manager", "Chilling Center Op
 }
 
 if(has_common(frappe.user_roles, ["Dairy Manager"])){
+	route_field["hidden"] = 1
 	field_list.splice(2, 0, cc_field);
 	field_list.splice(3, 0, vlcc_field);
 	field_list.splice(4, 0, all_vlcc_field);

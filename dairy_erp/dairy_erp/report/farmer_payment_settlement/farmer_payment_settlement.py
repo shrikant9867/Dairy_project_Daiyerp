@@ -82,7 +82,22 @@ def get_data(filters):
 				order by g1.posting_date,g1.party,g1.voucher_type)  g3 having debit > 0""".
 				format(vlcc,get_conditions(filters)),filters,as_list=True)
 
-	return supplier_data + customer_data  
+	advance_customer_data = frappe.db.sql(""" select 'test' as test,
+		g3.posting_date, g3.account,g3.party_type,g3.party,(g3.debit-g3.credit) as debit,
+		 0 as credit, g3.voucher_type,g3.voucher_no,
+		g3.against_voucher_type, g3.against_voucher,g3.remarks,g3.name 
+		from(
+			select 
+				name,posting_date,account,party,against_voucher_type,against_voucher,remarks,party_type,0 as debit,(credit-debit) as credit,voucher_type,voucher_no,against 
+			from 
+				`tabGL Entry` 
+			where 
+				voucher_type='Journal Entry' and ccompany='{0}'
+				{1}  
+			)  g3 having debit > 0""".
+				format(vlcc,get_conditions(filters)),filters,as_list=True)
+
+	return supplier_data + customer_data + advance_customer_data 
 
 
 def get_conditions_jv(filters):

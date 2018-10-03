@@ -339,6 +339,18 @@ class VillageLevelCollectionCentre(Document):
 					account.flags.ignore_permissions = True
 					account.save()
 
+				if not frappe.db.get_value("Account", {"company": company,"account_name": "Interest Income"}, "name"):
+					account = frappe.new_doc("Account")
+					account.update({
+						"company": company,
+						"account_name": "Interest Income - "+abbr,
+						"parent_account": "Direct Income - "+abbr,
+						"root_type": "Income",
+						"account_type": ""
+					})
+					account.flags.ignore_permissions = True
+					account.save()
+
 				if vlcc_duties_acc:
 					for acc in duties_and_taxes_acc:
 						if not frappe.db.get_value("Account", {

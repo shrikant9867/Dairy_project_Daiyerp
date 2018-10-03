@@ -438,7 +438,7 @@ def get_cattle_feed(filters,cond):
 								and si_item.item_code in {0}
 								and si.docstatus = 1 and si.company = '{1}' and
 								{2} 
-								""".format(item_list,filters.get('vlcc'),conditions_si),debug=1,as_dict=1)
+								""".format(item_list,filters.get('vlcc'),conditions_si),debug=0,as_dict=1)
 
 	return {'procured':pr_data_list[0]['procured'],'sold_to_farmers':cattle_si_data[0]['sold_to_farmers']}
 
@@ -499,7 +499,8 @@ def get_other_income(filters,cond):
 	item_selling = {}
 	buying_price_list_1 = ""
 	buying_price_list_2 = ""
-	cattle_feed_item = [item.get('name') for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name")]
+	# cattle_feed_item = [item.get('name') for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name")]
+	cattle_feed_item = [ item.get('name') for item in frappe.get_all("Item", filters=[("item_group", "in", ('Cattle feed','Fodder','Mineral Mixtures'))]) ]
 	if frappe.db.exists("Material Price List",{"price_list":"GTCOVLCCBc"}):
 		buying_price_list_1 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTCOVLCCB"},"name"))
 	if frappe.db.exists("Material Price List",{"price_list":"GTVLCCB"}):
@@ -530,7 +531,7 @@ def get_other_income(filters,cond):
 		# 	""".format(camp_office,filters.get('vlcc'),item,conditions_pi),as_dict=1,debug=0)
 		si_data = frappe.db.sql("""
 					select
-						si_item.qty,
+						sum(si_item.qty) as qty,
 						si_item.rate
 					from
 						`tabSales Invoice` si,

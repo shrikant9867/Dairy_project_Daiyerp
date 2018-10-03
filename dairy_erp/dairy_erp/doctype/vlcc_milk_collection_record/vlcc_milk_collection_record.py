@@ -54,6 +54,12 @@ class VlccMilkCollectionRecord(Document):
 			farmerid_len = self.long_format_farmer_id_e.split('_')
 			if len(farmerid_len) >= 4 and farmerid_len[2]:
 				self.collectionroute = str(farmerid_len[2])#End code
+
+		# Add Long Format Society ID to be used in VMCR list view
+		self.longsocietyid_listview = self.long_format_farmer_id if self.long_format_farmer_id else \
+											self.long_format_farmer_id_e
+		self.longsocietyid_listview = self.longsocietyid_listview.split('_')[-1]
+
 		# if self.long_format_farmer_id:
 		# 	farmerid_len = self.long_format_farmer_id.split('_')
 		# 	if len(farmerid_len) >= 4 and farmerid_len[2]:
@@ -183,8 +189,8 @@ class VlccMilkCollectionRecord(Document):
 				"description": item.description,
 				"uom": "Litre",
 				"qty": self.milkquantity,
-				"rate": 1 if self.milkquality == "SS" else self.rate,
-				"price_list_rate": 1 if self.milkquality == "SS" else self.rate,
+				"rate": self.rate,
+				"price_list_rate": self.rate,
 				"amount": self.amount,
 				"warehouse": warehouse,
 				"cost_center": cost_center

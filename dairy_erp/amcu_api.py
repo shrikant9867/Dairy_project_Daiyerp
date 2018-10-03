@@ -505,6 +505,12 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 				farmerid_len = vmrc_doc.long_format_farmer_id_e.split('_')
 				if len(farmerid_len) >= 4 and farmerid_len[2]:
 					collectionroute = str(farmerid_len[2])
+
+			# Set Long Format Society ID value based which is beong used in list view of VMCR
+			longsocietyid_listview = vmrc_doc.long_format_farmer_id if vmrc_doc.long_format_farmer_id else \
+											vmrc_doc.long_format_farmer_id_e
+			vmrc_doc.longsocietyid_listview = longsocietyid_listview.split('_')[-1]
+
 			vmrc_doc.starttime = data.get('starttime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
 			vmrc_doc.endtime = data.get('endtime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
 			vmrc_doc.endshift = 1 if data.get('endshift') == True else 0
@@ -603,9 +609,9 @@ def make_uom_config(doc):
 
 def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc):
 	try:
-		rate = 1
-		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
-			rate = row.get('rate')
+		rate = row.get('rate') if row.get('rate') else 0
+		if row.get('milkquality') == 'SS' and row.get('rate') >= 0:
+			rate = 0
 		customer = frappe.db.get_value("Village Level Collection Centre", vlcc, "plant_office")
 		warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": row.get('farmerid')}, 'warehouse')
 		cost_center = frappe.db.get_value("Cost Center", {"company": vlcc}, 'name')
@@ -644,9 +650,9 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 
 def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost_center, response_dict, dn_name, vmrc):
 	try:
-		rate = 0
-		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
-			rate = row.get('rate')
+		rate = row.get('rate') if row.get('rate') else 0
+		if row.get('milkquality') in 'SS' and row.get('rate') >= 0:
+			rate = 0
 		days = frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') if frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') else 0
  		si_obj = frappe.new_doc("Sales Invoice")
  		si_obj.customer = customer
@@ -658,6 +664,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
  			"item_code": item_.item_code,
  			"qty":row.get('milkquantity'),
  			"rate": rate,
+ 			"price_list_rate": rate,
  			"amount": flt(rate * row.get('milkquantity'),2),
  			"warehouse": warehouse,
 			"cost_center": cost_center,
@@ -675,10 +682,9 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
 
 def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co,warehouse=None):
 	try:
-		rate = 0
-		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
-			rate = row.get('rate')
-
+		rate = row.get('rate') if row.get('rate') else 0
+		if row.get('milkquality') == 'SS' and row.get('rate') >= 0:
+			rate = 0
 		purchase_rec = frappe.new_doc("Purchase Receipt")
 		purchase_rec.supplier =  vlcc
 		purchase_rec.vlcc_milk_collection_record = vmrc
@@ -731,9 +737,9 @@ def create_item(row):
 def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co,warehouse=None):
 
 	try:
-		rate = 0
-		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
-			rate = row.get('rate')
+		rate = row.get('rate') if row.get('rate') else 0
+		if row.get('milkquality') == 'SS' and row.get('rate') >= 0:
+			rate = 0
 		dairy_setting = frappe.get_doc("Dairy Setting")
 		days = dairy_setting.configurable_days if dairy_setting.configurable_days else 0
 		pi_obj = frappe.new_doc("Purchase Invoice")
@@ -752,6 +758,7 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 				"uom": "Litre",
 				"qty": row.get('milkquantity'),
 				"rate": rate,
+				"price_list_rate": rate,
 				"amount": flt(rate * row.get('milkquantity'),2),
 				"warehouse": warehouse, #frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse'),
 				"purchase_receipt": pr_co

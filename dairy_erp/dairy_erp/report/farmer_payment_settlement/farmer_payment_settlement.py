@@ -81,21 +81,8 @@ def get_data(filters):
 				group by g1.against_voucher, g1.party  
 				order by g1.posting_date,g1.party,g1.voucher_type)  g3 having debit > 0""".
 				format(vlcc,get_conditions(filters)),filters,as_list=True)
-		
 
-	jv_data = frappe.db.sql("""select 'test' as test,g3.posting_date, g3.account,g3.party_type,
-			g3.party,(g3.debit - ifnull((select sum(credit) from `tabGL Entry` where against_voucher = g3.voucher_no
-			and against_voucher_type = g3.voucher_type and party_type = g3.party_type 
-			and party=g3.party), 0)) as debit, 0 as credit, g3.voucher_type,g3.voucher_no,
-			g3.against_voucher_type, g3.against_voucher,g3.remarks,g3.name 
-		from 
-			`tabGL Entry` g3
-		where 
-			voucher_type = 'Journal Entry' and company = '{0}' {1}
-		having debit > 0
-		""".format(vlcc,get_conditions_jv(filters)),filters,as_list=1,debug=0)
-
-	return supplier_data + customer_data + jv_data 
+	return supplier_data + customer_data  
 
 
 def get_conditions_jv(filters):
@@ -160,7 +147,6 @@ def make_payment(data,row_data,filters):
 		elif gl_doc.voucher_type in ['Sales Invoice','Journal Entry']:
 			recv_list.append(gl_doc.voucher_no)
 	
-	print "################",recv_list
 	try:
 		payable = make_payble_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
 		receivable = make_receivable_payment(data=data,row_data=row_data,filters=filters,company=vlcc,recv_list=recv_list)

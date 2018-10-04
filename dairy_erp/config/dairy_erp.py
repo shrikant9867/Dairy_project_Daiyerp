@@ -143,6 +143,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Shift Ended Confirmation",
+					"description": _(" "),
+				},
+				{
+					"type": "doctype",
 					"name": "Veterinary AI Technician",
 					"description": _(" "),
 				}

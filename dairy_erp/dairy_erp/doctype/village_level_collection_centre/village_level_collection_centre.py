@@ -327,7 +327,7 @@ class VillageLevelCollectionCentre(Document):
 					account.flags.ignore_permissions = True
 					account.save()
 
-				if not frappe.db.get_value("Account", {"company": company,"account_name": "Feed And Fodder Advance"}, "name"):
+				if not frappe.db.get_value("Account", {"company": company,"account_name": "Loans and Advances"}, "name"):
 					account = frappe.new_doc("Account")
 					account.update({
 						"company": company,

@@ -94,8 +94,8 @@ def get_data(filters):
 			voucher_type = 'Journal Entry' and company = '{0}' {1}
 		having debit > 0
 		""".format(vlcc,get_conditions_jv(filters)),filters,as_list=1,debug=0)
-
 	return supplier_data + customer_data + jv_data 
+
 
 
 def get_conditions_jv(filters):

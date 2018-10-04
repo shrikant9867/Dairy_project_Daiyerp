@@ -162,7 +162,7 @@ def feed_fooder_advance(doc, method):
 			farmer_advance.advance_amount = doc.grand_total
 			farmer_advance.emi_amount = flt(doc.grand_total/doc.no_of_instalment,2)
 			farmer_advance.vlcc = user
-			farmer_advance.emi_deduction_start_cycle = 0
+			farmer_advance.emi_deduction_start_cycle = doc.emi_start_cycle
 			farmer_advance.feed_and_fodder_si = '<a href="#Form/Sales Invoice/'+doc.name+'">'+doc.name+'</a>'
 			farmer_advance.save(ignore_permissions=True)
 			farmer_advance.submit()

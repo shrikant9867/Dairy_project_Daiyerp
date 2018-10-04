@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Indictrans and contributors
 # For license information, please see license.txt
+# Author Khushal Trivedi
 
 from __future__ import unicode_literals
 import frappe
@@ -38,5 +39,26 @@ def make_agrupay_log(**kwargs):
 	frappe.db.commit()
 	return ag_log.name
 
-
-
+def make_journal_entry(**kwargs):
+	abbr = frappe.db.get_value("Company", kwargs.get('company'), 'abbr')
+	je_doc = frappe.new_doc("Journal Entry")
+	je_doc.voucher_type = kwargs.get('voucher_type')
+	je_doc.company = kwargs.get('company')
+	je_doc.type = kwargs.get('type')
+	je_doc.cycle = kwargs.get('cycle')
+	je_doc.farmer_advance = kwargs.get('master_no')
+	je_doc.posting_date = kwargs.get('posting_date')
+	je_doc.append('accounts', {
+		'account': kwargs.get('debit_account')+ abbr,
+		'debit_in_account_currency': kwargs.get('amount'),
+		'party_type': kwargs.get('party_type'),
+		'party': kwargs.get('party')
+		}) 
+	je_doc.append('accounts', {
+		'account': kwargs.get('credit_account')+ abbr,
+		'credit_in_account_currency': kwargs.get('amount')
+		})
+	je_doc.flags.ignore_permissions =True	
+	je_doc.save()
+	je_doc.submit()
+	return je_doc

@@ -13,8 +13,6 @@ from dairy_erp.report.farmer_net_payoff.farmer_net_payoff import get_data
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 
 
-
-
 def make_dairy_log(**kwargs):
 	dlog = frappe.get_doc({"doctype":"Dairy Log"})
 	dlog.update({
@@ -64,6 +62,17 @@ def make_journal_entry(**kwargs):
 			'credit_in_account_currency': kwargs.get('amount')
 			})
 	elif kwargs.get("advance_type") == "Feed And Fodder Advance":
+		je_doc.append('accounts', {
+			'account': kwargs.get('debit_account')+ abbr,
+			'debit_in_account_currency': kwargs.get('amount'),
+			})
+		je_doc.append('accounts', {
+			'account': kwargs.get('credit_account')+ abbr,
+			'credit_in_account_currency': kwargs.get('amount'),
+			'party_type': kwargs.get('party_type'),
+			'party': kwargs.get('party')
+			})
+	if kwargs.get('type') == "Debit to Loan":
 		je_doc.append('accounts', {
 			'account': kwargs.get('debit_account')+ abbr,
 			'debit_in_account_currency': kwargs.get('amount'),

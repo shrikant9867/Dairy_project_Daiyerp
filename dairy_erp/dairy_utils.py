@@ -42,6 +42,7 @@ def make_agrupay_log(**kwargs):
 	return ag_log.name
 
 def make_journal_entry(**kwargs):
+	print kwargs,"kwargs______________________\n\n"
 	abbr = frappe.db.get_value("Company", kwargs.get('company'), 'abbr')
 	je_doc = frappe.new_doc("Journal Entry")
 	je_doc.voucher_type = kwargs.get('voucher_type')
@@ -50,12 +51,26 @@ def make_journal_entry(**kwargs):
 	je_doc.cycle = kwargs.get('cycle')
 	je_doc.farmer_advance = kwargs.get('master_no')
 	je_doc.posting_date = kwargs.get('posting_date')
-	if kwargs.get("advance_type") in ["Money Advance"] or kwargs.get('type') in ["Farmer Loan","Farmer Advance"]:
+	if kwargs.get("advance_type") in ["Money Advance"] or kwargs.get('type') in ["Farmer Loan", "Farmer Advance"]:
 		je_doc.append('accounts', {
 			'account': kwargs.get('debit_account')+ abbr,
 			'debit_in_account_currency': kwargs.get('amount'),
 			'party_type': kwargs.get('party_type'),
 			'party': kwargs.get('party')
+			})
+		je_doc.append('accounts', {
+			'account': kwargs.get('credit_account')+ abbr,
+			'credit_in_account_currency': kwargs.get('amount'),
+			'party_type': kwargs.get('party_type'),
+			'party': kwargs.get('party')
+			})
+	elif kwargs.get('type') == 'Farmer Advancdde':
+		print "inside farmer_advance_________________________\n\n"
+		je_doc.append('accounts', {
+			'account': kwargs.get('debit_account')+ abbr,
+			'debit_in_account_currency': kwargs.get('amount'),
+			'party': kwargs.get('party'),
+			'party_type': kwargs.get('party_type')
 			})
 		je_doc.append('accounts', {
 			'account': kwargs.get('credit_account')+ abbr,
@@ -65,9 +80,7 @@ def make_journal_entry(**kwargs):
 	elif kwargs.get("advance_type") == "Feed And Fodder Advance":
 		je_doc.append('accounts', {
 			'account': kwargs.get('debit_account')+ abbr,
-			'debit_in_account_currency': kwargs.get('amount'),
-			'party_type': kwargs.get('party_type'),
-			'party': kwargs.get('party')
+			'debit_in_account_currency': kwargs.get('amount')
 			})
 		je_doc.append('accounts', {
 			'account': kwargs.get('credit_account')+ abbr,

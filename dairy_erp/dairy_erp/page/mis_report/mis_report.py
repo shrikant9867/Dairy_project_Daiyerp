@@ -497,21 +497,55 @@ def get_other_income(filters,cond):
 		conditions_si += "si.posting_date between '{0}' and '{1}'".format(filters.get('year_start_date'),filters.get('previous_month_end_date'))
 	
 	item_selling = {}
-	buying_price_list_1 = ""
-	buying_price_list_2 = ""
-	# cattle_feed_item = [item.get('name') for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name")]
+	######################added by chaitrali 05/10/2018
+	vlcc_camp_supp_global,vlcc_camp_supp_local,vlcc_local_supp_global, \
+		vlcc_local_supp_local,vlcc_camp_supp_buying,vlcc_local_supp_buying = "","","","","",""
 	cattle_feed_item = [ item.get('name') for item in frappe.get_all("Item", filters=[("item_group", "in", ('Cattle feed','Fodder','Mineral Mixtures'))]) ]
-	if frappe.db.exists("Material Price List",{"price_list":"GTCOVLCCBc"}):
-		buying_price_list_1 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTCOVLCCB"},"name"))
-	if frappe.db.exists("Material Price List",{"price_list":"GTVLCCB"}):
-		buying_price_list_2 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTVLCCB"},"name"))
-	if buying_price_list_1 and buying_price_list_2:
-		item_price_list = {row.item:row.price for row in buying_price_list_1.items}
-		item_price_list.update({row.item:row.price for row in buying_price_list_2.items})
-	if buying_price_list_1 and not buying_price_list_2:
-		item_price_list = {row.item:row.price for row in buying_price_list_1.items}
-	if buying_price_list_2 and not buying_price_list_1:
-		item_price_list = {row.item:row.price for row in buying_price_list_2.items}
+
+	lvlccb = "LVLCCB" +"-"+filters.get('vlcc') 
+	lcovlccb = "LCOVLCCB" +"-"+camp_office if camp_office else ""
+	lfs = "LFS" +"-"+filters.get('vlcc') 
+
+	if frappe.db.exists("Material Price List",{"price_list":"GTCOVLCCB"}):
+		vlcc_camp_supp_global = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTCOVLCCB"},"name"))
+	if frappe.db.exists("Material Price List",{"price_list":lcovlccb}):
+		vlcc_camp_supp_local = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":lcovlccb},"name"))
+
+	if frappe.db.exists("Material Price List",{"price_list":'GTVLCCB'}):
+		vlcc_local_supp_global = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTVLCCB"},"name"))
+	if frappe.db.exists("Material Price List",{"price_list":lvlccb}):
+		vlcc_local_supp_local = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":lvlccb},"name"))
+
+	
+	vlcc_camp_supp_buying = vlcc_camp_supp_local if vlcc_camp_supp_local else vlcc_camp_supp_global
+	vlcc_local_supp_buying = vlcc_local_supp_local if vlcc_local_supp_local else vlcc_local_supp_global
+
+
+	if vlcc_camp_supp_buying and vlcc_local_supp_buying:
+		item_price_list = {row.item:row.price for row in vlcc_camp_supp_buying.items}
+		item_price_list.update({row.item:row.price for row in vlcc_local_supp_buying.items})
+	if vlcc_camp_supp_buying and not vlcc_local_supp_buying:
+		item_price_list = {row.item:row.price for row in vlcc_camp_supp_buying.items}
+	if vlcc_local_supp_buying and not vlcc_camp_supp_buying:
+		item_price_list = {row.item:row.price for row in vlcc_local_supp_buying.items}
+	# buying_price_list_1 = ""
+	# buying_price_list_2 = ""
+	# cattle_feed_item = [item.get('name') for item in frappe.db.get_all("Item", { "item_group": "Cattle feed" }, "name")]
+	
+	###############Commented by Chaitrali as local price list not considered
+
+	# if frappe.db.exists("Material Price List",{"price_list":"GTCOVLCCB"}):
+	# 	buying_price_list_1 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTCOVLCCB"},"name"))
+	# if frappe.db.exists("Material Price List",{"price_list":"GTVLCCB"}):
+	# 	buying_price_list_2 = frappe.get_doc("Material Price List",frappe.db.get_value("Material Price List",{"price_list":"GTVLCCB"},"name"))
+	# if buying_price_list_1 and buying_price_list_2:
+	# 	item_price_list = {row.item:row.price for row in buying_price_list_1.items}
+	# 	item_price_list.update({row.item:row.price for row in buying_price_list_2.items})
+	# if buying_price_list_1 and not buying_price_list_2:
+	# 	item_price_list = {row.item:row.price for row in buying_price_list_1.items}
+	# if buying_price_list_2 and not buying_price_list_1:
+	# 	item_price_list = {row.item:row.price for row in buying_price_list_2.items}
+
 	for item in cattle_feed_item:
 		# pi_data = frappe.db.sql("""
 		# 		select
@@ -541,11 +575,11 @@ def get_other_income(filters,cond):
 						si.name = si_item.parent and
 						si.company = '{0}' and
 						si.local_sale = 1 and
-						si.selling_price_list in ("GTFS","LTFS") and
-						si_item.item_code = '{1}' and
+						si.selling_price_list in ("GTFS","{1}") and
+						si_item.item_code = '{2}' and
 						si.customer_or_farmer = 'Farmer' and
-						{2}	
-			""".format(filters.get('vlcc'),item,conditions_si),as_dict=1,debug=0)
+						{3}	
+			""".format(filters.get('vlcc'),lfs,item,conditions_si),as_dict=1,debug=0)
 		if item in item_price_list:
 			if si_data and si_data[0].get('rate') and si_data[0].get('qty'):
 				item_selling[item] = flt(si_data[0].get('rate') - item_price_list.get(item),2)*si_data[0].get('qty')

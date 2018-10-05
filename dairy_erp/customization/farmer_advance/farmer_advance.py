@@ -13,7 +13,7 @@ from dairy_erp.dairy_utils import make_dairy_log, make_journal_entry
 from frappe.utils import flt, today, getdate
 from frappe.model.document import Document
 
-def create_si():
+def create_jv():
 	docs = frappe.db.sql("""
 			select name,farmer_name,emi_amount,advance_amount,farmer_id,
 			vlcc,emi_deduction_start_cycle,outstanding_amount,date_of_disbursement,
@@ -35,7 +35,7 @@ def make_jv(data, cur_cycl=None):
 	try:
 		if data.get('outstanding_amount') > 0:
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
-				posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loan and Advances - ", 
+				posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
 				type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), 
 				party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
 			if je_doc.name:
@@ -67,7 +67,7 @@ def get_jv_amount(data):
 		from 
 			`tabJournal Entry` 
 		where 
-		farmer_advance =%s""",(data.get('name')),as_dict=1,debug=0)
+		farmer_advance =%s and type = 'Farmer Advance'""",(data.get('name')),as_dict=1,debug=1)
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
 	else: return 0
@@ -80,7 +80,7 @@ def get_current_cycle(data):
 			`tabFarmer Date Computation`
 		where
 			vlcc = %s and date(now()) between start_date and end_date
-		""",(data.get('vlcc')),as_dict=1,debug=1)
+		""",(data.get('vlcc')),as_dict=1,debug=0)
 
 
 def req_cycle_computation(data):

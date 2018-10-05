@@ -26,7 +26,7 @@ class FarmerAdvance(Document):
 	def create_je(self):
 		if self.advance_type == "Money Advance":
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc,posting_date = nowdate(),
-				debit_account = "Loan and Advances - ",credit_account = "Cash - ", type = "Debit to Advance",
+				debit_account = "Loans and Advances - ",credit_account = "Cash - ", type = "Debit to Advance",
 				amount = self.advance_amount, master_no = self.name,advance_type=self.advance_type)
 		elif self.advance_type == "Feed And Fodder Advance":
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc,posting_date = nowdate(),

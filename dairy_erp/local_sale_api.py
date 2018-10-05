@@ -39,19 +39,20 @@ def create_ls(data):
 	ls_obj.local_sale = 1
 	ls_obj.update_stock = 1
 	ls_obj.debit_to = frappe.db.get_value("Company",ls_obj.company, 'default_receivable_account')
+
 	if data.get('customer_or_farmer') == "Vlcc Local Institution":
 		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
-		print "#################",ls_obj.customer
+
 	elif data.get('customer_or_farmer') == "Farmer" and data.get('local_sale_type') == "No Advance":
 		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
 		ls_obj.local_sale_type = data.get('local_sale_type')
-		print "#################",ls_obj.customer
+
 	elif data.get('customer_or_farmer') == "Farmer" and data.get('local_sale_type') == "Feed And Fooder Advance":
 		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
 		ls_obj.local_sale_type = data.get('local_sale_type')
 		ls_obj.no_of_instalment = data.get('no_of_instalment')
 		ls_obj.emi_start_cycle = data.get('emi_start_cycle')
-		print "#################",ls_obj.customer
+
 	ls_obj.update(data)
 	ls_obj.customer_or_farmer = data.get('customer_or_farmer')
 	ls_obj.selling_price_list = get_price_list(ls_obj.customer_or_farmer)
@@ -74,7 +75,7 @@ def local_sale_list():
 			select
 				name,customer_or_farmer,posting_date,additional_discount_percentage,farmer_or_local_customer_address,
 				organisation_name,discount_amount,grand_total,status,apply_discount_on, by_cash, 
-				by_credit, multimode_payment,customer,shift
+				by_credit, multimode_payment,customer,shift,local_sale_type,no_of_instalment,emi_start_cycle 
 			from
 				`tabSales Invoice`
 			where

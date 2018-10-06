@@ -65,7 +65,6 @@ def make_journal_entry(**kwargs):
 			'party': kwargs.get('party')
 			})
 	elif kwargs.get('type') == 'Farmer Advancdde':
-		print "inside farmer_advance_________________________\n\n"
 		je_doc.append('accounts', {
 			'account': kwargs.get('debit_account')+ abbr,
 			'debit_in_account_currency': kwargs.get('amount'),
@@ -80,12 +79,12 @@ def make_journal_entry(**kwargs):
 	elif kwargs.get("advance_type") == "Feed And Fodder Advance":
 		je_doc.append('accounts', {
 			'account': kwargs.get('debit_account')+ abbr,
-			'debit_in_account_currency': kwargs.get('amount')
+			'debit_in_account_currency': kwargs.get('amount'),
+			'party': kwargs.get('party'),
+			'party_type': kwargs.get('party_type')
 			})
 		je_doc.append('accounts', {
 			'account': kwargs.get('credit_account')+ abbr,
-			'party_type': kwargs.get('party_type'),
-			'party': kwargs.get('party'),
 			'credit_in_account_currency': kwargs.get('amount')
 			})
 	elif kwargs.get('type') == ["Debit to Loan","Debit to Advance"]:

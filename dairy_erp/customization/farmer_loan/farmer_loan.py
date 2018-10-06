@@ -32,8 +32,6 @@ def create_jv():
 			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
 				make_jv(row,cur_cycl[0].get('name'))
 
-
-
 def make_jv(data,cur_cycl=None):
 	try:	
 		if data.get('outstanding_amount') > 0:

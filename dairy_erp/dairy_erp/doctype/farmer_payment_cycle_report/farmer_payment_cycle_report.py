@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from dairy_erp.dairy_utils import make_dairy_log
+from dairy_erp.dairy_utils import make_dairy_log, make_journal_entry
 from frappe.utils import flt, cstr,nowdate,cint
 
 class FarmerPaymentCycleReport(Document):
@@ -50,17 +50,31 @@ class FarmerPaymentCycleReport(Document):
 		flag = False
 		for row in self.advance_child:
 			flag = True
-			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
+			# SG 5-10
+			je_exist = frappe.db.get_value("Journal Entry",{'cycle': self.cycle,\
 						'farmer_advance':row.adv_id }, 'name')
-			if not si_exist:
+			print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",je_exist
+			if not je_exist:
 				self.validate_advance(row)
-				si = self.create_si(row, "Advance", "Advance Emi", row.adv_id)
-				self.update_advance(row, si)
-			elif si_exist:
-				self.update_si(row, self.cycle, si_exist)
-				self.update_advance_fpcr(row)
+				print "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7"
+				je = self.create_je(row)
+				print "\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",je
+				self.update_advance_je(row, je)
+			elif je_exist:
+				frappe.msgprint("JE already exists")
+				self.update_je(row, self.cycle, je_exist)
+				self.update_advance_fpcr_je(row)
+			# si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
+			# 			'farmer_advance':row.adv_id }, 'name')
+			# if not si_exist:
+			# 	self.validate_advance(row)
+			# 	si = self.create_si(row, "Advance", "Advance Emi", row.adv_id)
+			# 	self.update_advance(row, si)
+			# elif si_exist:
+			# 	self.update_si(row, self.cycle, si_exist)
+			# 	self.update_advance_fpcr(row)
 		if flag:
-			frappe.msgprint(_("Sales invoice created successfully against Advances"))
+			frappe.msgprint(_("Journal Entry created successfully against Advances"))
 	
 	def loan_operation(self):
 		flag = False
@@ -128,6 +142,21 @@ class FarmerPaymentCycleReport(Document):
 					'posting_date', self.collection_to )	
 		return si_doc.name
 
+	def create_je(self, row): # SG-5-10
+		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
+        			posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Feed And Fodder Advance - ", 
+        			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, 
+        			party_type = "Customer", party = self.farmer_name, master_no = self.name)
+		gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
+		gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
+		frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_doc.name},\
+					'posting_date', self.collection_to )
+		frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": je_doc.name},\
+					'posting_date', self.collection_to )
+		frappe.msgprint(_("Journal Entry <b>{0}</b> Created".format(
+					'<a href="#Form/Purchase Receipt/'+je_doc.name+'">'+je_doc.name+'</a>'
+				)))	
+		return je_doc.name
 	
 	def update_loan(self, row, si = None):
 		instalment = 0
@@ -166,6 +195,24 @@ class FarmerPaymentCycleReport(Document):
 		adv_doc.flags.ignore_permissions =True
 		adv_doc.save()
 
+	def update_advance_je(self, row, si=None):	# SG-5-10
+		instalment = 0
+		si_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_amount), 0) as amt']\
+			,filters={'farmer_advance':row.adv_id})
+		adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
+		adv_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
+		adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
+		for i in adv_doc.cycle:
+			instalment +=1
+		adv_doc.paid_instalment = instalment
+		if adv_doc.outstanding_amount > 0 :
+			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
+		if adv_doc.outstanding_amount == 0:
+			adv_doc.status = "Paid"
+			adv_doc.emi_amount = 0
+		adv_doc.flags.ignore_permissions =True
+		adv_doc.save()
+
 	
 	def update_advance_fpcr(self, row):
 		instalment = 0
@@ -183,6 +230,24 @@ class FarmerPaymentCycleReport(Document):
 			adv_doc.emi_amount = 0
 		adv_doc.flags.ignore_permissions =True
 		adv_doc.save()
+
+	def update_advance_fpcr_je(self, row):	# SG-5-10
+		instalment = 0
+		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_amount), 0) as amt']\
+			,filters={'farmer_advance':row.adv_id})
+		adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
+		adv_doc.outstanding_amount = float(adv_doc.advance_amount) - je_amt[0].get('amt')
+		for i in adv_doc.cycle:
+			instalment +=1
+		adv_doc.paid_instalment = instalment
+		if adv_doc.outstanding_amount > 0 :
+			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
+		if adv_doc.outstanding_amount == 0:
+			adv_doc.status = "Paid"
+			adv_doc.emi_amount = 0
+		adv_doc.flags.ignore_permissions =True
+		adv_doc.save()
+
 
 	def update_loan_fpcr(self, row):
 		instalment = 0
@@ -210,6 +275,15 @@ class FarmerPaymentCycleReport(Document):
 		frappe.db.set_value("Sales Invoice", si_no, 'grand_total', row.amount)
 		frappe.db.set_value("Sales Invoice", si_no, 'outstanding_amount', row.amount)
 		frappe.db.set_value("Sales Invoice", si_no, 'rounded_total', row.amount)
+		self.update_gl_entry(si_no, row.amount)
+
+	def update_je(self, row, cycle, je_no):
+		accounts_row = frappe.db.get_value("Journal Entry Account", {'parent':je_no}, 'name')
+		# frappe.db.set_value("Journal Entry Account", accounts_row, 'rate', row.amount)
+		# frappe.db.set_value("Journal Entry Account", accounts_row, 'amount', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'total_amount', row.amount)
 		self.update_gl_entry(si_no, row.amount)
 
 	def update_gl_entry(self, si_no, amount):

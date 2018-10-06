@@ -63,6 +63,19 @@ def make_journal_entry(**kwargs):
 			'credit_in_account_currency': kwargs.get('amount'),
 			'cost_center': abbr.get('cost_center')
 			})
+	elif kwargs.get("advance_type") == "Feed And Fodder Advance":
+		je_doc.append('accounts', {
+			'account': kwargs.get('debit_account')+ abbr.get('abbr'),
+			'debit_in_account_currency': kwargs.get('amount'),
+			'cost_center': abbr.get('cost_center')
+			})
+		je_doc.append('accounts', {
+			'account': kwargs.get('credit_account')+ abbr.get('abbr'),
+			'party_type': kwargs.get('party_type'),
+			'party': kwargs.get('party'),
+			'credit_in_account_currency': kwargs.get('amount'),
+			'cost_center': abbr.get('cost_center')
+			})
 	elif kwargs.get('type') == "Debit to Loan":
 		je_doc.append('accounts', {
 			'account': kwargs.get('debit_account')+ abbr.get('abbr'),

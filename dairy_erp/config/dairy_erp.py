@@ -205,6 +205,13 @@ def get_data():
 					"description": _(" "),
 				},
 				{
+					"type": "report",
+					"name": "Individual Farmer Payment Settlement",
+					"label": _("Individual Farmer Payment Settlement Report"),
+					"doctype": "Farmer Payment Log",
+					"is_query_report":True
+				},
+				{
 					"type": "page",
 					"name": "daily-milk-purchase",
 					"label": _("Daily Milk Purchase Report"),

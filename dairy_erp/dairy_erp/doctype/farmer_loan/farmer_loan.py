@@ -29,7 +29,7 @@ class FarmerLoan(Document):
 	def create_je(self):
 		try:
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc, posting_date = nowdate(),
-				debit_account = "Loan and Advances - ",credit_account = "Cash - ", type = "Debit to Loan",
+				debit_account = "Loans and Advances - ",credit_account = "Cash - ", type = "Debit to Loan",
 				amount = self.advance_amount, master_no = self.name, party_type = "Customer", party = self.farmer_name)
 		except Exception,e:
 			frappe.db.rollback()

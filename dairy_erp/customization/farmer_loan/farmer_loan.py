@@ -17,7 +17,7 @@ def create_jv():
 	docs = frappe.db.sql("""
 			select name,farmer_name,emi_amount,advance_amount,farmer_id,
 			vlcc,emi_deduction_start_cycle,outstanding_amount,date_of_disbursement,
-			no_of_instalments,extension,vlcc
+			no_of_instalments,extension,vlcc,interest_amount
 		from 
 			`tabFarmer Loan`
 		where
@@ -32,15 +32,15 @@ def create_jv():
 			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
 				make_jv(row,cur_cycl[0].get('name'))
 
-
-
 def make_jv(data,cur_cycl=None):
 	try:	
 		if data.get('outstanding_amount') > 0:
+			principal_interest = get_interest_amount(data)
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
-				posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loan and Advances - ", 
-				type = "Farmer Loan", cycle = cur_cycl, amount = data.get('emi_amount'), 
-				party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
+				posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
+				type = "Farmer Loan", cycle = cur_cycl, amount = principal_interest.get('principal'), 
+				party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'),
+				interest_account = "Interest Income - ", interest_amount= principal_interest.get('interest'))
 			if je_doc.name:
 				update_loan_doc(data, je_doc, cur_cycl)			
 	except Exception,e:
@@ -121,8 +121,12 @@ def get_jv_amount(data):
 		from 
 			`tabJournal Entry` 
 		where 
-		farmer_advance =%s""",(data.get('name')),as_dict=1,debug=1)
+		farmer_advance =%s and type = 'Farmer Loan'""",(data.get('name')),as_dict=1,debug=1)
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
 	else: return 0
 
+def get_interest_amount(data):
+	interest_per_cycle = data.get('interest_amount') / data.get('no_of_instalments')
+	principal_per_cycle = data.get('emi_amount') - interest_per_cycle
+	return { 'interest': interest_per_cycle , 'principal': principal_per_cycle}

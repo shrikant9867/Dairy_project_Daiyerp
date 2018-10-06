@@ -153,6 +153,7 @@ frappe.ui.form.on("Sales Invoice", {
 			set_farmer_config(frm)
 			frm.set_value("customer","")
 			frm.set_df_property("customer","read_only",1)
+			frm.set_df_property("local_sale_type","reqd",1)
 			if (frm.doc.items){
 				frm.set_value("items","")
 				refresh_field("items")

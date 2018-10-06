@@ -154,6 +154,7 @@ def feed_fooder_advance(doc, method):
 	user = frappe.db.get_value("User",frappe.session.user,'company')
 	if ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
 		if doc.local_sale and doc.local_sale_type == "Feed And Fooder Advance" and doc.farmer and doc.no_of_instalment:
+			make_payment_entry(doc)
 			farmer_advance = frappe.new_doc("Farmer Advance")
 			farmer_advance.advance_type = "Feed And Fodder Advance"
 			farmer_advance.farmer_id = doc.farmer
@@ -166,6 +167,7 @@ def feed_fooder_advance(doc, method):
 			farmer_advance.feed_and_fodder_si = '<a href="#Form/Sales Invoice/'+doc.name+'">'+doc.name+'</a>'
 			farmer_advance.save(ignore_permissions=True)
 			farmer_advance.submit()
+
 
 
 @frappe.whitelist()

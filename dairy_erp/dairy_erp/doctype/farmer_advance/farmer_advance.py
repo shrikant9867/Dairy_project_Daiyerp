@@ -32,11 +32,10 @@ class FarmerAdvance(Document):
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc,posting_date = nowdate(),
 				debit_account = "Feed And Fodder Advance - ",credit_account = "Cash - ", type = "Debit to Advance",
 				amount = self.advance_amount, master_no = self.name,advance_type=self.advance_type)
-
-		frappe.msgprint(_("Farmer Advance <b>{0}</b> and Journal Entry <b>{1}</b> created successfully against Loans".format(
-					'<a href="#Form/Farmer Advance/'+self.name+'">'+self.name+'</a>',
-					'<a href="#Form/Journal Entry/'+je_doc.name+'">'+je_doc.name+'</a>'
-				)))
+		if je_doc.name:
+			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Advance".format(
+				'<a href="#Form/Journal Entry/'+je_doc.name+'">'+je_doc.name+'</a>'
+					)))
 
 def farmer_advance_permission(user):
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},['operator_type','company','branch_office'], as_dict =1)

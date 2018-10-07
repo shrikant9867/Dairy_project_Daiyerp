@@ -30,15 +30,12 @@ def create_jv():
 			where parent =%s""",(row.get('name')),as_dict=1)
 		cc = [i.get('cycle') for i in child_cycl]
 		if len(cur_cycl):
-			print "###################",cur_cycl,req_cycle_computation(row)
 			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
-				print "!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 				make_si(row,cur_cycl[0].get('name'))
 
 def make_si(data, cur_cycl=None):
 	try:
 		if data.get('outstanding_amount') > 0:
-			print "##########################"
 			company = frappe.db.get_value("Company",{'is_dairy':1},['name','abbr','cost_center'],as_dict=1)
 			je_doc = frappe.new_doc("Journal Entry")
 			je_doc.voucher_type = "Journal Entry"

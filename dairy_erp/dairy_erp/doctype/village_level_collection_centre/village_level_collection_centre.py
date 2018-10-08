@@ -339,7 +339,7 @@ class VillageLevelCollectionCentre(Document):
 					account.flags.ignore_permissions = True
 					account.save()
 
-				if not frappe.db.get_value("Account", {"company": company,"account_name": "Loans and Advances"}, "name"):
+				if not frappe.db.get_value("Account", {"company": company,"account_name": "Feed And Fodder Advances Temporary Account"}, "name"):
 					account = frappe.new_doc("Account")
 					account.update({
 						"company": company,
@@ -357,6 +357,28 @@ class VillageLevelCollectionCentre(Document):
 						"company": company,
 						"account_name": "Interest Income",
 						"parent_account": "Direct Income - "+abbr,
+						"root_type": "Income",
+						"account_type": ""
+					})
+					account.flags.ignore_permissions = True
+					account.save()
+				if not frappe.db.get_value("Account", {"company": company,"account_name": "Loans and Advances Payable"}, "name"):
+					account = frappe.new_doc("Account")
+					account.update({
+						"company": company,
+						"account_name": "Loans and Advances Payable",
+						"parent_account": "Loans (Liabilities) - "+abbr,
+						"root_type": "Income",
+						"account_type": ""
+					})
+					account.flags.ignore_permissions = True
+					account.save()
+				if not frappe.db.get_value("Account", {"company": company,"account_name": "Interest Expense"}, "name"):
+					account = frappe.new_doc("Account")
+					account.update({
+						"company": company,
+						"account_name": "Interest Expense",
+						"parent_account": "Indirect Expenses - "+abbr,
 						"root_type": "Income",
 						"account_type": ""
 					})

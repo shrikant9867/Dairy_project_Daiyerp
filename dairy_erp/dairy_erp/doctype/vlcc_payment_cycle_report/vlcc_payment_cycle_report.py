@@ -49,19 +49,19 @@ class VLCCPaymentCycleReport(Document):
 		flag = False
 		for row in self.vlcc_advance_child:
 			flag = True
-			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
-						'vlcc_advance_loan':row.adv_id }, 'name')
-			pi_exist = frappe.db.get_value("Purchase Invoice",{'cycle': self.cycle,\
-						'vlcc_advance_loan':row.adv_id }, 'name' )
-			if not si_exist:
+			dairy_je_exist = frappe.db.get_value("Journal Entry",{'cycle': self.cycle,\
+						'vlcc_advance_loan':row.adv_id,'type':'Vlcc Advance' }, 'name')
+			vlcc_je_exist = frappe.db.get_value("Journal Entry",{'cycle': self.cycle,\
+						'vlcc_advance_loan':row.adv_id,'type':'Vlcc Advance' }, 'name' )
+			if not dairy_jea_exist:
 				self.validate_advance(row)
-				si = self.create_si(row, "Vlcc Advance", "Advance Emi", row.adv_id)
-				pi = self.create_pi(row, "Vlcc Advance", "Advance Emi", row.adv_id)
-				self.update_advance(row, si)
-			elif si_exist:
-				self.update_si(row, self.cycle, si_exist)
-				self.update_pi(row, self.cycle, pi_exist)
-				self.update_advance_vpcr(row)
+				dairy_je = self.create_dairy_advance_je(row, "Vlcc Advance", "Advance Emi", row.adv_id)
+				vlcc_je = self.create_vlcc_advance_je(row, "Vlcc Advance", "Advance Emi", row.adv_id)
+				self.update_advance_je(row, dairy_je)
+			elif dairy_je_exist:
+				self.update_dairy_je(row, self.cycle, dairy_je_exist)
+				self.update_vlcc_je(row, self.cycle, dairy_je_exist)
+				self.update_advance_vpcr_je(row)
 		if flag:	
 			frappe.msgprint(_("Sales Invoice has been created successfully against Advances"))
 
@@ -132,6 +132,38 @@ class VLCCPaymentCycleReport(Document):
 					'posting_date', self.collection_to )	
 		return si_doc.name
 
+	def create_dairy_advance_je(self, row):
+		company = frappe.db.get_value("Company",{'is_dairy':1},'name')
+		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
+        			posting_date = nowdate(),debit_account = " - ",credit_account = " - ", 
+        			type = "Vlcc Advance", cycle = self.cycle, amount = row.amount, 
+        			party_type = "Customer", party = self.vlcc_name, master_no = row.adv_id)
+
+		frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
+		gl_stock = frappe.db.get_value("Company", company, 'default_income_account')
+		gl_credit = frappe.db.get_value("Company", company, 'default_receivable_account')
+		frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_doc.name},\
+					'posting_date', self.collection_to )
+		frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": je_doc.name},\
+					'posting_date', self.collection_to )	
+		return si_doc.name
+
+	def create_dairy_loan_je(self, row):
+		company = frappe.db.get_value("Company",{'is_dairy':1},'name')
+		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
+        			posting_date = nowdate(),debit_account = " - ",credit_account = " - ", 
+        			type = "Vlcc Loan", cycle = self.cycle, amount = row.amount, 
+        			party_type = "Customer", party = self.vlcc_name, master_no = row.adv_id)
+
+		frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
+		gl_stock = frappe.db.get_value("Company", company, 'default_income_account')
+		gl_credit = frappe.db.get_value("Company", company, 'default_receivable_account')
+		frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_doc.name},\
+					'posting_date', self.collection_to )
+		frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": je_doc.name},\
+					'posting_date', self.collection_to )	
+		return si_doc.name
+
 	def create_pi(self, row, type_, item, doc_id):
 		company = frappe.db.get_value("Company",{'is_dairy':1},'name')
 		pi = frappe.new_doc("Purchase Invoice")
@@ -151,25 +183,38 @@ class VLCCPaymentCycleReport(Document):
 		pi.save()
 		pi.submit()
 
-	def update_si(self, row, cycle, si_no):
-		item_row = frappe.db.get_value("Sales Invoice Item", {'parent':si_no}, 'name')
-		frappe.db.set_value("Sales Invoice Item", item_row, 'rate', row.amount)
-		frappe.db.set_value("Sales Invoice Item", item_row, 'amount', row.amount)
-		frappe.db.set_value("Sales Invoice", si_no, 'grand_total', row.amount)
-		frappe.db.set_value("Sales Invoice", si_no, 'outstanding_amount', row.amount)
-		frappe.db.set_value("Sales Invoice", si_no, 'rounded_total', row.amount)
-		frappe.db.set_value("Sales Invoice", si_no, 'posting_date', self.collection_to)
-		self.update_gl_entry(si_no, row.amount)
+	def create_vlcc_advance_je(self, row):
+		company = frappe.db.get_value("Company",{'is_dairy':1},'name')
+		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
+        			posting_date = nowdate(),debit_account = " - ",credit_account = " - ", 
+        			type = "Vlcc Advance", cycle = self.cycle, amount = row.amount, 
+        			party_type = "Customer", party = self.vlcc_name, master_no = row.adv_id)
 
-	def update_pi(self, row, cycle, pi_no):
+	def create_vlcc_loan_je(self, row):
+		company = frappe.db.get_value("Company",{'is_dairy':1},'name')
+		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
+        			posting_date = nowdate(),debit_account = " - ",credit_account = " - ", 
+        			type = "Vlcc Loan", cycle = self.cycle, amount = row.amount, 
+        			party_type = "Customer", party = self.vlcc_name, master_no = row.adv_id)
+
+	def update_dairy_je(self, row, cycle, je_no):
+		accounts_row = frappe.db.get_value("Journal Entry Account", {'parent':je_no}, 'name')
+		# frappe.db.set_value("Journal Entry Account", accounts_row, 'rate', row.amount)
+		# frappe.db.set_value("Journal Entry Account", accounts_row, 'amount', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'posting_date', self.collection_to)
+		self.update_gl_entry(je_no, row.amount)
+
+	def update_vlcc_je(self, row, cycle, je_no):
 		#overriding PI on vpcr
-		item_row = frappe.db.get_value("Purchase Invoice Item", {'parent':pi_no}, 'name')
-		frappe.db.set_value("Purchase Invoice Item", item_row, 'rate', row.amount)
-		frappe.db.set_value("Purchase Invoice Item", item_row, 'amount', row.amount)
-		frappe.db.set_value("Purchase Invoice", pi_no, 'grand_total', row.amount)
-		frappe.db.set_value("Purchase Invoice", pi_no, 'outstanding_amount', row.amount)
-		frappe.db.set_value("Purchase Invoice", pi_no, 'posting_date', self.collection_to)
-		self.update_gl_pi_entry(pi_no, row.amount)
+		accounts_row = frappe.db.get_value("Journal Entry Account", {'parent':je_no}, 'name')
+		# frappe.db.set_value("Journal Entry Account", accounts_row, 'rate', row.amount)
+		# frappe.db.set_value("Journal Entry Account", accounts_row, 'amount', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'posting_date', self.collection_to)
+		self.update_gl_pi_entry(je_no, row.amount)
 
 	def update_gl_entry(self, si_no, amount):
 		if si_no and amount:
@@ -248,6 +293,24 @@ class VLCCPaymentCycleReport(Document):
 		adv_doc = frappe.get_doc("Vlcc Advance", row.adv_id)
 		adv_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
 		adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
+		for i in adv_doc.cycle:
+			instalment +=1
+		adv_doc.paid_instalment = instalment
+		if adv_doc.outstanding_amount > 0 :
+			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
+		if adv_doc.outstanding_amount == 0:
+			adv_doc.status = "Paid"
+			adv_doc.emi_amount = 0
+		adv_doc.flags.ignore_permissions =True
+		adv_doc.save()
+
+	def update_advance_je(self, row, je=None):
+		instalment = 0
+		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
+			,filters={'vlcc_advance_loan':row.adv_id, 'type': 'Vlcc Advance'})
+		adv_doc = frappe.get_doc("Vlcc Advance", row.adv_id)
+		adv_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": je})
+		adv_doc.outstanding_amount = float(adv_doc.advance_amount) - je_amt[0].get('amt')
 		for i in adv_doc.cycle:
 			instalment +=1
 		adv_doc.paid_instalment = instalment

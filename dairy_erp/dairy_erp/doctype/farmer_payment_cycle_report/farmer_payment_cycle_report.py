@@ -52,7 +52,7 @@ class FarmerPaymentCycleReport(Document):
 			flag = True
 			# SG 5-10
 			je_exist = frappe.db.get_value("Journal Entry",{'cycle': self.cycle,\
-						'farmer_advance':row.adv_id}, 'name')
+						'farmer_advance':row.adv_id,'type':'Farmer Advance'}, 'name')
 			if not je_exist:
 				self.validate_advance(row)
 				je = self.create_je(row)
@@ -80,7 +80,7 @@ class FarmerPaymentCycleReport(Document):
 		for row in self.loan_child:
 			flag = True
 			je_exist = frappe.db.get_value("Journal Entry",{'cycle': self.cycle,\
-						'farmer_advance':row.loan_id}, 'name')
+						'farmer_advance':row.loan_id,'type':'Farmer Loan'}, 'name')
 			if not je_exist:
 				self.validate_loan(row)
 				je = self.create_loan_je(row)
@@ -185,6 +185,7 @@ class FarmerPaymentCycleReport(Document):
 				type = "Farmer Loan", cycle = self.cycle, amount = row.amount, 
 				party_type = "Customer", party = self.farmer_name, master_no = row.loan_id)
 
+		frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
 		gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
 		gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
 		frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_doc.name},\
@@ -207,6 +208,7 @@ class FarmerPaymentCycleReport(Document):
         			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, 
         			party_type = "Customer", party = self.farmer_name, master_no = row.adv_id, advance_type = advance_type)
 
+		frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
 		gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
 		gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
 		frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_doc.name},\

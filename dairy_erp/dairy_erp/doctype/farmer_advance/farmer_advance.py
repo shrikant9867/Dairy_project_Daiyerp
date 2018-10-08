@@ -33,7 +33,7 @@ class FarmerAdvance(Document):
 				debit_account = "Feed And Fodder Advance - ",credit_account = "Cash - ", type = "Debit to Advance",
 				amount = self.advance_amount, master_no = self.name,party_type="Customer",party=self.farmer_name,advance_type=self.advance_type)
 
-		frappe.msgprint(_("Farmer Advance <b>{0}</b> and Journal Entry <b>{1}</b> created successfully against Loans".format(
+		frappe.msgprint(_("Farmer Advance <b>{0}</b> and Journal Entry <b>{1}</b> created successfully against Advance.".format(
 					'<a href="#Form/Farmer Advance/'+self.name+'">'+self.name+'</a>',
 					'<a href="#Form/Journal Entry/'+je_doc.name+'">'+je_doc.name+'</a>'
 				)))

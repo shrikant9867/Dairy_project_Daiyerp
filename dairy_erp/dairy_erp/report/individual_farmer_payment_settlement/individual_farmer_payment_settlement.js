@@ -4,7 +4,7 @@
 
 frappe.query_reports["Individual Farmer Payment Settlement"] = {
 	"filters": [
-			{
+		{
 			"fieldname":"vlcc",
 			"label": __("VLCC"),
 			"fieldtype": "Data",
@@ -12,6 +12,13 @@ frappe.query_reports["Individual Farmer Payment Settlement"] = {
 			"default":frappe.boot.user.first_name,
 			"read_only":1
 			
+		},
+		{
+			"fieldname":"cycle",
+			"label": __("Cycle"),
+			"fieldtype": "Link",
+			"options": "Farmer Date Computation",
+			"reqd":1,
 		},
 		{
 			"fieldname":"farmer",
@@ -57,13 +64,7 @@ frappe.query_reports["Individual Farmer Payment Settlement"] = {
 			"label": __("Full Name"),
 			"fieldtype": "Data",
 			"read_only":1
-		},
-		{
-			"fieldname":"cycle",
-			"label": __("Cycle"),
-			"fieldtype": "Link",
-			"options": "Farmer Date Computation",
-			"reqd":1,
-		}	
+		}
+		
 	]
 }

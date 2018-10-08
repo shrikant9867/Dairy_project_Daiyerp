@@ -34,12 +34,20 @@ def create_jv():
 def make_jv(data, cur_cycl=None):
 	try:
 		if data.get('outstanding_amount') > 0:
-			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
-				posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
-				type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), 
-				party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
+			if data.get('advance_type') == "Money Advance":
+				je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
+			          posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
+			          type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), 
+			          party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
+			elif data.get('advance_type') == "Feed And Fodder Advance":
+				je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
+			          posting_date = nowdate(),debit_account = "Feed And Fodder Advances Temporary Account - ",credit_account = "Feed And Fodder Advance - ", 
+			          type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), 
+			          party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
+			
 			if je_doc.name:
 				update_advance_doc(data, je_doc, cur_cycl)
+				
 	except Exception,e:
 		make_dairy_log(title="JV creation Against Advance Failed",method="make_jv", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())

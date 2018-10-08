@@ -17,7 +17,7 @@ def create_jv():
 	docs = frappe.db.sql("""
 			select name,farmer_name,emi_amount,advance_amount,farmer_id,
 			vlcc,emi_deduction_start_cycle,outstanding_amount,date_of_disbursement,
-			no_of_instalment,extension,vlcc
+			no_of_instalment,extension,vlcc,advance_type
 		from 
 			`tabFarmer Advance`
 		where
@@ -39,15 +39,17 @@ def make_jv(data, cur_cycl=None):
 			          posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
 			          type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), 
 			          party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
+				if je_doc.name:
+					update_advance_doc(data, je_doc, cur_cycl)
 			elif data.get('advance_type') == "Feed And Fodder Advance":
 				je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
 			          posting_date = nowdate(),debit_account = "Feed And Fodder Advances Temporary Account - ",credit_account = "Feed And Fodder Advance - ", 
 			          type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), 
 			          party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
 			
-			if je_doc.name:
-				update_advance_doc(data, je_doc, cur_cycl)
-				
+				if je_doc.name:
+					update_advance_doc(data, je_doc, cur_cycl)
+					
 	except Exception,e:
 		make_dairy_log(title="JV creation Against Advance Failed",method="make_jv", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())

@@ -80,13 +80,13 @@ def make_journal_entry(**kwargs):
 		je_doc.append('accounts', {
 			'account': kwargs.get('debit_account')+ abbr.get('abbr'),
 			'debit_in_account_currency': kwargs.get('amount'),
+			'party': kwargs.get('party'),
+			'party_type': kwargs.get('party_type'),
 			'cost_center': abbr.get('cost_center')
 			})
 		je_doc.append('accounts', {
 			'account': kwargs.get('credit_account')+ abbr.get('abbr'),
 			'credit_in_account_currency': kwargs.get('amount'),
-			'party_type': kwargs.get('party_type'),
-			'party': kwargs.get('party'),
 			'cost_center': abbr.get('cost_center')
 			})
 	elif kwargs.get('type') == "Farmer Loan":

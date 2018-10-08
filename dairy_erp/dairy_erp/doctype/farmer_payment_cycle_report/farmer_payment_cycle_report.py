@@ -33,9 +33,9 @@ class FarmerPaymentCycleReport(Document):
 	def update_fpcr(self):
 		loan_total, loan_si, adavnce_si, advance_total = 0, 0, 0, 0 
 		for row in self.loan_child:
-			si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
-			,filters={'farmer_advance':row.loan_id})
-			loan_si += si_amt[0].get('amt')
+			je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
+			,filters={'farmer_advance':row.loan_id,'type':'Farmer Loan'})
+			loan_je += je_amt[0].get('amt')
 			loan_total += row.principle
 		for row in self.advance_child:
 			je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
@@ -52,7 +52,7 @@ class FarmerPaymentCycleReport(Document):
 			flag = True
 			# SG 5-10
 			je_exist = frappe.db.get_value("Journal Entry",{'cycle': self.cycle,\
-						'farmer_advance':row.adv_id,'type':'Farmer Advance' }, 'name')
+						'farmer_advance':row.adv_id}, 'name')
 			if not je_exist:
 				self.validate_advance(row)
 				je = self.create_je(row)
@@ -79,17 +79,19 @@ class FarmerPaymentCycleReport(Document):
 		flag = False
 		for row in self.loan_child:
 			flag = True
-			si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
-						'farmer_advance':row.loan_id }, 'name')
-			if not si_exist:
+			je_exist = frappe.db.get_value("Journal Entry",{'cycle': self.cycle,\
+						'farmer_advance':row.loan_id}, 'name')
+			if not je_exist:
 				self.validate_loan(row)
-				si = self.create_si(row,"Loan","Loan Emi", row.loan_id)
-				self.update_loan(row, si)
-			elif si_exist:
-				self.update_si(row, self.cycle, si_exist)
-				self.update_loan_fpcr(row)
+				je = self.create_loan_je(row)
+				self.update_loan_je(row, je)
+			elif je_exist:
+				self.update_je(row, self.cycle, je_exist)
+				self.update_loan_fpcr_je(row)
 		if flag:
-			frappe.msgprint(_("Sales invoice created successfully against Loans"))
+			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Loans.".format(
+					'<a href="#Form/Journal Entry/'+je+'">'+je+'</a>'
+				)))
 
 	
 	def validate_advance(self, row):
@@ -131,6 +133,25 @@ class FarmerPaymentCycleReport(Document):
 			loan_doc.emi_amount = 0
 		loan_doc.flags.ignore_permissions = True
 		loan_doc.save()
+
+	def update_loan_je(self, row, je = None):
+		instalment = 0
+		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
+			,filters={'farmer_advance':row.loan_id,'type':'Farmer Loan'})
+		
+		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
+		loan_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": je})
+		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - je_amt[0].get('amt')
+		for i in loan_doc.cycle:
+			instalment += 1
+		loan_doc.paid_instalment = instalment
+		if loan_doc.outstanding_amount > 0:
+			loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
+		if loan_doc.outstanding_amount == 0:
+			loan_doc.status = "Paid"
+			loan_doc.emi_amount = 0
+		loan_doc.flags.ignore_permissions = True
+		loan_doc.save()
 	
 	def create_si(self, row, type_, item, doc_id):
 		si_doc = frappe.new_doc("Sales Invoice")
@@ -157,6 +178,21 @@ class FarmerPaymentCycleReport(Document):
 		frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": si_doc.name},\
 					'posting_date', self.collection_to )	
 		return si_doc.name
+
+	def create_loan_je(self, row): # SG-8-10
+		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
+				posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
+				type = "Farmer Loan", cycle = self.cycle, amount = row.amount, 
+				party_type = "Customer", party = self.farmer_name, master_no = row.loan_id)
+
+		gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
+		gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
+		frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_doc.name},\
+					'posting_date', self.collection_to )
+		frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": je_doc.name},\
+					'posting_date', self.collection_to )
+		
+		return je_doc.name
 
 	def create_je(self, row): # SG-5-10
 		advance_type = frappe.db.get_value("Farmer Advance",{'name': row.adv_id}, 'advance_type')
@@ -260,6 +296,24 @@ class FarmerPaymentCycleReport(Document):
 		
 		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
 		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
+		for i in loan_doc.cycle:
+			instalment += 1
+		loan_doc.paid_instalment = instalment
+		if loan_doc.outstanding_amount > 0:
+			loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
+		if loan_doc.outstanding_amount == 0:
+			loan_doc.status = "Paid"
+			loan_doc.emi_amount = 0
+		loan_doc.flags.ignore_permissions = True
+		loan_doc.save()
+
+	def update_loan_fpcr_je(self, row):
+		instalment = 0
+		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
+			,filters={'farmer_advance':row.adv_id,'type':'Farmer Loan'})
+		
+		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
+		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - je_amt[0].get('amt')
 		for i in loan_doc.cycle:
 			instalment += 1
 		loan_doc.paid_instalment = instalment
@@ -638,26 +692,26 @@ def get_updated_advance(cycle, adv_id=None, amount=None, total = None):
 			from 
 				`tabJournal Entry` 
 			where 
-			farmer_advance =%s  and cycle !=%s and type=Farmer Advance'""",(adv_id,cycle),as_dict=1,debug=1)
+			farmer_advance =%s  and cycle !=%s and type='Farmer Advance' """,(adv_id,cycle),as_dict=1,debug=1)
 		if len(sum_):
 			adv_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
 			return adv_amount
 		else: return 0
 	else:
-		frappe.throw(__("<b>Amount cannot be negative</b>"))
+		frappe.throw(__("<b>Amount cannot be negative or 0</b>"))
 
 @frappe.whitelist()
 def get_updated_loan(cycle, loan_id=None, amount=None, total = None):
 	if amount > 0:
 		sum_ = frappe.db.sql("""
-					select ifnull(sum(grand_total),0) as total
+					select ifnull(sum(total_debit),0) as total
 				from 
-					`tabSales Invoice` 
+					`tabJournal Entry` 
 				where 
-				farmer_advance =%s  and cycle_ !=%s""",(loan_id,cycle),as_dict=1,debug=1)
+				farmer_advance =%s  and cycle !=%s and type='Farmer loan' """,(loan_id,cycle),as_dict=1,debug=1)
 		if len(sum_):
 			loan_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
 			return loan_amount
 		else: return 0
 	else:
-		frappe.throw(__("<b>Amount cannot be negative</b>"))
+		frappe.throw(__("<b>Amount cannot be negative or 0</b>"))

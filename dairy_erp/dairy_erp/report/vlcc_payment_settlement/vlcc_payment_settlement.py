@@ -93,7 +93,7 @@ def get_data(filters):
 		where 
 			voucher_type = 'Journal Entry' and company = '{0}' {1}
 		having debit > 0""".
-		format(dairy,get_conditions_jv(filters)),filters, as_list=True,debug=1)
+		format(dairy,get_conditions_jv(filters)),filters, as_list=True,debug=0)
 	
 	return supplier_data + customer_data + jv_data
 
@@ -124,17 +124,14 @@ def get_payment_amt(row_data,filters):
 
 	report_data = get_data(json.loads(filters))
 	row_data = json.loads(row_data)
-
-	payble = 0.0
-	receivable = 0.0
-	set_amt = 0.0
-
+	payble, receivable, set_amt = 0.0, 0.0, 0.0
+	
 	for data in report_data:
 		if data[12] in row_data:
-			if data[9] == "Purchase Invoice":
-				payble += data[6]
-			if data[9] == "Sales Invoice":
-				receivable += data[5]
+			print "$$$$$$$$$$$$$$$",data[5],data[7]
+			if data[9] == "Purchase Invoice": payble += data[6]
+			if data[9] == "Sales Invoice": receivable += data[5]
+			if data[7] == "Journal Entry": receivable += data[5]
 
 	return {"payble":payble,"receivable":receivable,"set_amt": min(payble,receivable)}
 
@@ -152,7 +149,7 @@ def make_payment(data,row_data,filters):
 		gl_doc = frappe.get_doc('GL Entry',d)
 		if gl_doc.voucher_type == 'Purchase Invoice':
 			payble_list.append(gl_doc.voucher_no)
-		elif gl_doc.voucher_type == 'Sales Invoice':
+		elif gl_doc.voucher_type in ['Sales Invoice','Journal Entry']:
 			recv_list.append(gl_doc.voucher_no)
 	
 	try:
@@ -371,11 +368,14 @@ def make_payment_entry(**kwargs):
 		outstanding_invoices = get_outstanding_reference_documents(args)
 		party_amount = pe.paid_amount if pe.payment_type=="Receive" else pe.received_amount
 		voucher_no_list = kwargs.get('args').get('payble_list') if kwargs.get('payment_type')=="Pay" else kwargs.get('args').get('recv_list')  #[frappe.db.get_value('GL Entry', d, 'voucher_no') for d in kwargs.get('args').get('row_data')]
-
+		# print voucher_no_list,"voucher_no_list_____________\n\n"
+		
 		for d in outstanding_invoices:
 			if d.voucher_no in voucher_no_list and party_amount > 0:
 				allocated_amount = (d.outstanding_amount 
 					if party_amount > d.outstanding_amount else party_amount)
+				# print allocated_amount,"allocated_amount__________________\n\n"
+				# print d.outstanding_amount,"outstanding_amount________________\n\n"
 
 				pe.append('references', {
 					"reference_doctype": d.voucher_type,

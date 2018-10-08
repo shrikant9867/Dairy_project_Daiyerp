@@ -108,8 +108,6 @@ def make_jv_cross(data, cur_cycl=None, company={}):
 		'account': "Creditors - "+ vlcc_attr.get('abbr'),
 		'credit_in_account_currency': principal_interest.get('principal'),
 		'cost_center': vlcc_attr.get('cost_center'),
-		'party_type': "Supplier",
-		'party': company.get('name'),
 		})
 	je_doc.append('accounts', {
 		'account': "Interest Income - "+ vlcc_attr.get('abbr'),

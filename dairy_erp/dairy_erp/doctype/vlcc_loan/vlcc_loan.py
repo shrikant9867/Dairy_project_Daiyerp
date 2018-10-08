@@ -40,8 +40,8 @@ class VlccLoan(Document):
 		je_doc.append('accounts', {
 			'account': "Loans and Advances - "+ company.get('abbr'),
 			'debit_in_account_currency': self.advance_amount,
-			'party_type': "Customer",
-			'party': self.vlcc_id,
+			# 'party_type': "Customer",
+			# 'party': self.vlcc_id,
 			'cost_center': company.get('cost_center')
 			})
 		je_doc.append('accounts', {
@@ -64,8 +64,8 @@ class VlccLoan(Document):
 		je_doc.append('accounts', {
 			'account': "Cash - "+ company.get('abbr'),
 			'debit_in_account_currency': self.advance_amount,
-			'party_type': "Supplier",
-			'party': is_dairy,
+			# 'party_type': "Supplier",
+			# 'party': is_dairy,
 			'cost_center': company.get('cost_center')
 			})
 		je_doc.append('accounts', {

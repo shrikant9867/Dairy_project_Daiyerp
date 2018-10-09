@@ -34,17 +34,18 @@ def create_jv():
 def make_jv(data, cur_cycl=None):
 	try:
 		if data.get('outstanding_amount') > 0:
+			# parameter 'faf_flag', is used to fetch data on net-payOff report.
 			if data.get('advance_type') == "Money Advance":
 				je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
 			          posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
-			          type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), 
+			          type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), faf_flag = 0,
 			          party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
 				if je_doc.name:
 					update_advance_doc(data, je_doc, cur_cycl)
 			elif data.get('advance_type') == "Feed And Fodder Advance":
 				je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
 			          posting_date = nowdate(),debit_account = "Feed And Fodder Advances Temporary Account - ",credit_account = "Feed And Fodder Advance - ", 
-			          type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), 
+			          type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), faf_flag = 1,
 			          party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
 			
 				if je_doc.name:
@@ -100,7 +101,7 @@ def req_cycle_computation(data):
 			from
 				`tabFarmer Date Computation`
 			where
-				'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+				vlcc = '{1}' order by start_date limit {2}""".
 			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1)
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		

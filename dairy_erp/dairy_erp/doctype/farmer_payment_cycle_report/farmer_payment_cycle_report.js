@@ -170,7 +170,7 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 		net_pay = flt(frm.doc.total_bill) - (flt(frm.doc.loan_emi) + 
 		flt(frm.doc.advance_emi) + flt(frm.doc.feed_and_fodder) +
 		flt(frm.doc.veterinary_services))
-		frm.set_value("net_pay",net_pay)
+		frm.set_value("net_pay",net_pay.toFixed(2))
 	}
 });
 

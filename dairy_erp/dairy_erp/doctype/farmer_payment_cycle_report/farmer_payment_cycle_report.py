@@ -58,7 +58,7 @@ class FarmerPaymentCycleReport(Document):
 				je = self.create_je(row)
 				self.update_advance_je(row, je)
 			elif je_exist:
-				self.update_je(row, self.cycle, je_exist)
+				self.update_je_for_advance(row, self.cycle, je_exist)
 				self.update_advance_fpcr_je(row)
 			# si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
 			# 			'farmer_advance':row.adv_id }, 'name')
@@ -86,7 +86,7 @@ class FarmerPaymentCycleReport(Document):
 				je = self.create_loan_je(row)
 				self.update_loan_je(row, je)
 			elif je_exist:
-				self.update_je(row, self.cycle, je_exist)
+				self.update_je_for_loan(row, self.cycle, je_exist)
 				self.update_loan_fpcr_je(row)
 		if flag:
 			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Loans.".format(
@@ -180,10 +180,12 @@ class FarmerPaymentCycleReport(Document):
 		return si_doc.name
 
 	def create_loan_je(self, row): # SG-8-10
+		principal_interest = get_interest_amount(row.amount, row.loan_id)
 		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
-				posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
-				type = "Farmer Loan", cycle = self.cycle, amount = row.amount, 
-				party_type = "Customer", party = self.farmer_name, master_no = row.loan_id)
+			posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
+			type = "Farmer Loan", cycle = self.cycle, amount = principal_interest.get('principal'), 
+			party_type = "Customer", party = self.farmer_name, master_no = self.name,
+			interest_account = "Interest Income - ", interest_amount= principal_interest.get('interest'))
 
 		frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
 		gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
@@ -193,6 +195,8 @@ class FarmerPaymentCycleReport(Document):
 					'posting_date', self.collection_to )
 		frappe.db.set_value("GL Entry", {"account": 'Loans and Advances - '+company_abbr.get('abbr'), "voucher_no": je_doc.name},\
 					'posting_date', self.collection_to )
+		frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr.get('abbr'), "voucher_no": je_doc.name},\
+						'posting_date', self.collection_to )
 		
 		return je_doc.name
 
@@ -201,7 +205,7 @@ class FarmerPaymentCycleReport(Document):
 		if advance_type == "Money Advance":
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
         			posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
-        			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, 
+        			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, faf_flag = 0,
         			party_type = "Customer", party = self.farmer_name, master_no = row.adv_id, advance_type = advance_type)
 			frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
 			gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
@@ -211,12 +215,13 @@ class FarmerPaymentCycleReport(Document):
 						'posting_date', self.collection_to )
 			frappe.db.set_value("GL Entry", {"account": 'Loans and Advances - '+company_abbr.get('abbr'), "voucher_no": je_doc.name},\
 						'posting_date', self.collection_to )
-			
+			return je_doc.name
 
 		if advance_type == "Feed And Fodder Advance":
+			# parameter 'faf_flag', is used to fetch data on net-payOff report.
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
         			posting_date = nowdate(),debit_account = "Feed And Fodder Advances Temporary Accounts - ",credit_account = "Feed And Fodder Advance - ", 
-        			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, 
+        			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, faf_flag = 1,
         			party_type = "Customer", party = self.farmer_name, master_no = row.adv_id, advance_type = advance_type)
 			frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
 			gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
@@ -226,8 +231,7 @@ class FarmerPaymentCycleReport(Document):
 						'posting_date', self.collection_to )
 			frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr.get('abbr'), "voucher_no": je_doc.name},\
 						'posting_date', self.collection_to )
-		
-		return je_doc.name
+			return je_doc.name
 	
 
 	def update_advance(self, row, si=None):
@@ -348,28 +352,83 @@ class FarmerPaymentCycleReport(Document):
 		frappe.db.set_value("Sales Invoice", si_no, 'rounded_total', row.amount)
 		self.update_gl_entry(si_no, row.amount)
 
-	def update_je(self, row, cycle, je_no):	# SG-5-10
+	def update_je_for_loan(self, row, cycle, je_no):	# SG-5-10
+		principal_interest = get_interest_amount(row.amount, row.loan_id)
+		company = frappe.db.get_value("Company",self.vlcc_name,['name','abbr','cost_center'],as_dict=1)
 		accounts_row = frappe.db.get_value("Journal Entry Account", {'parent':je_no}, 'name')
-		# frappe.db.set_value("Journal Entry Account", accounts_row, 'rate', row.amount)
-		# frappe.db.set_value("Journal Entry Account", accounts_row, 'amount', row.amount)
+		frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':"Debtors - "+company.get('abbr')}, 'debit_in_account_currency', principal_interest.get('principal')+principal_interest.get('interest'))
+		frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':"Loans and Advances - "+company.get('abbr')}, 'credit_in_account_currency', principal_interest.get('principal'))
+		frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':"Interest Income - "+company.get('abbr')}, 'credit_in_account_currency', principal_interest.get('interest'))
 		frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
 		frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)
-		self.update_gl_entry(je_no, row.amount)
+		self.update_gl_entry_loan(je_no, principal_interest)
 
+	def update_je_for_advance(self, row, cycle, je_no):	# SG-5-10
+		company = frappe.db.get_value("Company",self.vlcc_name,['name','abbr','cost_center'],as_dict=1)
+		advance_type = frappe.db.get_value("Farmer Advance",{'name': row.adv_id}, 'advance_type')
+		if advance_type == "Money Advance":
+			accounts_row = frappe.db.get_value("Journal Entry Account", {'parent':je_no}, 'name')
+			frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':'Debtors - '+company.get('abbr')}, 'debit_in_account_currency', row.amount)
+			frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':'Loans and Advances - '+company.get('abbr')}, 'credit_in_account_currency', row.amount)
+			frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
+			frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)
+			self.update_gl_entry_advance(je_no, row, row.amount)
 
-	def update_gl_entry(self, si_no, amount):
-		if si_no and amount:
+		if advance_type == "Feed And Fodder Advance":
+			accounts_row = frappe.db.get_value("Journal Entry Account", {'parent':je_no}, 'name')
+			frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':'Feed And Fodder Advances Temporary Accounts - '+company.get('abbr')}, 'debit_in_account_currency', row.amount)
+			frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':'Feed And Fodder Advance - '+company.get('abbr')}, 'credit_in_account_currency', row.amount)
+			frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
+			frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)
+			self.update_gl_entry_advance(je_no, row, row.amount)
+
+	def update_gl_entry_loan(self, je_no, principal_interest):
+		if je_no and amount:
 			gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
 			gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
-			frappe.db.set_value("GL Entry", {'account': gl_stock, 'voucher_no': si_no},\
-				'credit_in_account_currency', amount)
-			frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": si_no},\
-					'credit', amount )
-			frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": si_no},\
-					'debit', amount )
-			frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": si_no},\
-					'debit_in_account_currency', amount )
+			company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr',as_dict=1)
+			frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_no},\
+						'posting_date', self.collection_to )
+			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+						'posting_date', self.collection_to )
+			frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+						'posting_date', self.collection_to )
+			frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_no},\
+						'debit_in_account_currency',  principal_interest.get('principal') + principal_interest.get('interest'))
+			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+						'credit_in_account_currency', principal_interest.get('principal') )
+			frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+						'credit_in_account_currency', principal_interest.get('interest') )
 
+	def update_gl_entry_advance(self, je_no, row, amount):
+		if je_no and amount:
+			advance_type = frappe.db.get_value("Farmer Advance",{'name': row.adv_id}, 'advance_type')
+			if advance_type == "Money Advance":
+				gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
+				gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
+				company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr',as_dict=1)
+				frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+							'posting_date', self.collection_to )
+				frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+							'posting_date', self.collection_to )
+				frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+							'credit_in_account_currency', amount )
+				frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+							'debit_in_account_currency', amount )
+				
+
+			if advance_type == "Feed And Fodder Advance":
+				gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
+				gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
+				company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr',as_dict=1)
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Accounts - '+company_abbr.get('abbr'), "voucher_no": je_no},\
+							'posting_date', self.collection_to )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr.get('abbr'), "voucher_no": je_no},\
+							'posting_date', self.collection_to )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Accounts - '+company_abbr.get('abbr'), "voucher_no": je_no},\
+							'credit_in_account_currency', amount )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr.get('abbr'), "voucher_no": je_no},\
+							'debit_in_account_currency', amount )
 
 	def create_incentive(self):
 		pi = frappe.new_doc("Purchase Invoice")
@@ -395,6 +454,12 @@ class FarmerPaymentCycleReport(Document):
 		gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_payable_account')
 		frappe.db.set_value("GL Entry",{'account': gl_stock,'voucher_no':pi.name}, 'posting_date', self.collection_to)
 		frappe.db.set_value("GL Entry",{'account': gl_credit,'voucher_no':pi.name}, 'posting_date', self.collection_to)
+
+def get_interest_amount(amount, data):
+	loan_doc = frappe.get_all("Farmer Loan",fields=['interest','no_of_instalments','emi_amount'],filters={'name':data})
+	interest_per_cycle = loan_doc[0].get('interest') / loan_doc[0].get('no_of_instalments')
+	principal_per_cycle = amount - interest_per_cycle
+	return { 'interest': interest_per_cycle , 'principal': principal_per_cycle}
 
 @frappe.whitelist()
 def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):

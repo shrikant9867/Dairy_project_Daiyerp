@@ -7,6 +7,12 @@
   		width: 7%;
 	}	
 
+.nopadding {
+   padding: 0 !important;
+   margin: 0 !important;
+}
+
+
 th,td {
 	text-align: center;
 }	
@@ -37,25 +43,9 @@ th,td {
 		<div class="col-xs-2">
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-xs-12" style="font-size: 16px;">
-			<center>
-				<b>Dairy Register - 1</b>
-			</center>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-xs-12" style="font-size: 16px;">
-			<center>
-			<b>{%= __("Start Date:") %}</b>
-			{%= start_date %}
-			<b>{%= __("End Date:") %}</b>
-			{%= end_date %}
-			</center>
-		</div>
-	</div>
-	<div style="border-top: double #d1d8dd; margin: 4px 0 4px 0"></div>
-	<div class = "row">
+	<p class="nopadding" align="center"><b>Dairy Register - 1</b></p>
+	<p align="center"><b>Start Date: &nbsp;&nbsp;{%= start_date %} &nbsp;&nbsp;End Date: &nbsp;&nbsp;{%= end_date %}</b></p>
+	<div class = "row nopadding">
 		<div class="col-md-12">
 			<table class="table table-bordered">
 				<tbody>
@@ -87,8 +77,8 @@ th,td {
 						<th>Nos</th>
 						<th>Qty</th>
 						<th>Amt</th>
-						<th>Total Milk Qty</th>
-						<th>Total Milk Amt</th>
+						<th>Tot Milk Qty</th>
+						<th>Tot Milk Amt</th>
 						<th>FAT</th>
 						<th>SNF</th>
 						<th class="increase">FAT</th>

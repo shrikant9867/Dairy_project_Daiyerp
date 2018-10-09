@@ -2,7 +2,12 @@
 .cc {
 	font-size: 15px;
 }
+
+.bold{
+	font-weight: bold; 
+}
 </style>
+
 <div class="row dd"><center>
 	<b>Malbar Regional Co-operative Milk Producers' Union Ltd.</b>
 </center>
@@ -18,43 +23,104 @@
 	</tr>
 </table>
 {% for(var i=0, l=data.length; i<l; i++) { %}
-<div class="row">
-	<div class="col-xs-10 col-md-10">
-		Date
-		&nbsp;
-		{%= dateutil.str_to_user(filters.from_date) %}
-		&nbsp;&nbsp;
-		Shift
-		&nbsp;
-		{% if (filters.shift == "MORNING") { %}
-			{%= ("AM") %}
-		{% } else { %}
-			{%= ("PM") %}
-		{% } %}
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		Route:
-		&nbsp;
-		{%= data[i][__("Route")] %}
-	</div>
-	<div class="col-xs-2 col-md-2"></div>
-</div>
-<table class="table">
-	<thead>
-		<tr>
-			<th>{%= __("SNo") %}</th>
-			<th>{%= __("Code") %}</th>
-			<th>{%= __("SocName") %}</th>
-			<th>{%= __("Cans") %}</th>
-			<th>{%= __("Qty") %}</th>
-			<th>{%= __("Fat") %}</th>	
-			<th>{%= __("SNF") %}</th>
-			<th>{%= __("TS") %}</th>
-			<th>{%= __("Qlty") %}</th>
-			<th>{%= __("Rate") %}</th>
-			<th>{%= __("Value") %}</th>
-		</tr>
-	</thead>
-	<tbody>
-	</tbody>
-</table>
+	{% if (i == l-1) { %}
+		<div class="row bold">
+			<div class="col-xs-2">Grand Total</div>
+			<div class="col-xs-10"></div>
+		</div>
+
+		<div class="row bold">
+			<div class="col-xs-2">Good Milk  :&nbsp;&nbsp;&nbsp;{%= data[i][__("Shift")] %}</div>
+			<div class="col-xs-10"></div>
+		</div>
+		<div class="row bold">
+			<div class="col-xs-2">Sour FOS   :</div>
+			<div class="col-xs-10"></div>
+		</div>
+		<div class="row bold">
+			<div class="col-xs-2">Curdle FOS :</div>
+			<div class="col-xs-10"></div>
+		</div>
+		<div class="row bold">
+			<div class="col-xs-2">F O T      :</div>
+			<div class="col-xs-10"></div>
+		</div>
+		<div class="row bold">
+			<div class="col-xs-2">F O D :</div>
+			<div class="col-xs-2"></div>
+			<div class="col-xs-4">Total Milk : &nbsp;&nbsp;{%= data[i][__("Route")] %}</div>
+			<div class="col-xs-4"></div>
+		</div>
+	{% } else { %}
+		<div class="row">
+			<div class="col-xs-10 col-md-10 bold">
+				Date
+				&nbsp;
+				{%= dateutil.str_to_user(filters.from_date) %}
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				Shift
+				&nbsp;
+				{% if (filters.shift == "MORNING") { %}
+					{%= ("AM") %}
+				{% } else { %}
+					{%= ("PM") %}
+				{% } %}
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				Route:
+				&nbsp;
+				<b>{%= data[i][__("Route")] %}</b>
+			</div>
+			<div class="col-xs-2 col-md-2"></div>
+		</div>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>{%= __("SNo") %}</th>
+					<th>{%= __("Code") %}</th>
+					<th>{%= __("SocName") %}</th>
+					<th>{%= __("Cans") %}</th>
+					<th>{%= __("Qty") %}</th>
+					<th>{%= __("Fat") %}</th>	
+					<th>{%= __("SNF") %}</th>
+					<th>{%= __("TS") %}</th>
+					<th>{%= __("Qlty") %}</th>
+					<th>{%= __("Rate") %}</th>
+					<th>{%= __("Value") %}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for(var ci=0, d = data[i][__("Rate")].length; ci < d; ci++) { %}
+					{% if (ci == d-1) { %}
+						<tr>
+							<td></td>
+							<td></td>
+							<td><b>{%= ("Route Total") %}</b></td>
+							<td><b>{%= data[i][__("Cans")][ci] %}</b></td>
+							<td><b>{%= data[i][__("Qty")][ci] %}</b></td>
+							<td><b>{%= data[i][__("Fat")][ci] %}</b></td>
+							<td><b>{%= data[i][__("Snf")][ci] %}</b></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td><b>{%= data[i][__("Value")][ci] %}</b></td>
+						</tr>
+					{% } else { %}
+						<tr>
+							<td>{%= ci+1 %}</td>
+							<td>{%= data[i][__("CC")][ci] %}</td>
+							<td>{%= data[i][__("VLCC")][ci] %}</td>
+							<td>{%= data[i][__("Cans")][ci] %}</td>
+							<td>{%= data[i][__("Qty")][ci] %}</td>
+							<td>{%= data[i][__("Fat")][ci] %}</td>
+							<td>{%= data[i][__("Snf")][ci] %}</td>
+							<td>{%= data[i][__("TS")][ci] %}</td>
+							<td>{%= data[i][__("Qlty")][ci] %}</td>
+							<td>{%= data[i][__("Rate")][ci] %}</td>
+							<td>{%= data[i][__("Value")][ci] %}</td>
+						</tr>
+					{% } %}	
+				{% } %}
+			</tbody>
+		</table>
+	{% } %}
 {% } %}

@@ -19,8 +19,10 @@ def get_column():
 		("Incentive") + ":Currency",
 		("Net Payable to Farmer") + ":Currency:200",
 		("Local Purchase by Farmer") + ":Currency:200",
+		("Feed & Fodder Purchase by Farmer") + ":Currency:250",
 		("Any Vet Service Availed") + ":Currency:200",
 		("Advance EMI") + ":Currency:200",
+		("Feed & Fodder Advance EMI") + ":Currency:230",
 		("Loan EMI") + ":Currency:200",
 		("Net Receivable from Farmer") + ":Currency:200",
 		("Net Pay Off to Farmer")+ ":Currency:200",
@@ -80,7 +82,7 @@ def merge_data(payable, receivable):
 			rec = receivable.get(f[1], 0)
 			net = pay - rec
 			data.append([f[0], f[1], pi_data.get('fmcr'), pi_data.get('incentive'), \
-				pay, si_data.get('local_sale'), si_data.get('vet_service'), si_data.get('advance'), si_data.get('loan'), rec, pay-rec])
+				pay, si_data.get('local_sale'), si_data.get('local_sale_faf'), si_data.get('vet_service'), si_data.get('advance'), si_data.get('fnf_advance'), si_data.get('loan'), rec, pay-rec])
 	return data		  
 
 def get_farmers():
@@ -130,7 +132,14 @@ def get_si_data(f):
 			from 
 				`tabSales Invoice`
 			where 
-				local_sale = 1 and customer = '{0}' and docstatus =1
+				local_sale = 1 and local_sale_type !='Feed And Fooder Advance' and customer = '{0}' and docstatus =1
+			""".format(f[1]),as_dict=1,debug=0)
+		local_sale_faf = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabSales Invoice`
+			where 
+				local_sale = 1 and local_sale_type='Feed And Fooder Advance' and customer = '{0}' and docstatus =1
 			""".format(f[1]),as_dict=1,debug=0)
 		vet_service = frappe.db.sql("""
 				select ifnull(sum(outstanding_amount),0) as total
@@ -140,29 +149,40 @@ def get_si_data(f):
 				service_note = 1 and customer = '{0}' and docstatus =1
 			""".format(f[1]),as_dict=1,debug=0)
 		loan = frappe.db.sql("""
-				select ifnull(sum(outstanding_amount),0) as total
+				select ifnull(sum(total_debit),0) as total
 			from 
-				`tabSales Invoice`
+				`tabJournal Entry`
 			where 
-				type = 'Loan' and customer = '{0}'  and docstatus =1
+				type = 'Farmer Loan' and reference_party = '{0}' and docstatus =1
 			""".format(f[1]),as_dict=1,debug=0)
 		advance = frappe.db.sql("""
-				select ifnull(sum(outstanding_amount),0) as total
+				select ifnull(sum(total_debit),0) as total
 			from 
-				`tabSales Invoice`
+				`tabJournal Entry`
 			where 
-				type = 'Advance' and customer = '{0}'  and docstatus =1
+				type = 'Farmer Advance' and reference_party = '{0}' and is_feed_and_fodder=0 and docstatus =1
+			""".format(f[1]),as_dict=1,debug=0)
+		fnf_advance = frappe.db.sql("""
+				select ifnull(sum(total_debit),0) as total
+			from 
+				`tabJournal Entry`
+			where 
+				type = 'Farmer Advance' and reference_party = '{0}' and is_feed_and_fodder=1 and docstatus =1
 			""".format(f[1]),as_dict=1,debug=0)
 		return {
 				'local_sale':local_sale[0].get('total'),
+				'local_sale_faf': local_sale_faf[0].get('total'),
 			 	'vet_service': vet_service[0].get('total'),
 			 	'loan': loan[0].get('total'),
-			 	'advance': advance[0].get('total')
+			 	'advance': advance[0].get('total'),
+			 	'fnf_advance': fnf_advance[0].get('total')
 			 	}
 	return {
 				'local_sale': 0 ,
+				'local_sale_faf':0,
 			 	'vet_service': 0,
 			 	'loan': 0,
-			 	'advance': 0
+			 	'advance': 0,
+			 	'fnf_advance':0
 			 	}
 

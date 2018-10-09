@@ -47,9 +47,11 @@ def make_journal_entry(**kwargs):
 	je_doc.voucher_type = kwargs.get('voucher_type')
 	je_doc.company = kwargs.get('company')
 	je_doc.type = kwargs.get('type')
+	je_doc.is_feed_and_fodder = kwargs.get('faf_flag')
 	je_doc.cycle = kwargs.get('cycle')
 	je_doc.farmer_advance = kwargs.get('master_no')
 	je_doc.posting_date = kwargs.get('posting_date')
+	je_doc.reference_party = kwargs.get('party')
 	if kwargs.get("advance_type") == "Money Advance" or kwargs.get('type') == "Farmer Advance":
 		je_doc.append('accounts', {
 			'account': kwargs.get('debit_account')+ abbr.get('abbr'),

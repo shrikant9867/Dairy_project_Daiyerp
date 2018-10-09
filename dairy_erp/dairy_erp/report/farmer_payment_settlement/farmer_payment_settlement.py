@@ -144,6 +144,7 @@ def get_payment_amt(row_data,filters):
 @frappe.whitelist()
 def make_payment(data,row_data,filters):
 	
+	payable_data = get_payment_amt(row_data,filters)
 	data = json.loads(data)
 	row_data = json.loads(row_data)
 	filters = json.loads(filters)
@@ -166,7 +167,7 @@ def make_payment(data,row_data,filters):
 		due_pay = make_manual_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
 
 		voucher_nos = [payable, receivable, due_pay]
-		make_payment_log(data=data,filters=filters, row_data= row_data, voucher_nos=voucher_nos)
+		make_payment_log(data=data,filters=filters, row_data= row_data, voucher_nos=voucher_nos,payable_data=payable_data)
 		return {"payable":payable,"receivable":receivable,"due_pay":due_pay}
 	except Exception,e:
 		frappe.db.rollback() 
@@ -187,7 +188,7 @@ def make_payment_log(**kwargs):
 		gl_doc = frappe.get_doc('GL Entry',d)
 		cycle = get_cycle(gl_doc.posting_date, cycle_list)
 		if cycle:
-			field = ('sales_voucher_no' if gl_doc.voucher_type == 'Sales Invoice' 
+			field = ('sales_voucher_no' if gl_doc.voucher_type in ['Sales Invoice','Journal Entry']
 				else 'purchase_voucher_no')
 
 			if cycle.name not in farmer_payment_log:
@@ -195,7 +196,8 @@ def make_payment_log(**kwargs):
 					'start_date': cycle.start_date,
 					'end_date': cycle.end_date,
 					'farmer': kwargs.get('filters').get('farmer'),
-					'company': frappe.db.get_value("User",{"name":frappe.session.user},'company')
+					'company': frappe.db.get_value("User",{"name":frappe.session.user},'company'),
+					'payable_data':kwargs.get('payable_data')
 				}
 
 				farmer_payment_log.setdefault(cycle.name, {})
@@ -223,7 +225,7 @@ def make_farmer_voucher_log(cycle, args):
 		if sales_amount > 0 or purchase_amount > 0:
 			log_doc = frappe.new_doc("Farmer Payment Log")
 			log_doc.total_pay = args.get('total_pay')
-			log_doc.payble = args.get('payable')
+			log_doc.payble = args.get('payable_data').get('payble')#args.get('payable')
 			log_doc.receivable = args.get('receivable')  
 			log_doc.start_date = args.get('start_date') 
 			log_doc.end_date = args.get('end_date') 
@@ -231,6 +233,7 @@ def make_farmer_voucher_log(cycle, args):
 			log_doc.month = cycle.split("-")[1]
 			log_doc.farmer = args.get('farmer')
 			log_doc.vlcc = args.get('company')
+			log_doc.settlement_date = nowdate()
 
 
 			auto, manual = 0, purchase_amount
@@ -267,9 +270,10 @@ def get_cycle_sales_purchase_paid_amt(args):
 	sales_amount = frappe.get_all('GL Entry', fields= ['ifnull(sum(credit),0) as amt'], 
 		filters = {'voucher_no': ('in', args.get('payment_entry')),
 			'against_voucher': ('in', args.get('sales_voucher_no')), 
-			'against_voucher_type': 'Sales Invoice', 'voucher_type': 'Payment Entry'})
+			'against_voucher_type': ('in', ['Sales Invoice','Journal Entry']), 'voucher_type': 'Payment Entry'})
 
 	sales_amount = sales_amount[0]['amt'] if sales_amount else 0
+
 
 	purchase_amount = frappe.get_all('GL Entry', fields= ['ifnull(sum(debit), 0) as amt'], 
 		filters = {'voucher_no': ('in', args.get('payment_entry')),
@@ -535,6 +539,7 @@ def skip_cycle(row_data,filters):
 				log_doc.month = filters.get('cycle').split("-")[1]
 				log_doc.farmer = farmer_name
 				log_doc.vlcc = vlcc
+				log_doc.settlement_date = nowdate()
 				log_doc.flags.ignore_permissions = True
 				log_doc.save()
 				frappe.msgprint(_("Cycle has been skipped"))

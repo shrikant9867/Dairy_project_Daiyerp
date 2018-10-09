@@ -28,6 +28,7 @@ def create_jv():
 		cur_cycl = get_current_cycle()
 		child_cycl = frappe.db.sql("""select cycle from `tabVlcc Cycle` where parent =%s""",(row.get('name')),as_dict=1)
 		cc = [i.get('cycle') for i in child_cycl]	
+		print "##################",req_cycle_computation(row),row.get('name')
 		if len(cur_cycl):
 			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
 				make_jv(row,cur_cycl[0].get('name'))
@@ -131,11 +132,12 @@ def req_cycle_computation(data):
 	if data.get('emi_deduction_start_cycle') > 0:
 		not_req_cycl = frappe.db.sql("""
 				select name
-			from
+			from		
 				`tabCyclewise Date Computation`
 			where
-				'{0}' < start_date order by start_date limit {1}""".
-			format(data.get('date_of_disbursement'),data.get('emi_deduction_start_cycle')),as_dict=1)
+				'{0}' < start_date or date(now()) between start_date and end_date
+				 order by start_date limit {1}""".
+			format(data.get('date_of_disbursement'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
 		if len(not_req_cycl):
@@ -144,7 +146,7 @@ def req_cycle_computation(data):
 				from
 					`tabCyclewise Date Computation`
 				where
-					'{date}' <= start_date order by start_date limit {instalment}
+					'{date}' <= start_date and name not in ({cycle}) order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),
 					instalment = instalment),as_dict=1)
 			
@@ -172,7 +174,7 @@ def get_jv_amount(data,company):
 		from 
 			`tabJournal Entry` 
 		where 
-		vlcc_advance =%s and type ='Vlcc Loan' and company =%s""",(data.get('name'),company),as_dict=1,debug=1)
+		vlcc_advance =%s and type ='Vlcc Loan' and company =%s""",(data.get('name'),company),as_dict=1,debug=0)
 	
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0

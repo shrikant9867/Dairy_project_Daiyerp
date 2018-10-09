@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt,nowdate
 from dairy_erp.dairy_utils import make_dairy_log
 import re
 import datetime
@@ -15,7 +15,7 @@ from frappe.model.document import Document
 
 
 
-def create_si():
+def create_jv():
 	docs = frappe.db.sql("""
 			select name,vlcc,emi_amount,advance_amount,emi_deduction_start_cycle,
 			outstanding_amount,date_of_disbursement,no_of_instalment,extension,status
@@ -36,32 +36,39 @@ def create_si():
 def make_si(data, cur_cycl=None):
 	try:
 		if data.get('outstanding_amount') > 0:
-			company = frappe.db.get_value("Company",{'is_dairy':1},'name')
-			si_doc = frappe.new_doc("Sales Invoice")
-			si_doc.type = "Vlcc Advance"
-			si_doc.customer = data.get('vlcc')
-			si_doc.company = company
-			si_doc.vlcc_advance_loan = data.get('name')
-			si_doc.cycle_ = cur_cycl
-			si_doc.append("items",{
-				"item_code":"Advance Emi",
-				"qty": 1,
-				"rate": data.get('emi_amount'),
-				"cost_center": frappe.db.get_value("Company", company, "cost_center")
+			company = frappe.db.get_value("Company",{'is_dairy':1},['name','abbr','cost_center'],as_dict=1)
+			je_doc = frappe.new_doc("Journal Entry")
+			je_doc.voucher_type = "Journal Entry"
+			je_doc.company = company.get('name')
+			je_doc.type = "Vlcc Advance"
+			je_doc.cycle = cur_cycl
+			je_doc.vlcc_advance = data.get('name')
+			je_doc.posting_date = nowdate()
+			je_doc.append('accounts', {
+				'account': "Debtors - "+ company.get('abbr'),
+				'debit_in_account_currency': data.get('emi_amount'),
+				'party_type': "Customer",
+				'party': data.get('vlcc'),
+				'cost_center': company.get('cost_center')
 				})
-			si_doc.flags.ignore_permissions = True
-			si_doc.insert()
-			si_doc.submit()
-			make_pi(data, cur_cycl, company)
+			je_doc.append('accounts', {
+				'account': "Loans and Advances - "+ company.get('abbr'),
+				'credit_in_account_currency':  data.get('emi_amount'),
+				'cost_center': company.get('cost_center')
+				})
+			je_doc.flags.ignore_permissions = True
+			je_doc.save()
+			je_doc.submit()
+			make_cross_jv(data, cur_cycl, company)
 
-			#update advance doc
+			# update advance doc
 			paid_instlmnt = 0
 			advance_doc = frappe.get_doc("Vlcc Advance",data.get('name'))
 			advance_doc.append("cycle",{
 				"cycle":cur_cycl,
-				"sales_invoice": si_doc.name
+				"sales_invoice": je_doc.name
 				})
-			advance_doc.outstanding_amount = data.get('advance_amount') - get_si_amount(data)
+			advance_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data, je_doc.company)
 			if advance_doc.outstanding_amount == 0:
 				advance_doc.outstanding_amount = 0
 				advance_doc.status = "Paid"
@@ -76,23 +83,30 @@ def make_si(data, cur_cycl=None):
 		make_dairy_log(title="Sync failed for Data push",method="get_items", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())
 
-def  make_pi(data, cur_cycl=None, company=None):
-	pi = frappe.new_doc("Purchase Invoice")
-	pi.supplier = company
-	pi.company = data.get('vlcc')
-	pi.pi_type = "Vlcc Advance"
-	pi.cycle = cur_cycl
-	pi.vlcc_advance_loan = data.get('name')
-	pi.append("items",
-		{
-			"item_code":"Advance Emi",
-			"qty": 1,
-			"rate": data.get('emi_amount'),
-			"cost_center": frappe.db.get_value("Company", data.get('vlcc'), "cost_center")
+def  make_cross_jv(data, cur_cycl=None, company=None):
+	vlcc_attr = frappe.db.get_value("Company", data.get('vlcc'), ['abbr','cost_center'],as_dict=1)
+	je_doc = frappe.new_doc("Journal Entry")
+	je_doc.voucher_type = "Journal Entry"
+	je_doc.company = data.get('vlcc')
+	je_doc.type = "Vlcc Advance"
+	je_doc.cycle = cur_cycl
+	je_doc.vlcc_advance = data.get('name')
+	je_doc.posting_date = nowdate()
+	je_doc.append('accounts', {
+		'account': "Loans and Advances Payable - "+ vlcc_attr.get('abbr'),
+		'debit_in_account_currency': data.get('emi_amount'),
+		'cost_center': vlcc_attr.get('cost_center')
 		})
-	pi.flags.ignore_permissions = True
-	pi.save()
-	pi.submit()
+	je_doc.append('accounts', {
+		'account': "Creditors - "+ vlcc_attr.get('abbr'),
+		'credit_in_account_currency': data.get('emi_amount'),
+		'party_type': "Supplier",
+		'party': company.get('name'),
+		'cost_center': vlcc_attr.get('cost_center'),
+		})
+	je_doc.flags.ignore_permissions = True
+	je_doc.save()
+	je_doc.submit()
 
 def get_current_cycle():
 	return frappe.db.sql("""
@@ -102,7 +116,6 @@ def get_current_cycle():
 		where
 			now() between start_date and end_date
 		""",as_dict=1)
-
 
 def req_cycle_computation(data):
 	if data.get('emi_deduction_start_cycle') > 0:
@@ -145,13 +158,13 @@ def req_cycle_computation(data):
 
 	return []
 
-def get_si_amount(data):
+def get_jv_amount(data, company):
 	sum_ = frappe.db.sql("""
-			select ifnull(sum(grand_total),0) as total
+			select ifnull(sum(total_debit),0) as total
 		from 
-			`tabSales Invoice` 
+			`tabJournal Entry` 
 		where 
-		vlcc_advance_loan =%s""",(data.get('name')),as_dict=1)
+		vlcc_advance =%s and type = 'Vlcc Advance' and company = %s""",(data.get('name'),company),as_dict=1,debug=1)
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
 	else: return 0

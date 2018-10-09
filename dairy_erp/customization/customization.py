@@ -28,6 +28,7 @@ def validate_dairy_company(doc,method=None):
 				comp_doc.is_dairy = 1
 				comp_doc.save()
 				create_dairy_as_supplier(comp_doc.name)
+				create_loans_advances_accounts(comp_doc.name)
 
 	if doc.address_type in ["Chilling Centre","Camp Office","Plant"]:
 		doc.append("links",
@@ -60,6 +61,20 @@ def create_dairy_as_supplier(company):
 	) 
 	supl_doc.flags.ignore_permissions = True
 	supl_doc.save()
+
+def create_loans_advances_accounts(company):
+	if not frappe.db.get_value("Account", {"company": company,"account_name": "Loans and Advances"}, "name"):
+		abbr = frappe.db.get_value("Company",{"name":company},"abbr")
+		account = frappe.new_doc("Account")
+		account.update({
+			"company": company,
+			"account_name": "Loans and Advances",
+			"parent_account": "Loans and Advances (Assets) - "+abbr,
+			"root_type": "Asset",
+			"account_type": ""
+		})
+		account.flags.ignore_permissions = True
+		account.save()
 
 def make_account_and_warehouse(doc, method=None):
 	try:

@@ -10,15 +10,15 @@ from dairy_erp.dairy_utils import make_dairy_log
 import re
 import datetime
 from dairy_erp.dairy_utils import make_dairy_log
-from frappe.utils import flt, today, getdate
+from frappe.utils import flt, today, getdate, nowdate
 from frappe.model.document import Document
 
 
-def create_si():
+def create_jv():
 	docs = frappe.db.sql("""select name,vlcc_id,emi_amount,advance_amount,
 							emi_deduction_start_cycle,
 							outstanding_amount,date_of_disbursement,
-							no_of_instalments,extension
+							no_of_instalments,extension,interest
 						from 
 							`tabVlcc Loan`
 						where
@@ -30,40 +30,52 @@ def create_si():
 		cc = [i.get('cycle') for i in child_cycl]	
 		if len(cur_cycl):
 			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
-				make_si(row,cur_cycl[0].get('name'))
+				make_jv(row,cur_cycl[0].get('name'))
 
-def make_si(data,cur_cycl=None):
+def make_jv(data,cur_cycl=None):
 	try:
-		company = frappe.db.get_value("Company",{"is_dairy":1},'name')
+		company = frappe.db.get_value("Company",{'is_dairy':1},['name','abbr','cost_center'],as_dict=1)
 		if data.get('outstanding_amount') > 0:
-			si_doc = frappe.new_doc("Sales Invoice")
-			si_doc.type = "Vlcc Loan"
-			si_doc.customer = data.get('vlcc_id')
-			si_doc.company = company
-			si_doc.vlcc_advance_loan = data.get('name')
-			si_doc.cycle_ = cur_cycl
-			si_doc.append("items",{
-				"item_code":"Loan Emi",
-				"qty": 1,
-				"rate": data.get('emi_amount'),
-				"cost_center": frappe.db.get_value("Company", company, "cost_center")
+			principal_interest = get_interest_amount(data)
+			je_doc = frappe.new_doc("Journal Entry")
+			je_doc.voucher_type = "Journal Entry"
+			je_doc.company = company.get('name')
+			je_doc.type = "Vlcc Loan"
+			je_doc.cycle = cur_cycl
+			je_doc.vlcc_advance = data.get('name')
+			je_doc.posting_date = nowdate()
+			je_doc.append('accounts', {
+				'account': "Debtors - "+ company.get('abbr'),
+				'party_type': "Customer",
+				'party': data.get('vlcc_id'),
+				'debit_in_account_currency': principal_interest.get('principal') + principal_interest.get('interest'),
+				'cost_center': company.get('cost_center')
 				})
-			si_doc.flags.ignore_permissions = True
-			si_doc.save()
-			si_doc.submit()
-
-			make_pi(data,cur_cycl,company)
+			je_doc.append('accounts', {
+				'account': "Loans and Advances - "+ company.get('abbr'),
+				'credit_in_account_currency':  principal_interest.get('principal'),
+				'cost_center': company.get('cost_center')
+				})
+			je_doc.append('accounts', {
+				'account': "Interest Income - "+ company.get('abbr'),
+				'credit_in_account_currency':  principal_interest.get('interest'),
+				'cost_center': company.get('cost_center')
+				})
+			je_doc.flags.ignore_permissions = True
+			je_doc.save()
+			je_doc.submit()
+			make_jv_cross(data,cur_cycl, company)
 
 			#update loan doc
 			paid_instlmnt = 0
 			loan_doc = frappe.get_doc("Vlcc Loan",data.get('name'))
-			loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_si_amount(data)
+			loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_jv_amount(data,je_doc.company)
 			if loan_doc.outstanding_amount == 0:
 				loan_doc.outstanding_amount = 0
 				loan_doc.status = "Paid"
 			loan_doc.append("cycle",{
 				"cycle":cur_cycl,
-				"sales_invoice": si_doc.name
+				"sales_invoice": je_doc.name
 				})
 			for i in loan_doc.cycle:
 				paid_instlmnt += 1
@@ -74,23 +86,37 @@ def make_si(data,cur_cycl=None):
 		make_dairy_log(title="Sync failed for Data push",method="get_items", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())
 
-def make_pi(data, cur_cycl=None, company=None):
-	pi = frappe.new_doc("Purchase Invoice")
-	pi.supplier = company
-	pi.company = data.get('vlcc_id')
-	pi.pi_type = "Vlcc Loan"
-	pi.cycle = cur_cycl
-	pi.vlcc_advance_loan = data.get('name')
-	pi.append("items",
-		{
-			"item_code":"Loan Emi",
-			"qty": 1,
-			"rate": data.get('emi_amount'),
-			"cost_center": frappe.db.get_value("Company", pi.company, "cost_center")
+def make_jv_cross(data, cur_cycl=None, company={}):
+	
+	vlcc_attr = frappe.db.get_value("Company", data.get('vlcc_id'), ['abbr','cost_center'],as_dict=1)
+	principal_interest = get_interest_amount(data)
+	je_doc = frappe.new_doc("Journal Entry")
+	je_doc.voucher_type = "Journal Entry"
+	je_doc.company = data.get('vlcc_id')
+	je_doc.type = "Vlcc Loan"
+	je_doc.cycle = cur_cycl
+	je_doc.vlcc_advance = data.get('name')
+	je_doc.posting_date = nowdate()
+	je_doc.append('accounts', {
+		'account': "Loans and Advances Payable - "+ vlcc_attr.get('abbr'),
+		'debit_in_account_currency': principal_interest.get('principal'),
+		'cost_center': vlcc_attr.get('cost_center')
 		})
-	pi.flags.ignore_permissions = True
-	pi.save()
-	pi.submit()
+	je_doc.append('accounts', {
+		'account': "Interest Expense - "+ vlcc_attr.get('abbr'),
+		'debit_in_account_currency':  principal_interest.get('interest'),
+		'cost_center': vlcc_attr.get('cost_center')
+		})
+	je_doc.append('accounts', {
+		'account': "Creditors - "+ vlcc_attr.get('abbr'),
+		'credit_in_account_currency': principal_interest.get('principal') + principal_interest.get('interest'),
+		'party_type': "Supplier",
+		'party': company.get('name'),
+		'cost_center': vlcc_attr.get('cost_center'),
+		})
+	je_doc.flags.ignore_permissions = True
+	je_doc.save()
+	je_doc.submit()
 
 def get_current_cycle():
 	return frappe.db.sql("""
@@ -140,14 +166,19 @@ def req_cycle_computation(data):
 		return req_cycl_list
 	return []
 
-def get_si_amount(data):
+def get_jv_amount(data,company):
 	sum_ = frappe.db.sql("""
-			select ifnull(sum(grand_total),0) as total
+			select ifnull(sum(total_debit),0) as total
 		from 
-			`tabSales Invoice` 
+			`tabJournal Entry` 
 		where 
-		vlcc_advance_loan =%s and total is not null""",(data.get('name')),as_dict=1)
+		vlcc_advance =%s and type ='Vlcc Loan' and company =%s""",(data.get('name'),company),as_dict=1,debug=1)
 	
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
 	else: return 0
+
+def get_interest_amount(data):
+	interest_per_cycle = data.get('interest') / data.get('no_of_instalments')
+	principal_per_cycle = data.get('emi_amount') - interest_per_cycle
+	return { 'interest': interest_per_cycle , 'principal': principal_per_cycle}

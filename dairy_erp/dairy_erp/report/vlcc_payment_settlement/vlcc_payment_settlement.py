@@ -82,8 +82,20 @@ def get_data(filters):
 				group by g1.against_voucher, g1.party  
 				order by g1.posting_date,g1.party,g1.voucher_type)  g3 having debit > 0""".
 				format(dairy,get_conditions(filters)),filters,as_list=True)
-
-	return supplier_data + customer_data
+	jv_data = frappe.db.sql("""
+		select 'test' as test,g3.posting_date, g3.account,g3.party_type,
+			g3.party,(g3.debit - ifnull((select sum(credit) from `tabGL Entry` where against_voucher = g3.voucher_no
+			and against_voucher_type = g3.voucher_type and party_type = g3.party_type 
+			and party=g3.party), 0)) as debit, 0 as credit, g3.voucher_type,g3.voucher_no,
+			g3.against_voucher_type, g3.against_voucher,g3.remarks,g3.name 
+		from 
+			`tabGL Entry` g3
+		where 
+			voucher_type = 'Journal Entry' and company = '{0}' {1}
+		having debit > 0""".
+		format(dairy,get_conditions_jv(filters)),filters, as_list=True,debug=0)
+	
+	return supplier_data + customer_data + jv_data
 
 def get_conditions(filters):
 
@@ -96,22 +108,30 @@ def get_conditions(filters):
 
 	return conditions
 
+def get_conditions_jv(filters):
+
+	conditions = " and 1=1"
+
+	if filters.get('vlcc') and filters.get('prev_transactions'):
+		conditions += " and g3.posting_date <= %(end_date)s and g3.party = %(vlcc)s"
+	elif filters.get('vlcc') and filters.get('cycle') and not filters.get('prev_transactions'):
+		conditions += " and g3.party = %(vlcc)s and g3.posting_date between %(start_date)s and %(end_date)s"
+
+	return conditions
+
 @frappe.whitelist()
 def get_payment_amt(row_data,filters):
 
 	report_data = get_data(json.loads(filters))
 	row_data = json.loads(row_data)
-
-	payble = 0.0
-	receivable = 0.0
-	set_amt = 0.0
-
+	payble, receivable, set_amt = 0.0, 0.0, 0.0
+	
 	for data in report_data:
 		if data[12] in row_data:
-			if data[9] == "Purchase Invoice":
-				payble += data[6]
-			if data[9] == "Sales Invoice":
-				receivable += data[5]
+			print "$$$$$$$$$$$$$$$",data[5],data[7]
+			if data[9] == "Purchase Invoice": payble += data[6]
+			if data[9] == "Sales Invoice": receivable += data[5]
+			if data[7] == "Journal Entry": receivable += data[5]
 
 	return {"payble":payble,"receivable":receivable,"set_amt": min(payble,receivable)}
 
@@ -129,7 +149,7 @@ def make_payment(data,row_data,filters):
 		gl_doc = frappe.get_doc('GL Entry',d)
 		if gl_doc.voucher_type == 'Purchase Invoice':
 			payble_list.append(gl_doc.voucher_no)
-		elif gl_doc.voucher_type == 'Sales Invoice':
+		elif gl_doc.voucher_type in ['Sales Invoice','Journal Entry']:
 			recv_list.append(gl_doc.voucher_no)
 	
 	try:
@@ -156,7 +176,7 @@ def make_payment_log(**kwargs):
 		gl_doc = frappe.get_doc('GL Entry',d)
 		cycle = get_cycle(gl_doc.posting_date, cycle_list)
 		if cycle:
-			field = ('sales_voucher_no' if gl_doc.voucher_type == 'Sales Invoice' 
+			field = ('sales_voucher_no' if gl_doc.voucher_type in ['Sales Invoice','Journal Entry']
 				else 'purchase_voucher_no')
 
 			if cycle.name not in vlcc_payment_log:
@@ -235,7 +255,7 @@ def get_cycle_sales_purchase_paid_amt(args):
 	sales_amount = frappe.get_all('GL Entry', fields= ['ifnull(sum(credit),0) as amt'], 
 		filters = {'voucher_no': ('in', args.get('payment_entry')),
 			'against_voucher': ('in', args.get('sales_voucher_no')), 
-			'against_voucher_type': 'Sales Invoice', 'voucher_type': 'Payment Entry'})
+			'against_voucher_type': ('in', ['Sales Invoice','Journal Entry']), 'voucher_type': 'Payment Entry'})
 
 	sales_amount = sales_amount[0]['amt'] if sales_amount else 0
 
@@ -285,10 +305,11 @@ def make_payble_payment(**kwargs):
 	
 def make_receivable_payment(**kwargs):
 
+	default_bank_cash_account = ""
 	party_account = get_party_account("Customer", kwargs.get('filters').get('vlcc'), kwargs.get('company'))
-	default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Bank")
-	if not default_bank_cash_account:
-		default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Cash")
+	default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Cash")#get_default_bank_cash_account(kwargs.get('company'), "Bank")
+	# if not default_bank_cash_account:
+	# 	default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Cash")
 	party_account_currency = get_account_currency(party_account)
 
 	if kwargs.get('data').get('set_amt'):
@@ -348,12 +369,11 @@ def make_payment_entry(**kwargs):
 		outstanding_invoices = get_outstanding_reference_documents(args)
 		party_amount = pe.paid_amount if pe.payment_type=="Receive" else pe.received_amount
 		voucher_no_list = kwargs.get('args').get('payble_list') if kwargs.get('payment_type')=="Pay" else kwargs.get('args').get('recv_list')  #[frappe.db.get_value('GL Entry', d, 'voucher_no') for d in kwargs.get('args').get('row_data')]
-
+		
 		for d in outstanding_invoices:
 			if d.voucher_no in voucher_no_list and party_amount > 0:
 				allocated_amount = (d.outstanding_amount 
 					if party_amount > d.outstanding_amount else party_amount)
-
 				pe.append('references', {
 					"reference_doctype": d.voucher_type,
 					"reference_name": d.voucher_no,
@@ -389,6 +409,7 @@ def make_pe_against_invoice(pe,kwargs):
 	dairy = frappe.db.get_value("Company",{"is_dairy":1},'name')
 	pe_doc = frappe.get_doc("Payment Entry",pe)
 	for row in pe_doc.references:
+		print row.reference_name,kwargs,"##############################\n\n"
 		if row.reference_doctype == 'Purchase Invoice':
 			pi_doc = frappe.get_doc("Purchase Invoice",row.reference_name)
 			si = frappe.db.get_value("Sales Invoice",
@@ -402,6 +423,16 @@ def make_pe_against_invoice(pe,kwargs):
 			if si_doc.purchase_invoice:
 				pi_doc = frappe.get_doc("Purchase Invoice",si_doc.purchase_invoice)
 				create_payment_entry(pi_doc,row,kwargs)
+		elif row.reference_doctype == 'Journal Entry':
+			print row.as_dict(),"row_______________________________\n\n"
+			jv_dairy_type = frappe.db.get_value("Journal Entry",row.reference_name,["type","vlcc_advance"],as_dict=1)
+			jv_vlcc = frappe.db.get_value("Journal Entry",{"vlcc_advance":jv_dairy_type.get('vlcc_advance'),"type":jv_dairy_type.get('type')},"name")
+			jv_vlcc_doc = frappe.get_doc("Journal Entry",jv_vlcc)
+			print jv_vlcc,"jv_vlcc_________________\n\n"
+			print jv_vlcc_doc,"jv_vlcc_doc_________________________\n\n"
+			if jv_vlcc_doc:
+				create_payment_entry(jv_vlcc_doc,row,kwargs)
+
 
 def create_payment_entry(doc,row,kwargs):
 
@@ -428,6 +459,20 @@ def create_payment_entry(doc,row,kwargs):
 		if not default_bank_cash_account:
 			default_bank_cash_account = get_default_bank_cash_account(doc.company, "Cash")
 		party_account_currency = get_account_currency(party_account)
+
+	elif row.reference_doctype == 'Journal Entry':
+		for d in doc.accounts:
+			if d.party:
+				party_account = get_party_account("Supplier", d.party, doc.company)
+				party_type = "Supplier"
+				party = d.party
+				ref_doc = "Journal Entry"
+				payment_type = "Pay"
+				ref_no = 'Auto Settlement on JV at VLCC'
+				default_bank_cash_account = get_default_bank_cash_account(doc.company, "Bank")
+				if not default_bank_cash_account:
+					default_bank_cash_account = get_default_bank_cash_account(doc.company, "Cash")
+				party_account_currency = get_account_currency(party_account)
 	
 	try:
 		pe = frappe.new_doc("Payment Entry")
@@ -454,8 +499,8 @@ def create_payment_entry(doc,row,kwargs):
 			"reference_doctype": ref_doc,
 			"reference_name": doc.name,
 			"due_date":doc.due_date,
-			"total_amount": doc.grand_total,
-			"outstanding_amount": doc.outstanding_amount,
+			"total_amount": doc.grand_total if ref_doc in ['Purchase Invoice','Sales Invoice'] else doc.total_debit or doc.total_credit,
+			"outstanding_amount": doc.outstanding_amount if ref_doc in ['Purchase Invoice','Sales Invoice'] else row.outstanding_amount,
 			"allocated_amount":row.allocated_amount
 		})
 		

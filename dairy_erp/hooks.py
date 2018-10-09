@@ -198,7 +198,7 @@ scheduler_events = {
       "dairy_erp.customization.farmer_advance.farmer_advance.create_si"
     ]
 }
-fixtures=['Property Setter','Custom Field','Print Format']
+fixtures=['Property Setter','Custom Field','Print Format','Report']
 
 
 permission_query_conditions = {

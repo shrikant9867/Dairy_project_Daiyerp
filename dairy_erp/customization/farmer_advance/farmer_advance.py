@@ -100,7 +100,8 @@ def req_cycle_computation(data):
 			from
 				`tabFarmer Date Computation`
 			where
-				'{0}' < start_date and vlcc = '{1}' order by start_date limit {2}""".
+				'{0}' < start_date or date(now()) between start_date and end_date 
+				and vlcc = '{1}' order by start_date limit {2}""".
 			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1)
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		

@@ -197,7 +197,8 @@ def make_payment_log(**kwargs):
 					'end_date': cycle.end_date,
 					'farmer': kwargs.get('filters').get('farmer'),
 					'company': frappe.db.get_value("User",{"name":frappe.session.user},'company'),
-					'payable_data':kwargs.get('payable_data')
+					'payable_data':kwargs.get('payable_data'),
+					'dialog_data': kwargs.get('data')
 				}
 
 				farmer_payment_log.setdefault(cycle.name, {})
@@ -246,8 +247,9 @@ def make_farmer_voucher_log(cycle, args):
 
 			log_doc.sales_amount = sales_amount
 			log_doc.purchase_amount = purchase_amount
-			log_doc.settled_amount = auto 
-			log_doc.set_amt_manual = manual
+			log_doc.settled_amount = args.get('dialog_data').get('set_amt') 
+			log_doc.set_amt_manual = args.get('dialog_data').get('set_amt_manual')
+			log_doc.outstanding_amount = (flt(log_doc.payble,2) - flt(purchase_amount,2)) or 0
 
 			previous_amt = get_previous_amt(cycle, args.get('farmer'))
 			total_pay = auto + manual + previous_amt

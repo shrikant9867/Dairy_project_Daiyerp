@@ -15,6 +15,7 @@ class FarmerLoan(Document):
 		if self.emi_amount > self.outstanding_amount:
 			frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
 		self.create_je()
+
 		
 	def after_insert(self):
 		self.interest_amount = self.interest
@@ -31,6 +32,10 @@ class FarmerLoan(Document):
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc, posting_date = nowdate(),
 				debit_account = "Loans and Advances - ",credit_account = "Cash - ", type = "Debit to Loan",
 				amount = self.advance_amount, master_no = self.name)
+			if je_doc.name:
+				frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Loan".format(
+					'<a href="#Form/Journal Entry/'+je_doc.name+'">'+je_doc.name+'</a>'
+					)))
 		except Exception,e:
 			frappe.db.rollback()
 			make_dairy_log(title="JV creation Against Advance Failed",method="make_jv", status="Error",

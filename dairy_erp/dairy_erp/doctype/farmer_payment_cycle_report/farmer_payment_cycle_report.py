@@ -184,7 +184,7 @@ class FarmerPaymentCycleReport(Document):
 		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
 			posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
 			type = "Farmer Loan", cycle = self.cycle, amount = principal_interest.get('principal'), 
-			party_type = "Customer", party = self.farmer_name, master_no = self.name,
+			party_type = "Customer", party = self.farmer_name, master_no = row.loan_id,
 			interest_account = "Interest Income - ", interest_amount= principal_interest.get('interest'))
 
 		frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)

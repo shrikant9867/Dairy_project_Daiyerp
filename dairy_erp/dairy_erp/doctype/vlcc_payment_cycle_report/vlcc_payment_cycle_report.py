@@ -651,7 +651,9 @@ def req_cycle_computation(data):
 			from
 				`tabCyclewise Date Computation`
 			where
-				'{0}' < start_date order by start_date limit {2}""".
+				'{0}' < start_date 
+				and  or date('{0}') between start_date and end_date
+				order by start_date limit {2}""".
 			format(data.get('date_of_disbursement'),data.get('vlcc_id'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		
@@ -692,7 +694,9 @@ def req_cycle_computation_advance(data):
 			from
 				`tabCyclewise Date Computation`
 			where
-				'{0}' < start_date  order by start_date limit {1}""".
+				'{0}' < start_date  
+				and  or date('{0}') between start_date and end_date
+				order by start_date limit {1}""".
 			format(data.get('date_of_disbursement'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		

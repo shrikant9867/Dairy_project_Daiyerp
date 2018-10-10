@@ -35,7 +35,11 @@ class FarmerLoan(Document):
 			if je_doc.name:
 				frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Loan".format(
 					'<a href="#Form/Journal Entry/'+je_doc.name+'">'+je_doc.name+'</a>'
+<<<<<<< HEAD
 					)))
+=======
+						)))
+>>>>>>> 92d4b6f6ddbe1c30ba2d42b10b8ee75a74b7e1f5
 		except Exception,e:
 			frappe.db.rollback()
 			make_dairy_log(title="JV creation Against Advance Failed",method="make_jv", status="Error",

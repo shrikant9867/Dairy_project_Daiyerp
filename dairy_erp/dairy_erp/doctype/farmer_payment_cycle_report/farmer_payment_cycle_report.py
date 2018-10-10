@@ -469,7 +469,7 @@ def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
 		from 
 			`tabFarmer Milk Collection Record`
 		where 
-			associated_vlcc = '{0}' and rcvdtime between '{1}' and '{2}' and farmerid= '{3}'
+			associated_vlcc = '{0}' and date(rcvdtime) between '{1}' and '{2}' and farmerid= '{3}'
 			""".format(vlcc, start_date, end_date, farmer_id),as_dict=1)
 	amount = 0
 	qty = 0

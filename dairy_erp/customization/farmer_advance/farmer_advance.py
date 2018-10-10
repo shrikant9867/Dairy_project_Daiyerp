@@ -27,6 +27,7 @@ def create_jv():
 		cur_cycl = get_current_cycle(row)
 		child_cycl = frappe.db.sql("""select cycle from `tabFarmer Cycle` where parent =%s""",(row.get('name')),as_dict=1)
 		cc = [i.get('cycle') for i in child_cycl]
+		print req_cycle_computation(row),cur_cycl,"*******************"
 		if len(cur_cycl):
 			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
 				make_jv(row,cur_cycl[0].get('name'))
@@ -100,7 +101,7 @@ def req_cycle_computation(data):
 			from
 				`tabFarmer Date Computation`
 			where
-				'{0}' < start_date or date(now()) between start_date and end_date 
+				'{0}' < start_date or date('{0}') between start_date and end_date 
 				and vlcc = '{1}' order by start_date limit {2}""".
 			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1)
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
@@ -131,7 +132,7 @@ def req_cycle_computation(data):
 						order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=1)
 		req_cycl_list = [i.get('name') for i in req_cycle]
-		print "##############################",req_cycl_list,data.get('name')
+		# print "##############################",req_cycl_list,data.get('name')
 		return req_cycl_list
 
 	return []

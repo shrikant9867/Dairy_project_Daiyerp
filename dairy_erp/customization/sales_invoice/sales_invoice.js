@@ -218,6 +218,22 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frm.doc.customer_or_farmer == "Vlcc Local Institution" &&  frm.doc.customer == frm.doc.company+"-Local Institution" && !frm.doc.organisation_name ){
 			frappe.throw("Please Enter Organisation Name against vlcc local Institution")
 		}
+	},
+	no_of_instalment: function(frm){
+		if(frm.doc.no_of_instalment < 0){
+			frm.set_value("no_of_instalment",0)
+			frappe.throw("No Of Instalment should be greater than or equal to zero")
+		}
+		else if(frm.doc.no_of_instalment == 0){
+			frm.set_value("no_of_instalment",1)
+			frappe.throw("No Of Instalment should be greater than zero")
+		}
+	},
+	emi_start_cycle:function(frm){
+		if(frm.doc.emi_start_cycle < 0){
+			frm.set_value("emi_start_cycle",0)
+			frappe.throw("Emi Start Cycle should be greater than or equal to zero")
+		}
 	}
 })
 

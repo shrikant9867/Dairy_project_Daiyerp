@@ -47,7 +47,7 @@ class FarmerPaymentCycleReport(Document):
 	
 	
 	def advance_operation(self):
-		flag = False
+		flag, je = False, ""
 		for row in self.advance_child:
 			flag = True
 			# SG 5-10
@@ -69,7 +69,7 @@ class FarmerPaymentCycleReport(Document):
 			# elif si_exist:
 			# 	self.update_si(row, self.cycle, si_exist)
 			# 	self.update_advance_fpcr(row)
-		if flag:
+		if flag and je:
 			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Advances.".format(
 					'<a href="#Form/Journal Entry/'+je+'">'+je+'</a>'
 				)))

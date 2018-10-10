@@ -125,7 +125,7 @@ def get_current_cycle():
 		from
 			`tabCyclewise Date Computation`
 		where
-			now() between start_date and end_date
+			date(now()) between start_date and end_date
 		""",as_dict=1)
 
 def req_cycle_computation(data):

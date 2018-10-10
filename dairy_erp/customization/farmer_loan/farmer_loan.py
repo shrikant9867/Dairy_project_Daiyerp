@@ -70,7 +70,7 @@ def get_current_cycle(data):
 		from
 			`tabFarmer Date Computation`
 		where
-			vlcc = %s and now() between start_date and end_date
+			vlcc = %s and date(now()) between start_date and end_date
 		""",(data.get('vlcc')),as_dict=1)
 
 

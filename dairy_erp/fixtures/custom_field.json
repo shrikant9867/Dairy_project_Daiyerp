@@ -252,7 +252,7 @@
   "modified": "2018-09-29 19:50:12.288898", 
   "name": "Sales Invoice-local_sale_type", 
   "no_copy": 0, 
-  "options": "\nNo Advance\nFeed And Fooder Advance", 
+  "options": "\nNo Advance\nFeed And Fodder Advance", 
   "permlevel": 0, 
   "precision": "", 
   "print_hide": 0, 

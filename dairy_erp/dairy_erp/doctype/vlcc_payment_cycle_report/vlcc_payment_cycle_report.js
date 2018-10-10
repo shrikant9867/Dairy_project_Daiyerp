@@ -229,7 +229,7 @@ frappe.ui.form.on('VLCC Advance Child', 'amount', function(frm, cdt, cdn){
 	if(frm.doc.cycle && row.adv_id && row.amount) {
 		frappe.call({
 			method: "dairy_erp.dairy_erp.doctype.vlcc_payment_cycle_report.vlcc_payment_cycle_report.get_updated_advance",
-			args: {"cycle": frm.doc.cycle, "adv_id": row.adv_id, "amount": row.amount, "total": row.principle},
+			args: {"cycle": frm.doc.cycle, "adv_id": row.adv_id, "amount": row.amount, "total": row.principle, "vlcc": frm.doc.vlcc_name},
 			callback: function(r) {
 				if (r.message){
 					frm.set_value("advance_outstanding",r.message)

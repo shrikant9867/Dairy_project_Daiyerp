@@ -19,7 +19,6 @@ def get_column():
 		("Incentive") + ":Currency",
 		("Net Payable to Farmer") + ":Currency:200",
 		("Local Purchase by Farmer") + ":Currency:200",
-		("Feed & Fodder Purchase by Farmer") + ":Currency:250",
 		("Any Vet Service Availed") + ":Currency:200",
 		("Advance EMI") + ":Currency:200",
 		("Feed & Fodder Advance EMI") + ":Currency:230",

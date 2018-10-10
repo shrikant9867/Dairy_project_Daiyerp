@@ -136,4 +136,3 @@ def req_cycle_computation(data):
 		return req_cycl_list
 
 	return []
-

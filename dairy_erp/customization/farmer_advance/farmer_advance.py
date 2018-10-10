@@ -77,7 +77,7 @@ def get_jv_amount(data):
 		from 
 			`tabJournal Entry` 
 		where 
-		farmer_advance =%s and type = 'Farmer Advance'""",(data.get('name')),as_dict=1,debug=1)
+		farmer_advance =%s and type = 'Farmer Advance'""",(data.get('name')),as_dict=1,debug=0)
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
 	else: return 0
@@ -127,10 +127,11 @@ def req_cycle_computation(data):
 					from
 						`tabFarmer Date Computation`
 					where
-					'{date}' < end_date
+					'{date}' <= end_date
 						order by start_date limit {instalment}
-				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=0)
+				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=1)
 		req_cycl_list = [i.get('name') for i in req_cycle]
+		print "##############################",req_cycl_list,data.get('name')
 		return req_cycl_list
 
 	return []

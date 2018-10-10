@@ -28,9 +28,12 @@ def create_jv():
 		cur_cycl = get_current_cycle()
 		child_cycl = frappe.db.sql("""select cycle from `tabVlcc Cycle` where parent =%s""",(row.get('name')),as_dict=1)
 		cc = [i.get('cycle') for i in child_cycl]	
-		print req_cycle_computation(row),cur_cycl
-		if len(cur_cycl):
-			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
+		req_cycle = req_cycle_computation(row)
+		print req_cycle,cur_cycl,row.get('name')
+		if len(req_cycle) > 0:
+			req_cycle.pop(-1)
+		if len(cur_cycl) and len(req_cycle) > 0:
+			if cur_cycl[0].get('name') in req_cycle and cur_cycl[0].get('name') not in cc:
 				make_jv(row,cur_cycl[0].get('name'))
 
 def make_jv(data,cur_cycl=None):

@@ -107,7 +107,7 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 	},
 	local_sale_type: function(frm){
-		if (frm.doc.local_sale_type == "Feed And Fooder Advance"){
+		if (frm.doc.local_sale_type == "Feed And Fodder Advance"){
 			frm.set_df_property("multimode_payment","hidden",1)
 			frm.set_df_property("no_of_instalment","reqd",1)
 			frm.set_df_property("emi_start_cycle","reqd",1)

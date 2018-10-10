@@ -19,7 +19,6 @@ def get_column():
 		("Incentive") + ":Currency",
 		("Net Payable to Farmer") + ":Currency:200",
 		("Local Purchase by Farmer") + ":Currency:200",
-		("Feed & Fodder Purchase by Farmer") + ":Currency:250",
 		("Any Vet Service Availed") + ":Currency:200",
 		("Advance EMI") + ":Currency:200",
 		("Feed & Fodder Advance EMI") + ":Currency:230",
@@ -82,7 +81,7 @@ def merge_data(payable, receivable):
 			rec = receivable.get(f[1], 0)
 			net = pay - rec
 			data.append([f[0], f[1], pi_data.get('fmcr'), pi_data.get('incentive'), \
-				pay, si_data.get('local_sale'), si_data.get('local_sale_faf'), si_data.get('vet_service'), si_data.get('advance'), si_data.get('fnf_advance'), si_data.get('loan'), rec, pay-rec])
+				pay, si_data.get('local_sale'), si_data.get('vet_service'), si_data.get('advance'), si_data.get('fnf_advance'), si_data.get('loan'), rec, pay-rec])
 	return data		  
 
 def get_farmers():
@@ -132,15 +131,15 @@ def get_si_data(f):
 			from 
 				`tabSales Invoice`
 			where 
-				local_sale = 1 and local_sale_type !='Feed And Fooder Advance' and customer = '{0}' and docstatus =1
+				local_sale = 1 and local_sale_type !='Feed And Fodder Advance' and customer = '{0}' and docstatus =1
 			""".format(f[1]),as_dict=1,debug=0)
-		local_sale_faf = frappe.db.sql("""
-				select ifnull(sum(outstanding_amount),0) as total
-			from 
-				`tabSales Invoice`
-			where 
-				local_sale = 1 and local_sale_type='Feed And Fooder Advance' and customer = '{0}' and docstatus =1
-			""".format(f[1]),as_dict=1,debug=0)
+		# local_sale_faf = frappe.db.sql("""
+		# 		select ifnull(sum(outstanding_amount),0) as total
+		# 	from 
+		# 		`tabSales Invoice`
+		# 	where 
+		# 		local_sale = 1 and local_sale_type='Feed And Fodder Advance' and customer = '{0}' and docstatus =1
+		# 	""".format(f[1]),as_dict=1,debug=0)
 		vet_service = frappe.db.sql("""
 				select ifnull(sum(outstanding_amount),0) as total
 			from 
@@ -171,7 +170,6 @@ def get_si_data(f):
 			""".format(f[1]),as_dict=1,debug=0)
 		return {
 				'local_sale':local_sale[0].get('total'),
-				'local_sale_faf': local_sale_faf[0].get('total'),
 			 	'vet_service': vet_service[0].get('total'),
 			 	'loan': loan[0].get('total'),
 			 	'advance': advance[0].get('total'),
@@ -179,7 +177,6 @@ def get_si_data(f):
 			 	}
 	return {
 				'local_sale': 0 ,
-				'local_sale_faf':0,
 			 	'vet_service': 0,
 			 	'loan': 0,
 			 	'advance': 0,

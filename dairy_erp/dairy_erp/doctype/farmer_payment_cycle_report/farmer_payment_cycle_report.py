@@ -184,7 +184,7 @@ class FarmerPaymentCycleReport(Document):
 		je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
 			posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
 			type = "Farmer Loan", cycle = self.cycle, amount = principal_interest.get('principal'), 
-			party_type = "Customer", party = self.farmer_name, master_no = self.name,
+			party_type = "Customer", party = self.farmer_name, master_no = row.loan_id,
 			interest_account = "Interest Income - ", interest_amount= principal_interest.get('interest'))
 
 		frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
@@ -593,8 +593,8 @@ def req_cycle_computation(data):
 				`tabFarmer Date Computation`
 			where
 				'{0}' < start_date  or date('{0}') between start_date and end_date
-				and vlcc = '{1}' order by start_date limit {2}""".
-			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
+				and vlcc = '{1}' order by start_date limit {2}""".format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
+
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		
 		instalment = int(data.get('no_of_instalments')) + int(data.get('extension'))
@@ -603,7 +603,7 @@ def req_cycle_computation(data):
 				from
 					`tabFarmer Date Computation`
 				where
-					'{date}' <= start_date and vlcc = '{vlcc}' order by start_date limit {instalment}
+					'{date}' <= start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
 					instalment = instalment),as_dict=1,debug=0)
 		req_cycl_list = [i.get('name') for i in req_cycle]
@@ -657,8 +657,8 @@ def req_cycle_computation_advance(data):
 				`tabFarmer Date Computation`
 			where
 				'{0}' < start_date  or date('{0}') between start_date and end_date
-				and vlcc = '{1}' order by start_date limit {2}""".
-			format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
+				and vlcc = '{1}' order by start_date limit {2}""".format(data.get('date_of_disbursement'),data.get('vlcc'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=0)
+		
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]
 		
 		instalment = int(data.get('no_of_instalment')) + int(data.get('extension'))
@@ -667,7 +667,7 @@ def req_cycle_computation_advance(data):
 				from
 					`tabFarmer Date Computation`
 				where
-					'{date}' <= start_date and vlcc = '{vlcc}' order by start_date limit {instalment}
+					'{date}' <= start_date and name not in ({cycle}) and vlcc = '{vlcc}' order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'), cycle = ','.join(not_req_cycl_list),vlcc = data.get('vlcc'),
 					instalment = instalment),as_dict=1,debug=0)
 		req_cycl_list = [i.get('name') for i in req_cycle]

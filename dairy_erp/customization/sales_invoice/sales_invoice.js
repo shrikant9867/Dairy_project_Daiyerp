@@ -220,11 +220,7 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 	},
 	no_of_instalment: function(frm){
-		if(frm.doc.no_of_instalment < 0){
-			frm.set_value("no_of_instalment",0)
-			frappe.throw("No Of Instalment should be greater than or equal to zero")
-		}
-		else if(frm.doc.no_of_instalment == 0){
+		if(frm.doc.no_of_instalment <= 0){
 			frm.set_value("no_of_instalment",1)
 			frappe.throw("No Of Instalment should be greater than zero")
 		}

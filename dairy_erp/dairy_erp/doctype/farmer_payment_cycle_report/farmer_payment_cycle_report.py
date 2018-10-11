@@ -617,9 +617,9 @@ def req_cycle_computation(data):
 					from
 						`tabFarmer Date Computation`
 					where
-					'{date}' <= end_date
+					'{date}' <= end_date and vlcc = '{vlcc}'
 						order by start_date limit {instalment}
-				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=0)
+				""".format(date=data.get('date_of_disbursement'),vlcc=data.get('vlcc'),instalment = instalment),as_dict=1,debug=0)
 		req_cycl_list = [i.get('name') for i in req_cycle]
 		return req_cycl_list
 	return []
@@ -681,9 +681,9 @@ def req_cycle_computation_advance(data):
 					from
 						`tabFarmer Date Computation`
 					where
-					'{date}' <= end_date
+					'{date}' <= end_date and vlcc= '{vlcc}'
 						order by start_date limit {instalment}
-				""".format(date=data.get('date_of_disbursement'),instalment = instalment),as_dict=1,debug=0)
+				""".format(date=data.get('date_of_disbursement'),vlcc=data.get('vlcc'),instalment = instalment),as_dict=1,debug=0)
 		req_cycl_list = [i.get('name') for i in req_cycle]
 		return req_cycl_list
 	

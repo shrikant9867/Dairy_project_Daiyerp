@@ -35,13 +35,13 @@ class VLCCPaymentCycleReport(Document):
 		for row in self.vlcc_loan_child:
 			company = frappe.db.get_value("Company",{'is_dairy':1},'name',as_dict=1)
 			je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
-			,filters={'vlcc_advance':row.loan_id,'type':'Vlcc Loan', 'company': self.vlcc})
+			,filters={'vlcc_advance':row.loan_id,'type':'Vlcc Loan', 'company': self.vlcc_name})
 			loan_je += je_amt[0].get('amt')
 			loan_total += row.principle
 		for row in self.vlcc_advance_child:
 			company = frappe.db.get_value("Company",{'is_dairy':1},'name',as_dict=1)
 			je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
-			,filters={'vlcc_advance':row.adv_id,'type':'Vlcc Advance', 'company': self.vlcc})
+			,filters={'vlcc_advance':row.adv_id,'type':'Vlcc Advance', 'company': self.vlcc_name})
 			adavnce_je += je_amt[0].get('amt')
 			advance_total += row.principle
 		self.advance_outstanding = float(advance_total) - float(adavnce_je)
@@ -144,6 +144,7 @@ class VLCCPaymentCycleReport(Document):
 		je_doc.type = "Vlcc Advance"
 		je_doc.cycle = self.cycle
 		je_doc.vlcc_advance = row.adv_id
+		je_doc.reference_party = self.vlcc_name
 		je_doc.posting_date = nowdate()
 		je_doc.append('accounts', {
 			'account': "Debtors - "+ company.get('abbr'),
@@ -179,6 +180,7 @@ class VLCCPaymentCycleReport(Document):
 		je_doc.type = "Vlcc Loan"
 		je_doc.cycle = self.cycle
 		je_doc.farmer_advance = row.loan_id
+		je_doc.reference_party = self.vlcc_name
 		je_doc.posting_date = nowdate()
 		je_doc.append('accounts', {
 			'account': "Debtors - "+ company.get('abbr'),

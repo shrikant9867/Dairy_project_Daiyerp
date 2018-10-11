@@ -44,6 +44,7 @@ def get_receivable_data(filters):
 		camp_new = ""
 	filters["customer"] = filters.get('vlcc')
 	filters.pop("supplier", None)
+	print ReceivablePayableReport(filters).run(customer_args),"ReceivablePayableReport\n\n\n\n\n"
 	return ReceivablePayableReport(filters).run(customer_args)
 
 def get_payable_data(filters):
@@ -64,9 +65,9 @@ def filter_vlcc_data(data, party_type):
 	#return only farmer's data
 	filtered_data = {}
 	if party_type == "Supplier": outstd_idx, naming_field, voucher_type = 10, "supplier_name", "Purchase Invoice"
-	else: outstd_idx, naming_field, voucher_type = 8, "customer_name", "Sales Invoice"
+	else: outstd_idx, naming_field, voucher_type = 8, "customer_name", ["Sales Invoice","Journal Entry"]
 	for d in data:
-		if d[2] == voucher_type:
+		if d[2] in voucher_type:
 			if not frappe.db.get_value(party_type, {naming_field: d[1]}, "farmer"):
 				if d[1] not in filtered_data:
 					filtered_data[d[1]] = d[outstd_idx]
@@ -120,7 +121,7 @@ def get_pi(f):
 				`tabPurchase Invoice`
 			where 
 				pi_type = 'Incentive' and supplier = '{0}' and docstatus = 1
-			""".format(f),as_dict=1,debug=1)
+			""".format(f),as_dict=1,debug=0)
 		return {'incentive':incentive[0].get('total')}
 	return {'incentive': 0}
 
@@ -154,7 +155,7 @@ def get_si(f):
 				`tabJournal Entry`
 			where 
 				type = 'Vlcc Advance' and reference_party = '{0}' and docstatus =1
-			""".format(f),as_dict=1,debug=1)
+			""".format(f),as_dict=1,debug=0)
 		return {
 				 	'loan': loan[0].get('total'),
 				 	'advance': advance[0].get('total')

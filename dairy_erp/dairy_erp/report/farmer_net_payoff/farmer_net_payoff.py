@@ -59,9 +59,9 @@ def filter_farmer_data(data, party_type):
 	#return only farmer's data
 	filtered_data = {}
 	if party_type == "Supplier": outstd_idx, voucher_type = 10, "Purchase Invoice"
-	else: outstd_idx, voucher_type = 8, "Sales Invoice"
+	else: outstd_idx, voucher_type = 8, ["Sales Invoice","Journal Entry"]
 	for d in data:
-		if d[2] == voucher_type:
+		if d[2] in voucher_type:
 			if frappe.db.get_value(party_type, d[1], "farmer"):
 				if d[1] not in filtered_data:
 					filtered_data[d[1]] = d[outstd_idx]

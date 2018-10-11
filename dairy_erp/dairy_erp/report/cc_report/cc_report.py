@@ -41,7 +41,11 @@ def get_data(filters=None):
 									round(vmcr.amount,2),
 									vmcr.collectionroute,
 									vmcr.associated_vlcc,
-									RIGHT(long_format_farmer_id,5)
+									RIGHT(
+										if(shift = "MORNING",
+											long_format_farmer_id,
+											long_format_farmer_id_e),
+										5)
 								from
 									`tabVlcc Milk Collection Record` vmcr
 								where

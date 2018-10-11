@@ -32,6 +32,10 @@ frappe.ui.form.on('Farmer Loan', {
 		}
 	},
 	no_of_instalments: function(frm) {
+		if(frm.doc.no_of_instalments <= 0){
+			frm.set_value("no_of_instalments",1)
+			frappe.msgprint("No Of Instalment should be greater than zero")
+		}
 		emi_amount = (flt(frm.doc.principle) + flt(frm.doc.interest)) / frm.doc.no_of_instalments
 		if(emi_amount > 0 && emi_amount != 'Infinity') {
 			frm.set_value('emi_amount', emi_amount.toFixed(2))		

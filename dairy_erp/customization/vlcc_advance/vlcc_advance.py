@@ -37,7 +37,7 @@ def create_jv():
 			if cur_cycl[0].get('name') in req_cycle and cur_cycl[0].get('name') not in cc:
 				make_jv(row,cur_cycl[0].get('name'))
 
-def make_si(data, cur_cycl=None):
+def make_jv(data, cur_cycl=None):
 	try:
 		if data.get('outstanding_amount') > 0:
 			company = frappe.db.get_value("Company",{'is_dairy':1},['name','abbr','cost_center'],as_dict=1)

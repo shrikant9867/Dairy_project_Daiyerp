@@ -48,6 +48,7 @@ def make_jv(data,cur_cycl=None):
 			je_doc.type = "Vlcc Loan"
 			je_doc.cycle = cur_cycl
 			je_doc.vlcc_advance = data.get('name')
+			je_doc.reference_party = data.get('vlcc_id')
 			je_doc.posting_date = nowdate()
 			je_doc.append('accounts', {
 				'account': "Debtors - "+ company.get('abbr'),

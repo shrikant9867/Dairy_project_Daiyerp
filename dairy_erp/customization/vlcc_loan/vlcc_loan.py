@@ -44,6 +44,7 @@ def make_jv(data,cur_cycl=None):
 			je_doc = frappe.new_doc("Journal Entry")
 			je_doc.voucher_type = "Journal Entry"
 			je_doc.company = company.get('name')
+			je_doc.reference_party = data.get('vlcc')
 			je_doc.type = "Vlcc Loan"
 			je_doc.cycle = cur_cycl
 			je_doc.vlcc_advance = data.get('name')
@@ -98,6 +99,7 @@ def make_jv_cross(data, cur_cycl=None, company={}):
 	je_doc = frappe.new_doc("Journal Entry")
 	je_doc.voucher_type = "Journal Entry"
 	je_doc.company = data.get('vlcc_id')
+	je_doc.reference_party = company.get('name')
 	je_doc.type = "Vlcc Loan"
 	je_doc.cycle = cur_cycl
 	je_doc.vlcc_advance = data.get('name')

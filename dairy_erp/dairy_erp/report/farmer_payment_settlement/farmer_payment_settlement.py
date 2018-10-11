@@ -479,7 +479,7 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 						c.end_date < curdate() and c.vlcc = '{vlcc}'
 						order by c.end_date limit {limit_count}) as cy where cy.name like '{txt}'""".
 						format(farmer_name=farmer_name,limit_count=limit_count,
-							vlcc=vlcc,txt= "%%%s%%" % txt),as_list=True)
+							vlcc=vlcc,txt= "%%%s%%" % txt),as_list=True,debug=1)
 
 			cycle_list = frappe.db.sql_list("""select name from 
 				`tabFarmer Date Computation` where vlcc = %s""",(vlcc))
@@ -668,15 +668,16 @@ def get_vlcc():
 @frappe.whitelist()
 def is_fpcr_generated(filters):
 	filters = json.loads(filters)
-	si_records = frappe.get_all("Sales Invoice",fields=['name'],filters={'cycle_': filters.get('cycle'),\
-	 	'type': ('in', ['Loan','Advance']),'customer': frappe.db.get_value("Farmer",filters.get('farmer'),'full_name')})
+	
+	jv_records = frappe.get_all("Journal Entry",fields=['name'],filters={'cycle': filters.get('cycle'),\
+	 	'type': ('in', ['Farmer Loan','Farmer Advance']),'reference_party': frappe.db.get_value("Farmer",filters.get('farmer'),'full_name')})
 
 	if filters.get('cycle') and filters.get('farmer'):
 		fpcr_records = frappe.get_all("Farmer Payment Cycle Report",fields=['count(name) as count']\
 				,filters={'cycle': filters.get('cycle'), 'farmer_id': filters.get('farmer')})
-		if len(si_records) and fpcr_records[0].get('count') == 0:
+		if len(jv_records) and fpcr_records[0].get('count') == 0:
 			return "creat"
-		elif not len(si_records):
+		elif not len(jv_records):
 			return "ncreat"
 
 

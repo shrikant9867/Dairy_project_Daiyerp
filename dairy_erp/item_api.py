@@ -223,7 +223,7 @@ def get_net_off(row):
 	"farmer": row.get('id')
 	}
 	if len(get_data(fliters)):
-		row.update({"farmer_net_off": round(get_data(fliters)[0][10],2)})
+		row.update({"farmer_net_off": round(get_data(fliters)[0][11],2)})
 	else: row.update({"farmer_net_off": 0.00})
 
 def terms_condition():

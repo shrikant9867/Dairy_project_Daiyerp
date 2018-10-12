@@ -54,17 +54,17 @@ def make_jv(data,cur_cycl=None):
 				'account': "Debtors - "+ company.get('abbr'),
 				'party_type': "Customer",
 				'party': data.get('vlcc_id'),
-				'debit_in_account_currency': principal_interest.get('principal') + principal_interest.get('interest'),
+				'debit_in_account_currency': flt(principal_interest.get('principal'),2) + flt(principal_interest.get('interest'),2),
 				'cost_center': company.get('cost_center')
 				})
 			je_doc.append('accounts', {
 				'account': "Loans and Advances - "+ company.get('abbr'),
-				'credit_in_account_currency':  principal_interest.get('principal'),
+				'credit_in_account_currency':  flt(principal_interest.get('principal'),2),
 				'cost_center': company.get('cost_center')
 				})
 			je_doc.append('accounts', {
 				'account': "Interest Income - "+ company.get('abbr'),
-				'credit_in_account_currency':  principal_interest.get('interest'),
+				'credit_in_account_currency':  flt(principal_interest.get('interest'),2),
 				'cost_center': company.get('cost_center')
 				})
 			je_doc.flags.ignore_permissions = True
@@ -75,7 +75,13 @@ def make_jv(data,cur_cycl=None):
 			#update loan doc
 			paid_instlmnt = 0
 			loan_doc = frappe.get_doc("Vlcc Loan",data.get('name'))
-			loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_jv_amount(data,je_doc.company)
+			# loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_jv_amount(data,je_doc.company)
+			out_stand_amt = get_jv_amount(data) - data.get('advance_amount') 
+			"""Added by Jitendra, fixes negative outstading amount"""
+			if 0 < out_stand_amt < 1:
+				loan_doc.outstanding_amount = 0
+			else:
+				loan_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data)
 			if loan_doc.outstanding_amount == 0:
 				loan_doc.outstanding_amount = 0
 				loan_doc.status = "Paid"
@@ -106,17 +112,17 @@ def make_jv_cross(data, cur_cycl=None, company={}):
 	je_doc.posting_date = nowdate()
 	je_doc.append('accounts', {
 		'account': "Loans and Advances Payable - "+ vlcc_attr.get('abbr'),
-		'debit_in_account_currency': principal_interest.get('principal'),
+		'debit_in_account_currency': flt(principal_interest.get('principal'),2),
 		'cost_center': vlcc_attr.get('cost_center')
 		})
 	je_doc.append('accounts', {
 		'account': "Interest Expense - "+ vlcc_attr.get('abbr'),
-		'debit_in_account_currency':  principal_interest.get('interest'),
+		'debit_in_account_currency':  flt(principal_interest.get('interest'),2),
 		'cost_center': vlcc_attr.get('cost_center')
 		})
 	je_doc.append('accounts', {
 		'account': "Creditors - "+ vlcc_attr.get('abbr'),
-		'credit_in_account_currency': principal_interest.get('principal') + principal_interest.get('interest'),
+		'credit_in_account_currency': flt(principal_interest.get('principal'),2) + flt(principal_interest.get('interest'),2),
 		'party_type': "Supplier",
 		'party': company.get('name'),
 		'cost_center': vlcc_attr.get('cost_center'),

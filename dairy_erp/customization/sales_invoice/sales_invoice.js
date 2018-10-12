@@ -404,15 +404,22 @@ frappe.ui.form.on("Sales Invoice Item", {
 cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	if(cur_frm.doc.customer_or_farmer && cur_frm.doc.local_sale){
 		var customer_type = cur_frm.doc.customer_or_farmer
+		var items = []
 		if (customer_type == "Vlcc Local Institution"){
 			var customer_type = 'Vlcc Local Customer'
 		}
+		$.each(cur_frm.doc.items, function(i,d) {
+			if(d.item_code){
+				items.push(d.item_code)
+			}
+		})
 		return {
 			query:"dairy_erp.customization.sales_invoice.sales_invoice.get_item_by_customer_type",
-			filters: {'customer_type': customer_type,
+				filters: {
+						'customer_type': customer_type,
 						'vlcc':cur_frm.doc.company,
-						'items_dict':cur_frm.doc.items
+						'items_dict':items
 					}
-		}
+			}
 	}
 }

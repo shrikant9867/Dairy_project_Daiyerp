@@ -55,25 +55,13 @@ class FarmerPaymentCycleReport(Document):
 						'farmer_advance':row.adv_id,'type':'Farmer Advance'}, 'name')
 			if not je_exist:
 				self.validate_advance(row)
-				je = self.create_je(row)
-				self.update_advance_je(row, je)
+				je = self.create_advance_je(row)
+				self.update_advance_doc(row, je)
 			elif je_exist:
 				self.update_je_for_advance(row, self.cycle, je_exist)
-				self.update_advance_fpcr_je(row)
-			# si_exist = frappe.db.get_value("Sales Invoice",{'cycle_': self.cycle,\
-			# 			'farmer_advance':row.adv_id }, 'name')
-			# if not si_exist:
-			# 	self.validate_advance(row)
-			# 	si = self.create_si(row, "Advance", "Advance Emi", row.adv_id)
-			# 	self.update_advance(row, si)
-			# elif si_exist:
-			# 	self.update_si(row, self.cycle, si_exist)
-			# 	self.update_advance_fpcr(row)
-		if flag and je:
-			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Advances.".format(
-					'<a href="#Form/Journal Entry/'+je+'">'+je+'</a>'
-				)))
-			# frappe.msgprint(_("Journal Entry created successfully against Advances"))
+				self.update_advance_after_fpcr(row)
+		if flag:
+			frappe.msgprint(_("Journal Entry created successfully against Advances"))
 	
 	def loan_operation(self):
 		flag = False
@@ -84,14 +72,12 @@ class FarmerPaymentCycleReport(Document):
 			if not je_exist:
 				self.validate_loan(row)
 				je = self.create_loan_je(row)
-				self.update_loan_je(row, je)
+				self.update_loan_doc(row, je)
 			elif je_exist:
 				self.update_je_for_loan(row, self.cycle, je_exist)
-				self.update_loan_fpcr_je(row)
+				self.update_loan_after_fpcr(row)
 		if flag:
-			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Loans.".format(
-					'<a href="#Form/Journal Entry/'+je+'">'+je+'</a>'
-				)))
+			frappe.msgprint(_("Journal Entry created successfully against Loans"))
 
 	
 	def validate_advance(self, row):
@@ -115,26 +101,26 @@ class FarmerPaymentCycleReport(Document):
 			(float(row.amount) < float(loan_doc.emi_amount) or float(row.outstanding) != float(loan_doc.emi_amount)):
 			frappe.throw(_("Please Use Extension <b>{0}</b>".format(row.loan_id)))
 	
-	def update_loan(self, row, si = None):
-		instalment = 0
-		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
-			,filters={'farmer_advance':row.loan_id})
+	# def update_loan(self, row, si = None):
+	# 	instalment = 0
+	# 	si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+	# 		,filters={'farmer_advance':row.loan_id})
 		
-		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
-		loan_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
-		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
-		for i in loan_doc.cycle:
-			instalment += 1
-		loan_doc.paid_instalment = instalment
-		if loan_doc.outstanding_amount > 0:
-			loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
-		if loan_doc.outstanding_amount == 0:
-			loan_doc.status = "Paid"
-			loan_doc.emi_amount = 0
-		loan_doc.flags.ignore_permissions = True
-		loan_doc.save()
+	# 	loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
+	# 	loan_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
+	# 	loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
+	# 	for i in loan_doc.cycle:
+	# 		instalment += 1
+	# 	loan_doc.paid_instalment = instalment
+	# 	if loan_doc.outstanding_amount > 0:
+	# 		loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
+	# 	if loan_doc.outstanding_amount == 0:
+	# 		loan_doc.status = "Paid"
+	# 		loan_doc.emi_amount = 0
+	# 	loan_doc.flags.ignore_permissions = True
+	# 	loan_doc.save()
 
-	def update_loan_je(self, row, je = None):
+	def update_loan_doc(self, row, je = None):
 		instalment = 0
 		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
 			,filters={'farmer_advance':row.loan_id,'type':'Farmer Loan'})
@@ -153,31 +139,31 @@ class FarmerPaymentCycleReport(Document):
 		loan_doc.flags.ignore_permissions = True
 		loan_doc.save()
 	
-	def create_si(self, row, type_, item, doc_id):
-		si_doc = frappe.new_doc("Sales Invoice")
-		si_doc.type = type_
-		si_doc.posting_date = self.collection_to
-		si_doc.customer = self.farmer_name
-		si_doc.company = self.vlcc_name
-		si_doc.farmer_advance = doc_id
-		si_doc.cycle_ = self.cycle
-		si_doc.append("items",{
-			"item_code": item,
-			"qty": 1,
-			"rate": row.amount,
-			"cost_center": frappe.db.get_value("Company", self.vlcc_name, "cost_center")
-			})
-		si_doc.flags.ignore_permissions = True
-		si_doc.save()
-		si_doc.submit()
-		frappe.db.set_value("Sales Invoice", si_doc.name, 'posting_date', self.collection_to)
-		gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
-		gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
-		frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": si_doc.name},\
-					'posting_date', self.collection_to )
-		frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": si_doc.name},\
-					'posting_date', self.collection_to )	
-		return si_doc.name
+	# def create_si(self, row, type_, item, doc_id):
+	# 	si_doc = frappe.new_doc("Sales Invoice")
+	# 	si_doc.type = type_
+	# 	si_doc.posting_date = self.collection_to
+	# 	si_doc.customer = self.farmer_name
+	# 	si_doc.company = self.vlcc_name
+	# 	si_doc.farmer_advance = doc_id
+	# 	si_doc.cycle_ = self.cycle
+	# 	si_doc.append("items",{
+	# 		"item_code": item,
+	# 		"qty": 1,
+	# 		"rate": row.amount,
+	# 		"cost_center": frappe.db.get_value("Company", self.vlcc_name, "cost_center")
+	# 		})
+	# 	si_doc.flags.ignore_permissions = True
+	# 	si_doc.save()
+	# 	si_doc.submit()
+	# 	frappe.db.set_value("Sales Invoice", si_doc.name, 'posting_date', self.collection_to)
+	# 	gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
+	# 	gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
+	# 	frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": si_doc.name},\
+	# 				'posting_date', self.collection_to )
+	# 	frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": si_doc.name},\
+	# 				'posting_date', self.collection_to )	
+	# 	return si_doc.name
 
 	def create_loan_je(self, row): # SG-8-10
 		principal_interest = get_interest_amount(row.amount, row.loan_id)
@@ -188,10 +174,9 @@ class FarmerPaymentCycleReport(Document):
 			interest_account = "Interest Income - ", interest_amount= principal_interest.get('interest'))
 
 		frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
-		gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
-		gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
+
 		company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr',as_dict=1)
-		frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_doc.name},\
+		frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr.get('abbr'), "voucher_no": je_doc.name},\
 					'posting_date', self.collection_to )
 		frappe.db.set_value("GL Entry", {"account": 'Loans and Advances - '+company_abbr.get('abbr'), "voucher_no": je_doc.name},\
 					'posting_date', self.collection_to )
@@ -200,7 +185,7 @@ class FarmerPaymentCycleReport(Document):
 		
 		return je_doc.name
 
-	def create_je(self, row): # SG-5-10
+	def create_advance_je(self, row): # SG-5-10
 		advance_type = frappe.db.get_value("Farmer Advance",{'name': row.adv_id}, 'advance_type')
 		if advance_type == "Money Advance":
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
@@ -208,51 +193,49 @@ class FarmerPaymentCycleReport(Document):
         			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, faf_flag = 0,
         			party_type = "Customer", party = self.farmer_name, master_no = row.adv_id, advance_type = advance_type)
 			frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
-			gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
-			gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
-			company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr',as_dict=1)
-			frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": je_doc.name},\
+
+			company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr')
+			frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_doc.name},\
 						'posting_date', self.collection_to )
-			frappe.db.set_value("GL Entry", {"account": 'Loans and Advances - '+company_abbr.get('abbr'), "voucher_no": je_doc.name},\
+			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_doc.name},\
 						'posting_date', self.collection_to )
 			return je_doc.name
 
 		if advance_type == "Feed And Fodder Advance":
 			# parameter 'faf_flag', is used to fetch data on net-payOff report.
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
-        			posting_date = nowdate(),debit_account = "Feed And Fodder Advances Temporary Accounts - ",credit_account = "Feed And Fodder Advance - ", 
+        			posting_date = nowdate(),debit_account = "Feed And Fodder Advances Temporary Account - ",credit_account = "Feed And Fodder Advance - ", 
         			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, faf_flag = 1,
         			party_type = "Customer", party = self.farmer_name, master_no = row.adv_id, advance_type = advance_type)
 			frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
-			gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
-			gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
-			company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr',as_dict=1)
-			frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Accounts - '+company_abbr.get('abbr'), "voucher_no": je_doc.name},\
+
+			company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr')
+			frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_doc.name},\
 						'posting_date', self.collection_to )
-			frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr.get('abbr'), "voucher_no": je_doc.name},\
+			frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_doc.name},\
 						'posting_date', self.collection_to )
 			return je_doc.name
 	
 
-	def update_advance(self, row, si=None):
-		instalment = 0
-		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
-			,filters={'farmer_advance':row.adv_id})
-		adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
-		adv_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
-		adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
-		for i in adv_doc.cycle:
-			instalment +=1
-		adv_doc.paid_instalment = instalment
-		if adv_doc.outstanding_amount > 0 :
-			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
-		if adv_doc.outstanding_amount == 0:
-			adv_doc.status = "Paid"
-			adv_doc.emi_amount = 0
-		adv_doc.flags.ignore_permissions =True
-		adv_doc.save()
+	# def update_advance(self, row, si=None):
+	# 	instalment = 0
+	# 	si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+	# 		,filters={'farmer_advance':row.adv_id})
+	# 	adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
+	# 	adv_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
+	# 	adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
+	# 	for i in adv_doc.cycle:
+	# 		instalment +=1
+	# 	adv_doc.paid_instalment = instalment
+	# 	if adv_doc.outstanding_amount > 0 :
+	# 		adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
+	# 	if adv_doc.outstanding_amount == 0:
+	# 		adv_doc.status = "Paid"
+	# 		adv_doc.emi_amount = 0
+	# 	adv_doc.flags.ignore_permissions =True
+	# 	adv_doc.save()
 
-	def update_advance_je(self, row, je=None):	# SG-5-10
+	def update_advance_doc(self, row, je=None):	# SG-5-10
 		instalment = 0
 		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
 			,filters={'farmer_advance':row.adv_id,'type':'Farmer Advance'})
@@ -271,24 +254,24 @@ class FarmerPaymentCycleReport(Document):
 		adv_doc.save()
 
 	
-	def update_advance_fpcr(self, row):
-		instalment = 0
-		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
-			,filters={'farmer_advance':row.adv_id})
-		adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
-		adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
-		for i in adv_doc.cycle:
-			instalment +=1
-		adv_doc.paid_instalment = instalment
-		if adv_doc.outstanding_amount > 0 :
-			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
-		if adv_doc.outstanding_amount == 0:
-			adv_doc.status = "Paid"
-			adv_doc.emi_amount = 0
-		adv_doc.flags.ignore_permissions =True
-		adv_doc.save()
+	# def update_advance_fpcr(self, row):
+	# 	instalment = 0
+	# 	si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+	# 		,filters={'farmer_advance':row.adv_id})
+	# 	adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
+	# 	adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
+	# 	for i in adv_doc.cycle:
+	# 		instalment +=1
+	# 	adv_doc.paid_instalment = instalment
+	# 	if adv_doc.outstanding_amount > 0 :
+	# 		adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
+	# 	if adv_doc.outstanding_amount == 0:
+	# 		adv_doc.status = "Paid"
+	# 		adv_doc.emi_amount = 0
+	# 	adv_doc.flags.ignore_permissions =True
+	# 	adv_doc.save()
 
-	def update_advance_fpcr_je(self, row):	# SG-5-10
+	def update_advance_after_fpcr(self, row):	# SG-5-10
 		instalment = 0
 		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
 			,filters={'farmer_advance':row.adv_id,'type':'Farmer Advance'})
@@ -306,28 +289,28 @@ class FarmerPaymentCycleReport(Document):
 		adv_doc.save()
 
 
-	def update_loan_fpcr(self, row):
-		instalment = 0
-		si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
-			,filters={'farmer_advance':row.loan_id})
+	# def update_loan_fpcr(self, row):
+	# 	instalment = 0
+	# 	si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
+	# 		,filters={'farmer_advance':row.loan_id})
 		
-		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
-		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
-		for i in loan_doc.cycle:
-			instalment += 1
-		loan_doc.paid_instalment = instalment
-		if loan_doc.outstanding_amount > 0:
-			loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
-		if loan_doc.outstanding_amount == 0:
-			loan_doc.status = "Paid"
-			loan_doc.emi_amount = 0
-		loan_doc.flags.ignore_permissions = True
-		loan_doc.save()
+	# 	loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
+	# 	loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
+	# 	for i in loan_doc.cycle:
+	# 		instalment += 1
+	# 	loan_doc.paid_instalment = instalment
+	# 	if loan_doc.outstanding_amount > 0:
+	# 		loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
+	# 	if loan_doc.outstanding_amount == 0:
+	# 		loan_doc.status = "Paid"
+	# 		loan_doc.emi_amount = 0
+	# 	loan_doc.flags.ignore_permissions = True
+	# 	loan_doc.save()
 
-	def update_loan_fpcr_je(self, row):
+	def update_loan_after_fpcr(self, row):
 		instalment = 0
 		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
-			,filters={'farmer_advance':row.adv_id,'type':'Farmer Loan'})
+			,filters={'farmer_advance':row.loan_id,'type':'Farmer Loan'})
 		
 		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
 		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - je_amt[0].get('amt')
@@ -343,92 +326,154 @@ class FarmerPaymentCycleReport(Document):
 		loan_doc.save()
 
 	
-	def update_si(self, row, cycle, si_no):
-		item_row = frappe.db.get_value("Sales Invoice Item", {'parent':si_no}, 'name')
-		frappe.db.set_value("Sales Invoice Item", item_row, 'rate', row.amount)
-		frappe.db.set_value("Sales Invoice Item", item_row, 'amount', row.amount)
-		frappe.db.set_value("Sales Invoice", si_no, 'grand_total', row.amount)
-		frappe.db.set_value("Sales Invoice", si_no, 'outstanding_amount', row.amount)
-		frappe.db.set_value("Sales Invoice", si_no, 'rounded_total', row.amount)
-		self.update_gl_entry(si_no, row.amount)
+	# def update_si(self, row, cycle, si_no):
+	# 	item_row = frappe.db.get_value("Sales Invoice Item", {'parent':si_no}, 'name')
+	# 	frappe.db.set_value("Sales Invoice Item", item_row, 'rate', row.amount)
+	# 	frappe.db.set_value("Sales Invoice Item", item_row, 'amount', row.amount)
+	# 	frappe.db.set_value("Sales Invoice", si_no, 'grand_total', row.amount)
+	# 	frappe.db.set_value("Sales Invoice", si_no, 'outstanding_amount', row.amount)
+	# 	frappe.db.set_value("Sales Invoice", si_no, 'rounded_total', row.amount)
+	# 	self.update_gl_entry(si_no, row.amount)
 
 	def update_je_for_loan(self, row, cycle, je_no):	# SG-5-10
 		principal_interest = get_interest_amount(row.amount, row.loan_id)
 		company = frappe.db.get_value("Company",self.vlcc_name,['name','abbr','cost_center'],as_dict=1)
 		accounts_row = frappe.db.get_value("Journal Entry Account", {'parent':je_no}, 'name')
-		frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':"Debtors - "+company.get('abbr')}, 'debit_in_account_currency', principal_interest.get('principal')+principal_interest.get('interest'))
-		frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':"Loans and Advances - "+company.get('abbr')}, 'credit_in_account_currency', principal_interest.get('principal'))
-		frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':"Interest Income - "+company.get('abbr')}, 'credit_in_account_currency', principal_interest.get('interest'))
+		accounts_row_debit = frappe.db.get_value("Journal Entry Account", {'parent':je_no,"account":\
+			'Debtors - '+company.get('abbr')}, 'name')
+
+		accounts_row_credit_principal = frappe.db.get_value("Journal Entry Account", {'parent':je_no,"account":\
+			'Loans and Advances - '+company.get('abbr')}, 'name')
+
+		accounts_row_credit_interest = frappe.db.get_value("Journal Entry Account", {'parent':je_no,"account":\
+			'Interest Income - '+company.get('abbr')}, 'name')
+
+		frappe.db.set_value("Journal Entry Account",{'name':accounts_row_debit, 'account':"Debtors - "+company.get('abbr')}, 'debit_in_account_currency', principal_interest.get('principal')+principal_interest.get('interest'))
+		frappe.db.set_value("Journal Entry Account",{'name':accounts_row_credit_principal, 'account':"Loans and Advances - "+company.get('abbr')}, 'credit_in_account_currency', principal_interest.get('principal'))
+		frappe.db.set_value("Journal Entry Account",{'name':accounts_row_credit_interest, 'account':"Interest Income - "+company.get('abbr')}, 'credit_in_account_currency', principal_interest.get('interest'))
 		frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
 		frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)
+		frappe.db.set_value("Journal Entry", je_no, 'posting_date', self.collection_to)
 		self.update_gl_entry_loan(je_no, principal_interest)
 
 	def update_je_for_advance(self, row, cycle, je_no):	# SG-5-10
 		company = frappe.db.get_value("Company",self.vlcc_name,['name','abbr','cost_center'],as_dict=1)
 		advance_type = frappe.db.get_value("Farmer Advance",{'name': row.adv_id}, 'advance_type')
 		if advance_type == "Money Advance":
-			accounts_row = frappe.db.get_value("Journal Entry Account", {'parent':je_no}, 'name')
-			frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':'Debtors - '+company.get('abbr')}, 'debit_in_account_currency', row.amount)
-			frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':'Loans and Advances - '+company.get('abbr')}, 'credit_in_account_currency', row.amount)
+			accounts_row_debit = frappe.db.get_value("Journal Entry Account", {'parent':je_no,"account":\
+				'Debtors - '+company.get('abbr')}, 'name')
+
+			accounts_row_credit = frappe.db.get_value("Journal Entry Account", {'parent':je_no,"account":\
+				'Loans and Advances - '+company.get('abbr')}, 'name')
+
+			frappe.db.set_value("Journal Entry Account",{'name':accounts_row_debit, 'account':'Debtors - '+company.get('abbr')}, 'debit_in_account_currency', row.amount)
+			frappe.db.set_value("Journal Entry Account",{'name':accounts_row_credit, 'account':'Loans and Advances - '+company.get('abbr')}, 'credit_in_account_currency', row.amount)
 			frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
 			frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)
+			frappe.db.set_value("Journal Entry", je_no, 'posting_date', self.collection_to)
 			self.update_gl_entry_advance(je_no, row, row.amount)
 
 		if advance_type == "Feed And Fodder Advance":
-			accounts_row = frappe.db.get_value("Journal Entry Account", {'parent':je_no}, 'name')
-			frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':'Feed And Fodder Advances Temporary Accounts - '+company.get('abbr')}, 'debit_in_account_currency', row.amount)
-			frappe.db.set_value("Journal Entry Account",{'name':accounts_row, 'account':'Feed And Fodder Advance - '+company.get('abbr')}, 'credit_in_account_currency', row.amount)
+			accounts_row_debit = frappe.db.get_value("Journal Entry Account", {'parent':je_no,"account":\
+				'Feed And Fodder Advances Temporary Account - '+company.get('abbr')}, 'name')
+
+			accounts_row_credit = frappe.db.get_value("Journal Entry Account", {'parent':je_no,"account":\
+				'Feed And Fodder Advance - '+company.get('abbr')}, 'name')
+			
+			frappe.db.set_value("Journal Entry Account",{'name':accounts_row_debit, 'account':'Feed And Fodder Advances Temporary Account - '+company.get('abbr')}, 'debit_in_account_currency', row.amount)
+			frappe.db.set_value("Journal Entry Account",{'name':accounts_row_credit, 'account':'Feed And Fodder Advance - '+company.get('abbr')}, 'credit_in_account_currency', row.amount)
 			frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
 			frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)
+			frappe.db.set_value("Journal Entry", je_no, 'posting_date', self.collection_to)
 			self.update_gl_entry_advance(je_no, row, row.amount)
 
 	def update_gl_entry_loan(self, je_no, principal_interest):
-		if je_no and amount:
-			gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
-			gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
-			company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr',as_dict=1)
-			frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_no},\
-						'posting_date', self.collection_to )
-			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr.get('abbr'), "voucher_no": je_no},\
-						'posting_date', self.collection_to )
-			frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr.get('abbr'), "voucher_no": je_no},\
-						'posting_date', self.collection_to )
-			frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": je_no},\
+		if je_no and principal_interest:
+			company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr')
+
+			frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
+						'debit',  principal_interest.get('principal') + principal_interest.get('interest'))
+			frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
+						'credit',  0)
+			frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
 						'debit_in_account_currency',  principal_interest.get('principal') + principal_interest.get('interest'))
-			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr.get('abbr'), "voucher_no": je_no},\
-						'credit_in_account_currency', principal_interest.get('principal') )
-			frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr.get('abbr'), "voucher_no": je_no},\
-						'credit_in_account_currency', principal_interest.get('interest') )
+			frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
+						'credit_in_account_currency', 0)
+			frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
+						'posting_date', self.collection_to )
+
+			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
+						'posting_date', self.collection_to )
+			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
+						'debit', 0)
+			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
+						'credit', principal_interest.get('principal'))
+			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
+						'debit_in_account_currency', 0)
+			frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
+						'credit_in_account_currency', principal_interest.get('principal'))
+
+			frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr, "voucher_no": je_no},\
+						'debit', 0)
+			frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr, "voucher_no": je_no},\
+						'credit', principal_interest.get('interest') )
+			frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr, "voucher_no": je_no},\
+						'debit_in_account_currency', 0)
+			frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr, "voucher_no": je_no},\
+						'credit_in_account_currency', principal_interest.get('interest'))
+			frappe.db.set_value("GL Entry", {"account":"Interest Income - "+company_abbr, "voucher_no": je_no},\
+						'posting_date', self.collection_to )
 
 	def update_gl_entry_advance(self, je_no, row, amount):
 		if je_no and amount:
 			advance_type = frappe.db.get_value("Farmer Advance",{'name': row.adv_id}, 'advance_type')
+			company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr')
 			if advance_type == "Money Advance":
-				gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
-				gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
-				company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr',as_dict=1)
-				frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
+							'debit', amount)
+				frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
+							'credit_in_account_currency', 0)
+				frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
+							'debit_in_account_currency', amount)
+				frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
+							'credit_in_account_currency', 0)
+				frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr, "voucher_no": je_no},\
 							'posting_date', self.collection_to )
-				frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr.get('abbr'), "voucher_no": je_no},\
-							'posting_date', self.collection_to )
-				frappe.db.set_value("GL Entry", {"account": "Debtors - "+company_abbr.get('abbr'), "voucher_no": je_no},\
+
+				frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
+							'debit', 0)
+				frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
+							'credit', amount )
+				frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
+							'debit_in_account_currency', 0)
+				frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
 							'credit_in_account_currency', amount )
-				frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr.get('abbr'), "voucher_no": je_no},\
-							'debit_in_account_currency', amount )
+				frappe.db.set_value("GL Entry", {"account": "Loans and Advances - "+company_abbr, "voucher_no": je_no},\
+							'posting_date', self.collection_to )
 				
 
 			if advance_type == "Feed And Fodder Advance":
-				gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
-				gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
-				company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr',as_dict=1)
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Accounts - '+company_abbr.get('abbr'), "voucher_no": je_no},\
-							'posting_date', self.collection_to )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr.get('abbr'), "voucher_no": je_no},\
-							'posting_date', self.collection_to )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Accounts - '+company_abbr.get('abbr'), "voucher_no": je_no},\
-							'credit_in_account_currency', amount )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr.get('abbr'), "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+							'debit', amount )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+							'credit', 0 )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
 							'debit_in_account_currency', amount )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+							'credit_in_account_currency', 0 )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+							'posting_date', self.collection_to )
+
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_no},\
+							'debit', 0 )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_no},\
+							'credit', amount )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_no},\
+							'debit_in_account_currency', 0 )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_no},\
+							'credit_in_account_currency', amount )
+				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_no},\
+							'posting_date', self.collection_to )
 
 	def create_incentive(self):
 		pi = frappe.new_doc("Purchase Invoice")
@@ -766,7 +811,7 @@ def get_vlcc():
 # SG-6-10
 @frappe.whitelist()
 def get_updated_advance(cycle, adv_id=None, amount=None, total = None):
-	if amount > 0:
+	if amount:
 		sum_ = frappe.db.sql("""
 				select ifnull(sum(total_debit),0) as total
 			from 
@@ -777,12 +822,11 @@ def get_updated_advance(cycle, adv_id=None, amount=None, total = None):
 			adv_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
 			return adv_amount
 		else: return 0
-	else:
-		frappe.throw(__("<b>Amount cannot be negative or 0</b>"))
+
 
 @frappe.whitelist()
 def get_updated_loan(cycle, loan_id=None, amount=None, total = None):
-	if amount > 0:
+	if amount:
 		sum_ = frappe.db.sql("""
 					select ifnull(sum(total_debit),0) as total
 				from 
@@ -793,5 +837,4 @@ def get_updated_loan(cycle, loan_id=None, amount=None, total = None):
 			loan_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
 			return loan_amount
 		else: return 0
-	else:
-		frappe.throw(__("<b>Amount cannot be negative or 0</b>"))
+

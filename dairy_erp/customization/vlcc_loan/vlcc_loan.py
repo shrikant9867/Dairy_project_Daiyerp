@@ -54,7 +54,7 @@ def make_jv(data,cur_cycl=None):
 				'account': "Debtors - "+ company.get('abbr'),
 				'party_type': "Customer",
 				'party': data.get('vlcc_id'),
-				'debit_in_account_currency': flt(principal_interest.get('principal'),2) + flt(principal_interest.get('interest'),2),
+				'debit_in_account_currency': flt(principal_interest.get('principal') + principal_interest.get('interest'),2),
 				'cost_center': company.get('cost_center')
 				})
 			je_doc.append('accounts', {

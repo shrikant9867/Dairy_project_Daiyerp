@@ -51,12 +51,20 @@ frappe.ui.form.on('Farmer Loan', {
 		frm.events.no_of_instalments(frm)
 		frm.events.calculate_total(frm)
 		frm.events.calculate_updated_ami(frm)
+		if (frm.doc.principle && frm.doc.principle < 0) {
+			frm.set_value("principle",0)
+			frappe.throw(__("Amount can not be negative"))
+		}
 	},
 	interest: function(frm) {
 		frm.events.no_of_instalments(frm)
 		frm.events.calculate_total(frm)
 		if(frm.doc.extension == 0) {
 			frm.events.calculate_updated_ami(frm)
+		}  
+		if (frm.doc.interest && frm.doc.interest < 0){
+			frm.set_value("interest",0)
+			frappe.throw(__("Interest can not be negative"))
 		}
 	},
 	calculate_total: function(frm) {

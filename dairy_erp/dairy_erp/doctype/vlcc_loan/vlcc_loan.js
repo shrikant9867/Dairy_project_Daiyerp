@@ -39,9 +39,6 @@ frappe.ui.form.on('Vlcc Loan', {
 		if (frm.doc.interest && frm.doc.interest < 0){
 			frm.set_value("interest","")
 			frappe.throw(__("Interest cannot be negative"))
-		} else if(frm.doc.interest === 0) {
-			frm.set_value("interest","")
-			frappe.throw(__("Interest cannot be zero"))
 		}
 	},
 	calculate_total: function(frm) {

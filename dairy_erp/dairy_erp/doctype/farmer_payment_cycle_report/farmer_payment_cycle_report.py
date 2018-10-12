@@ -20,16 +20,22 @@ class FarmerPaymentCycleReport(Document):
 		
 	
 	def before_submit(self):
-		self.advance_operation()
-		self.loan_operation()
-		self.update_fpcr()
-		if float(self.incentives) != 0:
-			if not frappe.db.get_value("Purchase Invoice", {'cycle':self.cycle,\
-		 'supplier': self.farmer_name},'name'):
-				self.create_incentive()
-				frappe.msgprint(_("Purchase invoice created successfully against Incentives"))
-			else: frappe.msgprint(_("Purchase invoice Already created successfully against Incentives"))
-
+		try:
+			self.advance_operation()
+			self.loan_operation()
+			self.update_fpcr()
+			if float(self.incentives) != 0:
+				if not frappe.db.get_value("Purchase Invoice", {'cycle':self.cycle,\
+			 'supplier': self.farmer_name},'name'):
+					self.create_incentive()
+					frappe.msgprint(_("Purchase invoice created successfully against Incentives"))
+				else: frappe.msgprint(_("Purchase invoice Already created successfully against Incentives"))
+		except Exception,e:
+			frappe.db.rollback()
+			make_dairy_log(title="JV creation Against Advance Failed",method="make_jv", status="Error",
+				data = "data", message=e, traceback=frappe.get_traceback())		
+			frappe.throw("Something Went Wrong Please check dairy log")
+					
 	def update_fpcr(self):
 		loan_total, loan_je, adavnce_je, advance_total = 0, 0, 0, 0 
 		for row in self.loan_child:

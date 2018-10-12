@@ -480,8 +480,7 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			vmrc_doc.submit()
 			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"vmrc":vmrc_doc.name})
 			vlcc = validate_vlcc(row)
-			if row.get('status') == "Accept":
-				make_purchase_receipt_dairy(data, row, vlcc_name, response_dict, vmrc_doc.name)
+			make_purchase_receipt_dairy(data, row, vlcc_name, response_dict, vmrc_doc.name)
 			return vmrc_doc
 		else:
 			traceback = "vlcc does not exist"

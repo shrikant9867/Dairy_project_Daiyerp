@@ -208,8 +208,11 @@ frappe.ui.form.on('Loan Child',  {
 	amount: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn]
 		if(row.amount && row.amount < 0) {
-			frappe.model.set_value(cdt,cdn,"amount",0)
-			frappe.throw(__("Amount can not be negative"))
+			frappe.model.set_value(cdt,cdn,"amount","")
+			frappe.throw(__("Amount cannot be negative"))
+		} else if(row.amount === 0) {
+			frappe.model.set_value(cdt,cdn,"amount","")
+			frappe.throw(__("Amount cannot be zero"))
 		}
 		if(frm.doc.cycle && row.loan_id && row.amount) {
 			frappe.call({
@@ -234,8 +237,12 @@ frappe.ui.form.on('Loan Child',  {
 frappe.ui.form.on('Advance Child', 'amount', function(frm, cdt, cdn){
 	var row = locals[cdt][cdn]
 	if(row.amount && row.amount < 0) {
-			frappe.model.set_value(cdt,cdn,"amount",0)
+			frappe.model.set_value(cdt,cdn,"amount","")
 			frappe.throw(__("Amount can not be negative"))
+		}
+	else if(row.amount === 0) {
+			frappe.model.set_value(cdt,cdn,"amount","")
+			frappe.throw(__("Amount can not be zero"))
 		}
 	if(frm.doc.cycle && row.adv_id && row.amount) {
 		frappe.call({

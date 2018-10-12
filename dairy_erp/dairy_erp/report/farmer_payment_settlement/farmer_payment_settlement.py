@@ -386,8 +386,6 @@ def make_payment_entry(**kwargs):
 			"party_account": pe.paid_from if pe.payment_type=="Receive" else pe.paid_to
 		}
 		outstanding_invoices = get_outstanding_reference_documents(args)
-		print "##################################",outstanding_invoices
-		hhhh
 		party_amount = pe.paid_amount if pe.payment_type=="Receive" else pe.received_amount
 		voucher_no_list = kwargs.get('args').get('payble_list') if kwargs.get('payment_type')=="Pay" else kwargs.get('args').get('recv_list')  #[frappe.db.get_value('GL Entry', d, 'voucher_no') for d in kwargs.get('args').get('row_data')]
 

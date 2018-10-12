@@ -68,10 +68,7 @@ frappe.ui.form.on('Farmer Loan', {
 		if (frm.doc.interest && frm.doc.interest < 0){
 			frm.set_value("interest","")
 			frappe.throw(__("Interest cannot be negative"))
-		} else if(frm.doc.interest === 0) {
-			frm.set_value("interest","")
-			frappe.throw(__("Interest cannot be zero"))
-		}
+		} 
 	},
 	calculate_total: function(frm) {
 		frm.set_value('advance_amount',flt(frm.doc.principle) + flt(frm.doc.interest))

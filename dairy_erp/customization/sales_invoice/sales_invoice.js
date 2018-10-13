@@ -118,7 +118,7 @@ frappe.ui.form.on("Sales Invoice", {
 		if (frm.doc.local_sale_type == "No Advance"){
 			frm.set_df_property("multimode_payment","hidden",0)
 			frm.set_df_property("no_of_instalment","reqd",0)
-			frm.set_df_property("emi_start_cycle","reqd",1)
+			frm.set_df_property("emi_start_cycle","reqd",0)
 		}
 	},
 	farmer: function(frm){

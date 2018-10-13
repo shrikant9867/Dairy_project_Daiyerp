@@ -92,6 +92,30 @@ frappe.ui.form.on('Vlcc Loan', {
 				}
 			}
 		})
+	},
+	extension: function(frm) {
+		if(frm.doc.docstatus == 1){
+			frappe.call({
+					method:"dairy_erp.dairy_erp.doctype.vlcc_loan.vlcc_loan.calculate_interest",
+					args : {
+							"name": frm.doc.name,
+							"principle": frm.doc.principle,
+							"no_of_instalments": frm.doc.no_of_instalments,
+							"extension": frm.doc.extension,
+							"paid_instalment": frm.doc.paid_instalment,
+							"interest": frm.doc.interest,
+							"last_extension": frm.doc.last_extension_used,
+							"per_cyc_interest": frm.doc.per_cycle_interest
+							},
+					callback : function(r){
+						frm.set_value('advance_amount',r.message.total)
+						frm.set_value('emi_amount',r.message.emi)
+						frm.set_value('outstanding_amount',r.message.outstanding)
+						frm.set_value('extension_interest',r.message.extension_interest)
+					}
+				})
+			frm.refresh_fields();
+		}
 	}
 });
 

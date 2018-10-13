@@ -50,6 +50,9 @@ class VlccAdvance(Document):
 		je_doc.flags.ignore_permissions = True
 		je_doc.save()
 		je_doc.submit()
+		if je_doc.name:
+			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Advance at <b>{1}</b>".format(
+					'<a href="#Form/Journal Entry/'+je_doc.name+'">'+je_doc.name+'</a>',je_doc.company)))
 
 
 	def create_jv_at_vlcc(self):
@@ -77,6 +80,9 @@ class VlccAdvance(Document):
 		je_doc.flags.ignore_permissions = True
 		je_doc.save()
 		je_doc.submit()
+		if je_doc.name:
+			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Advance at <b>{1}</b>".format(
+					'<a href="#Form/Journal Entry/'+je_doc.name+'">'+je_doc.name+'</a>',je_doc.company)))
 
 
 

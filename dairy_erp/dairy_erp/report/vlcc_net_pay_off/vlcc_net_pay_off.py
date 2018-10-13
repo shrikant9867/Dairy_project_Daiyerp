@@ -14,9 +14,11 @@ def execute(filters=None):
 def get_column():
 	columns =[
 		("Village Level Collection Centre") + ":Link/Village Level Collection Centre:200",
+		("Payable for Milk purchased from vlcc") + ":Currency:100",
 		("Milk Incentives") + ":Currency:200",
 		("Net Payable to Vlcc") + ":Currency:200",
 		("Advance Emi") + ":Currency:200",
+		("Feed & Fodder Advance EMI") + ":Currency:230",
 		("Loan Emi") + ":Currency:200",
 		("Net Receivable from Vlcc") + ":Currency:200",
 		("Net Pay Off to Vlcc")+ ":Currency:200"
@@ -80,12 +82,13 @@ def merge_data(payable, receivable):
 	data = []
 	for f in get_vlccs():
 		if payable.get(f) or receivable.get(f):
-			pi_data = get_pi(f)
+			incentive_pi_data = get_incentive_pi(f)
+			vmcr_pi = get_vmcr_pi(f)
 			si_data = get_si(f)
 			pay = payable.get(f, 0)
 			rec = receivable.get(f, 0)
 			net = pay - rec
-			data.append([f, pi_data.get('incentive'), pay, si_data.get('advance'), si_data.get('loan'), rec, net])
+			data.append([f, vmcr_pi.get('vmcr_pi'), incentive_pi_data.get('incentive'), pay, si_data.get('advance'), 0, si_data.get('loan'), rec, net])
 	return data		  
 
 
@@ -112,9 +115,8 @@ def get_filtered_vlccs(doctype,text,searchfields,start,pagelen,filters):
 	return frappe.db.sql("""select name,vlcc_type from 
 		`tabVillage Level Collection Centre`""")
 
-def get_pi(f):
+def get_incentive_pi(f):
 	if len(f):
-		print "###############",f
 		incentive = frappe.db.sql("""
 				select ifnull(sum(outstanding_amount),0) as total
 			from 
@@ -124,6 +126,19 @@ def get_pi(f):
 			""".format(f),as_dict=1,debug=0)
 		return {'incentive':incentive[0].get('total')}
 	return {'incentive': 0}
+
+def get_vmcr_pi(f):
+	if len(f):
+		incentive = frappe.db.sql("""
+				select ifnull(sum(outstanding_amount),0) as total
+			from 
+				`tabPurchase Invoice`
+			where 
+				pi_type = 'VMCR' and supplier = '{0}' and docstatus = 1
+			""".format(f),as_dict=1,debug=0)
+		return {'vmcr_pi':incentive[0].get('total')}
+	return {'vmcr_pi': 0}
+
 
 def get_si(f):
 	if len(f):

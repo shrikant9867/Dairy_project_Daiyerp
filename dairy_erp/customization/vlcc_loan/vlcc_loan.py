@@ -81,7 +81,7 @@ def make_jv(data,cur_cycl=None):
 			if 0 < out_stand_amt < 1:
 				loan_doc.outstanding_amount = 0
 			else:
-				loan_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data,company.get('name'))
+				loan_doc.outstanding_amount = flt(data.get('advance_amount') - get_jv_amount(data),2)
 			if loan_doc.outstanding_amount == 0:
 				loan_doc.outstanding_amount = 0
 				loan_doc.status = "Paid"

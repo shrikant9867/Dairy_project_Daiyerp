@@ -94,7 +94,7 @@ def make_journal_entry(**kwargs):
 	elif kwargs.get('type') == "Farmer Loan":
 		je_doc.append('accounts', {
 			'account': kwargs.get('debit_account')+ abbr.get('abbr'),
-			'debit_in_account_currency': kwargs.get('amount') + kwargs.get('interest_amount') or 0,
+			'debit_in_account_currency': flt(kwargs.get('amount') + kwargs.get('interest_amount'),2),
 			'party_type': kwargs.get('party_type'),
 			'party': kwargs.get('party'),
 			'cost_center': abbr.get('cost_center')

@@ -75,13 +75,15 @@ def make_jv(data,cur_cycl=None):
 			#update loan doc
 			paid_instlmnt = 0
 			loan_doc = frappe.get_doc("Vlcc Loan",data.get('name'))
+			loan_doc.total_principle_paid = flt(principal_interest.get('principal'),2)
+			loan_doc.total_interest_paid =  flt(principal_interest.get('interest'),2)
 			# loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_jv_amount(data,je_doc.company)
 			out_stand_amt = get_jv_amount(data,company.get('name')) - data.get('advance_amount') 
 			"""Added by Jitendra, fixes negative outstading amount"""
 			if 0 < out_stand_amt < 1:
 				loan_doc.outstanding_amount = 0
 			else:
-				loan_doc.outstanding_amount = flt(data.get('advance_amount') - get_jv_amount(data),2)
+				loan_doc.outstanding_amount = flt(data.get('advance_amount') - get_jv_amount(data, company),2)
 			if loan_doc.outstanding_amount == 0:
 				loan_doc.outstanding_amount = 0
 				loan_doc.status = "Paid"

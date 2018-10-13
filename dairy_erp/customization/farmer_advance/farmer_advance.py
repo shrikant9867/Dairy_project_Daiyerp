@@ -47,7 +47,7 @@ def make_jv(data, cur_cycl=None):
 					update_advance_doc(data, je_doc, cur_cycl)
 			elif data.get('advance_type') == "Feed And Fodder Advance":
 				je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
-			          posting_date = nowdate(),debit_account = "Feed And Fodder Advances Temporary Account - ",credit_account = "Feed And Fodder Advance - ", 
+			          posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Feed And Fodder Advance - ", 
 			          type = "Farmer Advance", cycle = cur_cycl, amount = data.get('emi_amount'), faf_flag = 1, 
 			          party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'))
 			

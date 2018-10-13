@@ -106,32 +106,17 @@ class FarmerPaymentCycleReport(Document):
 		if (int(row.no_of_instalment) + int(loan_doc.extension)) - loan_doc.paid_instalment == 1 and \
 			(float(row.amount) < float(loan_doc.emi_amount) or float(row.outstanding) != float(loan_doc.emi_amount)):
 			frappe.throw(_("Please Use Extension <b>{0}</b>".format(row.loan_id)))
-	
-	# def update_loan(self, row, si = None):
-	# 	instalment = 0
-	# 	si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
-	# 		,filters={'farmer_advance':row.loan_id})
-		
-	# 	loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
-	# 	loan_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
-	# 	loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
-	# 	for i in loan_doc.cycle:
-	# 		instalment += 1
-	# 	loan_doc.paid_instalment = instalment
-	# 	if loan_doc.outstanding_amount > 0:
-	# 		loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
-	# 	if loan_doc.outstanding_amount == 0:
-	# 		loan_doc.status = "Paid"
-	# 		loan_doc.emi_amount = 0
-	# 	loan_doc.flags.ignore_permissions = True
-	# 	loan_doc.save()
 
 	def update_loan_doc(self, row, je = None):
 		instalment = 0
+		principal_interest = get_interest_amount(row.amount, row.loan_id)
 		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
 			,filters={'farmer_advance':row.loan_id,'type':'Farmer Loan'})
 		
 		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
+		loan_doc.total_principle_paid = principal_interest.get('principal')
+		loan_doc.total_interest_paid = principal_interest.get('interest')
+		loan_doc.last_extension_used = flt(loan_doc.extension)
 		loan_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": je})
 		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - je_amt[0].get('amt')
 		for i in loan_doc.cycle:
@@ -144,32 +129,6 @@ class FarmerPaymentCycleReport(Document):
 			loan_doc.emi_amount = 0
 		loan_doc.flags.ignore_permissions = True
 		loan_doc.save()
-	
-	# def create_si(self, row, type_, item, doc_id):
-	# 	si_doc = frappe.new_doc("Sales Invoice")
-	# 	si_doc.type = type_
-	# 	si_doc.posting_date = self.collection_to
-	# 	si_doc.customer = self.farmer_name
-	# 	si_doc.company = self.vlcc_name
-	# 	si_doc.farmer_advance = doc_id
-	# 	si_doc.cycle_ = self.cycle
-	# 	si_doc.append("items",{
-	# 		"item_code": item,
-	# 		"qty": 1,
-	# 		"rate": row.amount,
-	# 		"cost_center": frappe.db.get_value("Company", self.vlcc_name, "cost_center")
-	# 		})
-	# 	si_doc.flags.ignore_permissions = True
-	# 	si_doc.save()
-	# 	si_doc.submit()
-	# 	frappe.db.set_value("Sales Invoice", si_doc.name, 'posting_date', self.collection_to)
-	# 	gl_stock = frappe.db.get_value("Company", get_vlcc(), 'default_income_account')
-	# 	gl_credit = frappe.db.get_value("Company", get_vlcc(), 'default_receivable_account')
-	# 	frappe.db.set_value("GL Entry", {"account": gl_stock, "voucher_no": si_doc.name},\
-	# 				'posting_date', self.collection_to )
-	# 	frappe.db.set_value("GL Entry", {"account": gl_credit, "voucher_no": si_doc.name},\
-	# 				'posting_date', self.collection_to )	
-	# 	return si_doc.name
 
 	def create_loan_je(self, row): # SG-8-10
 		principal_interest = get_interest_amount(row.amount, row.loan_id)
@@ -210,7 +169,7 @@ class FarmerPaymentCycleReport(Document):
 		if advance_type == "Feed And Fodder Advance":
 			# parameter 'faf_flag', is used to fetch data on net-payOff report.
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
-        			posting_date = nowdate(),debit_account = "Feed And Fodder Advances Temporary Account - ",credit_account = "Feed And Fodder Advance - ", 
+        			posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Feed And Fodder Advance - ", 
         			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, faf_flag = 1,
         			party_type = "Customer", party = self.farmer_name, master_no = row.adv_id, advance_type = advance_type)
 			frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
@@ -221,25 +180,6 @@ class FarmerPaymentCycleReport(Document):
 			frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_doc.name},\
 						'posting_date', self.collection_to )
 			return je_doc.name
-	
-
-	# def update_advance(self, row, si=None):
-	# 	instalment = 0
-	# 	si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
-	# 		,filters={'farmer_advance':row.adv_id})
-	# 	adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
-	# 	adv_doc.append("cycle", {"cycle": self.cycle, "sales_invoice": si})
-	# 	adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
-	# 	for i in adv_doc.cycle:
-	# 		instalment +=1
-	# 	adv_doc.paid_instalment = instalment
-	# 	if adv_doc.outstanding_amount > 0 :
-	# 		adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
-	# 	if adv_doc.outstanding_amount == 0:
-	# 		adv_doc.status = "Paid"
-	# 		adv_doc.emi_amount = 0
-	# 	adv_doc.flags.ignore_permissions =True
-	# 	adv_doc.save()
 
 	def update_advance_doc(self, row, je=None):	# SG-5-10
 		instalment = 0
@@ -259,24 +199,6 @@ class FarmerPaymentCycleReport(Document):
 		adv_doc.flags.ignore_permissions =True
 		adv_doc.save()
 
-	
-	# def update_advance_fpcr(self, row):
-	# 	instalment = 0
-	# 	si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
-	# 		,filters={'farmer_advance':row.adv_id})
-	# 	adv_doc = frappe.get_doc("Farmer Advance", row.adv_id)
-	# 	adv_doc.outstanding_amount = float(adv_doc.advance_amount) - si_amt[0].get('amt')
-	# 	for i in adv_doc.cycle:
-	# 		instalment +=1
-	# 	adv_doc.paid_instalment = instalment
-	# 	if adv_doc.outstanding_amount > 0 :
-	# 		adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
-	# 	if adv_doc.outstanding_amount == 0:
-	# 		adv_doc.status = "Paid"
-	# 		adv_doc.emi_amount = 0
-	# 	adv_doc.flags.ignore_permissions =True
-	# 	adv_doc.save()
-
 	def update_advance_after_fpcr(self, row):	# SG-5-10
 		instalment = 0
 		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
@@ -294,31 +216,17 @@ class FarmerPaymentCycleReport(Document):
 		adv_doc.flags.ignore_permissions =True
 		adv_doc.save()
 
-
-	# def update_loan_fpcr(self, row):
-	# 	instalment = 0
-	# 	si_amt = frappe.get_all("Sales Invoice",fields=['ifnull(sum(grand_total), 0) as amt']\
-	# 		,filters={'farmer_advance':row.loan_id})
-		
-	# 	loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
-	# 	loan_doc.outstanding_amount = float(loan_doc.advance_amount) - si_amt[0].get('amt')
-	# 	for i in loan_doc.cycle:
-	# 		instalment += 1
-	# 	loan_doc.paid_instalment = instalment
-	# 	if loan_doc.outstanding_amount > 0:
-	# 		loan_doc.emi_amount = (float(loan_doc.outstanding_amount)) / (float(loan_doc.no_of_instalments) + float(loan_doc.extension) - float(loan_doc.paid_instalment))
-	# 	if loan_doc.outstanding_amount == 0:
-	# 		loan_doc.status = "Paid"
-	# 		loan_doc.emi_amount = 0
-	# 	loan_doc.flags.ignore_permissions = True
-	# 	loan_doc.save()
-
 	def update_loan_after_fpcr(self, row):
+		principal_interest = get_interest_amount(row.amount, row.loan_id)
+		print principal_interest,"inside update_loan_after_fpcr\n\n\n\n"
 		instalment = 0
 		je_amt = frappe.get_all("Journal Entry",fields=['ifnull(sum(total_debit), 0) as amt']\
 			,filters={'farmer_advance':row.loan_id,'type':'Farmer Loan'})
 		
 		loan_doc = frappe.get_doc("Farmer Loan", row.loan_id)
+		loan_doc.total_principle_paid = principal_interest.get('principal')
+		loan_doc.total_interest_paid = principal_interest.get('interest')
+		loan_doc.last_extension_used = flt(loan_doc.extension)
 		loan_doc.outstanding_amount = float(loan_doc.advance_amount) - je_amt[0].get('amt')
 		for i in loan_doc.cycle:
 			instalment += 1
@@ -330,16 +238,6 @@ class FarmerPaymentCycleReport(Document):
 			loan_doc.emi_amount = 0
 		loan_doc.flags.ignore_permissions = True
 		loan_doc.save()
-
-	
-	# def update_si(self, row, cycle, si_no):
-	# 	item_row = frappe.db.get_value("Sales Invoice Item", {'parent':si_no}, 'name')
-	# 	frappe.db.set_value("Sales Invoice Item", item_row, 'rate', row.amount)
-	# 	frappe.db.set_value("Sales Invoice Item", item_row, 'amount', row.amount)
-	# 	frappe.db.set_value("Sales Invoice", si_no, 'grand_total', row.amount)
-	# 	frappe.db.set_value("Sales Invoice", si_no, 'outstanding_amount', row.amount)
-	# 	frappe.db.set_value("Sales Invoice", si_no, 'rounded_total', row.amount)
-	# 	self.update_gl_entry(si_no, row.amount)
 
 	def update_je_for_loan(self, row, cycle, je_no):	# SG-5-10
 		principal_interest = get_interest_amount(row.amount, row.loan_id)
@@ -510,6 +408,12 @@ def get_interest_amount(amount, data):
 	loan_doc = frappe.get_all("Farmer Loan",fields=['interest','no_of_instalments','emi_amount'],filters={'name':data})
 	interest_per_cycle = loan_doc[0].get('interest') / loan_doc[0].get('no_of_instalments')
 	principal_per_cycle = amount - interest_per_cycle
+	if amount <= interest_per_cycle:
+		interest_per_cycle = flt(amount,2)
+		principal_per_cycle = 0
+	else:
+		interest_per_cycle = flt(interest_per_cycle,2)
+		principal_per_cycle = flt((amount - interest_per_cycle),2)
 	return { 'interest': interest_per_cycle , 'principal': principal_per_cycle}
 
 @frappe.whitelist()
@@ -800,19 +704,6 @@ def get_fpcr_flag():
 
 def get_vlcc():
 	return frappe.db.get_value("User",frappe.session.user, 'company')
-
-# @frappe.whitelist()
-# def get_updated_advance(cycle, adv_id=None, amount=None, total = None):
-# 	sum_ = frappe.db.sql("""
-# 			select ifnull(sum(grand_total),0) as total
-# 		from 
-# 			`tabSales Invoice` 
-# 		where 
-# 		farmer_advance =%s  and cycle_ !=%s""",(adv_id,cycle),as_dict=1,debug=1)
-# 	if len(sum_):
-# 		adv_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
-# 		return adv_amount
-# 	else: return 0
 
 # SG-6-10
 @frappe.whitelist()

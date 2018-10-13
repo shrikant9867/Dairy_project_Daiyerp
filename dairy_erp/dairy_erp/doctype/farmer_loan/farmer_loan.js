@@ -11,9 +11,9 @@ frappe.ui.form.on('Farmer Loan', {
 			console.log(frm.doc.no_of_instalments,frm.doc.extension,frm.doc.paid_instalment,cint(frm.doc.no_of_instalments)+cint(frm.doc.extension) - cint(frm.doc.paid_instalment))
 			frm.set_df_property("extension", "hidden", 0);
 		}
-		if(frm.doc.docstatus == 1){
+		/*if(frm.doc.docstatus == 1){
 			frm.set_value('interest_amount', frm.doc.interest)
-		}
+		}*/
 	},
 	emi_deduction_start_cycle: function(frm) {
 		if(cint(frm.doc.emi_deduction_start_cycle) > 6) {
@@ -60,6 +60,10 @@ frappe.ui.form.on('Farmer Loan', {
 		}
 	},
 	interest: function(frm) {
+		if(flt(frm.doc.interest) <= 0){
+			frm.set_value('interest',1)
+			frappe.throw("Interest cannot be less than or equal to zero")
+		}
 		frm.events.no_of_instalments(frm)
 		frm.events.calculate_total(frm)
 		if(frm.doc.extension == 0) {
@@ -68,7 +72,7 @@ frappe.ui.form.on('Farmer Loan', {
 		if (frm.doc.interest && frm.doc.interest < 0){
 			frm.set_value("interest","")
 			frappe.throw(__("Interest cannot be negative"))
-		} 
+		}
 	},
 	calculate_total: function(frm) {
 		frm.set_value('advance_amount',flt(frm.doc.principle) + flt(frm.doc.interest))
@@ -101,13 +105,15 @@ frappe.ui.form.on('Farmer Loan', {
 							"no_of_instalments": frm.doc.no_of_instalments,
 							"extension": frm.doc.extension,
 							"paid_instalment": frm.doc.paid_instalment,
-							"interest": frm.doc.interest_amount,
+							"interest": frm.doc.interest,
+							"last_extension": frm.doc.last_extension_used,
+							"per_cyc_interest": frm.doc.per_cycle_interest
 							},
 					callback : function(r){
 						frm.set_value('advance_amount',r.message.total)
 						frm.set_value('emi_amount',r.message.emi)
-						frm.set_value('interest',r.message.interest)
 						frm.set_value('outstanding_amount',r.message.outstanding)
+						frm.set_value('extension_interest',r.message.extension_interest)
 					}
 				})
 			frm.refresh_fields();

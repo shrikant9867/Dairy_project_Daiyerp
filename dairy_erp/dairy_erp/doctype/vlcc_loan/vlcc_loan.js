@@ -33,6 +33,10 @@ frappe.ui.form.on('Vlcc Loan', {
 		}
 	},
 	interest: function(frm) {
+		if(flt(frm.doc.interest) <= 0){
+			frm.set_value('interest',1)
+			frappe.throw("Interest cannot be less than or equal to zero")
+		}
 		frm.events.no_of_instalments(frm)
 		frm.events.calculate_total(frm)
 		frm.events.calculate_updated_emi(frm)

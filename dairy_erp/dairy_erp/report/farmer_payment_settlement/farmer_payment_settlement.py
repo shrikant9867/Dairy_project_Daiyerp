@@ -226,7 +226,7 @@ def make_farmer_voucher_log(cycle, args):
 		if sales_amount > 0 or purchase_amount > 0:
 			log_doc = frappe.new_doc("Farmer Payment Log")
 			log_doc.total_pay = args.get('total_pay')
-			log_doc.payble = args.get('payable_data').get('payble')#args.get('payable')
+			log_doc.payble = args.get('payable_data').get('payble') if args.get('total_pay') else 0#args.get('payable')
 			log_doc.receivable = args.get('receivable')  
 			log_doc.start_date = args.get('start_date') 
 			log_doc.end_date = args.get('end_date') 
@@ -254,7 +254,7 @@ def make_farmer_voucher_log(cycle, args):
 			previous_amt = get_previous_amt(cycle, args.get('farmer'))
 			total_pay = auto + manual + previous_amt
 
-			log_doc.set_per = (total_pay/args.get('total_pay')) * 100
+			log_doc.set_per = (total_pay/args.get('total_pay')) * 100 if args.get('total_pay') else 100
 			log_doc.flags.ignore_permissions = True
 			log_doc.save()
 	except Exception, e:
@@ -479,7 +479,7 @@ def get_settlement_per(doctype,txt,searchfields,start,pagelen,filters):
 						c.end_date < curdate() and c.vlcc = '{vlcc}'
 						order by c.end_date limit {limit_count}) as cy where cy.name like '{txt}'""".
 						format(farmer_name=farmer_name,limit_count=limit_count,
-							vlcc=vlcc,txt= "%%%s%%" % txt),as_list=True,debug=1)
+							vlcc=vlcc,txt= "%%%s%%" % txt),as_list=True)
 
 			cycle_list = frappe.db.sql_list("""select name from 
 				`tabFarmer Date Computation` where vlcc = %s""",(vlcc))
@@ -511,26 +511,26 @@ def skip_cycle(row_data,filters):
 			not isnull(name) and supplier = '{1}' and posting_date between '{2}' and '{3}'""".
 			format(vlcc,farmer_name,filters.get('start_date'),filters.get('end_date')),as_dict=True)
 
-	si = frappe.db.sql("""select name  
-		from    
-			`tabSales Invoice`  
-		where    
-			status in ('Overdue','Unpaid') and 
-			company = '{0}' and 
-			not isnull(name) and customer = '{1}' and posting_date between '{2}' and '{3}'""".
-			format(vlcc,farmer_name,filters.get('start_date'),filters.get('end_date')),as_dict=True)
-
 	pi_list = [d.name for d in pi]
+	# si = frappe.db.sql("""select name  
+	# 	from    
+	# 		`tabSales Invoice`  
+	# 	where    
+	# 		status in ('Overdue','Unpaid') and 
+	# 		company = '{0}' and 
+	# 		not isnull(name) and customer = '{1}' and posting_date between '{2}' and '{3}'""".
+	# 		format(vlcc,farmer_name,filters.get('start_date'),filters.get('end_date')),as_dict=True)
 
-	si_list = [d.name for d in si]
 
-	invoice_list = pi_list+si_list
+	# si_list = [d.name for d in si]
+
+	# invoice_list = pi_list+si_list
 
 
 	if farmer_name and filters.get('cycle'):
 		log = frappe.db.get_value("Farmer Payment Log",{"farmer":farmer_name,"cycle":filters.get('cycle')},"name")
 		if not log:
-			if invoice_list:
+			if pi_list:
 				frappe.throw("You cannot skip the cycle because invoice are yet to settled.")
 			else:
 				log_doc = frappe.new_doc("Farmer Payment Log")
@@ -565,7 +565,7 @@ def check_cycle(row_data,filters):
 	for d in row_data:
 		gl_doc = frappe.get_doc('GL Entry',d)
 
-		receivable_list.append(gl_doc.against_voucher_type)
+		receivable_list.append(gl_doc.voucher_type)
 
 		if getdate(gl_doc.posting_date) < getdate(filters.get('start_date')):
 			month_list.append({calendar.month_abbr[getdate(gl_doc.posting_date).month]:gl_doc.fiscal_year})
@@ -592,7 +592,7 @@ def check_cycle(row_data,filters):
 
 def check_receivable(recv_list):
 	
-	if 'Sales Invoice' in recv_list and 'Purchase Invoice' not in recv_list:
+	if 'Sales Invoice' or 'Journal Entry' in recv_list and 'Purchase Invoice' not in recv_list:
 		return "You can not settle only Receivable Amount"
 
 

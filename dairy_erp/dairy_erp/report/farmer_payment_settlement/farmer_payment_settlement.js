@@ -321,18 +321,18 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 	},
 	validate_amount:function(dialog){
 		var data = dialog.get_values()
-		if(data.set_amt.toFixed(2) && data.set_amt_manual.toFixed(2) && (data.set_amt_manual.toFixed(2) > (data.payble.toFixed(2) - data.set_amt.toFixed(2)))){		
+		if(flt(data.set_amt,2) && flt(data.set_amt_manual,2) && (flt(data.set_amt_manual,2) > flt(flt(data.payble,2) - flt(data.set_amt,2),2))){		
 				frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
-					[data.set_amt_manual,data.payble-data.set_amt.toFixed(2)]))
+					[flt(data.set_amt_manual,2),flt(flt(data.payble,2) - flt(data.set_amt,2),2)]))
 		}
-		else if(data.payble && !data.set_amt && (data.set_amt_manual.toFixed(2) > data.payble.toFixed(2))){
+		else if(flt(data.payble,2) && flt(!data.set_amt,2) && (flt(data.set_amt_manual,2) > flt(data.payble,2))){
 			frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
-				[data.set_amt_manual,data.payble]))
+				[flt(data.set_amt_manual,2),flt(data.payble,2)]))
 		}
-		if(data.set_amt_manual < 0){
+		if(flt(data.set_amt_manual,2) < 0){
 			frappe.throw(__("Payable Amount can not be negative"))
 		}
-		else if(data.set_amt_manual === 0){
+		else if(flt(data.set_amt_manual,2) === 0){
 			frappe.throw(__("Payable Amount can not be zero"))
 		}
 	}

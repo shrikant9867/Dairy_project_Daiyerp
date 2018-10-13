@@ -29,6 +29,12 @@ class VlccLoan(Document):
 		if self.advance_amount <= 0:
 			frappe.throw(_("Advance Amount cannot be zero"))
 
+	def after_insert(self):
+		self.per_cycle_interest = flt(flt(self.interest) / flt(self.no_of_instalments),2)
+
+	def on_update_after_submit(self):
+		frappe.db.set_value("Vlcc Loan", self.name, "last_extension_used", self.extension)		
+
 	def create_jv_at_dairy(self):
 		company = frappe.db.get_value("Company",{'is_dairy':1},['name','abbr','cost_center'],as_dict=1)
 		je_doc = frappe.new_doc("Journal Entry")
@@ -77,13 +83,13 @@ class VlccLoan(Document):
 		je_doc.save()
 		je_doc.submit()
 
-def get_si_amount(data):
+def get_jv_amount(data):
 	sum_ = frappe.db.sql("""
-			select ifnull(sum(grand_total),0) as total
+			select ifnull(sum(total_debit),0) as total
 		from 
-			`tabSales Invoice` 
+			`tabJournal Entry` 
 		where 
-		vlcc_advance_loan =%s and total is not null""",(data),as_dict=1)
+		vlcc_advance =%s and type = 'Vlcc Loan' """,(data),as_dict=1)
 	
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
@@ -92,7 +98,27 @@ def get_si_amount(data):
 @frappe.whitelist()
 def get_emi(name = None, total = None, no_of_instalments = None, extension=None, paid_instalment = None):
 	if name:
-		outstanding_amount = (float(total) - float(get_si_amount(name)))
+		outstanding_amount = (float(total) - float(get_jv_amount(name)))
 		instalment = (float(no_of_instalments) + float(extension)) - float(paid_instalment)
 		emi = outstanding_amount / instalment
-		return emi if emi else 0 
+		return emi if emi else 0
+
+@frappe.whitelist()
+def calculate_interest(**kwargs):
+	try:
+		if kwargs.get('name') and kwargs.get('extension') and kwargs.get('interest') and kwargs.get('no_of_instalments'):
+			extension_interest = flt(flt(kwargs.get('extension')) * flt(kwargs.get('per_cyc_interest')),2)
+			total_amount = flt(kwargs.get('principle')) + flt(kwargs.get('interest')) + flt(extension_interest)
+			outstanding_amount = flt(flt(total_amount) - flt(get_jv_amount(kwargs.get('name'))),2)
+			emi_amount = flt(flt(outstanding_amount ) / (flt(kwargs.get('no_of_instalments')) + flt(kwargs.get('extension'))),2)
+			return {
+					'emi': emi_amount or 0, 
+					'outstanding':outstanding_amount, 
+					'total':total_amount, 
+					'extension_interest':extension_interest
+				}
+		else: return {}
+ 	except Exception,e:
+			make_dairy_log(title="Extension attribute failed for vlcc loan",method="calculate_interest", status="Error",
+			data = kwargs, message=e, traceback=frappe.get_traceback())
+			frappe.throw("Some thing went wrong please check dairy")

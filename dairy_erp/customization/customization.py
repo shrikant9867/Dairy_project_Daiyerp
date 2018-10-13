@@ -53,12 +53,6 @@ def create_dairy_as_supplier(company):
 	supl_doc = frappe.new_doc("Supplier")
 	supl_doc.supplier_name = company
 	supl_doc.supplier_type = "Dairy Type"
-	supl_doc.append("accounts",
-		{
-		"company": company,
-		"account": frappe.db.get_value("Company", company, 'default_payable_account')
-		}
-	) 
 	supl_doc.flags.ignore_permissions = True
 	supl_doc.save()
 

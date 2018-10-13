@@ -57,6 +57,7 @@ class VillageLevelCollectionCentre(Document):
 			self.create_user()
 			self.create_missing_accounts(company)
 			self.create_taxes_templates(company)
+			self.add_vlcc_acc_in_dairy_supplier(company)
 
 			#hybrid chilling centre is of own
 			self.bmc_chilling_centre = self.name
@@ -69,7 +70,19 @@ class VillageLevelCollectionCentre(Document):
 			frappe.db.rollback()
 			make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",
 			data = "data", message=e, traceback=frappe.get_traceback())
-
+	
+	def add_vlcc_acc_in_dairy_supplier(self, company):
+		dairy_comp = frappe.db.get_value("Company",{'is_dairy':1},'name')
+		if dairy_comp:
+			suppl_doc = frappe.get_doc("Supplier",dairy_comp)
+			suppl_doc.append("accounts", {
+				"company": company,
+				"account": frappe.db.get_value("Company", company, 'default_payable_account')
+				}
+			)
+			suppl_doc.flags.ignore_permissions = True
+			suppl_doc.save()
+	
 	def on_update(self):
 		self.create_supplier()
 		self.create_customer()

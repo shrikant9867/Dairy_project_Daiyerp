@@ -143,6 +143,7 @@ class VLCCPaymentCycleReport(Document):
 		je_doc.company = company.get('name')
 		je_doc.type = "Vlcc Advance"
 		je_doc.cycle = self.cycle
+		je_doc.reference_party = self.vlcc_name
 		je_doc.vlcc_advance = row.adv_id
 		je_doc.reference_party = self.vlcc_name
 		je_doc.posting_date = nowdate()
@@ -177,6 +178,7 @@ class VLCCPaymentCycleReport(Document):
 		je_doc = frappe.new_doc("Journal Entry")
 		je_doc.voucher_type = "Journal Entry"
 		je_doc.company = company.get('name')
+		je_doc.reference_party = self.vlcc_name
 		je_doc.type = "Vlcc Loan"
 		je_doc.cycle = self.cycle
 		je_doc.farmer_advance = row.loan_id
@@ -241,6 +243,7 @@ class VLCCPaymentCycleReport(Document):
 		je_doc.company = self.vlcc_name
 		je_doc.type = "Vlcc Advance"
 		je_doc.cycle = self.cycle
+		je_doc.reference_party = company.get('name')
 		je_doc.vlcc_advance = row.adv_id
 		je_doc.posting_date = nowdate()
 		je_doc.append('accounts', {
@@ -267,6 +270,7 @@ class VLCCPaymentCycleReport(Document):
 		je_doc.voucher_type = "Journal Entry"
 		je_doc.company = self.vlcc_name
 		je_doc.type = "Vlcc Loan"
+		je_doc.reference_party = company.get('name')
 		je_doc.cycle = self.cycle
 		je_doc.vlcc_advance = row.loan_id
 		je_doc.posting_date = nowdate()

@@ -658,6 +658,7 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 		pi_obj = frappe.new_doc("Purchase Invoice")
 		pi_obj.supplier =  vlcc
 		pi_obj.vlcc_milk_collection_record = vmrc
+		pi_obj.pi_type = "VMCR"
 		# pi_obj.due_date = add_to_date(getdate(row.get('collectiontime')),0,0,days)
 		pi_obj.chilling_centre = frappe.db.get_value("Address", \
 							{"centre_id" : data.get('societyid')}, 'name')

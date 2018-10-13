@@ -3,11 +3,23 @@
 
 frappe.ui.form.on('Vlcc Milk Collection Record', {
 	milkquantity: function(frm) {
-		frm.trigger("calculate_amount");
+		if(frm.doc.milkquantity > 0){
+			frm.trigger("calculate_amount");
+		}
+		else{
+			frm.set_value("milkquantity",1)
+			frappe.throw("Milk Quantity Can not be less or equal to zero")	
+		}
 	},
 
 	rate: function(frm) {
-		frm.trigger("calculate_amount");
+		if(frm.doc.rate > 0){
+			frm.trigger("calculate_amount");
+		}
+		else{
+			frm.set_value("rate",1)
+			frappe.throw("Rate Can not be less or equal to zero")	
+		}
 	},
 
 	collectionroute:function(frm){

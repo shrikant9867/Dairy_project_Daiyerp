@@ -58,6 +58,9 @@ class VlccLoan(Document):
 		je_doc.flags.ignore_permissions = True
 		je_doc.save()
 		je_doc.submit()
+		if je_doc.name:
+			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Loan at '{1}' ".format(
+					'<a href="#Form/Journal Entry/'+je_doc.name+'">'+je_doc.name+'</a>',je_doc.company)))
 
 	def create_jv_at_vlcc(self):
 		company = frappe.db.get_value("Company",self.vlcc_id,['name','abbr','cost_center'],as_dict=1)
@@ -82,6 +85,9 @@ class VlccLoan(Document):
 		je_doc.flags.ignore_permissions = True
 		je_doc.save()
 		je_doc.submit()
+		if je_doc.name:
+			frappe.msgprint(_("Journal Entry <b>{0}</b> created successfully against Loan at '{1}'".format(
+					'<a href="#Form/Journal Entry/'+je_doc.name+'">'+je_doc.name+'</a>',je_doc.company)))
 
 def get_jv_amount(data):
 	sum_ = frappe.db.sql("""

@@ -188,6 +188,7 @@ class VlccMilkCollectionRecord(Document):
 			pi = frappe.new_doc("Purchase Invoice")
 			pi.supplier = frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "name")
 			pi.vlcc_milk_collection_record = self.name
+			pi.pi_type = "VMCR"
 			# pi.due_date = add_to_date(getdate(self.collectiontime),0,0,cint(days))
 			pi.company = frappe.db.get_value("Company",{"is_dairy":1},'name')
 			pi.append("items",

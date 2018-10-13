@@ -42,6 +42,16 @@ def create_ls(data):
 	if data.get('customer_or_farmer') == "Vlcc Local Institution":
 		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
 		print "#################",ls_obj.customer
+	elif data.get('customer_or_farmer') == "Farmer" and data.get('local_sale_type') == "No Advance":
+		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
+		ls_obj.local_sale_type = data.get('local_sale_type')
+		print "#################",ls_obj.customer
+	elif data.get('customer_or_farmer') == "Farmer" and data.get('local_sale_type') == "Feed And Fooder Advance":
+		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
+		ls_obj.local_sale_type = data.get('local_sale_type')
+		ls_obj.no_of_instalment = data.get('no_of_instalment')
+		ls_obj.emi_start_cycle = data.get('emi_start_cycle')
+		print "#################",ls_obj.customer
 	ls_obj.update(data)
 	ls_obj.customer_or_farmer = data.get('customer_or_farmer')
 	ls_obj.selling_price_list = get_price_list(ls_obj.customer_or_farmer)

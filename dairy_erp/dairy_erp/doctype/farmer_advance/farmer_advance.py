@@ -22,6 +22,9 @@ class FarmerAdvance(Document):
 		self.date_of_disbursement = today()
 		if self.advance_amount <= 0:
 			frappe.throw(_("Advance Amount cannot be zero"))
+	
+	def on_update_after_submit(self):
+		frappe.db.set_value("Farmer Advance", self.name, "last_extension_used", self.extension)
 
 	def create_je(self):
 		if self.advance_type == "Money Advance":

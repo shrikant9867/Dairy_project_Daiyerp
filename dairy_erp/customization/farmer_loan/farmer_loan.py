@@ -17,7 +17,7 @@ def create_jv():
 	docs = frappe.db.sql("""
 			select name,farmer_name,emi_amount,advance_amount,farmer_id,
 			vlcc,emi_deduction_start_cycle,outstanding_amount,date_of_disbursement,
-			no_of_instalments,extension,vlcc,interest_amount
+			no_of_instalments,extension,vlcc,interest
 		from 
 			`tabFarmer Loan`
 		where
@@ -46,14 +46,16 @@ def make_jv(data,cur_cycl=None):
 				party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'),
 				interest_account = "Interest Income - ", interest_amount= flt(principal_interest.get('interest'),2))
 			if je_doc.name:
-				update_loan_doc(data, je_doc, cur_cycl)			
+				update_loan_doc(data, je_doc, cur_cycl, principal_interest)			
 	except Exception,e:
 		make_dairy_log(title="JV creation Against Advance Failed",method="get_items", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())
 
-def update_loan_doc(data, je_doc, cur_cycl):
+def update_loan_doc(data, je_doc, cur_cycl, principal_interest):
 	paid_instlmnt = 0
 	loan_doc = frappe.get_doc("Farmer Loan",data.get('name'))
+	loan_doc.total_principle_paid = principal_interest.get('principal')
+	loan_doc.total_interest_paid = principal_interest.get('interest')
 	# loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_jv_amount(data)
 	
 	out_stand_amt = get_jv_amount(data) - data.get('advance_amount') 
@@ -140,6 +142,6 @@ def get_jv_amount(data):
 	else: return 0
 
 def get_interest_amount(data):
-	interest_per_cycle = data.get('interest_amount') / data.get('no_of_instalments')
+	interest_per_cycle = data.get('interest') / data.get('no_of_instalments')
 	principal_per_cycle = data.get('emi_amount') - interest_per_cycle
 	return { 'interest': interest_per_cycle , 'principal': principal_per_cycle}

@@ -34,6 +34,13 @@ frappe.ui.form.on('Vlcc Advance', {
 		}
 	},
 	advance_amount: function(frm) {
+		if (frm.doc.advance_amount && frm.doc.advance_amount < 0) {
+			frm.set_value("advance_amount","")
+			frappe.throw(__("Advance Amount cannot be negative"))
+		}else if(frm.doc.advance_amount === 0) {
+			frm.set_value("advance_amount","")
+			frappe.throw(__("Advance Amount cannot be zero"))
+		}
 		frm.events.no_of_instalment(frm)
 		frm.events.calculate_updated_ami(frm)
 	},

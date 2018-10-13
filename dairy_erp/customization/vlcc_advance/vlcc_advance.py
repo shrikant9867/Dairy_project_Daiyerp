@@ -75,12 +75,12 @@ def make_jv(data, cur_cycl=None):
 				"sales_invoice": je_doc.name
 				})
 			# advance_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data, je_doc.company)
-			out_stand_amt = get_jv_amount(data) - data.get('advance_amount') 
+			out_stand_amt = get_jv_amount(data,company.get('name')) - data.get('advance_amount') 
 			"""Added by Jitendra, fixes negative outstading amount"""
 			if 0 < out_stand_amt < 1:
 				advance_doc.outstanding_amount = 0
 			else:
-				advance_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data)
+				advance_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data,company.get('name'))
 
 			if advance_doc.outstanding_amount == 0:
 				advance_doc.outstanding_amount = 0

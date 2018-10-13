@@ -226,9 +226,13 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 	},
 	emi_start_cycle:function(frm){
-		if(frm.doc.emi_start_cycle < 0){
+		if(cint(frm.doc.emi_start_cycle) > 6) {
 			frm.set_value("emi_start_cycle",0)
-			frappe.throw("Emi Start Cycle should be greater than or equal to zero")
+			frappe.throw("Emi start cycle must be less than or equal to <b>6</b>")
+		}
+		else if(frm.doc.emi_start_cycle < 0){
+			frm.set_value("emi_start_cycle",0)
+			frappe.throw("Emi Start Cycle cannot be negative")
 		}
 	}
 })
@@ -400,15 +404,22 @@ frappe.ui.form.on("Sales Invoice Item", {
 cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	if(cur_frm.doc.customer_or_farmer && cur_frm.doc.local_sale){
 		var customer_type = cur_frm.doc.customer_or_farmer
+		var items = []
 		if (customer_type == "Vlcc Local Institution"){
 			var customer_type = 'Vlcc Local Customer'
 		}
+		$.each(cur_frm.doc.items, function(i,d) {
+			if(d.item_code){
+				items.push(d.item_code)
+			}
+		})
 		return {
 			query:"dairy_erp.customization.sales_invoice.sales_invoice.get_item_by_customer_type",
-			filters: {'customer_type': customer_type,
+				filters: {
+						'customer_type': customer_type,
 						'vlcc':cur_frm.doc.company,
-						'items_dict':cur_frm.doc.items
+						'items_dict':items
 					}
-		}
+			}
 	}
 }

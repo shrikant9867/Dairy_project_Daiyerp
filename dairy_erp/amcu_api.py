@@ -55,12 +55,12 @@ def make_fmrc(data, response_dict):
 	"""
 	traceback = ""
 	farmer1,farmer2 = "",""
-	if data.get('societyid'):
+	if data.get('longformatsocietyid'):
 		for i,v in data.items():
 			if i == "collectionEntryList":
 				for row in v:
 					try:
-						vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},"name")
+						vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('longformatsocietyid')},"name")
 						if frappe.db.get_value("VLCC Settings",vlcc,'name'):
 							resv_farmer = frappe.db.get_value('VLCC Settings',{'vlcc':vlcc},['farmer_id1','farmer_id2','configurable_days'],as_dict=True) 
 							if resv_farmer:
@@ -79,7 +79,7 @@ def make_fmrc(data, response_dict):
 											if not fmrc_entry:
 												if validate_society_exist(data):
 													if farmer_associate_vlcc(data,row):
-														vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
+														vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('longformatsocietyid')},'name')
 														farmer = frappe.db.get_value("Farmer",{"vlcc_name": vlcc},'name')
 														farmer_supplier = frappe.db.get_value("Farmer",row.get('farmerid'),'full_name')
 														row.update(
@@ -92,11 +92,12 @@ def make_fmrc(data, response_dict):
 														fmrc_doc = frappe.new_doc("Farmer Milk Collection Record")
 														fmrc_doc.farmer = farmer_supplier
 														fmrc_doc.id = data.get('id')
-														fmrc_doc.associated_vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
+														fmrc_doc.associated_vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('longformatsocietyid')},'name')
 														fmrc_doc.imeinumber = data.get('imeinumber')
 														fmrc_doc.rcvdtime = data.get('rcvdtime')
 														fmrc_doc.processedstatus = data.get('processedstatus')
-														fmrc_doc.societyid = data.get('societyid')
+														fmrc_doc.societyid = data.get('longformatsocietyid')
+														fmrc_doc.longformatsocietyid = data.get('societyid')
 														fmrc_doc.collectiondate =  data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 														fmrc_doc.posting_date = getdate(data.get('collectiontime'))
 														fmrc_doc.shift = data.get('shift')
@@ -125,11 +126,11 @@ def make_fmrc(data, response_dict):
 										elif row.get('operation') == 'DELETE':
 											delete_fmcr(data,row,response_dict)
 									elif row.get('farmerid') in (resv_farmer.get('farmer_id1'),resv_farmer.get('farmer_id2')):
-										wh = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},["name","warehouse"],as_dict=True)
+										wh = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('longformatsocietyid')},["name","warehouse"],as_dict=True)
 										make_stock_receipt(message="Material Receipt for Reserved Farmer",method="create_fmrc",
 														data=data,row=row,response_dict=response_dict,qty=row.get('milkquantity'),
 														warehouse=wh.get('warehouse'),
-														societyid=data.get('societyid'))
+														societyid=data.get('longformatsocietyid'))
 								else:
 									traceback = "data missing"
 									response_dict.update({"status":"Error","response":"Data Missing","message": "farmerid,milktype,collectiontime,milkquantity,rate, status must be one of Accept or Reject are manadatory"})
@@ -158,11 +159,11 @@ def validate_fmrc_entry(data, row):
 def validate_society_exist(data):
 
 	return frappe.db.sql("""select name from `tabVillage Level Collection Centre`
-		where amcu_id = '{0}'""".format(data.get('societyid')))
+		where amcu_id = '{0}'""".format(data.get('longformatsocietyid')))
 
 
 def farmer_associate_vlcc(data, row):
-	vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('societyid')},'name')
+	vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":data.get('longformatsocietyid')},'name')
 	return frappe.db.get_value("Farmer",{"vlcc_name": vlcc,"name":row.get('farmerid')},'name')
 
 
@@ -226,11 +227,11 @@ def create_farmer(data):
 	if api_data:
 		for row in api_data:
 			response_dict.update({row.get('farmer_id'):[]})
-			vlcc_ = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
+			vlcc_ = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('longformatsocietyid')},'name')
 			farmer_ = frappe.db.get_value("Farmer",row.get('farmer_id'),'name')
 			try:
-				if row.get('society_id') and row.get('farmer_id') and row.get('full_name') and row.get('mode') == "CREATE" and row.get('cattle_type'):
-					vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
+				if row.get('longformatsocietyid') and row.get('farmer_id') and row.get('full_name') and row.get('mode') == "CREATE" and row.get('cattle_type'):
+					vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('longformatsocietyid')},'name')
 					if vlcc :
 						if not frappe.db.sql("select full_name from `tabFarmer` where full_name=%s",(row.get("full_name"))):
 							if  reserved_farmer_exist(row,vlcc):
@@ -359,20 +360,20 @@ def make_vmrc(data, response_dict):
 			if i == "collectionEntryList":
 				for row in v:
 					try:
-						response_dict.update({row.get('farmerid')+"-"+row.get('milktype'):[]})
+						response_dict.update({row.get('longformatfarmerid')+"-"+row.get('milktype'):[]})
 						if frappe.db.get_singles_dict('Dairy Setting').get('configurable_days'):
 							if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
-								if row.get('farmerid') and row.get('milktype') and row.get('collectiontime') and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('collectionroute'):
+								if row.get('longformatfarmerid') and row.get('milktype') and row.get('collectiontime') and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('collectionroute'):
 									collectiontime = row.get('collectiontime') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000))
 									collectiondate = data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
-									vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
+									vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('longformatfarmerid')},'name')
 									vmrc = validate_vmrc_entry(row)
 									if row.get('operation') == 'CREATE':
 										if not vmrc:
 											vmrc_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)	
 											handling_loss_gain(data,row,vmrc_doc,response_dict)
 										else:
-											response_dict.update({row.get('farmerid')+"-"+row.get('milktype'):["Record already created please check on server,if any exception check 'Dairy log'."]})
+											response_dict.update({row.get('longformatfarmerid')+"-"+row.get('milktype'):["Record already created please check on server,if any exception check 'Dairy log'."]})
 									elif row.get('operation') == 'UPDATE':
 										if vmrc:
 											delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)
@@ -380,19 +381,19 @@ def make_vmrc(data, response_dict):
 											is_vmcr_created = 1
 											vmrc_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict,is_vmcr_created)	
 											handling_loss_gain(data,row,vmrc_doc,response_dict)
-											response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),vmrc_doc.name)})
+											response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),vmrc_doc.name)})
 											# response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
 								else:
 									response_dict.update({"status":["Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate,collectionroute are manadatory"]})
 							else:
-								response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"Error","response":"Data Missing","message":"imeinumber,collectionDate,shift,rcvdTime are manadatory"})
+								response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"status":"Error","response":"Data Missing","message":"imeinumber,collectionDate,shift,rcvdTime are manadatory"})
 						else:
-							response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"Error","response":"Data Missing","message":"Please Create dairy settings"})
+							response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"status":"Error","response":"Data Missing","message":"Please Create dairy settings"})
 							# frappe.throw(_("Please create dairy settings first"))
 					except Exception,e:
 						utils.make_dairy_log(title="Sync failed for Data push",method="create_vmrc", status="Error",
 						data = data, message=e, traceback=frappe.get_traceback())
-						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": frappe.get_traceback()})
+						response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"error": frappe.get_traceback()})
 
 def delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict):
 
@@ -459,7 +460,8 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 					"quantitytime": row.get('quantitytime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000)),		
 					"tippingendtime": row.get('tippingendtime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingendtime'))/1000)),		
 					"tippingstarttime": row.get('tippingstarttime') ,#time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingstarttime'))/1000)),
-					"associated_vlcc": frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name')		
+					"associated_vlcc": frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('longformatfarmerid')},'name'),		
+					"farmerid": row.get('longformatfarmerid')
 				})
 			vmrc_doc = frappe.new_doc("Vlcc Milk Collection Record")
 			vmrc_doc.id = data.get('id')
@@ -478,7 +480,7 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			vmrc_doc.flags.ignore_permissions = True
 			vmrc_doc.flags.is_api = True
 			vmrc_doc.submit()
-			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"vmrc":vmrc_doc.name})
+			response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"vmrc":vmrc_doc.name})
 			vlcc = validate_vlcc(row)
 			make_purchase_receipt_dairy(data, row, vlcc_name, response_dict, vmrc_doc.name)
 			return vmrc_doc
@@ -500,7 +502,7 @@ def validate_society_exist_dairy(data):
 			.format(data.get('societyid')))
 
 def validate_vlcc(row):
-	return  frappe.db.sql("select name from `tabVillage Level Collection Centre` where amcu_id = '{0}'".format(row.get('farmerid')),as_dict=1)
+	return  frappe.db.sql("select name from `tabVillage Level Collection Centre` where amcu_id = '{0}'".format(row.get('longformatfarmerid')),as_dict=1)
 
 
 def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
@@ -541,7 +543,7 @@ def make_uom_config(doc):
 def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc):
 	try:
 		customer = frappe.db.get_value("Village Level Collection Centre", vlcc, "plant_office")
-		warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": row.get('farmerid')}, 'warehouse')
+		warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": row.get('longformatfarmerid')}, 'warehouse')
 		cost_center = frappe.db.get_value("Cost Center", {"company": vlcc}, 'name')
 		delivry_obj = frappe.new_doc("Delivery Note")
 		delivry_obj.customer = customer
@@ -565,13 +567,13 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 		delivry_obj.submit()
 		set_posting_datetime(delivry_obj,row)
 		set_stock_ledger_date(delivry_obj,row)
-		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Delivery Note" : delivry_obj.name})
+		response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"Delivery Note" : delivry_obj.name})
 		sales_invoice_against_dairy(data, row, customer, warehouse, item_, vlcc, cost_center, response_dict, delivry_obj.name, vmrc)
 	
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
-		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error":frappe.get_traceback()})
+		response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"error":frappe.get_traceback()})
 
 
 def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost_center, response_dict, dn_name, vmrc):
@@ -595,7 +597,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
  		si_obj.flags.ignore_permissions = True
 		si_obj.submit()
 		set_posting_datetime(si_obj,row,days)
-		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"sales invoice": si_obj.name})
+		response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"sales invoice": si_obj.name})
 
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
@@ -629,7 +631,7 @@ def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,c
 		purchase_rec.submit()
 		set_posting_datetime(purchase_rec,row)
 		set_stock_ledger_date(purchase_rec,row)
-		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase_receipt": purchase_rec.name})
+		response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"purchase_receipt": purchase_rec.name})
 		delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 
 	except Exception,e:
@@ -682,7 +684,7 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 		pi_obj.flags.ignore_permissions = True
 		pi_obj.submit()
 		set_posting_datetime(pi_obj,row,days)
-		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})
+		response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"purchase invoice":pi_obj.name})
 	
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",

@@ -5,7 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, today, getdate
+from frappe.utils import flt, today, getdate, nowdate
+from dairy_erp.dairy_utils import make_dairy_log
+
 
 class VlccLoan(Document):
 
@@ -13,6 +15,12 @@ class VlccLoan(Document):
 		if self.emi_amount > self.outstanding_amount:
 			#future configurability emi amt field is editable
 			frappe.throw(_("EMI Amount can not be greater than Outstanding amount"))
+		try:
+			self.create_jv_at_dairy()
+			self.create_jv_at_vlcc()
+		except Exception,e:
+			make_dairy_log(title="Sync failed for Data push",method="get_items", status="Error",
+			data = "data", message=e, traceback=frappe.get_traceback())
 
 	def validate(self):
 		self.status = "Unpaid"
@@ -21,6 +29,53 @@ class VlccLoan(Document):
 		if self.advance_amount <= 0:
 			frappe.throw(_("Advance Amount cannot be zero"))
 
+	def create_jv_at_dairy(self):
+		company = frappe.db.get_value("Company",{'is_dairy':1},['name','abbr','cost_center'],as_dict=1)
+		je_doc = frappe.new_doc("Journal Entry")
+		je_doc.voucher_type = "Journal Entry"
+		je_doc.company = company.get('name')
+		je_doc.type = "Debit to Advance vlcc"
+		je_doc.vlcc_advance =self.name
+		je_doc.posting_date = nowdate()
+		je_doc.append('accounts', {
+			'account': "Loans and Advances - "+ company.get('abbr'),
+			'debit_in_account_currency': self.advance_amount,
+			'party_type': "Customer",
+			'party': self.vlcc_id,
+			'cost_center': company.get('cost_center')
+			})
+		je_doc.append('accounts', {
+			'account': "Cash - "+ company.get('abbr'),
+			'credit_in_account_currency': self.advance_amount,
+			'cost_center': company.get('cost_center')
+			})
+		je_doc.flags.ignore_permissions = True
+		je_doc.save()
+		je_doc.submit()
+
+	def create_jv_at_vlcc(self):
+		company = frappe.db.get_value("Company",self.vlcc_id,['name','abbr','cost_center'],as_dict=1)
+		is_dairy = frappe.db.get_value("Company",{'is_dairy':1},'name')
+		je_doc = frappe.new_doc("Journal Entry")
+		je_doc.voucher_type = "Journal Entry"
+		je_doc.company = self.vlcc_id
+		je_doc.vlcc_advance =self.name
+		je_doc.posting_date = nowdate()
+		je_doc.append('accounts', {
+			'account': "Cash - "+ company.get('abbr'),
+			'debit_in_account_currency': self.advance_amount,
+			'party_type': "Supplier",
+			'party': is_dairy,
+			'cost_center': company.get('cost_center')
+			})
+		je_doc.append('accounts', {
+			'account': "Loans and Advances - "+ company.get('abbr'),
+			'credit_in_account_currency': self.advance_amount,
+			'cost_center': company.get('cost_center')
+			})
+		je_doc.flags.ignore_permissions = True
+		je_doc.save()
+		je_doc.submit()
 
 def get_si_amount(data):
 	sum_ = frappe.db.sql("""

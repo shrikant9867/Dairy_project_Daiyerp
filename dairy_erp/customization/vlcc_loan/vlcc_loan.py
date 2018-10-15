@@ -81,9 +81,11 @@ def make_jv(data,cur_cycl=None):
 			out_stand_amt = get_jv_amount(data,company.get('name')) - data.get('advance_amount') 
 			"""Added by Jitendra, fixes negative outstading amount"""
 			if 0 < out_stand_amt < 1:
+				print "######################",out_stand_amt
 				loan_doc.outstanding_amount = 0
 			else:
-				loan_doc.outstanding_amount = flt(data.get('advance_amount') - get_jv_amount(data, company),2)
+				# print "@@@@@@@@@@@@@@@@@@@",out_stand_amt,get_jv_amount(data, company)
+				loan_doc.outstanding_amount = flt(data.get('advance_amount') - get_jv_amount(data, company.get('name')),2)
 			if loan_doc.outstanding_amount == 0:
 				loan_doc.outstanding_amount = 0
 				loan_doc.status = "Paid"

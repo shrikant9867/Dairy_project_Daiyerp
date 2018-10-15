@@ -51,10 +51,7 @@ def get_data(filters=None):
 								round(milkquantity,1),
 								round(fat,1),
 								round(snf,1),
-								CASE
-								    WHEN status = "Accept" THEN "G"
-								    WHEN status = "Reject" THEN "CS"
-								END
+								ifnull(milkquality,'')
 							from
 								`tabVlcc Milk Collection Record`
 							where

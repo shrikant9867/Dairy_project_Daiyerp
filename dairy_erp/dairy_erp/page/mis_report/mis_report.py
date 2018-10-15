@@ -84,8 +84,8 @@ def get_mis_data(month=None,fiscal_year=None):
 
 			# fmcr_list = get_fmcr_list(filters)
 			# member_data = fetch_farmer_data(fmcr_list,filters)
-			milk_quality_data = {'good':get_vmcr_milk_quality_data(filters,"Accept").get('milk_quantity'),
-								'bad':get_vmcr_milk_quality_data(filters,"Reject").get('milk_quantity')}
+			milk_quality_data = {'good':get_vmcr_milk_quality_data(filters,"good").get('milk_quantity'),
+								'bad':get_vmcr_milk_quality_data(filters,"bad").get('milk_quantity')}
 			
 			mis_report_log = frappe.db.get_value("MIS Report Log",{"vlcc_name":frappe.db.get_value("User",frappe.session.user,"company"),
 												"fiscal_year":fiscal_year,
@@ -360,15 +360,20 @@ def get_vmcr_conditions(filters):
 
 
 def get_vmcr_milk_quality_data(filters,status):
+	cond = " 1=1 "
+	if status == "good":
+		cond += " and vmcr.milkquality = 'G' "
+	if status == "bad":
+		cond += " and vmcr.milkquality in ('TS', 'CS', 'SS') "	
 	milk_quality = frappe.db.sql("""
 									select 
 										COALESCE(round(sum(vmcr.milkquantity),2),0) as milk_quantity
 									from
 										`tabVlcc Milk Collection Record` vmcr
 									where
-										vmcr.status = '{0}' 	
+										{0} 
 										and date(vmcr.collectiontime) between '{1}' and '{2}'
-										""".format(status,filters.get('month_start_date'),filters.get('month_end_date')),as_dict=1,debug=0)
+										""".format(cond,filters.get('month_start_date'),filters.get('month_end_date')),as_dict=1,debug=1)
 	return milk_quality[0]
 
 @frappe.whitelist()

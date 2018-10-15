@@ -170,12 +170,12 @@ tr{
 					<tr>
 						<td>2</td>
 						<td>Bad Milk</td>
-						<td class="bad_milk">{%= formated_and_total_milk.formated_milk %}</td>
+						<td class="bad_milk">{%= milk_quality.bad %}</td>
 					</tr>
 					<tr>
 						<td></td>
 						<td>Total Qty</td>
-						<td class="total_milk">{%= formated_and_total_milk.total_milk %}</td>
+						<td class="total_milk">{%= flt(milk_quality.good + milk_quality.bad,2) %}</td>
 					</tr>
 				</tbody>
 			</table>

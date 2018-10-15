@@ -25,6 +25,9 @@ class VlccAdvance(Document):
 		if self.no_of_instalment == 0:
 			frappe.throw(_("No of instalment can not be zero"))
 
+	def on_update_after_submit(self):
+		frappe.db.set_value("Vlcc Advance", self.name, "last_extension_used", self.extension)			
+
 	def create_jv_at_dairy(self):
 		company = frappe.db.get_value("Company",{'is_dairy':1},['name','abbr','cost_center'],as_dict=1)
 		je_doc = frappe.new_doc("Journal Entry")
@@ -89,18 +92,18 @@ class VlccAdvance(Document):
 @frappe.whitelist()
 def get_emi(name = None, total = None, no_of_instalments = None,extension = None, paid_instalment=None):
 	if name:
-		outstanding_amount = (float(total) - float(get_si_amount(name)))
+		outstanding_amount = (float(total) - float(get_jv_amount(name)))
 		instalment = (float(no_of_instalments) + float(extension)) - float(paid_instalment)
 		emi = outstanding_amount / instalment
 		return emi if emi else 0 
 
-def get_si_amount(data):
+def get_jv_amount(data):
 	sum_ = frappe.db.sql("""
-			select ifnull(sum(grand_total),0) as total
+			select ifnull(sum(total_debit),0) as total
 		from 
-			`tabSales Invoice` 
+			`tabJournal Entry`
 		where 
-		farmer_advance =%s and total is not null""",(data),as_dict=1)
+		type = 'Vlcc Advance' and farmer_advance =%s """,(data),as_dict=1)
 	
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0

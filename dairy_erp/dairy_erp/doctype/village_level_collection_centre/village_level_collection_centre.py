@@ -37,6 +37,8 @@ class VillageLevelCollectionCentre(Document):
 	def validate_vlcc_id(self):
 		if self.is_new():		
 			if frappe.db.sql("select amcu_id from `tabVillage Level Collection Centre` where amcu_id = %s",(self.amcu_id)):
+				frappe.throw(_("Long Format farmer exist already"))
+			if frappe.db.sql("select longformatfarmerid from `tabVillage Level Collection Centre` where longformatfarmerid = %s",(self.longformatfarmerid)):
 				frappe.throw(_("Amcu id exist already"))
 
 	def validate_global_eff_credit_percent(self):

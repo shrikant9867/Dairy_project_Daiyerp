@@ -76,6 +76,7 @@ def make_account_and_warehouse(doc, method=None):
 			if frappe.db.get_value("Address", {"address_type": "Head Office"}, "name"):
 				make_accounts(doc)
 				make_warehouse(doc)
+				make_rejected_warehouse(doc)
 			elif doc.address_type != "Head Office":
 				frappe.throw(_("Please create Head Office first"))
 	except Exception as e:
@@ -109,6 +110,29 @@ def make_accounts(doc):
 		doc.stock_account = stock_acc.name
 		doc.save()
 
+def make_rejected_warehouse(doc):
+	if doc.address_type == 'Chilling Centre':
+		wh_name = wh_creation(doc,"Curdled by Society")
+		doc.c_society_warehouse = wh_name
+
+		wh_name = wh_creation(doc,"Curdled by Transporter")
+		doc.c_transporter_warehouse = wh_name
+
+		wh_name = wh_creation(doc,"Sub Standard")
+		doc.sub_std_warehouse = wh_name
+		doc.save()
+
+def wh_creation(doc,warehouse):
+	company_abbr = ''
+	company_abbr = frappe.db.get_value("Company",doc.links[0].link_name,"abbr") if doc.links and doc.links[0].link_name  else [] 
+	if not frappe.db.exists('Warehouse', doc.address_title +"-" +warehouse + " - "+ company_abbr):
+		wr_hs_doc = frappe.new_doc("Warehouse")
+		wr_hs_doc.warehouse_name = doc.address_title +"-" +warehouse 
+		wr_hs_doc.company = doc.links[0].link_name if doc.links else []
+		wr_hs_doc.flags.ignore_permissions = True
+		wr_hs_doc.save()
+		return wr_hs_doc.name
+		
 def make_warehouse(doc):
 	"""configure w/h for dairy components"""
 	if frappe.db.sql("""select name from `tabAddress` where address_type ='Head Office'"""):

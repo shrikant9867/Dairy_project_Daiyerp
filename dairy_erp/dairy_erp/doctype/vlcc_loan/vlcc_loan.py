@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today, getdate, nowdate
 from dairy_erp.dairy_utils import make_dairy_log

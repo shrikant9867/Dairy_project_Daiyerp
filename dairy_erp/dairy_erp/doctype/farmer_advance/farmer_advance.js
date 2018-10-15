@@ -76,7 +76,7 @@ frappe.ui.form.on('Farmer Advance', {
 	advance_type: function(frm){
 		if(frm.doc.advance_type == "Feed And Fodder Advance"){
 			frm.set_value("advance_type","")
-			frappe.throw("Advance Type cannot Be Feed and Fodder")
+			frappe.throw("Please create Advance Feed and Fodder at Sales Invoice")
 		}
 	}
 });

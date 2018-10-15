@@ -25,7 +25,7 @@ class FarmerLoan(Document):
 		self.date_of_disbursement = today()
 		self.outstanding_amount = self.advance_amount
 		if self.advance_amount <= 0:
-			frappe.throw(_("Advance Amount cannot be zero"))
+			frappe.throw(_("Principal Amount cannot be zero"))
 	
 	def on_update_after_submit(self):
 		frappe.db.set_value("Farmer Loan", self.name, "last_extension_used", self.extension)

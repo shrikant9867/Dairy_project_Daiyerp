@@ -17,6 +17,7 @@ def get_column():
 		("Payable for Milk purchased from vlcc") + ":Currency:100",
 		("Milk Incentives") + ":Currency:200",
 		("Net Payable to Vlcc") + ":Currency:200",
+		("Receivable From Society") + ":Currency:200",
 		("Advance Emi") + ":Currency:200",
 		("Feed & Fodder Advance EMI") + ":Currency:230",
 		("Loan Emi") + ":Currency:200",
@@ -46,7 +47,6 @@ def get_receivable_data(filters):
 		camp_new = ""
 	filters["customer"] = filters.get('vlcc')
 	filters.pop("supplier", None)
-	print ReceivablePayableReport(filters).run(customer_args),"ReceivablePayableReport\n\n\n\n\n"
 	return ReceivablePayableReport(filters).run(customer_args)
 
 def get_payable_data(filters):
@@ -78,19 +78,19 @@ def filter_vlcc_data(data, party_type):
 	return filtered_data
 
 def merge_data(payable, receivable):
-	# [ farmer_id, full_name, incentives, payable, advance, loan, receivable, payable-receivable ]
+	# [ farmer_id, full_name, incentives, payable, mi raise si,advance, loan, receivable,feed n fodder payable-receivable ]
 	data = []
 	for f in get_vlccs():
 		if payable.get(f) or receivable.get(f):
 			incentive_pi_data = get_incentive_pi(f)
 			vmcr_pi = get_vmcr_pi(f)
 			si_data = get_si(f)
+			rece_from_society = get_si_mi(f)
 			pay = payable.get(f, 0)
 			rec = receivable.get(f, 0)
 			net = pay - rec
-			data.append([f, vmcr_pi.get('vmcr_pi'), incentive_pi_data.get('incentive'), pay, si_data.get('advance'), 0, si_data.get('loan'), rec, net])
+			data.append([f, vmcr_pi.get('vmcr_pi'), incentive_pi_data.get('incentive'), pay, rece_from_society, si_data.get('advance'), 0, si_data.get('loan'), rec, net])
 	return data		  
-
 
 def get_vlccs():
 	camp_office = frappe.db.get_value("User", frappe.session.user, "branch_office")
@@ -102,7 +102,6 @@ def get_filtered_farmers(doctype,text,searchfields,start,pagelen,filters):
 	company_name= frappe.db.sql("""select company from `tabUser` where name ='{0}'""".format(str(frappe.session.user)),as_list=1)
 	farmers = frappe.db.sql(""" select name,full_name from `tabFarmer` where vlcc_name ='{0}'""".format(company_name[0][0]),as_list=1)
 	return farmers
-
 
 @frappe.whitelist()
 def get_filtered_company(doctype,text,searchfields,start,pagelen,filters):
@@ -142,21 +141,6 @@ def get_vmcr_pi(f):
 
 def get_si(f):
 	if len(f):
-		# loan = frappe.db.sql("""
-		# 			select ifnull(sum(outstanding_amount),0) as total
-		# 		from 
-		# 			`tabSales Invoice`
-		# 		where 
-		# 			type = 'Vlcc Loan' and customer = '{0}'  and docstatus =1
-		# 		""".format(f),as_dict=1,debug=0)
-		# advance = frappe.db.sql("""
-		# 		select ifnull(sum(outstanding_amount),0) as total
-		# 	from 
-		# 		`tabSales Invoice`
-		# 	where 
-		# 		type = 'Vlcc Advance' and customer = '{0}'  and docstatus =1
-		# 	""".format(f),as_dict=1,debug=0)
-		# SG 11-10
 		loan = frappe.db.sql("""
 				select ifnull(sum(total_debit),0) as total
 			from 
@@ -179,3 +163,14 @@ def get_si(f):
 			 	'loan': 0,
 			 	'advance': 0
 			 }
+
+def get_si_mi(f):
+	# sales amount dairy-> vlcc for mi flow
+	company = frappe.db.get_value("Company",{'is_dairy':1} ,'name')
+	return frappe.db.sql("""
+			select ifnull(sum(outstanding_amount),0) as total
+		from 
+			`tabSales Invoice`
+		where 
+			customer =%s and  company = %s and docstatus = 1 
+		""",(f,company),as_dict=1,debug=0)[0].get('total')

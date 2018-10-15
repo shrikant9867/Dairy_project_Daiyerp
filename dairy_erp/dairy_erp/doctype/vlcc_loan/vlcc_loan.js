@@ -10,9 +10,10 @@ frappe.ui.form.on('Vlcc Loan', {
 		frm.events.get_vpcr_flag(frm)
 	},
 	emi_deduction_start_cycle: function(frm) {
-		if(cint(frm.doc.emi_deduction_start_cycle) > 6) {
+		var exp2 = /^\d{1}$/;
+		if(cint(frm.doc.emi_deduction_start_cycle) > 6 || !exp2.test(frm.doc.emi_deduction_start_cycle)) {
 			frm.set_value("emi_deduction_start_cycle",0)
-			frappe.throw("Emi deduction start cycle must be less than or equal to <b>6</b>")
+			frappe.throw("Emi deduction start cycle must be between <b>0</b> to <b>6</b>")
 		}
 		else if (cint(frm.doc.emi_deduction_start_cycle) < 0){
 			var emi_deduction_start_cycle = frm.doc.emi_deduction_start_cycle
@@ -51,7 +52,11 @@ frappe.ui.form.on('Vlcc Loan', {
 	no_of_instalments: function(frm) {
 		if(frm.doc.no_of_instalments <= 0){
 			frm.set_value("no_of_instalments",1)
-			frappe.msgprint("No Of Instalment should be greater than zero")
+			frappe.msgprint("No Of Instalments should be greater than zero")
+		}
+		else if(cur_frm.doc.no_of_instalments > 10000000000) {
+			frm.set_value("no_of_instalments",)
+			frappe.throw("No Of Instalments must not be more than <b>10</b> digits")
 		}
 		emi_amount = (flt(frm.doc.principle) + flt(frm.doc.interest)) / frm.doc.no_of_instalments
 		if(emi_amount > 0 && emi_amount != 'Infinity') {

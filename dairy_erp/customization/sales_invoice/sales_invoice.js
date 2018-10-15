@@ -224,11 +224,16 @@ frappe.ui.form.on("Sales Invoice", {
 			frm.set_value("no_of_instalment",1)
 			frappe.throw("No Of Instalment should be greater than zero")
 		}
+		else if(cur_frm.doc.no_of_instalment > 10000000000) {
+			frm.set_value("no_of_instalment",)
+			frappe.throw("No Of Instalment must not be more than <b>10</b> digits")
+		}
 	},
 	emi_start_cycle:function(frm){
-		if(cint(frm.doc.emi_start_cycle) > 6) {
+		var exp2 = /^\d{1}$/;
+		if(cint(frm.doc.emi_start_cycle) > 6 || !exp2.test(frm.doc.emi_start_cycle)) {
 			frm.set_value("emi_start_cycle",0)
-			frappe.throw("Emi start cycle must be less than or equal to <b>6</b>")
+			frappe.throw("Emi start cycle must be between <b>0</b> to <b>6</b>")
 		}
 		else if(frm.doc.emi_start_cycle < 0){
 			frm.set_value("emi_start_cycle",0)

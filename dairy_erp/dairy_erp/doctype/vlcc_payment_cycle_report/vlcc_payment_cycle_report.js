@@ -206,13 +206,13 @@ frappe.ui.form.on('VLCC Loan Child',  {
 	amount: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn]
 		if(row.amount && row.amount < 0) {
-			frappe.model.set_value(cdt,cdn,"amount","")
+			frappe.model.set_value(cdt,cdn,"amount", 0.0)
 			frappe.throw(__("Amount can not be negative"))
 		}
-		else if(row.amount === 0) {
-				frappe.model.set_value(cdt,cdn,"amount","")
-				frappe.throw(__("Amount can not be zero"))
-			}
+		if(row.amount > row.principle) {
+			frappe.model.set_value(cdt,cdn,"amount", 0.0)
+			frappe.throw(__("Amount can not be greater than total amount"))
+		}
 		if(frm.doc.cycle && row.loan_id && row.amount && frm.doc.vlcc_name) {
 			frappe.call({
 				method: "dairy_erp.dairy_erp.doctype.vlcc_payment_cycle_report.vlcc_payment_cycle_report.get_updated_loan",
@@ -235,13 +235,13 @@ frappe.ui.form.on('VLCC Loan Child',  {
 frappe.ui.form.on('VLCC Advance Child', 'amount', function(frm, cdt, cdn){
 	var row = locals[cdt][cdn]
 	if(row.amount && row.amount < 0) {
-			frappe.model.set_value(cdt,cdn,"amount","")
+			frappe.model.set_value(cdt,cdn,"amount", 0.0)
 			frappe.throw(__("Amount can not be negative"))
 		}
-	else if(row.amount === 0) {
-			frappe.model.set_value(cdt,cdn,"amount","")
-			frappe.throw(__("Amount can not be zero"))
-	}
+	if(row.amount > row.principle) {
+		frappe.model.set_value(cdt,cdn,"amount", 0.0)
+		frappe.throw(__("Amount can not be greater than total amount"))
+		}
 	if(frm.doc.cycle && row.adv_id && row.amount) {
 		frappe.call({
 			method: "dairy_erp.dairy_erp.doctype.vlcc_payment_cycle_report.vlcc_payment_cycle_report.get_updated_advance",

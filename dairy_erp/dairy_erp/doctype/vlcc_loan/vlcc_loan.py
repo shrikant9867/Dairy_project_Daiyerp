@@ -79,7 +79,7 @@ class VlccLoan(Document):
 			'cost_center': company.get('cost_center')
 			})
 		je_doc.append('accounts', {
-			'account': "Loans and Advances - "+ company.get('abbr'),
+			'account': "Loans and Advances Payable - "+ company.get('abbr'),
 			'credit_in_account_currency': self.advance_amount,
 			'cost_center': company.get('cost_center')
 			})

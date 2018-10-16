@@ -714,7 +714,7 @@ def get_updated_advance(cycle, adv_id=None, amount=None, total = None):
 			from 
 				`tabJournal Entry` 
 			where 
-			farmer_advance =%s  and cycle !=%s and type='Farmer Advance' """,(adv_id,cycle),as_dict=1,debug=1)
+			farmer_advance =%s  and cycle !=%s and type='Farmer Advance' """,(adv_id,cycle),as_dict=1,debug=0)
 		if len(sum_):
 			adv_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
 			return adv_amount
@@ -729,7 +729,7 @@ def get_updated_loan(cycle, loan_id=None, amount=None, total = None):
 				from 
 					`tabJournal Entry` 
 				where 
-				farmer_advance =%s  and cycle !=%s and type='Farmer loan' """,(loan_id,cycle),as_dict=1,debug=1)
+				farmer_advance =%s  and cycle !=%s and type='Farmer loan' """,(loan_id,cycle),as_dict=1,debug=0)
 		if len(sum_):
 			loan_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
 			return loan_amount

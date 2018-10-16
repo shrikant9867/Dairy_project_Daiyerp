@@ -45,8 +45,13 @@ class VlccMilkCollectionRecord(Document):
 		self.posting_date = getdate(self.collectiontime)
 
 	def validate_route(self):
-		if self.collectionroute and len(str(self.collectionroute)) < 3:
-			frappe.throw("Collection Route contain atleast 3 Charaters")
+		if self.farmerid:
+			farmerid_len = self.farmerid.split('_')
+			if len(farmerid_len) >= 4 and farmerid_len[2]:
+				self.collectionroute = str(farmerid_len[2])
+				# frappe.throw("The Long Format Farmer Id should be of Format OrgiD_CCID_RouteId_SocietyId")		
+		# if self.collectionroute and len(str(self.collectionroute)) < 3:
+		# 	frappe.throw("Collection Route contain atleast 3 Charaters")
 				
 	def validate_duplicate_entry(self):
 		if not self.flags.is_api:

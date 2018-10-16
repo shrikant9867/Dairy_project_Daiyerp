@@ -40,8 +40,14 @@ def get_vmcr_data(start_date=None,end_date=None):
 			date_and_shift_wise_local_sale[str(si['posting_date'])+"#"+si['shift']] = local_sale_dict
 	
 	for vmcr in vmcr_data_list:
+		if vmcr.get('milkquality'):
+			if vmcr.get('milkquality') in ['CT','CS','SS']:
+				vmcr['spoil_qty'] = vmcr.get('vmcr_qty')
+				vmcr['spoil_snf'] = vmcr.get('fat')
+				vmcr['spoil_fat'] = vmcr.get('snf')
+				vmcr['spoil_rate'] = vmcr.get('rate')
+				vmcr['spoil_amount'] = vmcr.get('vmcr_amount')
 		vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
-
 	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+vmcr_dict.keys()
 	final_dict = {}
 	
@@ -50,7 +56,7 @@ def get_vmcr_data(start_date=None,end_date=None):
 			merged = {}
 			merged.update(members.get(key, {'total_milk_amt': 0,'total_milk_qty': 0}))
 			merged.update(date_and_shift_wise_local_sale.get(key, {'si_amount': 0, 'si_qty': 0}))
-			merged.update(vmcr_dict.get(key,{'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
+			merged.update(vmcr_dict.get(key,{'spoil_fat':0, 'spoil_qty':0,'spoil_rate': 0, 'spoil_snf': 0, 'spoil_amount': 0,'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
 			merged.update({'daily_sales':flt(merged.get('total_milk_qty')-merged.get('si_qty'),2)})
 			merged.update({
 				'short_qty':flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) if flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) > 0 else 0
@@ -89,7 +95,8 @@ def get_vmcr_data_list(filters):
 									vmcr.rate,
 									vmcr.amount as vmcr_amount,
 									date(vmcr.collectiontime) as vmcr_date,
-									vmcr.shift
+									vmcr.shift,
+									vmcr.milkquality
 								from
 									`tabVlcc Milk Collection Record` vmcr
 								where

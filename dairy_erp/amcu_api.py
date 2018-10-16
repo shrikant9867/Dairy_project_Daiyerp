@@ -477,6 +477,9 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			vmrc_doc.endtime = data.get('endtime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
 			vmrc_doc.endshift = 1 if data.get('endshift') == True else 0
 			vmrc_doc.update(row)
+			vmrc_doc.update({
+				'amount':flt(row.get('rate') * row.get('milkquantity'),2)
+			})
 			vmrc_doc.flags.ignore_permissions = True
 			vmrc_doc.flags.is_api = True
 			vmrc_doc.submit()

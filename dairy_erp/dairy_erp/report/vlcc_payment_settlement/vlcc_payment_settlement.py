@@ -728,7 +728,7 @@ def get_vlcc(doctype,txt,searchfields,start,pagelen,filters):
 
 def check_receivable(recv_list):
 	
-	if ('Sales Invoice' or 'Journal Entry') in recv_list and 'Purchase Invoice' not in recv_list:
+	if ('Sales Invoice' in recv_list or 'Journal Entry' in recv_list) and 'Purchase Invoice' not in recv_list:
 		return "You can not settle only Receivable Amount"
 
 @frappe.whitelist()

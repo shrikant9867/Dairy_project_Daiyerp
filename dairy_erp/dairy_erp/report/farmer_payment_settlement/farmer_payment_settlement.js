@@ -99,40 +99,31 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 		var me = frappe.container.page.query_report;
 		var flag = true;
 		frappe.selected_rows = []
+		frappe.credit_amt = []
 
 		report.page.add_inner_button(__("Payment Settlement"), function() {
-			frappe.call({
-				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.is_fpcr_generated",
-				args : {
-						"filters":report.get_values()
-						},
-				async: false,
-				callback : function(r){
-					if(r.message == 'creat'){
-						flag = false
-						frappe.throw(__("Please Generate <b>FPCR</b> for the cycle <b>{0}</b> against farmer <b>{1}</b>",
-							[frappe.query_report_filters_by_name.cycle.get_value(),frappe.query_report_filters_by_name.farmer.get_value()]))
-					}
-				}
-			})
-			if(flag){
+			
 				frappe.selected_rows = []
+				frappe.credit_amt = []
+
+				frappe.query_reports['Farmer Payment Settlement'].is_fpcr_generated(report)
 
 				$.each(me.data,function(i,d){
 					if (d.selected == true){
 						frappe.selected_rows.push(d.Name)
+					
+						if (d['Voucher Type'] === 'Purchase Invoice'){
+							frappe.credit_amt.push({
+								"posting_date":d['Posting Date'],
+								"credit_amt":d['Credit']
+							})
+						}
 					}
 				})
 
 				if (frappe.selected_rows.length === 0){
 					frappe.throw("Please select records")
 				}
-				// var end_date = frappe.query_report_filters_by_name.end_date.get_value()
-				/*if(frappe.datetime.str_to_obj(frappe.datetime.get_today()) < frappe.datetime.str_to_obj(end_date)){
-					frappe.throw(__("Settlement can be done after <b>{0}</b>",[frappe.datetime.str_to_user(end_date)]))
-				}*/
-				frappe.query_reports['Farmer Payment Settlement'].check_cycle(report)
-			}
 		});
 
 		report.page.add_inner_button(__("Skip Cycle"), function() {
@@ -163,6 +154,24 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			me.data[$(this).attr('data-row')].selected
 					= this.checked ? true : false;
 		})
+	},
+	is_fpcr_generated: function(report){
+		frappe.call({
+				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.is_fpcr_generated",
+				args : {
+						"filters":report.get_values()
+						},
+				callback : function(r){
+					if(r.message == 'creat'){
+						flag = false
+						frappe.throw(__("Please Generate <b>FPCR</b> for the cycle <b>{0}</b> against farmer <b>{1}</b>",
+							[frappe.query_report_filters_by_name.cycle.get_value(),frappe.query_report_filters_by_name.farmer.get_value()]))
+					}
+					else{
+						frappe.query_reports['Farmer Payment Settlement'].check_cycle(report)
+					}
+				}
+			})
 	},
 	check_cycle: function(report){
 		frappe.call({
@@ -243,9 +252,9 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 				'payble': r.message.payble,
 				'receivable': r.message.receivable,
 				"set_amt":r.message.set_amt,
-				"set_amt_manual": r.message.payble - r.message.set_amt
+				"set_amt_manual": r.message.manual_amt //r.message.payble - r.message.set_amt
 			});
-			if(r.message.payble <= r.message.receivable){
+			if(flt(r.message.payble,2) <= flt(r.message.receivable,2)){
 				dialog.get_field('set_amt_manual').df.hidden = 1;
 				dialog.get_field('set_amt_manual').refresh();
 				dialog.get_field('mode_of_payment').df.hidden = 1;
@@ -275,7 +284,8 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			args : {
 					"data":dialog.get_values(),
 					"row_data":frappe.selected_rows,
-					"filters":report.get_values()
+					"filters":report.get_values(),
+					"credit_amt":frappe.credit_amt
 					},
 			callback : function(r){
 				if (r.message){
@@ -322,17 +332,21 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 	validate_amount:function(dialog){
 		var data = dialog.get_values()
 		if(flt(data.set_amt,2) && flt(data.set_amt_manual,2) && (flt(data.set_amt_manual,2) > flt(flt(data.payble,2) - flt(data.set_amt,2),2))){		
+				dialog.set_value('set_amt_manual', "")
 				frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
 					[flt(data.set_amt_manual,2),flt(flt(data.payble,2) - flt(data.set_amt,2),2)]))
 		}
 		else if(flt(data.payble,2) && flt(!data.set_amt,2) && (flt(data.set_amt_manual,2) > flt(data.payble,2))){
+			dialog.set_value('set_amt_manual', "")
 			frappe.throw(__("<b>Settlement Amount {0}</b> cannot be greater than <b>Payable Amount {1}</b>",
 				[flt(data.set_amt_manual,2),flt(data.payble,2)]))
 		}
 		if(flt(data.set_amt_manual,2) < 0){
+			dialog.set_value('set_amt_manual', "")
 			frappe.throw(__("Payable Amount can not be negative"))
 		}
-		else if(flt(data.set_amt_manual,2) === 0){
+		else if(flt(data.set_amt_manual,2) === 0 && flt(data.payble,2) > flt(data.receivable,2)){
+			dialog.set_value('set_amt_manual', "")
 			frappe.throw(__("Payable Amount can not be zero"))
 		}
 	}

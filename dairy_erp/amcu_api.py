@@ -364,25 +364,28 @@ def make_vmrc(data, response_dict):
 						if frappe.db.get_singles_dict('Dairy Setting').get('configurable_days'):
 							if data.get('imeinumber') and data.get('rcvdtime') and data.get('shift') and data.get('collectiondate'):
 								if row.get('longformatfarmerid') and row.get('milktype') and row.get('collectiontime') and row.get('milkquantity') and row.get('rate') and row.get('status') and row.get('collectionroute'):
-									collectiontime = row.get('collectiontime') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000))
-									collectiondate = data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
-									vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('longformatfarmerid')},'name')
-									vmrc = validate_vmrc_entry(row)
-									if row.get('operation') == 'CREATE':
-										if not vmrc:
-											vmrc_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)	
-											handling_loss_gain(data,row,vmrc_doc,response_dict)
-										else:
-											response_dict.update({row.get('longformatfarmerid')+"-"+row.get('milktype'):["Record already created please check on server,if any exception check 'Dairy log'."]})
-									elif row.get('operation') == 'UPDATE':
-										if vmrc:
-											delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)
-										else:
-											is_vmcr_created = 1
-											vmrc_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict,is_vmcr_created)	
-											handling_loss_gain(data,row,vmrc_doc,response_dict)
-											response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),vmrc_doc.name)})
-											# response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
+									if row.get('milkquality') in ['G','CT','CS','SS']:
+										collectiontime = row.get('collectiontime') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('collectiontime'))/1000))
+										collectiondate = data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
+										vlcc_name = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('longformatfarmerid')},'name')
+										vmrc = validate_vmrc_entry(row)
+										if row.get('operation') == 'CREATE':
+											if not vmrc:
+												vmrc_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)	
+												handling_loss_gain(data,row,vmrc_doc,response_dict)
+											else:
+												response_dict.update({row.get('longformatfarmerid')+"-"+row.get('milktype'):["Record already created please check on server,if any exception check 'Dairy log'."]})
+										elif row.get('operation') == 'UPDATE':
+											if vmrc:
+												delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)
+											else:
+												is_vmcr_created = 1
+												vmrc_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict,is_vmcr_created)	
+												handling_loss_gain(data,row,vmrc_doc,response_dict)
+												response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),vmrc_doc.name)})
+												# response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
+									else:
+										response_dict.update({"status":["milkquality can be G,CT,CS or SS"]})
 								else:
 									response_dict.update({"status":["Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate,collectionroute are manadatory"]})
 							else:
@@ -523,8 +526,9 @@ def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
 		item_ = frappe.get_doc("Item",item_code)
 		company = frappe.db.get_value("Company",{"is_dairy":1},'name')
 		if vlcc and company:
-			pr_co = make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co)
-			purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co)
+			warehouse =  get_curdled_warehouse(data,row)
+			pr_co = make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co,warehouse)
+			purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co,warehouse)
 
 		else:
 			frappe.throw(_("Head Office does not exist"))
@@ -532,6 +536,21 @@ def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method="create_fmrc", status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
+
+
+def get_curdled_warehouse(data,row):
+
+	warehouse = ""
+	if row.get('milkquality') == 'G':
+		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
+	elif row.get('milkquality') == 'CT':
+		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
+	elif row.get('milkquality') == 'CS':
+		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
+	elif row.get('milkquality') == 'SS':
+		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
+
+	return warehouse
 
 
 def make_uom_config(doc):
@@ -604,7 +623,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
 		data = data, message=e, traceback=frappe.get_traceback())
 
 
-def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co):
+def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co,warehouse=None):
 	try:
 		purchase_rec = frappe.new_doc("Purchase Receipt")
 		purchase_rec.supplier =  vlcc
@@ -622,7 +641,7 @@ def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,c
 				"rate": row.get('rate'),
 				"price_list_rate": row.get('rate'),
 				"amount": row.get('amount'),
-				"warehouse": frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
+				"warehouse": warehouse #frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
 			}
 		)
 		purchase_rec.status = "Completed"
@@ -652,7 +671,7 @@ def create_item(row):
 			item.insert()
 
 
-def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co):
+def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co,warehouse=None):
 
 	try:
 		dairy_setting = frappe.get_doc("Dairy Setting")
@@ -674,7 +693,7 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 				"qty": row.get('milkquantity'),
 				"rate": row.get('rate'),
 				"amount": row.get('amount'),
-				"warehouse": frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse'),
+				"warehouse": warehouse, #frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse'),
 				"purchase_receipt": pr_co
 			}
 		)

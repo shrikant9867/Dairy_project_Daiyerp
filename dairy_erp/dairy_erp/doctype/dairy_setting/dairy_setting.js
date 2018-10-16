@@ -5,6 +5,11 @@ frappe.ui.form.on('Dairy Setting', {
 	refresh: function(frm) {
 
 	},
+	validate: function(frm) {
+		if(frm.doc.no_of_cycles <= 0 || frm.doc.no_of_interval <= 0) {
+			frappe.throw("Number of cycles/Number of Intervals must be between <b>1-31</b>")
+		}
+	},
 	onload_post_render: function(frm){
 		frm.get_field("add_multi_vlcc").$input.addClass("btn-primary");
 	},
@@ -37,5 +42,25 @@ frappe.ui.form.on('Dairy Setting', {
 				}
 			})
 	},
+	no_of_cycles: function(frm) {
+		if(frm.doc.no_of_cycles > 31){
+			frm.set_value("no_of_cycles",1)
+			frappe.throw("Number of cycles must be between <b>1-31</b>")
+		}
+		else if(frm.doc.no_of_cycles <= 0){
+			frm.set_value("no_of_cycles",1)
+			frappe.throw("Number of cycles can not be less than <b>1</b>")
+		}
+	},
+	no_of_interval: function(frm) {
+		if(frm.doc.no_of_interval > 31){
+			frm.set_value("no_of_interval",1)
+			frappe.throw("Number of intervals must be between <b>1-31</b>")
+		}
+		else if(frm.doc.no_of_interval <= 0){
+			frm.set_value("no_of_interval",1)
+			frappe.throw("Number of intervals can not be less than <b>1</b>")
+		}
+	}
 	
 });

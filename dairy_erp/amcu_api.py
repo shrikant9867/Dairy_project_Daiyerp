@@ -354,7 +354,7 @@ def create_vmrc(data):
 
 def make_vmrc(data, response_dict):
 	""":Dairy"""
-	traceback = ""
+	traceback,quality_type = "",""
 	if data.get('societyid'):
 		for i,v in data.items():
 			if i == "collectionEntryList":
@@ -385,7 +385,11 @@ def make_vmrc(data, response_dict):
 												response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0} so new {1} has been created".format(row.get('transactionid'),vmrc_doc.name)})
 												# response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Message": "There are no transactions present with the transaction id {0}".format(row.get('transactionid'))})
 									else:
-										response_dict.update({"status":["milkquality can be G,CT,CS or SS"]})
+										if row.get('status') == 'Accept':
+											quality_type = 'G'
+										elif row.get('status') == 'Reject':
+											quality_type = 'CT,CS or SS'
+										response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"status":"Milkquality must be {0}".format(quality_type)}) if quality_type else ""
 								else:
 									response_dict.update({"status":["Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate,collectionroute are manadatory"]})
 							else:
@@ -480,6 +484,8 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			vmrc_doc.endtime = data.get('endtime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
 			vmrc_doc.endshift = 1 if data.get('endshift') == True else 0
 			vmrc_doc.update(row)
+			vmrc_doc.milk_quality_type = get_curdled_warehouse(date,row).get('milk_quality_type')
+			vmrc_doc.milkquality = row.get('milkquality')
 			vmrc_doc.flags.ignore_permissions = True
 			vmrc_doc.flags.is_api = True
 			vmrc_doc.submit()
@@ -526,9 +532,9 @@ def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
 		item_ = frappe.get_doc("Item",item_code)
 		company = frappe.db.get_value("Company",{"is_dairy":1},'name')
 		if vlcc and company:
-			warehouse =  get_curdled_warehouse(data,row)
-			pr_co = make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co,warehouse)
-			purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co,warehouse)
+			rejected_milk_data =  get_curdled_warehouse(data,row)
+			pr_co = make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co,rejected_milk_data.get('warehouse'))
+			purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co,rejected_milk_data.get('warehouse'))
 
 		else:
 			frappe.throw(_("Head Office does not exist"))
@@ -540,17 +546,21 @@ def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
 
 def get_curdled_warehouse(data,row):
 
-	warehouse = ""
+	warehouse,milk_quality_type = "",""
 	if row.get('milkquality') == 'G':
+		milk_quality_type = 'Good'
 		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
 	elif row.get('milkquality') == 'CT':
-		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
+		milk_quality_type = 'Curdled by Transporter'
+		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'c_transporter_warehouse')
 	elif row.get('milkquality') == 'CS':
-		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
+		milk_quality_type = 'Curdled by Society'
+		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'c_society_warehouse')
 	elif row.get('milkquality') == 'SS':
-		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
+		milk_quality_type = 'Sub Standard'
+		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'sub_std_warehouse')
 
-	return warehouse
+	return {"warehouse":warehouse,"milk_quality_type":milk_quality_type}
 
 
 def make_uom_config(doc):

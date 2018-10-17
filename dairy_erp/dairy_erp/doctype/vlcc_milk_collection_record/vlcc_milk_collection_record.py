@@ -95,9 +95,8 @@ class VlccMilkCollectionRecord(Document):
 
 	def validate_status(self):
 		# user only create transactions with status - Accept
-		pass
-		# if self.status == "Reject":
-		# 	frappe.throw(_("Status is Reject, Transaction can not be created"))
+		if self.status == "Accept" and (self.milkquantity == 0 or self.rate == 0):
+			frappe.throw(_("Milk Quantity And Rate Can not be less or equal to zero for Accept Status"))
 
 	def check_stock(self):
 		"""check stock is available for transactions"""

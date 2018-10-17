@@ -21,9 +21,12 @@ def get_vmcr_data(start_date=None,end_date=None):
 	fmcr_list = get_fmcr_list(filters)
 	local_sale_list = get_local_sale_data(filters)
 	members = fetch_farmer_data(fmcr_list,filters)
-	vmcr_data_list = get_vmcr_data_list(filters)
+	# vmcr_data_list = get_vmcr_data_list(filters)
+	good_milk = get_vmcr_data_list(filters,"Accept")
+	bad_milk = get_vmcr_data_list(filters,"Reject")
 	date_and_shift_wise_local_sale = {}
 	vmcr_dict = {}
+	vmcr_dict_ = {}
 
 	for si in local_sale_list:
 		local_sale_dict = {}
@@ -39,15 +42,51 @@ def get_vmcr_data(start_date=None,end_date=None):
 			}
 			date_and_shift_wise_local_sale[str(si['posting_date'])+"#"+si['shift']] = local_sale_dict
 	
-	for vmcr in vmcr_data_list:
-		if vmcr.get('milkquality'):
-			if vmcr.get('milkquality') in ['CT','CS','SS']:
-				vmcr['spoil_qty'] = vmcr.get('vmcr_qty')
-				vmcr['spoil_snf'] = vmcr.get('fat')
-				vmcr['spoil_fat'] = vmcr.get('snf')
-				vmcr['spoil_rate'] = vmcr.get('rate')
-				vmcr['spoil_amount'] = vmcr.get('vmcr_amount')
-		vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = vmcr
+	for vmcr in good_milk:
+		b_dict = {}
+		if vmcr_dict and str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift') in date_and_shift_wise_vmcr:
+			p = vmcr_dict[str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift')]
+			b_dict['fat'] = flt(p.get('fat')) + vmcr.get('fat')
+			b_dict['snf'] = flt(p.get('snf')) + vmcr.get('snf')
+			b_dict['vmcr_qty'] = flt(p.get('vmcr_qty')) + vmcr.get('vmcr_qty')
+			b_dict['rate'] = flt(p.get('rate')) + vmcr.get('rate')
+			b_dict['vmcr_amount'] = flt(p.get('vmcr_amount')) + vmcr.get('vmcr_amount')
+		else:
+			b_dict = {
+				'fat':vmcr.get('fat'),
+				'snf':vmcr.get('snf'),
+				'rate':vmcr.get('rate'),
+				'vmcr_qty':vmcr.get('vmcr_qty'),
+				'vmcr_amount':vmcr.get('vmcr_amount')
+			}
+			vmcr_dict[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = b_dict
+
+	for vmcr in bad_milk:
+		b_dict = {}
+		if vmcr_dict_ and str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift') in vmcr_dict_:
+			p = vmcr_dict_[str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift')]
+			b_dict['spoil_fat'] = flt(p.get('spoil_fat')) + vmcr.get('fat')
+			b_dict['spoil_snf'] = flt(p.get('spoil_snf')) + vmcr.get('snf')
+			b_dict['spoil_qty'] = flt(p.get('spoil_qty')) + vmcr.get('vmcr_qty')
+			b_dict['spoil_rate'] = flt(p.get('spoil_rate')) + vmcr.get('rate')
+			b_dict['spoil_amount'] = flt(p.get('spoil_amount')) + vmcr.get('vmcr_amount')
+		else:
+			b_dict = {
+				'spoil_fat':vmcr.get('fat'),
+				'spoil_snf':vmcr.get('snf'),
+				'spoil_rate':vmcr.get('rate'),
+				'spoil_qty':vmcr.get('vmcr_qty'),
+				'spoil_amount':vmcr.get('vmcr_amount'),
+				'fat':0,
+				'snf':0,
+				'rate':0,
+				'vmcr_qty':0,
+				'vmcr_amount':0
+			}
+			vmcr_dict_[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = b_dict
+	
+
+	vmcr_dict.update(vmcr_dict_)
 	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+vmcr_dict.keys()
 	final_dict = {}
 	
@@ -86,7 +125,12 @@ def get_vmcr_data(start_date=None,end_date=None):
 	final_dict = collections.OrderedDict(sorted(final_dict.items()))
 	return {"final_dict":final_dict,"vlcc_details":vlcc_details}
 
-def get_vmcr_data_list(filters):
+def get_vmcr_data_list(filters,status):
+	cond = " 1=1 and"
+	if status == "Accept":
+		cond = " vmcr.status = 'Accept' and vmcr.milkquality in ('G') and"
+	if status == "Reject":
+		cond = " vmcr.status = 'Reject' and vmcr.milkquality in ('CT','CS','SS') and"	
 	vmcr_list = frappe.db.sql("""
 								select
 									vmcr.milkquantity as vmcr_qty,
@@ -96,13 +140,15 @@ def get_vmcr_data_list(filters):
 									vmcr.amount as vmcr_amount,
 									date(vmcr.collectiontime) as vmcr_date,
 									vmcr.shift,
-									vmcr.milkquality
+									vmcr.milkquality,
+									vmcr.status
 								from
 									`tabVlcc Milk Collection Record` vmcr
 								where
 									vmcr.docstatus = 1 and
+									{0}
 									vmcr.shift in ('MORNING','EVENING') and
-									{0} """.format(get_conditions(filters)),as_dict=1,debug=1)	
+									{1} """.format(cond,get_conditions(filters)),as_dict=1,debug=1)	
 	return vmcr_list
 
 def get_conditions(filters):

@@ -13,8 +13,10 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 			frm.trigger("calculate_amount");
 		}
 		else{
-			frm.set_value("milkquantity",1)
-			frappe.throw("Milk Quantity Can not be less or equal to zero")	
+			if(frm.doc.status == "Accept"){		
+				frm.set_value("milkquantity",1)
+				frappe.throw("Milk Quantity Can not be less or equal to zero")	
+			}
 		}
 	},
 
@@ -23,8 +25,10 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 			frm.trigger("calculate_amount");
 		}
 		else{
-			frm.set_value("rate",1)
-			frappe.throw("Rate Can not be less or equal to zero")	
+			if(frm.doc.status == "Accept"){		
+				frm.set_value("rate",1)
+				frappe.throw("Milk Quantity Can not be less or equal to zero")	
+			}
 		}
 	},
 
@@ -91,5 +95,13 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 		else{
 			frm.set_value("milkquality",'')
 		}
-	}	
+	},
+	
+	associated_vlcc:function(frm){
+		if(frm.doc.associated_vlcc && frm.doc.long_format_farmer_id){
+			var collectionroute = frm.doc.long_format_farmer_id.split('_')[2]
+			frm.set_value("collectionroute",collectionroute)
+		}
+	}
+
 });

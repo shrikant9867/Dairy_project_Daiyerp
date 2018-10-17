@@ -46,7 +46,7 @@ def get_data(filters=None):
 								    WHEN shift = "EVENING" THEN "2"
 								END,
 								" 001",
-								RIGHT(farmerid,5),
+								RIGHT(long_format_farmer_id,5),
 								ifnull(collectionroute,"    "),
 								round(milkquantity,1),
 								round(fat,1),
@@ -57,14 +57,15 @@ def get_data(filters=None):
 							where
 							{0} and docstatus = 1 order by date(collectiontime)""".format(get_conditions(filters)),as_list=1,debug=0)
 	for row in vmcr_data:
-		farmerid = row[4].strip().split("_")
+		if row[4]:
+			farmerid = row[4].split("_")
+			if len(farmerid) == 2 and farmerid[1] and len(farmerid[1]) < 5:
+				row[4] = (5 - len(farmerid[1]))*"0"+str(farmerid[1])
+			if len(farmerid) == 1 and farmerid[0] and len(farmerid[0]) < 5:
+				row[4] = (5 - len(farmerid[0]))*"0"+str(farmerid[0])
 		qty = str(row[6]).split(".")
 		fat = str(row[7]).split(".")
 		snf = str(row[8]).split(".")
-		if len(farmerid) == 2 and farmerid[1] and len(farmerid[1]) < 5:
-			row[4] = (5 - len(farmerid[1]))*"0"+str(farmerid[1])
-		if len(farmerid) == 1 and farmerid[0] and len(farmerid[0]) < 5:
-			row[4] = (5 - len(farmerid[0]))*"0"+str(farmerid[0])
 		if len(str(row[6])) < 10 and len(qty) == 2:
 			row[6] = (10 - len(str(row[6])))*"0"+qty[0]+"."+qty[1][0]
 		if len(str(row[7])) < 6 and len(fat) == 2:

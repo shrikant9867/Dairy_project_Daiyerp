@@ -9,6 +9,7 @@ from frappe.utils import getdate
 from dairy_erp.dairy_utils import make_dairy_log
 from frappe import _
 from frappe.utils import flt, cstr,nowdate,cint
+import json
 
 
 class VLCCPaymentCycleReport(Document):
@@ -745,36 +746,20 @@ def get_mi_raised(start_date, end_date, vlcc):
 	return grand_total
 
 @frappe.whitelist()
-def get_updated_loan(cycle, loan_id=None, amount=None, total = None, vlcc = None):
-	if amount > 0:
-		sum_ = frappe.db.sql("""
-					select ifnull(sum(total_debit),0) as total
-				from 
-					`tabJournal Entry` 
-				where 
-				vlcc_advance =%s  and cycle !=%s and type='Vlcc Loan' and company=%s""",(loan_id,cycle,vlcc),as_dict=1,debug=0)
-		if len(sum_):
-			loan_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
-			return loan_amount
-		else: return 0
-	else:
-		frappe.msgprint("Amount cannot be negative nor 0")
+def get_updated_loan(cycle, data, loan_id=None, amount=None, total = None, vlcc = None):
+	data, total_paid, total_amount, overriding_amount = json.loads(data), 0, 0, 0
+	for row in data.get('vlcc_loan_child'):
+		total_amount += row.get('principle')
+		overriding_amount += row.get('amount')
+	return flt((total_amount - overriding_amount),2) or 0
 
 @frappe.whitelist()
-def get_updated_advance(cycle, adv_id=None, amount=None, total = None,vlcc = None):
-	if amount > 0:
-		sum_ = frappe.db.sql("""
-				select ifnull(sum(total_debit),0) as total
-			from 
-				`tabJournal Entry` 
-			where 
-			vlcc_advance =%s  and cycle !=%s and type='Vlcc Advance' and company=%s""",(adv_id,cycle,vlcc),as_dict=1,debug=0)
-		if len(sum_):
-			adv_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
-			return adv_amount
-		else: return 0
-	else:
-		frappe.msgprint("Amount cnnot be negative nor 0")
+def get_updated_advance(cycle, data, adv_id=None, amount=None, total = None,vlcc = None):
+	data, total_paid, total_amount, overriding_amount = json.loads(data), 0, 0, 0
+	for row in data.get('vlcc_advance_child'):
+		total_amount += row.get('principle')
+		overriding_amount += row.get('amount')
+	return flt((total_amount - overriding_amount),2) or 0
 
 
 @frappe.whitelist()

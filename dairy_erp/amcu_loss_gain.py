@@ -69,8 +69,11 @@ def handling_loss_gain(data,row,vmcr_doc,response_dict):
 				fmcr.get('societyid')),as_dict=1,debug=0)
 
 			fmcr_stock_qty = (flt(fmcr.get('qty'),2) + flt(stock_record[0].get('qty'),2)) - flt(local_sale_qty,2)
-			loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,
+			
+			create_loss_gain(fmcr_stock_qty=fmcr_stock_qty,row=row,
 						data=data,vmcr_doc=vmcr_doc,response_dict=response_dict)
+			# loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,
+			# 			data=data,vmcr_doc=vmcr_doc,response_dict=response_dict)
 			make_fmcr_qty_log(data=data,row=row,stock_qty = stock_record[0].get('qty'),
 				local_sale_qty=local_sale_qty,fmcr_qty=fmcr.get('qty'))
 		set_flag(fmcr,vlcc)
@@ -78,8 +81,10 @@ def handling_loss_gain(data,row,vmcr_doc,response_dict):
 	elif stock_data:
 		for stock in stock_record:
 			fmcr_stock_qty = flt(stock.get('qty'),2) - flt(local_sale_qty,2)
-			loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,data=data,
-				vmcr_doc=vmcr_doc,response_dict=response_dict,stock=stock)
+			create_loss_gain(fmcr_stock_qty=fmcr_stock_qty,row=row,
+						data=data,vmcr_doc=vmcr_doc,response_dict=response_dict)
+			# loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,data=data,
+			# 	vmcr_doc=vmcr_doc,response_dict=response_dict,stock=stock)
 			# make_fmcr_qty_log(data=data,row=row,stock_qty=stock.get('qty')
 			# 	,local_sale_qty=local_sale_qty)
 		set_se_flag(stock,vlcc)
@@ -108,6 +113,28 @@ def get_local_sale_data(row,data):
 						""".format(item_code,getdate(row.get('collectiontime')),
 							data.get('shift'),vlcc),as_dict=True,debug=0)
 
+
+def create_loss_gain(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock=None):
+	se = frappe.db.get_value("Stock Entry",{"milktype":row.get('milktype'),
+		"shift":data.get('shift'),"posting_date":getdate(row.get('collectiontime')),
+		"farmer_id":row.get('farmerid')},"name")
+
+	if se:
+		se_doc = frappe.get_doc("Stock Entry",se)
+		if se_doc.wh_type in ['Loss','Gain']:
+			se_qty = frappe.db.get_value("Stock Entry Detail",{"parent":se},"qty") or 0
+			loss_gain_computation(se_qty,row,data,vmcr_doc,response_dict,stock)
+			delete_se(se)
+		else:
+			loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock)
+	else:
+		loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock)
+
+
+def delete_se(se):
+	frappe.db.sql("""delete from `tabGL Entry` where voucher_no = %s""",(se))
+	frappe.db.sql("""delete from `tabStock Ledger Entry` where voucher_no = %s""",(se))
+	frappe.db.sql("""delete from `tabStock Entry` where name = %s""",(se))
 
 def loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock=None):
 

@@ -41,7 +41,7 @@ def get_data(filters=None):
 									round(vmcr.amount,2),
 									vmcr.collectionroute,
 									vmcr.associated_vlcc,
-									vmcr.farmerid
+									vmcr.long_format_farmer_id
 								from
 									`tabVlcc Milk Collection Record` vmcr
 								where

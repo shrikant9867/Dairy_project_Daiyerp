@@ -33,11 +33,12 @@ frappe.ui.form.on('Farmer Milk Collection Record', {
 				args: {
 					doctype: "Village Level Collection Centre",
 					filters: {"name": company},
-					fieldname: ["amcu_id"]
+					fieldname: ["amcu_id","longformatfarmerid"]
 				},
 				callback: function(r){
 					if(r.message){
 						frm.set_value("societyid", r.message.amcu_id)
+						frm.set_value("longformatsocietyid", r.message.longformatfarmerid)
 					}
 				}
 			});

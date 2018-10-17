@@ -36,7 +36,7 @@ def get_fmcr_hourly():
 								from 
 									`tabFMCR Quantity Log`
 								where 
-									purpose = 'Acutual Qty of FMCR' and
+									purpose = 'Actual Qty of FMCR' and
 									is_scheduler = 0 and 
 									shift = %s and vlcc = %s and
 									milktype = %s and 
@@ -160,7 +160,7 @@ def set_flag(fmcr):
 					set 
 						is_scheduler = 1
 					where 
-						purpose = 'Acutual Qty of FMCR' and 
+						purpose = 'Actual Qty of FMCR' and 
 						shift = %s and vlcc = %s and
 						milktype = %s and 
 						collectiontime = %s""",(fmcr.get('shift'),vlcc,

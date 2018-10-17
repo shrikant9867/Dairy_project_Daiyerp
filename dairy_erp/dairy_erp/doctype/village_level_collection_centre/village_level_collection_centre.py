@@ -40,12 +40,14 @@ class VillageLevelCollectionCentre(Document):
 				frappe.throw(_("Amcu id exist already"))
 			# if frappe.db.sql("select longformatfarmerid from `tabVillage Level Collection Centre` where longformatfarmerid = %s",(self.longformatfarmerid)):
 			# 	frappe.throw(_("Amcu id exist already"))
-			if self.amcu_id:
-				amcu_id_len = self.amcu_id.split('_')
-				if len(amcu_id_len) < 4:
+			if self.longformatfarmerid:
+				longformat_id_len = self.longformatfarmerid.split('_')
+				if len(longformat_id_len) < 4:
 					frappe.throw("The Long Format Farmer Id should be of Format OrgiD_CCID_RouteId_SocietyId")
-				if len(amcu_id_len) == 4 and (not amcu_id_len[0] or not amcu_id_len[1] or not amcu_id_len[2] or not amcu_id_len[3]):
+				if len(longformat_id_len) == 4 and (not longformat_id_len[0] or not longformat_id_len[1] or not longformat_id_len[2] or not longformat_id_len[3]):
 					frappe.throw("The Long Format Farmer Id should be of Format OrgiD_CCID_RouteId_SocietyId")		
+				if len(longformat_id_len) > 4:
+					frappe.throw("The Long Format Farmer Id should be of Format OrgiD_CCID_RouteId_SocietyId")							
 
 	def validate_global_eff_credit_percent(self):
 		# global eff-credit % must be between 0-99

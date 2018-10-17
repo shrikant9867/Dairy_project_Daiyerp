@@ -21,14 +21,12 @@ class DairySetting(Document):
 					frappe.db.set_value("VLCC Settings",vlcc,'allow_negative_effective_credit',\
 							self.allow_negative_effective_credit)
 
-
-
 @frappe.whitelist()
 def get_csv(doc):
 	traceback = ""
 	try:
 		doc = json.loads(doc)
-		count, flag = 0, 0
+		count, flag, longformat_flag = 0, 0, 0
 		fail_vlcc,sucess_vlcc = [],[]
 		max_rows = 500
 		msg,fmcr_msg = "",""
@@ -45,36 +43,59 @@ def get_csv(doc):
 			if count != 0:
 				if  not frappe.db.exists("Village Level Collection Centre",row[0]) and row[0] !="":
 					if not frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row[7]},"name"):
-						
-						vlcc = frappe.new_doc("Village Level Collection Centre")
-						vlcc.vlcc_name = row[0]
-						vlcc.abbr = row[1]
-						vlcc.name1 = row[2]
-						vlcc.email_id = row[3]
-						vlcc.contact_no = row[4]
-						vlcc.plant_office = row[5]
-						vlcc.camp_office = row[6]
-						vlcc.amcu_id = row[7]
-						vlcc.vlcc_type = row[8]
-						vlcc.global_percent_effective_credit = row[9]
-						vlcc.chilling_centre =row[10]
-						if int(row[11]) == 1:	
+						if not frappe.db.get_value("Village Level Collection Centre",{"longformatfarmerid":row[8]},"name"): #SD 17-10-2018 17:00
+							if row[8]:#SD 17-10-2018 17:00
+								longformat_id_len = row[8].split('_')#SD 17-10-2018 17:00
+								if len(longformat_id_len) < 4: #SD 17-10-2018 17:00
+									longformat_flag = 1 #SD 17-10-2018 17:00
+								if len(longformat_id_len) == 4 and (not longformat_id_len[0] or not longformat_id_len[1] or not longformat_id_len[2] or not longformat_id_len[3]): #SD 17-10-2018 17:00
+									longformat_flag = 1
+								if len(longformat_id_len) > 4:
+									longformat_flag = 1
+									
 
-							vlcc.operator_same_as_agent = 1
-							vlcc.operator_number = row[12]
-							vlcc.operator_email_id = row[13]
-							vlcc.operator_name = row[14]
+							if longformat_flag == 0:
+								vlcc = frappe.new_doc("Village Level Collection Centre")
+								vlcc.vlcc_name = row[0]
+								vlcc.abbr = row[1]
+								vlcc.name1 = row[2]
+								vlcc.email_id = row[3]
+								vlcc.contact_no = row[4]
+								vlcc.plant_office = row[5]
+								vlcc.camp_office = row[6]
+								vlcc.vlcc_type = row[9]
+								vlcc.global_percent_effective_credit = row[10]
+								vlcc.chilling_centre =row[11]
+								vlcc.longformatfarmerid = row [8] #SD 17-10-2018 17:00
+								vlcc.amcu_id = row[7]  #SD 17-10-2018 17:00
 
-						vlcc.is_auto_society_id = 1
-						vlcc.flags.ignore_permissions = True
-						
-						vlcc.save()
-						address=make_address(address_title=row[15],address_type=row[16],address_line1=row[17],city=row[18],vlcc_name=vlcc.name)
-						frappe.db.set_value("Village Level Collection Centre",vlcc.name,"address",address.name)
-						address_display = address.address_line1+"\n"+address.city+"\n"+address.country
-						frappe.db.set_value("Village Level Collection Centre",vlcc.name,"address_display",address_display)
-						sucess_vlcc.append(row[0])
-						flag = 1
+								if int(row[12]) == 1:
+									vlcc.operator_same_as_agent = 1
+									vlcc.operator_number = row[13]
+									vlcc.operator_email_id = row[14]
+									vlcc.operator_name = row[15]
+
+								vlcc.is_auto_society_id = 1
+								vlcc.flags.ignore_permissions = True
+								
+								vlcc.save()
+								address=make_address(address_title=row[16],address_type=row[17],address_line1=row[18],city=row[19],vlcc_name=vlcc.name)
+								frappe.db.set_value("Village Level Collection Centre",vlcc.name,"address",address.name)
+								address_display = address.address_line1+"\n"+address.city+"\n"+address.country
+								frappe.db.set_value("Village Level Collection Centre",vlcc.name,"address_display",address_display)
+								sucess_vlcc.append(row[0])
+								flag = 1
+							else:
+								if longformat_flag == 1:#SD 17-10-2018 17:00
+									traceback = "The Long Format Society Id should be of Format OrgiD_CCID_RouteId_SocietyId: \t"+str(row[8])
+									fail_vlcc.append(row[0])
+									make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",data = "data", message=traceback, traceback=frappe.get_traceback())
+
+						else:
+							traceback="Long Format Farmer Id Alreadry Exists"+str(row[8])#SD 17-10-2018 17:00
+							fail_vlcc.append(row[0])#SD 17-10-2018 17:00
+							make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",data = "data", message=traceback, traceback=frappe.get_traceback())#SD 17-10-2018 17:00
+
 					else:
 						traceback="AMCU ID Alreadry Exists"+str(row[7])
 						fail_vlcc.append(row[0])
@@ -102,10 +123,6 @@ def get_csv(doc):
 	except Exception as e:
 		frappe.db.rollback()
 		make_dairy_log(title="Failed attribute for vlcc creation",method="vlcc_creation", status="Error",data = "data", message=e, traceback=frappe.get_traceback())
-
-
-			
-			
 			
 def make_dairy_log(**kwargs):
 	dlog = frappe.get_doc({"doctype":"Dairy Log"})

@@ -215,10 +215,16 @@ frappe.ui.form.on('Loan Child',  {
 			frappe.model.set_value(cdt,cdn,"amount",0.0)
 			frappe.throw(__("Amount can not be greater than total amount"))
 		}
-		if(frm.doc.cycle && row.loan_id && row.amount) {
+		if(frm.doc.cycle && row.loan_id) {
 			frappe.call({
 				method: "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_updated_loan",
-				args: {"cycle": frm.doc.cycle, "loan_id": row.loan_id, "amount": row.amount, "total": row.principle},
+				args: {
+					"cycle": frm.doc.cycle,
+					"data":frm.doc, 
+					"loan_id": row.loan_id,
+					"amount": row.amount, 
+					"total": row.principle
+				},
 				callback: function(r) {
 					if (r.message){
 						frm.set_value("loan_outstanding",r.message)
@@ -245,10 +251,16 @@ frappe.ui.form.on('Advance Child', 'amount', function(frm, cdt, cdn){
 		frappe.model.set_value(cdt,cdn,"amount",0.0)
 		frappe.throw(__("Amount can not be greater than total amount"))
 	}
-	if(frm.doc.cycle && row.adv_id && row.amount) {
+	if(frm.doc.cycle && row.adv_id) {
 		frappe.call({
 			method: "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_updated_advance",
-			args: {"cycle": frm.doc.cycle, "adv_id": row.adv_id, "amount": row.amount, "total": row.principle},
+			args: {
+				"cycle": frm.doc.cycle,
+				"data": frm.doc,
+				"adv_id": row.adv_id,
+				"amount": row.amount,
+				"total": row.principle
+			},
 			callback: function(r) {
 				console.log(r.message)
 				if (r.message){

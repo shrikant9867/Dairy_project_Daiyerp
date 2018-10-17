@@ -10,7 +10,6 @@ frappe.ui.form.on('Purchase Order', {
 			cur_frm.cscript.make_is_dropship(frm);
 		} 
 	},
-
 	refresh: function(frm) {
 		dairy.price_list.trigger_price_list();
 		if (has_common(frappe.user_roles, ["Vlcc Operator", "Vlcc Manager"])){
@@ -18,7 +17,15 @@ frappe.ui.form.on('Purchase Order', {
 			frm.set_df_property("chilling_centre", "hidden", 1);
 		}
 	},
-	
+	validate: function(frm){
+		if(frm.doc.items && frm.doc.is_dropship){
+			$.each(frm.doc.items,function(i,d){
+				if(!d.material_request){
+					frappe.throw("You can not add items manually")
+				}
+			})
+		}
+	},
 	supplier: function(frm) {
 		if(get_session_user_type().operator_type == 'VLCC' && 
 		(get_supplier_type(frm.doc.supplier) == "Farmer" ||
@@ -41,6 +48,25 @@ frappe.ui.form.on('Purchase Order', {
 		erpnext.utils.get_party_details(frm);
 	}
 })
+
+
+frappe.ui.form.on("Purchase Order Item", {
+	items_add: function(frm, cdt, cdn) {
+		if(frm.doc.is_dropship) {	
+			frm.reload_doc();
+			console.log("dssd",cdt,cdn)
+			frappe.msgprint("You can not add items manually")
+		}
+	},
+	items_remove: function(frm, cdt, cdn) {
+		if(frm.doc.is_dropship) {
+			frm.reload_doc();
+			frappe.msgprint("You can not remove items manually, set accepted qty as Zero instead")
+		}
+	}
+})
+
+
 $.extend(cur_frm.cscript, new dairy.price_list.PriceListController({frm: cur_frm}));
 
 

@@ -403,7 +403,7 @@ def make_vmrc(data, response_dict):
 						response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"error": frappe.get_traceback()})
 
 def delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict):
-
+	#cannot use cancel doc, delete doc  deadlock occurs, so explicitly hard delete
 	vmcr = frappe.db.get_value('Vlcc Milk Collection Record',
 				{"transactionid":row.get('transactionid'),"farmerid":row.get('farmerid'),"docstatus":['=',1]},"name")
 	if vmcr:
@@ -538,6 +538,8 @@ def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
 		if vlcc and company:
 			rejected_milk_data =  get_curdled_warehouse(data,row)
 			pr_co = make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co,rejected_milk_data.get('warehouse'))
+			price_list_ = frappe.db.get_value("Item Price", {'item_code': item_code, 'price_list':'Standard Buying'},'name')
+			frappe.delete_doc("Item Price", price_list_)
 			purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co,rejected_milk_data.get('warehouse'))
 
 		else:
@@ -575,6 +577,9 @@ def make_uom_config(doc):
 
 def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc):
 	try:
+		rate, milkquantity = 1, 1
+		if row.get('milk_quality_type') in ['CT', 'CS', 'G'] and row.get('rate'):
+			rate = row.get('rate')
 		customer = frappe.db.get_value("Village Level Collection Centre", vlcc, "plant_office")
 		warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": row.get('farmerid')}, 'warehouse')
 		cost_center = frappe.db.get_value("Cost Center", {"company": vlcc}, 'name')
@@ -590,7 +595,7 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 			"uom": "Litre",
 			"qty": row.get('milkquantity'),
 			"rate": row.get('rate'),
-			"price_list_rate": row.get('rate'),
+			"price_list_rate": rate,
 			"amount": flt(row.get('rate') * row.get('milkquantity'),2),
 			"warehouse": warehouse,
 			"cost_center": cost_center
@@ -598,6 +603,8 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 		delivry_obj.status = "Completed"
 		delivry_obj.flags.ignore_permissions = True
 		delivry_obj.submit()
+		item_price_c = frappe.db.get_value("Item Price",{'price_list':"Standard Selling",'item_code' : item_.item_code}, 'name')
+		frappe.delete_doc("Item Price", item_price_c)
 		set_posting_datetime(delivry_obj,row)
 		set_stock_ledger_date(delivry_obj,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Delivery Note" : delivry_obj.name})
@@ -611,6 +618,9 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 
 def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost_center, response_dict, dn_name, vmrc):
 	try:
+		rate = 0
+		if row.get('milk_quality_type') in ['CT', 'CS', 'G'] and row.get('rate'):
+			rate = row.get('rate')
 		days = frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') if frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') else 0
  		si_obj = frappe.new_doc("Sales Invoice")
  		si_obj.customer = customer
@@ -621,8 +631,8 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
  		{
  			"item_code": item_.item_code,
  			"qty":row.get('milkquantity'),
- 			"rate": row.get('rate'),
- 			"amount": flt(row.get('rate') * row.get('milkquantity'),2),
+ 			"rate": 0,
+ 			"amount": flt(rate * row.get('milkquantity'),2),
  			"warehouse": warehouse,
 			"cost_center": cost_center,
 			"delivery_note": dn_name
@@ -662,6 +672,8 @@ def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,c
 		purchase_rec.per_billed = 100
 		purchase_rec.flags.ignore_permissions = True
 		purchase_rec.submit()
+		price_list_ = frappe.db.get_value("Item Price",{'item_code': item_.item_code,'price_list':"Standard Buying"},'name')
+		frappe.delete_doc("Item Price",price_list_)
 		set_posting_datetime(purchase_rec,row)
 		set_stock_ledger_date(purchase_rec,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase_receipt": purchase_rec.name})

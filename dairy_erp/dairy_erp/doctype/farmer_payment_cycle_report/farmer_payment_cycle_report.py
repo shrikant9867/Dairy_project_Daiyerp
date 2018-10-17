@@ -502,8 +502,8 @@ def get_fodder_amount(start_date, end_date, farmer_id, vlcc=None):
 			s.name= si.parent and 
 			s.docstatus = 1 and
 			si.item_group in ('Cattle Feed') and s.local_sale = 1  and 
-			si.local_sale_type not in ('Feed And Fodder Advance') and 
 			s.farmer = '{0}'and
+			s.local_sale_type not in ('Feed And Fodder Advance') and 
 			s.posting_date between '{1}' and '{2}'
 			""".format(farmer_id, start_date, end_date),as_dict=1)
 	if len(fodder):

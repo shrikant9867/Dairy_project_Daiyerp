@@ -13,13 +13,14 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getda
 class VlccMilkCollectionRecord(Document):
 
 	def validate(self):
-		self.validate_duplicate_entry()
-		self.validate_status()
-		self.validate_route()
-		self.validate_vlcc_chilling_centre()
-		# self.check_stock()
-		self.calculate_amount()
-		self.set_posting_date()
+		if not self.flags.is_api:
+			self.validate_duplicate_entry()
+			self.validate_status()
+			self.validate_route()
+			self.validate_vlcc_chilling_centre()
+			# self.check_stock()
+			self.calculate_amount()
+			self.set_posting_date()
 
 	def on_submit(self):
 		try:

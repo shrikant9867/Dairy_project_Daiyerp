@@ -19,8 +19,8 @@ from frappe import _
 
 def monthly_cycle_creation():
 	try:
-		farmer_date_computation()
 		vlcc_date_computation()
+		farmer_date_computation()
 	except Exception,e:
 		utils.make_dairy_log(title="Monthly Cycle Create Error",method="monthly_cycle_creation", 
 		status="Error",data="message" ,message="e", traceback=frappe.get_traceback())

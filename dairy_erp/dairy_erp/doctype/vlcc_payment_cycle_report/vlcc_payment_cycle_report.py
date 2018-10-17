@@ -362,11 +362,10 @@ class VLCCPaymentCycleReport(Document):
 		self.update_gl_entry_vlcc_loan(je_no, principal_interest)
 
 	def update_gl_entry_dairy_advance(self, je_no, amount):
-		if je_no and amount:
+		if je_no:
 			company = frappe.db.get_value("Company",{'is_dairy':1},['name','abbr'],as_dict=1)
 			gl_debit = frappe.db.get_value("GL Entry", {"account": 'Loans and Advances - '+company.get('abbr'), "voucher_no": je_no},"name")
 			gl_credit = frappe.db.get_value("GL Entry", {"account": "Debtors - "+company.get('abbr'), "voucher_no": je_no},"name")
-			print gl_debit,"Dairy******",gl_credit,je_no
 			#For Debitors
 			frappe.db.set_value("GL Entry", gl_debit, "debit", 0)
 			frappe.db.set_value("GL Entry", gl_debit, "credit", amount)
@@ -412,7 +411,7 @@ class VLCCPaymentCycleReport(Document):
 			frappe.db.set_value("GL Entry", gl_debit_interest, "posting_date", self.collection_to)
 
 	def update_gl_entry_vlcc_advance(self, je_no, amount):
-		if je_no and amount:
+		if je_no:
 			vlcc_attr = frappe.db.get_value("Company", self.vlcc_name, 'abbr')
 			gl_debit = frappe.db.get_value("GL Entry", {"account": 'Creditors - '+vlcc_attr, "voucher_no": je_no},"name")
 			gl_credit = frappe.db.get_value("GL Entry", {"account": "Loans and Advances Payable - "+vlcc_attr, \

@@ -27,7 +27,7 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 		else{
 			if(frm.doc.status == "Accept"){		
 				frm.set_value("rate",1)
-				frappe.throw("Milk Quantity Can not be less or equal to zero")	
+				frappe.throw("Rate Can not be less or equal to zero")	
 			}
 		}
 	},

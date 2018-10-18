@@ -136,13 +136,31 @@ def get_vmcr_data_list(filters,status):
 	cond = " 1=1 and"
 	if status == "Accept":
 		cond = " vmcr.status = 'Accept' and vmcr.milkquality in ('G') and"
-	if status == "Reject":
-		cond = " vmcr.status = 'Reject' and vmcr.milkquality in ('CT','CS','SS') and"	
 	vmcr_list = frappe.db.sql("""
 								select
 									vmcr.milkquantity as vmcr_qty,
 									vmcr.fat,
 									vmcr.snf,
+									vmcr.rate,
+									vmcr.amount as vmcr_amount,
+									date(vmcr.collectiontime) as vmcr_date,
+									vmcr.shift,
+									vmcr.milkquality,
+									vmcr.status
+								from
+									`tabVlcc Milk Collection Record` vmcr
+								where
+									vmcr.docstatus = 1 and
+									{0}
+									vmcr.shift in ('MORNING','EVENING') and
+									{1} """.format(cond,get_conditions(filters)),as_dict=1,debug=1)	
+	if status == "Reject":
+		cond = " vmcr.status = 'Reject' and vmcr.milkquality in ('CT','CS','SS') and"	
+		vmcr_list = frappe.db.sql("""
+								select
+									vmcr.milkquantity as vmcr_qty,
+									vmcr.fat*vmcr.milkquantity as fat,
+									vmcr.snf*vmcr.milkquantity as snf,
 									vmcr.rate,
 									vmcr.amount as vmcr_amount,
 									date(vmcr.collectiontime) as vmcr_date,

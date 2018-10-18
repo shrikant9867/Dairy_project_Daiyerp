@@ -41,7 +41,7 @@ def get_data(filters=None):
 									round(vmcr.amount,2),
 									vmcr.collectionroute,
 									vmcr.associated_vlcc,
-									vmcr.long_format_farmer_id
+									RIGHT(long_format_farmer_id,5)
 								from
 									`tabVlcc Milk Collection Record` vmcr
 								where
@@ -52,6 +52,13 @@ def get_data(filters=None):
 	if str(get_conditions(filters)) == "1=1":
 		return []
 	else:
+		for row in vmcr_list:
+			if row[9]:
+				farmerid = row[9].split("_")
+			if len(farmerid) == 2 and farmerid[1] and len(farmerid[1]) < 5:
+				row[9] = (5 - len(farmerid[1]))*"0"+str(farmerid[1])
+			if len(farmerid) == 1 and farmerid[0] and len(farmerid[0]) < 5:
+				row[9] = (5 - len(farmerid[0]))*"0"+str(farmerid[0])
 		return vmcr_list
 
 def get_conditions(filters):

@@ -1,7 +1,13 @@
 cur_frm.add_fetch("supplier", "supplier_type", "supplier_type")
 
 frappe.ui.form.on('Purchase Order', {
-	onload: function(frm) {
+	onload: function(frm) {		
+		if (has_common(frappe.user_roles, ["Camp Operator", "Camp Manager"])){
+			console.log(frm.doc.is_dropship)
+			$('.grid-add-row').hide()
+			$('.grid-remove-rows').hide()
+		} 
+		
 		if(frm.doc.__islocal){
 			frm.set_value("supplier_address","")
 			frm.set_value("shipping_address","")
@@ -53,15 +59,14 @@ frappe.ui.form.on('Purchase Order', {
 frappe.ui.form.on("Purchase Order Item", {
 	items_add: function(frm, cdt, cdn) {
 		if(frm.doc.is_dropship) {	
-			frm.reload_doc();
-			console.log("dssd",cdt,cdn)
 			frappe.msgprint("You can not add items manually")
+			frm.reload_doc();
 		}
 	},
 	items_remove: function(frm, cdt, cdn) {
 		if(frm.doc.is_dropship) {
-			frm.reload_doc();
 			frappe.msgprint("You can not remove items manually, set accepted qty as Zero instead")
+			frm.reload_doc();
 		}
 	}
 })

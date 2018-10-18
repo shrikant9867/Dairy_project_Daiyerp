@@ -78,11 +78,11 @@ th,td {
 			{% if (i == l-1) { %}
 			<tr>
 				<td colspan="4" style="text-align: left;"><b>Grand Total</b></td>
-				<td><b>{%= data[i][__("Quantity")] %}</b></td>
+				<td><b>{%= flt(data[i][__("Quantity")],2) %}</b></td>
 				<td></td>
 				<td></td>
 				<td></td>
-				<td><b>{%= data[i][__("Total")] %}</b></td>
+				<td><b>{%= flt(data[i][__("Total")],2) %}</b></td>
 			</tr>
 			{% } else { %}
 			<tr>

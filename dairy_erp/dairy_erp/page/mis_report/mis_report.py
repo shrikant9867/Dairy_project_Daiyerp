@@ -372,10 +372,11 @@ def get_vmcr_milk_quality_data(filters,status):
 										`tabVlcc Milk Collection Record` vmcr
 									where
 										{0} 
-										and long_format_farmer_id IS NOT NULL
-										and date(vmcr.collectiontime) between '{1}' and '{2}'
+										and vmcr.long_format_farmer_id IS NOT NULL
+										and vmcr.associated_vlcc = '{1}'
+										and date(vmcr.collectiontime) between '{2}' and '{3}'
 										
-										""".format(cond,filters.get('month_start_date'),filters.get('month_end_date')),as_dict=1,debug=1)
+										""".format(cond,filters.get('vlcc'),filters.get('month_start_date'),filters.get('month_end_date')),as_dict=1,debug=1)
 	return milk_quality[0]
 
 @frappe.whitelist()

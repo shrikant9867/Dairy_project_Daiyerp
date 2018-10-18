@@ -51,6 +51,7 @@ def get_vmcr_data(start_date=None,end_date=None):
 			b_dict['vmcr_qty'] = flt(p.get('vmcr_qty')) + vmcr.get('vmcr_qty')
 			b_dict['rate'] = flt(p.get('rate')) + vmcr.get('rate')
 			b_dict['vmcr_amount'] = flt(p.get('vmcr_amount')) + vmcr.get('vmcr_amount')
+			vmcr_dict[str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift')] = b_dict
 		else:
 			b_dict = {
 				'fat':vmcr.get('fat'),
@@ -70,6 +71,7 @@ def get_vmcr_data(start_date=None,end_date=None):
 			b_dict['spoil_qty'] = flt(p.get('spoil_qty')) + vmcr.get('vmcr_qty')
 			b_dict['spoil_rate'] = flt(p.get('spoil_rate')) + vmcr.get('rate')
 			b_dict['spoil_amount'] = flt(p.get('spoil_amount')) + vmcr.get('vmcr_amount')
+			vmcr_dict_[str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift')] = b_dict
 		else:
 			b_dict = {
 				'spoil_fat':vmcr.get('fat'),
@@ -77,16 +79,21 @@ def get_vmcr_data(start_date=None,end_date=None):
 				'spoil_rate':vmcr.get('rate'),
 				'spoil_qty':vmcr.get('vmcr_qty'),
 				'spoil_amount':vmcr.get('vmcr_amount'),
-				'fat':0,
-				'snf':0,
-				'rate':0,
-				'vmcr_qty':0,
-				'vmcr_amount':0
 			}
 			vmcr_dict_[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = b_dict
-	
 
-	vmcr_dict.update(vmcr_dict_)
+	for key in vmcr_dict:
+		if vmcr_dict_ and key in vmcr_dict_:
+			spoil = vmcr_dict_.get(key)
+			vmcr_dict.get(key).update({
+				'spoil_fat':spoil.get('spoil_fat'),
+				'spoil_snf':spoil.get('spoil_snf'),
+				'spoil_rate':spoil.get('spoil_rate'),
+				'spoil_qty':spoil.get('spoil_qty'),
+				'spoil_amount':spoil.get('spoil_amount')
+			})
+			
+	
 	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+vmcr_dict.keys()
 	final_dict = {}
 	

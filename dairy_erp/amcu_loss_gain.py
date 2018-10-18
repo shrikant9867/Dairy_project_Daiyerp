@@ -119,20 +119,22 @@ def create_loss_gain(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock=None):
 		"farmer_id":row.get('farmerid'),"societyid":data.get('societyid'),"docstatus":1,
 		"wh_type":('in', ['Loss','Gain'])},"name")
 
+	print se,"se_________________\n\n"
+
 	if se:
 		se_doc = frappe.get_doc("Stock Entry",se)
 		se_qty = frappe.db.get_value("Stock Entry Detail",{"parent":se},"qty") or 0
 		actual_fmcr_qty = flt(get_actual_fmcr_qty(data,row),2)
 		if se_doc.wh_type == 'Loss':
 			total_vmcr_qty = flt((actual_fmcr_qty - se_qty + row.get('milkquantity')),2)
+			print total_vmcr_qty,"total_vmcr_qty_loss_________________\n\n"
 			loss_gain_computation(actual_fmcr_qty,row,data,vmcr_doc,response_dict,stock,total_vmcr_qty)
 			cancel_se(se)
-			set_fmcr_log_flag(data,row)
 		elif se_doc.wh_type == 'Gain':
 			total_vmcr_qty =  flt((actual_fmcr_qty + se_qty + row.get('milkquantity')),2)
+			print total_vmcr_qty,"total_vmcr_qty_gain_________________\n\n"
 			loss_gain_computation(actual_fmcr_qty,row,data,vmcr_doc,response_dict,stock,total_vmcr_qty)
 			cancel_se(se)
-			set_fmcr_log_flag(data,row)
 
 def get_actual_fmcr_qty(data,row):
 
@@ -146,7 +148,6 @@ def get_actual_fmcr_qty(data,row):
 							`tabFMCR Quantity Log`
 						where 
 							purpose = 'Actual Qty of FMCR' and
-							is_stock_settled = 0 and
 							shift = %s and vlcc = %s and 
 							milktype = %s and 
 							collectiontime = %s""",(data.get('shift'),
@@ -161,6 +162,9 @@ def cancel_se(se):
 	se_doc.cancel()
 
 def loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock=None,total_vmcr_qty=0):
+	print fmcr_stock_qty,"fmcr_stock_qty______________________\n\n"
+	print total_vmcr_qty,"total_vmcr_qty__________________\n\n"
+	print "inside loss_gain_computation_________________________\n\n"
 
 	vlcc = frappe.db.get_value("Village Level Collection Centre",
 		{"amcu_id":row.get('farmerid')},

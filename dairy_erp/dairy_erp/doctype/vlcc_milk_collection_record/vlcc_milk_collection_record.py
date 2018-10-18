@@ -13,17 +13,18 @@ from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getda
 class VlccMilkCollectionRecord(Document):
 
 	def validate(self):
-		self.validate_duplicate_entry()
-		self.validate_status()
-		self.validate_route()
-		self.validate_vlcc_chilling_centre()
-		# self.check_stock()
-		self.calculate_amount()
-		self.set_posting_date()
+		if not self.flags.is_api:
+			self.validate_duplicate_entry()
+			self.validate_status()
+			self.validate_route()
+			self.validate_vlcc_chilling_centre()
+			# self.check_stock()
+			self.calculate_amount()
+			self.set_posting_date()
 
 	def on_submit(self):
 		try:
-			if self.status == "Accept" and not self.flags.is_api:
+			if not self.flags.is_api:
 				pr = self.make_purchase_receipt()
 				dn = self.make_delivery_note_vlcc()
 				pi = self.make_purchase_invoice(pr)
@@ -95,7 +96,7 @@ class VlccMilkCollectionRecord(Document):
 
 	def validate_status(self):
 		# user only create transactions with status - Accept
-		if self.status == "Accept" and (self.milkquantity == 0 or self.rate == 0):
+		if self.status == "Accept" and (self.milkquantity == 0 or self.rate == 0) and not self.flags.is_api:
 			frappe.throw(_("Milk Quantity And Rate Can not be less or equal to zero for Accept Status"))
 
 	def check_stock(self):

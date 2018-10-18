@@ -44,7 +44,7 @@ def get_vmcr_data(start_date=None,end_date=None):
 	
 	for vmcr in good_milk:
 		b_dict = {}
-		if vmcr_dict and str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift') in date_and_shift_wise_vmcr:
+		if vmcr_dict and str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift') in vmcr_dict:
 			p = vmcr_dict[str(vmcr.get('vmcr_date'))+"#"+vmcr.get('shift')]
 			b_dict['fat'] = flt(p.get('fat')) + vmcr.get('fat')
 			b_dict['snf'] = flt(p.get('snf')) + vmcr.get('snf')

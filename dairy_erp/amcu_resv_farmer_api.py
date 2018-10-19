@@ -16,7 +16,7 @@ import json
 
 
 
-def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,societyid,vmcr_doc=None,fmcr=None):
+def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,s_warehouse,societyid,vmcr_doc=None,fmcr=None):
 
 	try:
 		item_code = ""
@@ -35,11 +35,11 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,socie
 		if method == 'create_fmrc':
 			if not frappe.db.get_value('Stock Entry',
 				{"transaction_id":row.get('transactionid')},"name"):
-				stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,societyid,vmcr_doc,fmcr)
+				stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse,societyid,vmcr_doc,fmcr)
 			else:
 				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"success","response":"Record already created please check on server,if any exception check 'Dairy log'."})
 		else:
-			stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,societyid,vmcr_doc,fmcr)	
+			stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse,societyid,vmcr_doc,fmcr)	
 			
 		if stock_doc:
 			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Stock Receipt": stock_doc.name})
@@ -51,7 +51,7 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,socie
 	return response_dict
 
 
-def stock_entry_creation(message,item_,method,data,row,qty,warehouse,societyid,vmcr_doc,fmcr):
+def stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse,societyid,vmcr_doc,fmcr):
 
 	vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":societyid},["name","warehouse"],as_dict=True)
 	company_details = frappe.db.get_value("Company",{"name":vlcc.get('name')},['default_payable_account','abbr','cost_center'],as_dict=1)
@@ -65,6 +65,7 @@ def stock_entry_creation(message,item_,method,data,row,qty,warehouse,societyid,v
 	stock_doc.vmcr = vmcr_doc.name if method == 'handling_loss' or method == 'handling_gain' else ""
 	if method == 'handling_loss' or method == 'handling_loss_after_vmcr':
 		stock_doc.wh_type = 'Loss'
+		stock_doc.purpose = 'Material Transfer'
 	elif method == 'handling_gain' or method == 'handling_gain_after_vmcr':
 		stock_doc.wh_type = 'Gain'
 
@@ -84,18 +85,20 @@ def stock_entry_creation(message,item_,method,data,row,qty,warehouse,societyid,v
 			"Collection Time":row.get('collectiontime'),"Message": message,"shift":data.get('shift')})
 
 	stock_doc.remarks = "\n".join("{}: {}".format(k, v) for k, v in remarks.items())
-	stock_doc.append("items",
-		{
-			"item_code": item_.item_code,
-			"item_name": item_.item_code,
-			"description": item_.item_code,
-			"uom": "Litre",
-			"qty": qty,
-			"t_warehouse": warehouse,
-			"cost_center":company_details.get('cost_center'),
-			"basic_rate": row.get('rate')
-		}
-	)
+	stock_doc_item = {
+		"item_code": item_.item_code,
+		"item_name": item_.item_code,
+		"description": item_.item_code,
+		"uom": "Litre",
+		"qty": qty,
+		"t_warehouse": warehouse,
+		"cost_center":company_details.get('cost_center'),
+		"basic_rate": row.get('rate')
+	}
+	if method == 'handling_loss' or method == 'handling_loss_after_vmcr':
+		stock_doc_item['s_warehouse'] = s_warehouse
+	
+	stock_doc.append("items",stock_doc_item)
 	stock_doc.flags.ignore_permissions = True
 	stock_doc.flags.is_api = True
 	stock_doc.submit()

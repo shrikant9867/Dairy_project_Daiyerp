@@ -467,9 +467,13 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 					"quantitytime": row.get('quantitytime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('quantitytime'))/1000)),		
 					"tippingendtime": row.get('tippingendtime'), #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingendtime'))/1000)),		
 					"tippingstarttime": row.get('tippingstarttime') ,#time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cint(row.get('tippingstarttime'))/1000)),
-					"associated_vlcc": frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name'),		
-					"farmerid": row.get('farmerid')
+					"associated_vlcc": frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name'),
+					"farmerid": row.get('farmerid'),
+					"milkquality": str(row.get('milkquality')),
+					"status": 'Reject' if str(row.get('milkquality')) in ("SS","CT","CS") else 'Accept',
+					"milk_quality_type": get_curdled_warehouse(data,row).get('milk_quality_type')
 				})
+
 			vmrc_doc = frappe.new_doc("Vlcc Milk Collection Record")
 			vmrc_doc.id = data.get('id')
 			vmrc_doc.imeinumber = data.get('imeinumber')
@@ -488,10 +492,11 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			vmrc_doc.update({
 				'amount':flt(row.get('rate') * row.get('milkquantity'),2)
 			})
-			vmrc_doc.milk_quality_type = get_curdled_warehouse(data,row).get('milk_quality_type')
-			vmrc_doc.milkquality = row.get('milkquality')
+			
+			# vmrc_doc.milkquality = row.get('milkquality')
 			vmrc_doc.flags.ignore_permissions = True
 			vmrc_doc.flags.is_api = True
+			vmrc_doc.insert()
 			vmrc_doc.submit()
 			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"vmrc":vmrc_doc.name})
 			vlcc = validate_vlcc(row)
@@ -565,7 +570,7 @@ def get_curdled_warehouse(data,row):
 	elif row.get('milkquality') == 'SS':
 		milk_quality_type = 'Sub Standard'
 		warehouse = frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'sub_std_warehouse')
-
+	
 	return {"warehouse":warehouse,"milk_quality_type":milk_quality_type}
 
 

@@ -82,27 +82,24 @@ def get_vmcr_data(start_date=None,end_date=None):
 			}
 			vmcr_dict_[str(vmcr['vmcr_date'])+"#"+vmcr['shift']] = b_dict
 
-	for key in vmcr_dict:
-		if vmcr_dict_ and key in vmcr_dict_:
-			spoil = vmcr_dict_.get(key)
-			vmcr_dict.get(key).update({
-				'spoil_fat':spoil.get('spoil_fat'),
-				'spoil_snf':spoil.get('spoil_snf'),
-				'spoil_rate':spoil.get('spoil_rate'),
-				'spoil_qty':spoil.get('spoil_qty'),
-				'spoil_amount':spoil.get('spoil_amount')
-			})
-			
+	milkquality_keys = vmcr_dict.keys()+vmcr_dict_.keys()
+	milkquality_ = {}
+	for key in set(milkquality_keys):
+		if (vmcr_dict.get(key) or vmcr_dict_.get(key)):
+			merged = {}
+			merged.update(vmcr_dict.get(key,{'fat':0, 'snf':0, 'rate':0, 'vmcr_qty':0, 'vmcr_amount':0}))
+			merged.update(vmcr_dict_.get(key,{'spoil_fat':0, 'spoil_snf':0, 'spoil_rate':0, 'spoil_qty':0, 'spoil_amount':0}))
+			milkquality_[key] = merged			
 	
-	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+vmcr_dict.keys()
+	final_keys = members.keys()+date_and_shift_wise_local_sale.keys()+milkquality_.keys()
 	final_dict = {}
 	
 	for key in set(final_keys):
-		if (members.get(key) or date_and_shift_wise_local_sale.get(key) or vmcr_dict.keys()):
+		if (members.get(key) or date_and_shift_wise_local_sale.get(key) or milkquality_.keys()):
 			merged = {}
 			merged.update(members.get(key, {'total_milk_amt': 0,'total_milk_qty': 0}))
 			merged.update(date_and_shift_wise_local_sale.get(key, {'si_amount': 0, 'si_qty': 0}))
-			merged.update(vmcr_dict.get(key,{'spoil_fat':0, 'spoil_qty':0,'spoil_rate': 0, 'spoil_snf': 0, 'spoil_amount': 0,'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
+			merged.update(milkquality_.get(key,{'spoil_fat':0, 'spoil_qty':0,'spoil_rate': 0, 'spoil_snf': 0, 'spoil_amount': 0,'snf':0, 'vmcr_qty':0,'rate': 0, 'fat': 0, 'vmcr_amount': 0,'shift':key.split('#')[1],'vmcr_date':key.split('#')[0]}))
 			merged.update({'daily_sales':flt(merged.get('total_milk_qty')-merged.get('si_qty'),2)})
 			merged.update({
 				'short_qty':flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) if flt(merged.get('daily_sales') - merged.get('vmcr_qty'),2) > 0 else 0

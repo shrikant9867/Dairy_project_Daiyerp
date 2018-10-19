@@ -868,7 +868,20 @@ def pr_permission(user):
 def get_pr_from_warehouse_ref(branch_office):
 	# check warehouse in PR Item table & return distinct PR
 	warehouse = frappe.db.get_value("Address",branch_office , "warehouse")
-	pr_list = frappe.db.get_all("Purchase Receipt Item", {"warehouse": warehouse}, "distinct parent")
+	bad_milk_warehouses = frappe.db.get_values("Address",branch_office,\
+		['c_transporter_warehouse','sub_std_warehouse','c_society_warehouse']\
+		,as_dict=1)[0].values()
+	bad_milk_warehouses.append(warehouse)
+	bad_milk_warehouses =  "(" + ",".join([ "'{0}'".format(wr) for wr in bad_milk_warehouses ]) + ")"
+	pr_list = frappe.db.sql("""
+		select
+			distinct parent
+		from
+			`tabPurchase Receipt Item`
+		where
+			warehouse in {0}		
+		""".format(bad_milk_warehouses),as_dict=1,debug=1)
+	# pr_list = frappe.get_all("Purchase Receipt Item", {"warehouse", "name", "in", bad_milk_warehouses}, "distinct parent")
 	pr_nos = ''
 	if pr_list:
 		pr_nos = "(" + ",".join([ "'{0}'".format(pr.get('parent')) for pr in pr_list ])  +")"

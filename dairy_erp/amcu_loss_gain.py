@@ -175,16 +175,18 @@ def loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock=N
 			make_stock_receipt(
 				message="Material Receipt for Handling Loss",method="handling_loss",
 				data=data,row=row,response_dict=response_dict,
-				qty=qty,warehouse=vlcc.get('handling_loss'),
+				qty=qty,warehouse=vlcc.get('handling_loss'),s_warehouse=vlcc.get('warehouse'),
 				societyid=row.get('farmerid'),vmcr_doc=vmcr_doc)
+		
 		elif flt(fmcr_stock_qty,2) < flt(total_vmcr_qty,2):
 			qty = flt(total_vmcr_qty) - flt(fmcr_stock_qty,2)
 			make_stock_receipt(
 				message="Material Receipt for Calibration Gain",
 				method="handling_gain",data=data,row=row,
 				response_dict=response_dict,
-				qty=qty,warehouse=vlcc.get('calibration_gain'),
+				qty=qty,warehouse=vlcc.get('calibration_gain'),s_warehouse=vlcc.get('warehouse'),
 				societyid=row.get('farmerid'),vmcr_doc=vmcr_doc)
+		
 		elif flt(fmcr_stock_qty,2) == flt(total_vmcr_qty,2):
 			utils.make_dairy_log(title="Quantity Balanced after VMCR Creation",
 				method="handling_loss_gain", status="Success",data="Qty" ,

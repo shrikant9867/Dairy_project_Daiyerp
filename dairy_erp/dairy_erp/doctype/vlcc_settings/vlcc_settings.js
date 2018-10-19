@@ -5,6 +5,7 @@ frappe.ui.form.on('VLCC Settings', {
 	refresh: function(frm) {
 		frm.events.set_vlcc(frm)
 		frm.events.set_vlcc_setting(frm)
+		frm.events.set_farmer_id(frm)
 		if(frm.doc.flag_negative_effective_credit){
 			frm.set_df_property("allow_negative_effective_credit","read_only",1)
 		}
@@ -119,6 +120,30 @@ frappe.ui.form.on('VLCC Settings', {
 							frm.set_value("vlcc",r.message.company)
 						}
 						frm.events.check_record_exist(frm)
+					}
+				}
+			});
+	},
+	set_farmer_id: function(frm) {
+		console.log("setting Farmer ids >>>>")
+		frappe.call({
+				method: "frappe.client.get_value",
+				async : false,
+				args: {
+					doctype: "Village Level Collection Centre",
+					filters: {"name": frm.doc.vlcc},
+					fieldname: ["longformatfarmerid"]
+				},
+				callback: function(r){
+					if(r.message){
+						if(frm.doc.vlcc){
+							frm.set_value("farmer_id1",r.message.longformatfarmerid+"_0999")
+							frm.set_value("farmer_id2",r.message.longformatfarmerid+"_9994")
+						}
+						else{
+							frm.set_value("farmer_id1","0999")
+							frm.set_value("farmer_id2","9994")
+						}
 					}
 				}
 			});

@@ -42,9 +42,9 @@ def make_jv(data,cur_cycl=None):
 			principal_interest = get_interest_amount(data)
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = data.get('vlcc'),
 				posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Loans and Advances - ", 
-				type = "Farmer Loan", cycle = cur_cycl, amount = principal_interest.get('principal'), 
+				type = "Farmer Loan", cycle = cur_cycl, amount = flt(principal_interest.get('principal'),2), 
 				party_type = "Customer", party = data.get('farmer_name'), master_no = data.get('name'),
-				interest_account = "Interest Income - ", interest_amount= principal_interest.get('interest'))
+				interest_account = "Interest Income - ", interest_amount= flt(principal_interest.get('interest'),2))
 			if je_doc.name:
 				update_loan_doc(data, je_doc, cur_cycl)			
 	except Exception,e:
@@ -54,7 +54,15 @@ def make_jv(data,cur_cycl=None):
 def update_loan_doc(data, je_doc, cur_cycl):
 	paid_instlmnt = 0
 	loan_doc = frappe.get_doc("Farmer Loan",data.get('name'))
-	loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_jv_amount(data)
+	# loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_jv_amount(data)
+	
+	out_stand_amt = get_jv_amount(data) - data.get('advance_amount') 
+	"""Added by Jitendra, fixes negative outstading amount"""
+	if 0 < out_stand_amt < 1:
+		loan_doc.outstanding_amount = 0
+	else:
+		loan_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data)
+		
 	if loan_doc.outstanding_amount == 0:
 		loan_doc.outstanding_amount = 0
 		loan_doc.status = "Paid"

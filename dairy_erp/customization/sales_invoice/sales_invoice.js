@@ -226,9 +226,13 @@ frappe.ui.form.on("Sales Invoice", {
 		}
 	},
 	emi_start_cycle:function(frm){
-		if(frm.doc.emi_start_cycle < 0){
+		if(cint(frm.doc.emi_start_cycle) > 6) {
 			frm.set_value("emi_start_cycle",0)
-			frappe.throw("Emi Start Cycle should be greater than or equal to zero")
+			frappe.throw("Emi start cycle must be less than or equal to <b>6</b>")
+		}
+		else if(frm.doc.emi_start_cycle < 0){
+			frm.set_value("emi_start_cycle",0)
+			frappe.throw("Emi Start Cycle cannot be negative")
 		}
 	}
 })

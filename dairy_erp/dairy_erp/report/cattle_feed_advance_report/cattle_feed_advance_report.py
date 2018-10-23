@@ -52,7 +52,7 @@ def get_data(filters):
 	if len(data):
 		advance_data = []
 		for row in data:
-			if row[9] == "Feed And Fooder Advance" and len(row[2].split('-')) > 2:
+			if row[9] == "Feed And Fodder Advance" and len(row[2].split('-')) > 2:
 				advance_data = get_feed_advance(row[2])
 				if advance_data:
 					row[5] = advance_data[0]

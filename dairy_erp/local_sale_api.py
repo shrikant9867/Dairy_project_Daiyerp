@@ -47,7 +47,7 @@ def create_ls(data):
 		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
 		ls_obj.local_sale_type = data.get('local_sale_type')
 
-	elif data.get('customer_or_farmer') == "Farmer" and data.get('local_sale_type') == "Feed And Fooder Advance":
+	elif data.get('customer_or_farmer') == "Farmer" and data.get('local_sale_type') == "Feed And Fodder Advance":
 		ls_obj.customer = frappe.db.get_value("Customer",data.get('customer_name'), 'name')
 		ls_obj.local_sale_type = data.get('local_sale_type')
 		ls_obj.no_of_instalment = data.get('no_of_instalment')

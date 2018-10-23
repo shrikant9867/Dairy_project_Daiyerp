@@ -88,7 +88,7 @@ def validate_local_sale(doc, method):
 	Fetch allow_negative_effective_credit from VLCC
 	"""
 	if doc.farmer and not doc.local_sale_type:
-		frappe.throw("Please Select Local Sale Type Either <b>No Advance</b> or <b>Feed And Fooder Advance</b>")	
+		frappe.throw("Please Select Local Sale Type Either <b>No Advance</b> or <b>Feed And Fodder Advance</b>")	
 	
 	if doc.local_sale:
 		vlcc = frappe.get_doc("User",frappe.session.user).company
@@ -153,7 +153,7 @@ def feed_fooder_advance(doc, method):
 	roles = frappe.get_roles()
 	user = frappe.db.get_value("User",frappe.session.user,'company')
 	if ('Vlcc Manager' in roles or 'Vlcc Operator' in roles):
-		if doc.local_sale and doc.local_sale_type == "Feed And Fooder Advance" and doc.farmer and doc.no_of_instalment:
+		if doc.local_sale and doc.local_sale_type == "Feed And Fodder Advance" and doc.farmer and doc.no_of_instalment:
 			make_payment_entry(doc)
 			farmer_advance = frappe.new_doc("Farmer Advance")
 			farmer_advance.advance_type = "Feed And Fodder Advance"
@@ -328,5 +328,5 @@ def get_net_off(farmer, company):
 	"farmer": farmer
 	}
 	if len(get_data(fliters)):
-		return round(get_data(fliters)[0][10],2)
+		return round(get_data(fliters)[0][11],2)
 	else: return 0

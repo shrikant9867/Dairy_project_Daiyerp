@@ -47,6 +47,7 @@ def make_jv(data, cur_cycl=None):
 			je_doc.type = "Vlcc Advance"
 			je_doc.cycle = cur_cycl
 			je_doc.vlcc_advance = data.get('name')
+			je_doc.reference_party = data.get('vlcc')
 			je_doc.posting_date = nowdate()
 			je_doc.append('accounts', {
 				'account': "Debtors - "+ company.get('abbr'),
@@ -87,7 +88,7 @@ def make_jv(data, cur_cycl=None):
 		make_dairy_log(title="Sync failed for Data push",method="get_items", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())
 
-def  make_cross_jv(data, cur_cycl=None, company=None):
+def make_cross_jv(data, cur_cycl=None, company=None):
 	vlcc_attr = frappe.db.get_value("Company", data.get('vlcc'), ['abbr','cost_center'],as_dict=1)
 	je_doc = frappe.new_doc("Journal Entry")
 	je_doc.voucher_type = "Journal Entry"

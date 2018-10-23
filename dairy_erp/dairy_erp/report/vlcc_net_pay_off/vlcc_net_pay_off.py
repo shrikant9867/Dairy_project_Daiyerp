@@ -126,20 +126,35 @@ def get_pi(f):
 
 def get_si(f):
 	if len(f):
+		# loan = frappe.db.sql("""
+		# 			select ifnull(sum(outstanding_amount),0) as total
+		# 		from 
+		# 			`tabSales Invoice`
+		# 		where 
+		# 			type = 'Vlcc Loan' and customer = '{0}'  and docstatus =1
+		# 		""".format(f),as_dict=1,debug=0)
+		# advance = frappe.db.sql("""
+		# 		select ifnull(sum(outstanding_amount),0) as total
+		# 	from 
+		# 		`tabSales Invoice`
+		# 	where 
+		# 		type = 'Vlcc Advance' and customer = '{0}'  and docstatus =1
+		# 	""".format(f),as_dict=1,debug=0)
+		# SG 11-10
 		loan = frappe.db.sql("""
-					select ifnull(sum(outstanding_amount),0) as total
-				from 
-					`tabSales Invoice`
-				where 
-					type = 'Vlcc Loan' and customer = '{0}'  and docstatus =1
-				""".format(f),as_dict=1,debug=0)
-		advance = frappe.db.sql("""
-				select ifnull(sum(outstanding_amount),0) as total
+				select ifnull(sum(total_debit),0) as total
 			from 
-				`tabSales Invoice`
+				`tabJournal Entry`
 			where 
-				type = 'Vlcc Advance' and customer = '{0}'  and docstatus =1
+				type = 'Vlcc Loan' and reference_party = '{0}' and docstatus =1
 			""".format(f),as_dict=1,debug=0)
+		advance = frappe.db.sql("""
+				select ifnull(sum(total_debit),0) as total
+			from 
+				`tabJournal Entry`
+			where 
+				type = 'Vlcc Advance' and reference_party = '{0}' and docstatus =1
+			""".format(f),as_dict=1,debug=1)
 		return {
 				 	'loan': loan[0].get('total'),
 				 	'advance': advance[0].get('total')

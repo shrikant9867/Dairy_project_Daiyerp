@@ -20,7 +20,9 @@ def auto_fpcr():
 			if len(cur_cycle):
 				start_date = frappe.db.get_value("Farmer Date Computation", cur_cycle[0], 'start_date')
 				end_date = frappe.db.get_value("Farmer Date Computation", cur_cycle[0], 'end_date')
-				generate_fpcr(cur_cycle[0], farmer.get('farmer_id'), farmer.get('vlcc_name'), start_date, end_date)
+				cur_date = getdate(nowdate())
+				if end_date < cur_date:
+					generate_fpcr(cur_cycle[0], farmer.get('farmer_id'), farmer.get('vlcc_name'), start_date, end_date)
 	except Exception,e:
 		make_dairy_log(title="Auto Fpcr Failed",method="auto_fpcr", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())
@@ -51,6 +53,8 @@ def generate_fpcr(cur_cycle, farmer, vlcc, start_date, end_date):
 	fpcr_doc.date = nowdate()
 	fpcr_doc.cycle = cur_cycle
 	fpcr_doc.farmer_id = farmer
+	fpcr_doc.collection_to = str(end_date)
+	fpcr_doc.collection_from = str(start_date)
 
 	fmcr = get_fmcr(cur_cycle, farmer, vlcc, start_date, end_date)
 	loans = get_loans_child(start_date,end_date,vlcc,farmer,cur_cycle)

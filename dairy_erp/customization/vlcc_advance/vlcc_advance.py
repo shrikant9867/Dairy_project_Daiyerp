@@ -125,7 +125,7 @@ def req_cycle_computation(data):
 			from
 				`tabCyclewise Date Computation`
 			where
-				'{0}' < start_date or date(now()) between start_date and end_date
+				'{0}' < start_date or date('{0}') between start_date and end_date
 				order by start_date limit {1}""".
 			format(data.get('date_of_disbursement'),data.get('emi_deduction_start_cycle')),as_dict=1,debug=1)
 		not_req_cycl_list = [ '"%s"'%i.get('name') for i in not_req_cycl ]

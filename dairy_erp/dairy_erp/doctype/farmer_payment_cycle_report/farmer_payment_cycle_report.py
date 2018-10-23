@@ -169,7 +169,7 @@ class FarmerPaymentCycleReport(Document):
 		if advance_type == "Feed And Fodder Advance":
 			# parameter 'faf_flag', is used to fetch data on net-payOff report.
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc_name,
-        			posting_date = nowdate(),debit_account = "Feed And Fodder Advances Temporary Account - ",credit_account = "Feed And Fodder Advance - ", 
+        			posting_date = nowdate(),debit_account = "Debtors - ",credit_account = "Feed And Fodder Advance - ", 
         			type = "Farmer Advance", cycle = self.cycle, amount = row.amount, faf_flag = 1,
         			party_type = "Customer", party = self.farmer_name, master_no = row.adv_id, advance_type = advance_type)
 			frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)

@@ -34,6 +34,11 @@ def vlcc_date_computation():
 	month_details = get_month_details(current_fiscal_year.get('name'),cint(current_month))
 	cycle_data = OrderedDict()
 	s_date,e_date = "",""
+	date_range = 0
+	if dairy_setting.no_of_cycles < 31:
+		date_range = dairy_setting.no_of_cycles
+	else:
+		date_range = month_details.month_days
 
 	cycle_exist = frappe.get_all('Cyclewise Date Computation',
 			filters = { 'month': current_month_abbr,
@@ -57,7 +62,7 @@ def vlcc_date_computation():
 
 
 		if dairy_setting.no_of_cycles > 1:
-			for cycle_index in range(1,cint(dairy_setting.no_of_cycles)+cint(1)):
+			for cycle_index in range(1,cint(date_range)+cint(1)):
 				cycle_name = "Cycle "+str(cycle_index)
 				cycle_data.setdefault(cycle_name, {})
 
@@ -99,6 +104,12 @@ def farmer_date_computation():
 					'month': current_month_abbr,
 					'fiscal_year':current_fiscal_year.get('name')})
 
+			date_range = 0
+			if vlcc.get('no_of_cycles') < 31:
+				date_range = vlcc.get('no_of_cycles')
+			else:
+				date_range = month_details.month_days
+
 			if not len(cycle_exist) and vlcc.get('no_of_cycles')>0 and vlcc.get('no_of_interval')>0:
 				if vlcc.get('no_of_cycles') == 1:
 					cycle_name = "Cycle "+str(1)
@@ -117,7 +128,7 @@ def farmer_date_computation():
 					cycle_data[cycle_name].update(args)
 				
 				if vlcc.get('no_of_cycles') > 1:
-					for cycle_index in range(1,cint(vlcc.get('no_of_cycles'))+cint(1)):
+					for cycle_index in range(1,cint(date_range)+cint(1)):
 						cycle_name = "Cycle "+str(cycle_index)
 						cycle_data.setdefault(cycle_name, {})
 

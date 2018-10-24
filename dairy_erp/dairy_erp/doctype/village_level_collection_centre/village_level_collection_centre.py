@@ -343,7 +343,7 @@ class VillageLevelCollectionCentre(Document):
 					account = frappe.new_doc("Account")
 					account.update({
 						"company": company,
-						"account_name": "Interest Income - "+abbr,
+						"account_name": "Interest Income",
 						"parent_account": "Direct Income - "+abbr,
 						"root_type": "Income",
 						"account_type": ""

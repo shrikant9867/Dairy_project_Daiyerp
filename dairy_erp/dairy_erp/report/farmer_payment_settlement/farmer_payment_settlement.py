@@ -11,7 +11,7 @@ from erpnext.accounts.utils import get_outstanding_invoices, get_account_currenc
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_outstanding_reference_documents
 from frappe import _
 import json
-# from dairy_erp.dairy_utils import  make_dairy_log,get_receivable_farmer
+from dairy_erp.dairy_utils import  make_dairy_log
 from dairy_erp.customization.payment_integration.payment_integration import pay_to_farmers_account
 import calendar
 

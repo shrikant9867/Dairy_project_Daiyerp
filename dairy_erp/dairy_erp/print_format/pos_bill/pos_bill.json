@@ -1,0 +1,22 @@
+{
+ "align_labels_right": 0, 
+ "creation": "2018-11-02 10:52:46.485367", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Farmer Payment Cycle Report", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "html": "<html>\n<body>\nMilk Bill Collection    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <button type=\"button\"><a href=\"printintent:// \n%20%20%20Milk Bill Collection \\n\n%20%20%20%20%20{{doc.name}} \\n\n---------------------------------------\\n\nVlcc Name: {{ doc.vlcc_name }}\\n\n{% if (doc.address_display) -%}\n{% set vlcc_address = doc.address_display.replace('<br>', ', ') %}\nAddress: {{ vlcc_address }}\\n\n{%- endif %}\nMobile No: {{ doc.phone_no }}\\n\nDate: {{doc.date }}\\n\n---------------------------------------\\n\nFarmer ID: {{ doc.farmer_id }}\\n\nFamre Name: {{ doc.farmer_name }}\\n\nCattle Type: {{ doc.cattle_type }}\\n\nCollection From: {{doc.collection_from }}\\n\nCollection To: {{ doc.collection_to }}\\n\n---------------------------------------\\n\nSr%20Date%20%20%20%20%20Shift%20Qty%20Fat%20Snf%20Rate%20Amt\\n\n{%- for row in doc.fmcr_details -%}\n\t\t{{ row.idx }}%20\n\t\t{% set f_date = row.date.split('-') %}\n\t\t{{ f_date[2]+'-'+f_date[1]+'-'+f_date[0][2::] }}%20%20\n\t\t{{ row.shift[0] }}%20%20\n\t\t{{ row.litres }}%20%20\n\t\t{{ row.fat }}%20%20\n\t\t{{ row.snf }}%20%20\n\t\t{{ row.get_formatted('rate', doc) }}%20%20\n\t\t{{ row.get_formatted('amount', doc) }}%20\\n\n{%- endfor -%}\n---------------------------------------\\n\nTotal Amount: {{ doc.total_amount }} \\n\nCommission: {{ doc.incentives }}\\n\nTotal Bill: {{ doc.total_bill }}\\n\n---------------------------------------\\n\nAdvance Emi: {{ doc.advance_emi }} \\n\nLoan Emi: {{ doc.loan_emi }} \\n\nFeed And Fodder: {{ doc.feed_and_fodder }} \\n\n---------------------------------------\\n\nAdvance Outstanding: {{ doc.advance_outstanding }} \\n\nLoan Outstanding: {{ doc.loan_outstanding }} \\n\n---------------------------------------\\n\nNet Pay: {{ doc.net_pay }} \\n\">Print</a>\n</body>\n</html></button><br>\n{{doc.name}}<br>\n--------------------------------<br>\nVlcc Name: {{ doc.vlcc_name }}<br>\n{% if (doc.address_display) -%}\n    Address: {% set vlcc_address = doc.address_display.replace('<br>', ', ') %}{{ vlcc_address }}<br>\n{%- endif %}\nMobile No: {{ doc.phone_no }}<br>\nDate: {{doc.date }}<br>\n--------------------------------<br>\nFarmer ID: {{ doc.farmer_id }} <br>\nFamre Name: {{ doc.farmer_name }} <br>\nCattle Type: {{ doc.cattle_type }} <br>\nCollection From: {{doc.collection_from }} <br>\nCollection To: {{ doc.collection_to }} <br>\n---------------------------------------<br>\nSr&nbsp;Date&nbsp;&nbsp;&nbsp;&nbsp;Shift&nbsp;&nbsp;&nbsp;Qty&nbsp;Fat&nbsp;Snf&nbsp;Rate&nbsp;Amt<br>\n{%- for row in doc.fmcr_details -%}\n\t\t{{ row.idx }}&nbsp;\n\t\t{% set f_date = row.date.split('-') %}\n\t\t{{ f_date[2]+'-'+f_date[1]+'-'+f_date[0][2::] }}&nbsp;&nbsp;\n\t\t{{ row.shift[0] }}&nbsp;\n\t\t{{ row.litres }}&nbsp;&nbsp;&nbsp;\n\t\t{{ row.fat }}&nbsp;\n\t\t{{ row.snf }}&nbsp;\n\t\t{{ row.rate }}&nbsp;\n\t\t{{ row.amount }}&nbsp;<br>\n{%- endfor -%}\n---------------------------------------<br>\nTotal Amount: {{ doc.total_amount }} <br>\nCommission: {{ doc.incentives }}<br>\nTotal Bill: {{ doc.total_bill }}<br>\n---------------------------------------<br>\nAdvance Emi: {{ doc.advance_emi }} <br>\nLoan Emi: {{ doc.loan_emi }} <br>\nFeed And Fodder: {{ doc.feed_and_fodder }} <br>\n---------------------------------------<br>\nAdvance Outstanding: {{ doc.advance_outstanding }} <br>\nLoan Outstanding: {{ doc.loan_outstanding }} <br>\n---------------------------------------<br>\nNet Pay: {{ doc.net_pay }} <br>\n<html>\n<body>", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2018-10-25 19:20:17.216380", 
+ "modified_by": "Administrator", 
+ "module": "Dairy Erp", 
+ "name": "POS Bill", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}

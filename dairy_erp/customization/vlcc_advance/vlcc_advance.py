@@ -29,12 +29,15 @@ def create_jv():
 		child_cycl = frappe.db.sql("""select cycle from `tabVlcc Cycle` 
 			where parent =%s""",(row.get('name')),as_dict=1)
 		cc = [i.get('cycle') for i in child_cycl]
-		print "#######################",req_cycle_computation(row),row.get('name')
-		if len(cur_cycl):
-			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
-				make_si(row,cur_cycl[0].get('name'))
+		req_cycle = req_cycle_computation(row)
+		print req_cycle,cur_cycl,row.get('name')
+		if len(req_cycle) > 0:
+			req_cycle.pop(-1)
+		if len(cur_cycl) and len(req_cycle) > 0:
+			if cur_cycl[0].get('name') in req_cycle and cur_cycl[0].get('name') not in cc:
+				make_jv(row,cur_cycl[0].get('name'))
 
-def make_si(data, cur_cycl=None):
+def make_jv(data, cur_cycl=None):
 	try:
 		if data.get('outstanding_amount') > 0:
 			company = frappe.db.get_value("Company",{'is_dairy':1},['name','abbr','cost_center'],as_dict=1)

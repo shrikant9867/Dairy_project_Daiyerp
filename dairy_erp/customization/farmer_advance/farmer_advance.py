@@ -27,9 +27,12 @@ def create_jv():
 		cur_cycl = get_current_cycle(row)
 		child_cycl = frappe.db.sql("""select cycle from `tabFarmer Cycle` where parent =%s""",(row.get('name')),as_dict=1)
 		cc = [i.get('cycle') for i in child_cycl]
-		print req_cycle_computation(row),cur_cycl,"*******************"
-		if len(cur_cycl):
-			if cur_cycl[0].get('name') in req_cycle_computation(row) and cur_cycl[0].get('name') not in cc:
+		req_cycle = req_cycle_computation(row)
+		print req_cycle,cur_cycl,row.get('name')
+		if len(req_cycle) > 0:
+			req_cycle.pop(-1)
+		if len(cur_cycl) and len(req_cycle) > 0:
+			if cur_cycl[0].get('name') in req_cycle and cur_cycl[0].get('name') not in cc:
 				make_jv(row,cur_cycl[0].get('name'))
 
 def make_jv(data, cur_cycl=None):
@@ -62,7 +65,13 @@ def update_advance_doc(data, je_doc, cur_cycl):
 		"cycle":cur_cycl,
 		"sales_invoice": je_doc.name
 		})
-	advance_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data)
+	out_stand_amt = get_jv_amount(data) - data.get('advance_amount') 
+	"""Added by Jitendra, fixes negative outstading amount"""
+	if 0 < out_stand_amt < 1:
+		advance_doc.outstanding_amount = 0
+	else:
+		advance_doc.outstanding_amount = data.get('advance_amount') - get_jv_amount(data)
+	
 	if advance_doc.outstanding_amount == 0:
 		advance_doc.outstanding_amount = 0
 		advance_doc.status = "Paid"
@@ -132,7 +141,6 @@ def req_cycle_computation(data):
 						order by start_date limit {instalment}
 				""".format(date=data.get('date_of_disbursement'),vlcc=data.get('vlcc'),instalment = instalment),as_dict=1,debug=1)
 		req_cycl_list = [i.get('name') for i in req_cycle]
-		# print "##############################",req_cycl_list,data.get('name')
 		return req_cycl_list
 
 	return []

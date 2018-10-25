@@ -28,6 +28,10 @@ frappe.ui.form.on('Farmer Advance', {
 		}
 	},
 	no_of_instalment: function(frm) {
+		if(frm.doc.no_of_instalment <= 0){
+			frm.set_value("no_of_instalment",1)
+			frappe.msgprint("No Of Instalment should be greater than zero")
+		}
 		emi_amount = frm.doc.advance_amount / frm.doc.no_of_instalment
 		if(emi_amount > 0 && emi_amount != 'Infinity') {
 			frm.set_value('emi_amount', emi_amount.toFixed(2))		

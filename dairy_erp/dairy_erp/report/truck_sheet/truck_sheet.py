@@ -54,10 +54,7 @@ def get_data(filters=None):
 								group_concat(long_format_farmer_id),
 								group_concat(associated_vlcc),
 								group_concat(fat+snf),
-								CASE
-								    WHEN status = "Accept" THEN group_concat("G")
-								    WHEN status = "Reject" THEN group_concat("CS")
-								END,
+								group_concat(milkquality),
 								group_concat(numberofcans),
 								group_concat(milkquantity),
 								group_concat(round(milkquantity*fat/1000,2)),
@@ -88,15 +85,22 @@ def get_data(filters=None):
 					row[index] = [flt(val,2) for val in data.split(',')]
 					row[index].append(" ")
 
-	last_row = ["Grand Total",get_total_and_good_milk_qty(date_filters,"Accept"),get_total_and_good_milk_qty(date_filters)]
+	last_row = ["Grand Total",get_total_and_good_milk_qty(date_filters,"Accept"),get_total_and_good_milk_qty(date_filters,"Reject","CS"),get_total_and_good_milk_qty(date_filters,"Reject","CT"),get_total_and_good_milk_qty(date_filters,"Reject","SS")]
 	vmcr_data.append(last_row)
 	return vmcr_data
 
 
-def get_total_and_good_milk_qty(filters,status=None):
+def get_total_and_good_milk_qty(filters,status=None,bad_milk_type=None):
 	cond = " and 1=1 "
 	if status and status == "Accept":
 		cond += " and status = 'Accept' "
+	if status and status == "Reject":
+		if bad_milk_type and bad_milk_type == "CS":
+			cond += " and status = 'Reject' and milkquality =  'CS' "
+		if bad_milk_type and bad_milk_type == "CT":
+			cond += " and status = 'Reject' and milkquality =  'CT' "
+		if bad_milk_type and bad_milk_type == "SS":
+			cond += " and status = 'Reject' and milkquality =  'SS' "
 	qty = frappe.db.sql("""
 		select 
 				sum(milkquantity)

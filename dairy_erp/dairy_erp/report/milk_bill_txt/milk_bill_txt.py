@@ -47,7 +47,7 @@ def get_data(filters=None):
 								END,
 								" 001",
 								RIGHT(long_format_farmer_id,5),
-								ifnull(collectionroute,"    "),
+								RIGHT(collectionroute,3),
 								round(milkquantity,1),
 								round(fat,1),
 								round(snf,1),
@@ -63,6 +63,9 @@ def get_data(filters=None):
 				row[4] = (5 - len(farmerid[1]))*"0"+str(farmerid[1])
 			if len(farmerid) == 1 and farmerid[0] and len(farmerid[0]) < 5:
 				row[4] = (5 - len(farmerid[0]))*"0"+str(farmerid[0])
+		if len(row[5]) < 3:
+			row[5] = (3 - len(row[5]))*"0"+row[5]
+
 		qty = str(row[6]).split(".")
 		fat = str(row[7]).split(".")
 		snf = str(row[8]).split(".")

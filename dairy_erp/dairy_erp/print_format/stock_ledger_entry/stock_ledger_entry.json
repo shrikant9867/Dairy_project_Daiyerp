@@ -1,0 +1,22 @@
+{
+ "align_labels_right": 0, 
+ "creation": "2018-10-25 19:29:08.273569", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Stock Ledger Entry", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "html": "\n<div class=\"container-fluid\">\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-3\"></div>\n\t\t<div class=\"col-xs-4\"></div>\n\t\t<div class=\"col-xs-5\"><h2><b>STOCK LEDGER ENTRY</b><h2></div>\n\t</div>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-6\"></div>\n\t\t<div class=\"col-xs-4\"></div>\n\t\t<div class=\"col-xs-1\"><small><font size=\"2px;\" style=\"margin-left: -23px;\">{{doc.name}}</small></div>\n\t</div>\n<hr>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Item Code</b></div><div class=\"col-xs-7\">{{doc.item_code}}</div>\n\t</div><br>\n  \t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Warehouse</b></div><div class=\"col-xs-7\">{{doc.warehouse}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Posting Date</b></div><div class=\"col-xs-7\">{{doc.posting_date}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Posting Time</b></div><div class=\"col-xs-7\">{{doc.posting_time}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Voucher Type</b></div><div class=\"col-xs-7\">{{doc.voucher_type}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Voucher No</b></div><div class=\"col-xs-7\">{{doc.voucher_no}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Voucher Detail No</b></div><div class=\"col-xs-7\">{{doc.voucher_detail_no}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Actual Quantity</b></div><div class=\"col-xs-7\">{{doc.actual_qty}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Incoming Rate</b></div><div class=\"col-xs-7\">{{doc.get_formatted(\"incoming_rate\")}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Outgoing Rate</b></div><div class=\"col-xs-7\">{{doc.get_formatted(\"outgoing_rate\")}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Stock UOM</b></div><div class=\"col-xs-7\">{{doc.stock_uom}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Actual Qty After Transaction</b></div><div class=\"col-xs-7\">{{doc.qty_after_transaction}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Valuation Rate</b></div><div class=\"col-xs-7\">{{ doc.get_formatted(\"valuation_rate\")}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Stock Value</b></div><div class=\"col-xs-7\">{{doc.get_formatted(\"stock_value\")}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Stock Value Difference</b></div><div class=\"col-xs-7\">{{doc.get_formatted(\"stock_value_difference\")}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Voucher Type</b></div><div class=\"col-xs-7\">{{doc.company}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Fiscal Year</b></div><div class=\"col-xs-7\">{{doc.fiscal_year}}</div>\n\t</div><br>\n\t<div class=\"row\">\n\t\t<div class=\"col-xs-5\"><b>Is Cancelled</b></div><div class=\"col-xs-7\">{{doc.is_cancelled}}</div>\n\t</div>\n</div>", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2018-10-26 19:53:36.613104", 
+ "modified_by": "Administrator", 
+ "module": "Dairy Erp", 
+ "name": "STOCK LEDGER ENTRY", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}

@@ -694,11 +694,26 @@ def is_fpcr_generated(filters):
 	 	'type': ('in', ['Farmer Loan','Farmer Advance']),'reference_party': frappe.db.get_value("Farmer",filters.get('farmer'),'full_name')})
 
 	if filters.get('cycle') and filters.get('farmer'):
-		fpcr_records = frappe.get_all("Farmer Payment Cycle Report",fields=['count(name) as count']\
-				,filters={'cycle': filters.get('cycle'), 'farmer_id': filters.get('farmer')})
-		if len(jv_records) and fpcr_records[0].get('count') == 0:
+		fpcr_records = frappe.db.get_value("Farmer Payment Cycle Report",{'cycle': filters.get('cycle'), 'farmer_id': filters.get('farmer')},"name")
+		if not fpcr_records:
 			return "creat"
 		elif not len(jv_records):
 			return "ncreat"
 
-
+# def get_not_clear_adv(filters):
+# 	not_clear_adv = []
+# 	f_adv = frappe.db.sql("""
+# 		select
+# 			name,
+# 			no_of_instalment,
+# 			fpcr_instalment,
+# 			no_of_instalment - fpcr_instalment as 'difference'
+# 		from
+# 			`tabFarmer Advance`
+# 		where
+# 			 farmer_id = '{2}'
+# 		""".format(filters.get('start_date'),filters.get('end_date'),filters.get('farmer')),as_dict=1,debug=0)
+# 	for adv in f_adv:
+# 		if adv.get('difference') != 1:
+# 			not_clear_adv.append(adv.get('name'))
+# 	return not_clear_adv

@@ -192,6 +192,7 @@ class FarmerPaymentCycleReport(Document):
 		for i in adv_doc.cycle:
 			instalment +=1
 		adv_doc.paid_instalment = instalment
+		adv_doc.fpcr_instalment = instalment
 		if adv_doc.outstanding_amount > 0 :
 			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
 		if adv_doc.outstanding_amount == 0:
@@ -209,6 +210,7 @@ class FarmerPaymentCycleReport(Document):
 		for i in adv_doc.cycle:
 			instalment +=1
 		adv_doc.paid_instalment = instalment
+		adv_doc.fpcr_instalment = instalment
 		if adv_doc.outstanding_amount > 0 :
 			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
 		if adv_doc.outstanding_amount == 0:

@@ -538,8 +538,8 @@ def get_cycle(doctype,text,searchfields,start,pagelen,filters):
 		from
 			`tabFarmer Date Computation`
 		where
-			 end_date < now() and vlcc = '{vlcc}' and name like '{txt}'
-		""".format(vlcc = filters.get('vlcc'),txt= "%%%s%%" % text,as_list=True))
+			 end_date < now() and vlcc = '{vlcc}' and name like '{txt}' and name not in (select cycle from `tabFarmer Payment Cycle Report` where farmer_id = '{farmer}')
+		""".format(farmer = filters.get('farmer') , vlcc = filters.get('vlcc'),txt= "%%%s%%" % text,as_list=True))
 
 def req_cycle_computation(data):
 	

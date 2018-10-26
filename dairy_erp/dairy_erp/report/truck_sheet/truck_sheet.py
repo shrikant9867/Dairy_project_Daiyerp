@@ -51,7 +51,7 @@ def get_data(filters=None):
 								    WHEN shift = "EVENING" THEN "PM"
 								END,
 								collectionroute,
-								group_concat(societyid),
+								group_concat(long_format_farmer_id),
 								group_concat(associated_vlcc),
 								group_concat(fat+snf),
 								CASE
@@ -69,7 +69,7 @@ def get_data(filters=None):
 							where
 							{0} and docstatus = 1
 							group by collectionroute
-							order by date(collectiontime)""".format(date_filters),as_list=1,debug=0)
+							order by date(collectiontime),collectionroute """.format(date_filters),as_list=1,debug=0)
 
 	for row in vmcr_data:
 		for index,data in enumerate(row):	
@@ -79,7 +79,10 @@ def get_data(filters=None):
 					row[index] = row_
 					row[index].append(flt(sum(row_),2))
 				if index == 4 or index == 3 or index == 6:
-					row[index] = [str(val) for val in data.split(',')]
+					if index == 3:
+						row[index] = [str(val.split('_')[3]) for val in data.split(',')]
+					else:
+						row[index] = [str(val) for val in data.split(',')]
 					row[index].append(" ")
 				if index == 5:
 					row[index] = [flt(val,2) for val in data.split(',')]

@@ -38,16 +38,17 @@ class VillageLevelCollectionCentre(Document):
 		if self.is_new():		
 			if frappe.db.sql("select amcu_id from `tabVillage Level Collection Centre` where amcu_id = %s",(self.amcu_id)):
 				frappe.throw(_("Amcu id exist already"))
-			# if frappe.db.sql("select longformatfarmerid from `tabVillage Level Collection Centre` where longformatfarmerid = %s",(self.longformatfarmerid)):
-			# 	frappe.throw(_("Amcu id exist already"))
-			if self.longformatfarmerid:
-				longformat_id_len = self.longformatfarmerid.split('_')
-				if len(longformat_id_len) < 4:
-					frappe.throw("The Long Format Society Id should be of Format OrgiD_CCID_RouteId_SocietyId")
-				if len(longformat_id_len) == 4 and (not longformat_id_len[0] or not longformat_id_len[1] or not longformat_id_len[2] or not longformat_id_len[3]):
-					frappe.throw("The Long Format Society Id should be of Format OrgiD_CCID_RouteId_SocietyId")		
-				if len(longformat_id_len) > 4:
-					frappe.throw("The Long Format Society Id should be of Format OrgiD_CCID_RouteId_SocietyId")							
+			if self.longformatfarmerid or self.longformatsocietyid_e:
+				self.check_longformatsocietyid(self.longformatfarmerid.split('_'))
+				self.check_longformatsocietyid(self.longformatsocietyid_e.split('_'))
+
+	def check_longformatsocietyid(self,longformat_id_len):
+		if len(longformat_id_len) < 4:
+			frappe.throw("The Long Format Society Id should be of Format OrgiD_CCID_RouteId_SocietyId")
+		if len(longformat_id_len) == 4 and (not longformat_id_len[0] or not longformat_id_len[1] or not longformat_id_len[2] or not longformat_id_len[3]):
+			frappe.throw("The Long Format Society Id should be of Format OrgiD_CCID_RouteId_SocietyId")
+		if len(longformat_id_len) > 4:
+			frappe.throw("The Long Format Society Id should be of Format OrgiD_CCID_RouteId_SocietyId")
 
 	def validate_global_eff_credit_percent(self):
 		# global eff-credit % must be between 0-99

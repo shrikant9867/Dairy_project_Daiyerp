@@ -586,6 +586,8 @@ def get_vmcr(start_date, end_date, vlcc, cycle=None):
 	for i in vmcr:
 		amount += i.get('amount')
 		qty += i.get('milkquantity')
+		
+	amount = flt(amount,2)
 	return {
 		"vmcr":vmcr, 
 		"incentive": get_incentives(amount, qty, vlcc) or 0, 

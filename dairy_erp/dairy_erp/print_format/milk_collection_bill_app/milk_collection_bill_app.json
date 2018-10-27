@@ -1,0 +1,22 @@
+{
+ "align_labels_right": 0, 
+ "creation": "2018-11-02 10:52:46.485367", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Farmer Payment Cycle Report", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "html": "<html>\n<body>\n<a href=\"printintent:// \nMilk Bill Collection \\n\n                               {{doc.name}} \\n\n------------------------------------------------------------\\n\nVlcc Name: {{ doc.vlcc_name }} \\n\n\n{% if (doc.address_display) -%}\n    Address:\n    {% set vlcc_address = doc.address_display.replace('<br>', ', ') %}\n    {{ vlcc_address }}\n{%- endif %}\n\\nMobile No: {{ doc.phone_no }}\\n\nDate: {{doc.date }} \\n\n---------------------------------------\\n\nFarmer ID: {{ doc.farmer_id }} \\n\nFamre Name: {{ doc.farmer_name }} \\n\nCattle Type: {{ doc.cattle_type }} \\n\nCollection From: {{doc.collection_from }} \\n\nCollection To: {{ doc.collection_to }} \\n\n---------------------------------------\\n\nSr%20  Date%20%20%20%20%20%20 Shift%20%20%20%20%20  Qty%20  Fat%20\\n\nSnf%20  Rate%20  Amt\t\\n\n\n{%- for row in doc.fmcr_details -%}\n\t\t{{ row.idx }}%20\n\t\t%20%20%20{{ row.date }}%20%20%20\n\t\t%20%20{{ row.shift }}%20\n\t\t%20%20{{ row.litres }}%20%20%20\n\t\t%20%20{{ row.fat }}%20\\n\n\t\t{{ row.snf }}%20\n\t\t%20%20%20{{ row.get_formatted('rate', doc) }}%20\n\t\t%20%20%20%20%20%20{{ row.get_formatted('amount', doc) }}%20\\n\n{%- endfor -%}\n---------------------------------------\\n\nTotal Amount: {{ doc.total_amount }} \\n\nCommission: {{ doc.incentives }}\\n\nTotal Bill: {{ doc.total_bill }}\\n\n---------------------------------------\\n\nAdvance Emi: {{ doc.advance_emi }} \\n\nLoan Emi: {{ doc.loan_emi }} \\n\nFeed And Fodder : {{ doc.feed_and_fodder }} \\n\n---------------------------------------\\n\nAdvance Outstanding: {{ doc.advance_outstanding }} \\n\nLoan Outstanding: {{ doc.loan_outstanding }} \\n\n---------------------------------------\\n\nNet Pay: {{ doc.net_pay }} \\n\">Click For Intent</a>\n</body>\n</html>", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2018-10-25 11:17:58.865681", 
+ "modified_by": "Administrator", 
+ "module": "Dairy Erp", 
+ "name": "Milk Collection Bill App", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}

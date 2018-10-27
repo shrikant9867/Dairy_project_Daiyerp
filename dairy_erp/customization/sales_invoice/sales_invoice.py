@@ -87,6 +87,7 @@ def validate_local_sale(doc, method):
 	"""
 	Fetch allow_negative_effective_credit from VLCC
 	"""
+	calculate_emi(doc)
 	if doc.farmer and not doc.local_sale_type:
 		frappe.throw("Please Select Local Sale Type Either <b>No Advance</b> or <b>Feed And Fodder Advance</b>")	
 	
@@ -124,7 +125,7 @@ def validate_warehouse_qty(doc):
 
 @frappe.whitelist()
 def payment_entry(doc, method):
-	if doc.local_sale  or doc.service_note and doc.local_sale_type == "No Advance":
+	if (doc.local_sale  or doc.service_note) and doc.local_sale_type == "No Advance":
 		input_ = get_farmer_config(doc.farmer,doc.name, doc.company).get('percent_eff_credit') if doc.farmer else 0
 		if doc.local_sale and doc.customer_or_farmer == "Farmer":
 		# if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.multimode_payment:
@@ -333,3 +334,7 @@ def get_net_off(farmer, company):
 	if len(get_data(fliters)):
 		return round(get_data(fliters)[0][11],2)
 	else: return 0
+
+def calculate_emi(doc):
+	if doc.local_sale == 1 and doc.local_sale_type == "Feed And Fodder Advance":
+		doc.emi_amount = doc.grand_total / doc.no_of_instalment

@@ -28,7 +28,7 @@ dairy_erp.setup.slides_settings = [
 			{
 					fieldtype: 'Check',
 					fieldname: 'is_material_request_item_editable',
-					label: __('Is Material Request Item Editable'),
+					label: __('Is Material Request Item Non Editable'),
 					default: 0,
 					description:__('After Enabling CheckBox, VLCC and Camp Office user cannot edit quantity and cannot delete a row in item table having a reference of Material Indent.')
 			}

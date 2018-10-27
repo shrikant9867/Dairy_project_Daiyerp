@@ -47,11 +47,25 @@
 						    <td>{%= flt(val.vmcr_amount,2) %}</td>
 						    
 						    <td>{%= flt(val.spoil_qty,2) %}</td>
-						    <td>{%= flt(val.spoil_fat,2) %}</td>
-						    <td>{%= flt(val.spoil_snf,2) %}</td>
-						    <td>{%= flt(val.spoil_rate,2) %}</td>
-						    <td>{%= flt(val.spoil_amount,2) %}</td>
+						    {% if (val.spoil_qty > 0) { %}
+						    	<td>{%= flt(val.spoil_fat/val.spoil_qty,2) %}</td>
+						    {% } else { %}
+						    	<td>{%= 0 %}</td>
+						    {% } %}
 
+						    {% if (val.spoil_qty > 0) { %}
+						    	<td>{%= flt(val.spoil_snf/val.spoil_qty,2) %}</td>
+						    {% } else { %}
+						    	<td>{%= 0 %}</td>
+						    {% } %}
+						    
+						    {% if (val.spoil_qty > 0) { %}
+						    	<td>{%= flt(val.spoil_amount/val.spoil_qty,2) %}</td>
+						    {% } else { %}
+						    	<td>{%= 0 %}</td>
+						    {% } %}
+
+						    <td>{%= flt(val.spoil_amount,2) %}</td>
 						    <td>{%= flt(val.excess_qty,2) %}</td>
 						    <td>{%= flt(val.short_qty,2) %}</td>
 						    <td>{%= flt(val.profit,2) %}</td>

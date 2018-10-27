@@ -192,6 +192,7 @@ class FarmerPaymentCycleReport(Document):
 		for i in adv_doc.cycle:
 			instalment +=1
 		adv_doc.paid_instalment = instalment
+		adv_doc.fpcr_instalment = instalment
 		if adv_doc.outstanding_amount > 0 :
 			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
 		if adv_doc.outstanding_amount == 0:
@@ -209,6 +210,7 @@ class FarmerPaymentCycleReport(Document):
 		for i in adv_doc.cycle:
 			instalment +=1
 		adv_doc.paid_instalment = instalment
+		adv_doc.fpcr_instalment = instalment
 		if adv_doc.outstanding_amount > 0 :
 			adv_doc.emi_amount = (float(adv_doc.outstanding_amount)) / (float(adv_doc.no_of_instalment) + float(adv_doc.extension) - float(adv_doc.paid_instalment))
 		if adv_doc.outstanding_amount == 0:
@@ -358,15 +360,15 @@ class FarmerPaymentCycleReport(Document):
 				
 
 			if advance_type == "Feed And Fodder Advance":
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'debit', amount )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'credit', 0 )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'debit_in_account_currency', amount )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'credit_in_account_currency', 0 )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'posting_date', self.collection_to )
 
 				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_no},\
@@ -433,6 +435,7 @@ def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
 		amount += i.get('amount')
 		qty += i.get('milkquantity')
 	
+	amount = flt(amount,2)
 	return {
 		"fmcr":fmcr, 
 		"incentive": get_incentives(amount, qty, vlcc) or 0, 
@@ -537,8 +540,8 @@ def get_cycle(doctype,text,searchfields,start,pagelen,filters):
 		from
 			`tabFarmer Date Computation`
 		where
-			 end_date < now() and vlcc = '{vlcc}' and name like '{txt}'
-		""".format(vlcc = filters.get('vlcc'),txt= "%%%s%%" % text,as_list=True))
+			 end_date < now() and vlcc = '{vlcc}' and name like '{txt}' and name not in (select cycle from `tabFarmer Payment Cycle Report` where farmer_id = '{farmer}')
+		""".format(farmer = filters.get('farmer') , vlcc = filters.get('vlcc'),txt= "%%%s%%" % text,as_list=True))
 
 def req_cycle_computation(data):
 	

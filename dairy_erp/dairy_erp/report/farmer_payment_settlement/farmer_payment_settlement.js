@@ -155,6 +155,7 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 					= this.checked ? true : false;
 		})
 	},
+
 	is_fpcr_generated: function(report){
 		frappe.call({
 				method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.is_fpcr_generated",
@@ -224,7 +225,10 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 				"label": __("Mode Of Payment"),
 				"fieldname": "mode_of_payment",
 				"fieldtype": "Link",
-				"options":"Mode of Payment"
+				"options":"Mode of Payment",
+				onchange: () => {
+					frappe.query_reports['Farmer Payment Settlement'].set_check_reqd(dialog)
+				}
 			},
 			{fieldtype: "Section Break",fieldname:"sec_brk"},
 			{
@@ -272,7 +276,6 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 			}
 		}
 	})
-	
 	dialog.show()
 
 	dialog.set_primary_action(__("Submit"), function() {
@@ -329,6 +332,19 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 		})
 	})
 	},
+
+
+	set_check_reqd:function(dialog){
+		if(dialog.get_value('mode_of_payment') == "Cash"){
+			dialog.get_field('ref_no').df.reqd = 0;
+			dialog.get_field('ref_no').refresh();
+		}
+		else{
+			dialog.get_field('ref_no').df.reqd = 1;
+			dialog.get_field('ref_no').refresh();
+		}
+	},
+
 	validate_amount:function(dialog){
 		var data = dialog.get_values()
 		if(flt(data.set_amt,2) && flt(data.set_amt_manual,2) && (flt(data.set_amt_manual,2) > flt(flt(data.payble,2) - flt(data.set_amt,2),2))){		

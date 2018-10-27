@@ -1,8 +1,16 @@
+var i = 0;
 frappe.pages['dairy-dashboard'].on_page_load = function(wrapper) {
     new frappe.dairy_dashboard({
         $wrapper: $(wrapper)
     });
     frappe.breadcrumbs.add("Dairy Erp");
+}
+
+frappe.pages['dairy-dashboard'].refresh = function(wrapper) {
+    if (i!=0) {
+        location.reload()
+    }
+    i=i+1
 }
 
 frappe.dairy_dashboard = Class.extend({

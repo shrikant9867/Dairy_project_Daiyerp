@@ -42,6 +42,7 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 
 	validate: function(frm) {
 		frm.trigger("calculate_amount");
+		frm.trigger("validate_milk_quality");
 	},
 
 	calculate_amount: function(frm) {
@@ -53,6 +54,19 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 		}
 	},
 
+	validate_milk_quality: function(frm){
+		if(frm.doc.status == "Reject" && frm.doc.milkquality == "G") {
+			frm.set_value("milkquality", "")
+			frm.set_value("milk_quality_type", "")
+			frappe.throw("For Reject Stauts Please Select Milk Quality Type as 'Curdled by Society' or 'Curdled by Transporter' or 'Sub Standard' ")
+		}
+		if (in_list(['Curdled by Society', 'Curdled by Transporter', 'Sub Standard'], frm.doc.milk_quality_type) && frm.doc.status == "Accept"){
+			frm.set_value("milkquality", "")
+			frm.set_value("milk_quality_type", "")
+			frappe.throw("For Accept Stauts Please Select Milk Quality Type as 'Good' ")
+		}
+	},
+
 	onload: function(frm) {
 		if (has_common(frappe.user_roles, ["Chilling Center Manager", "Chilling Center Operator"])){		
 			frappe.db.get_value("User",frappe.session.user,"branch_office", function(v){
@@ -61,7 +75,7 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 				})
 			})
 		}
-		if(frm.doc.status){
+		/*if(frm.doc.status){
 			if(frm.doc.status == "Accept") {
 				frm.set_df_property("milk_quality_type", "options", ['Good']);
 				frm.set_value("milk_quality_type","Good")
@@ -72,17 +86,15 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 				frm.set_value("milk_quality_type","")
 				frm.set_value("milkquality","")
 			}
-		}
+		}*/
 	},
 
 	status: function(frm){
 		if(frm.doc.status == "Accept") {
-			frm.set_df_property("milk_quality_type", "options", ['Good']);
 			frm.set_value("milk_quality_type","Good")
 			frm.set_value("milkquality","G")
 		}
 		else if(frm.doc.status == "Reject") {
-			frm.set_df_property("milk_quality_type", "options", ['Curdled by Society','Curdled by Transporter','Sub Standard']);
 			frm.set_value("milk_quality_type","")
 			frm.set_value("milkquality","")
 		}

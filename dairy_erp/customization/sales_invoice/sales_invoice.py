@@ -125,7 +125,7 @@ def validate_warehouse_qty(doc):
 
 @frappe.whitelist()
 def payment_entry(doc, method):
-	if doc.local_sale  or doc.service_note and doc.local_sale_type == "No Advance":
+	if (doc.local_sale  or doc.service_note) and doc.local_sale_type == "No Advance":
 		input_ = get_farmer_config(doc.farmer,doc.name, doc.company).get('percent_eff_credit') if doc.farmer else 0
 		if doc.local_sale and doc.customer_or_farmer == "Farmer":
 		# if doc.local_sale and doc.customer_or_farmer == "Farmer" and doc.by_credit and doc.multimode_payment:

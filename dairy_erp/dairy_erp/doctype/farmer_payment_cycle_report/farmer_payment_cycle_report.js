@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Farmer Payment Cycle Report', {
 	refresh: function(frm) {
-
+		frm.set_df_property('vlcc_name', 'read_only', 1);
 	},
 	onload: function(frm) {
 		if(frm.doc.__islocal){	
@@ -295,6 +295,6 @@ get_address =  function(frm) {
 cur_frm.fields_dict['cycle'].get_query = function(doc) {
 	return {
 		"query": "dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report.get_cycle",
-		filters: {'vlcc': doc.vlcc_name}
+		filters: {'vlcc': doc.vlcc_name, 'farmer': doc.farmer_id}
 	}
 }

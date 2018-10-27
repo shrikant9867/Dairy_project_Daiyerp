@@ -583,7 +583,7 @@ def make_uom_config(doc):
 def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc):
 	try:
 		rate, milkquantity = 1, 1
-		if row.get('milk_quality_type') in ['CT', 'CS', 'G'] and row.get('rate'):
+		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
 			rate = row.get('rate')
 		customer = frappe.db.get_value("Village Level Collection Centre", vlcc, "plant_office")
 		warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": row.get('farmerid')}, 'warehouse')
@@ -624,7 +624,7 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost_center, response_dict, dn_name, vmrc):
 	try:
 		rate = 0
-		if row.get('milk_quality_type') in ['CT', 'CS', 'G'] and row.get('rate'):
+		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
 			rate = row.get('rate')
 		days = frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') if frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') else 0
  		si_obj = frappe.new_doc("Sales Invoice")
@@ -636,7 +636,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
  		{
  			"item_code": item_.item_code,
  			"qty":row.get('milkquantity'),
- 			"rate": 0,
+ 			"rate": rate,
  			"amount": flt(rate * row.get('milkquantity'),2),
  			"warehouse": warehouse,
 			"cost_center": cost_center,

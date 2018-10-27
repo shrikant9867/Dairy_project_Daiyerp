@@ -7,6 +7,6 @@ def execute():
 		update 
 			`tabAddress` 
 		set 
-			warehouse = 'Pattambi - MM', rejected_warehouse = 'Pattambi-Rejected - MM', income_account = 'Pattambi Income - MM', expence_account = 'Pattambi Expense - MM', stock_account = 'Pattambi Stock - MM'
+			warehouse = 'Pattambi - MM', rejected_warehouse = 'Pattambi-Rejected - MM', income_account = 'Pattambi Income - MM', expense_account = 'Pattambi Expense - MM', stock_account = 'Pattambi Stock - MM'
 		where 
 			name = 'Pattambi-Chilling Centre' """)

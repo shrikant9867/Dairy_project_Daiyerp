@@ -46,10 +46,18 @@ class VlccMilkCollectionRecord(Document):
 		self.posting_date = getdate(self.collectiontime)
 
 	def validate_route(self):
-		if self.long_format_farmer_id:
+		if self.long_format_farmer_id and self.shift == "MORNING":#Created Shrikant 20:00
 			farmerid_len = self.long_format_farmer_id.split('_')
 			if len(farmerid_len) >= 4 and farmerid_len[2]:
 				self.collectionroute = str(farmerid_len[2])
+		if self.long_format_farmer_id_e and self.shift == "EVENING":
+			farmerid_len = self.long_format_farmer_id_e.split('_')
+			if len(farmerid_len) >= 4 and farmerid_len[2]:
+				self.collectionroute = str(farmerid_len[2])#End code
+		# if self.long_format_farmer_id:
+		# 	farmerid_len = self.long_format_farmer_id.split('_')
+		# 	if len(farmerid_len) >= 4 and farmerid_len[2]:
+		# 		self.collectionroute = str(farmerid_len[2])
 				# frappe.throw("The Long Format Farmer Id should be of Format OrgiD_CCID_RouteId_SocietyId")		
 		# if self.collectionroute and len(str(self.collectionroute)) < 3:
 		# 	frappe.throw("Collection Route contain atleast 3 Charaters")
@@ -126,6 +134,7 @@ class VlccMilkCollectionRecord(Document):
 			pr = frappe.new_doc("Purchase Receipt")
 			pr.supplier =  frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, "name")
 			pr.vlcc_milk_collection_record = self.name
+			pr.milk_type = self.milkquality
 			pr.company = frappe.db.get_value("Company",{"is_dairy":1},'name')
 			pr.camp_office = camp_office
 			pr.append("items",

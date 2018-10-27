@@ -360,15 +360,15 @@ class FarmerPaymentCycleReport(Document):
 				
 
 			if advance_type == "Feed And Fodder Advance":
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'debit', amount )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'credit', 0 )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'debit_in_account_currency', amount )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'credit_in_account_currency', 0 )
-				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_no},\
+				frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_no},\
 							'posting_date', self.collection_to )
 
 				frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_no},\

@@ -428,7 +428,7 @@ def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
 			`tabFarmer Milk Collection Record`
 		where 
 			associated_vlcc = '{0}' and date(rcvdtime) between '{1}' and '{2}' and farmerid= '{3}'
-			""".format(vlcc, start_date, end_date, farmer_id),as_dict=1)
+			""".format(vlcc, "2018-10-01", "2018-10-31", farmer_id),as_dict=1)
 	amount = 0
 	qty = 0
 	for i in fmcr:
@@ -436,8 +436,10 @@ def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
 		qty += i.get('milkquantity')
 	
 	amount = flt(amount,2)
+	print fmcr
 	return {
-		"fmcr":fmcr, 
+		"fmcr":fmcr,
+		"weighted_data" : get_weighted_fmcr_data(fmcr), # Added by Niraj
 		"incentive": get_incentives(amount, qty, vlcc) or 0, 
 		"advance": get_advances(start_date, end_date, vlcc, farmer_id, cycle) or 0,
 		"loan": get_loans(start_date, end_date, vlcc, farmer_id, cycle) or 0,
@@ -447,6 +449,23 @@ def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
 		"child_advance": get_advance_child(start_date, end_date, vlcc, farmer_id, cycle)
 	}
 
+def get_weighted_fmcr_data(fmcr_data):
+	milkquantity, fat, snf, rate = 0, 0, 0, 0
+	
+	for data in fmcr_data:
+		milkquantity += data.get('milkquantity')
+		fat += data.get('fat')*data.get('milkquantity')
+		snf += data.get('snf')*data.get('milkquantity') 
+		rate += data.get('rate')*data.get('milkquantity')
+
+	fat, snf , rate = fat/milkquantity, snf/milkquantity, rate/milkquantity
+
+	return {
+		'milkquantity' : milkquantity,
+		'fat' : fat,
+		'snf' : snf,
+		'rate' : rate,
+	} 
 
 def get_incentives(amount, qty, vlcc=None):
 	if vlcc and amount and qty:

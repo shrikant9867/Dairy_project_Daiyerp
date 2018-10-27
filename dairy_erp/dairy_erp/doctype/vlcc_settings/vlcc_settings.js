@@ -132,13 +132,13 @@ frappe.ui.form.on('VLCC Settings', {
 				args: {
 					doctype: "Village Level Collection Centre",
 					filters: {"name": frm.doc.vlcc},
-					fieldname: ["longformatfarmerid"]
+					fieldname: ["longformatsocietyid_m"]
 				},
 				callback: function(r){
 					if(r.message){
 						if(frm.doc.vlcc){
-							frm.set_value("farmer_id1",r.message.longformatfarmerid+"_9994")
-							frm.set_value("farmer_id2",r.message.longformatfarmerid+"_0999")
+							frm.set_value("farmer_id1",r.message.longformatsocietyid_m+"_9994")
+							frm.set_value("farmer_id2",r.message.longformatsocietyid_m+"_0999")
 						}
 						else{
 							frm.set_value("farmer_id1","0999")

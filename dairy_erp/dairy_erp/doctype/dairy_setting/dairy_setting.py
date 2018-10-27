@@ -43,7 +43,7 @@ def get_csv(doc):
 			if count != 0:
 				if  not frappe.db.exists("Village Level Collection Centre",row[0]) and row[0] !="":
 					if not frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row[7]},"name"):
-						if not frappe.db.get_value("Village Level Collection Centre",{"longformatfarmerid":row[8]},"name"): #SD 17-10-2018 17:00
+						if not frappe.db.get_value("Village Level Collection Centre",{"longformatsocietyid_m":row[8]},"name"): #SD 17-10-2018 17:00
 							if row[8]:#SD 17-10-2018 17:00
 								longformat_id_len = row[8].split('_')#SD 17-10-2018 17:00
 								if len(longformat_id_len) < 4: #SD 17-10-2018 17:00
@@ -66,7 +66,7 @@ def get_csv(doc):
 								vlcc.vlcc_type = row[9]
 								vlcc.global_percent_effective_credit = row[10]
 								vlcc.chilling_centre =row[11]
-								vlcc.longformatfarmerid = row [8] #SD 17-10-2018 17:00
+								vlcc.longformatsocietyid_m = row [8] #SD 17-10-2018 17:00
 								vlcc.amcu_id = row[7]  #SD 17-10-2018 17:00
 
 								if int(row[12]) == 1:

@@ -12,7 +12,7 @@ frappe.ui.form.on('Village Level Collection Centre', {
 		frm.set_df_property("email_id", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("abbr", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("amcu_id", "read_only", frm.doc.__islocal ? 0:1);
-		frm.set_df_property("longformatsocietyid_m", "read_only", frm.doc.__islocal ? 0:1);
+		frm.set_df_property("longformatfarmerid", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("longformatsocietyid_e", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("name1", "read_only", frm.doc.__islocal ? 0:1);
 		frm.set_df_property("camp_office", "read_only", frm.doc.__islocal ? 0:1);
@@ -23,6 +23,10 @@ frappe.ui.form.on('Village Level Collection Centre', {
 		// address mandatory after save
 		frm.toggle_reqd("address", frm.doc.__islocal ? 0:1)
 		frm.events.set_dynamic_cc(frm)
+		if(frappe.user.has_role("Stellapps Support")){
+			frm.set_df_property("longformatfarmerid", "read_only", 0);
+			frm.set_df_property("longformatsocietyid_e", "read_only", 0);
+		}
 	},
 	
 	onload: function(frm) {

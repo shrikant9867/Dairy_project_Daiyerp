@@ -38,8 +38,8 @@ class VillageLevelCollectionCentre(Document):
 		if self.is_new():		
 			if frappe.db.sql("select amcu_id from `tabVillage Level Collection Centre` where amcu_id = %s",(self.amcu_id)):
 				frappe.throw(_("Amcu id exist already"))
-			if self.longformatsocietyid_m or self.longformatsocietyid_e:
-				self.check_longformatsocietyid(self.longformatsocietyid_m.split('_'))
+			if self.longformatfarmerid or self.longformatsocietyid_e:
+				self.check_longformatsocietyid(self.longformatfarmerid.split('_'))
 				self.check_longformatsocietyid(self.longformatsocietyid_e.split('_'))
 
 	def check_longformatsocietyid(self,longformat_id_len):

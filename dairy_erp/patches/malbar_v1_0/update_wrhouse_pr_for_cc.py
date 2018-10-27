@@ -7,6 +7,7 @@ import frappe
 
 def execute():
 	company = frappe.db.get_value("Company",{'is_dairy':1},'name')
+	insert_field_in_pr()
 	if company:
 		update_milktype_on_pr()
 		pr_list = frappe.get_all("Purchase Receipt",filters={'company': company, \
@@ -43,3 +44,6 @@ def update_bin(child_doc):
 	frappe.db.sql("""
 		update `tabBin` set warehouse = 'Pattambi - MM' where warehouse = 'Stores - MM'
 		 and item_code = 'COW Milk'""")
+
+def insert_field_in_pr():
+	pass

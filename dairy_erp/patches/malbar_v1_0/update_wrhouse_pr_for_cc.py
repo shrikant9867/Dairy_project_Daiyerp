@@ -26,13 +26,13 @@ def update_child_warehouse(child_doc, company):
 				parent=%s and name=%s""",(child_doc.get('parent'),child_doc.get('name')),debug=1)
 	
 def update_milktype_on_pr():
-	for row in frappe.get_all("Vlcc Milk Collection Record",fields=['milk_quality_type','name']):
+	for row in frappe.get_all("Vlcc Milk Collection Record",fields=['milkquality','name']):
 		purchase_rec = frappe.db.get_value("Purchase Receipt",{'vlcc_milk_collection_record':\
 								row.get('name')},'name')
 		frappe.db.sql("""
 				update `tabPurchase Receipt` set milk_type =%s 
 			where 
-				name = %s""",(row.get('milk_quality_type'),purchase_rec),debug=0)
+				name = %s""",(row.get('milkquality'),purchase_rec),debug=0)
 
 def update_gl_entry(child_doc):
 	frappe.db.sql("""

@@ -483,16 +483,37 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			vmrc_doc.vmcr_created = is_vmcr_created
 			vmrc_doc.collectiondate =  collectiondate
 			vmrc_doc.posting_date = getdate(data.get('collectiontime'))
-			vmrc_doc.shift = data.get('shift')
-			vmrc_doc.long_format_farmer_id = data.get('longformatfarmerid')
+			# vmrc_doc.shift = data.get('shift')
+			# vmrc_doc.long_format_farmer_id = data.get('longformatfarmerid')
+			# vmrc_doc.starttime = data.get('starttime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
+			# vmrc_doc.endtime = data.get('endtime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
+			# vmrc_doc.endshift = 1 if data.get('endshift') == True else 0
+			# vmrc_doc.update(row)
+			# vmrc_doc.update({
+			# 	'amount':flt(row.get('rate') * row.get('milkquantity'),2)
+			# })
+			vmrc_doc.shift = data.get('shift')#creats Shrikant 27-10-18 20:24
+			if data.get('shift') == "MORNING":
+				vmrc_doc.long_format_farmer_id = row.get('longformatfarmerid')
+				farmerid_len = row.get('longformatfarmerid').split('_')
+				if len(farmerid_len) >= 4 and farmerid_len[2]:
+					collectionroute = str(farmerid_len[2])
+
+				#vmrc_doc.long_format_farmer_id = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row.get('farmerid')},"longformatfarmerid")
+			if data.get('shift') == "EVENING":
+				vmrc_doc.long_format_farmer_id_e = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row.get('farmerid')},"longformatsocietyid_e")
+				farmerid_len = vmrc_doc.long_format_farmer_id_e.split('_')
+				if len(farmerid_len) >= 4 and farmerid_len[2]:
+					collectionroute = str(farmerid_len[2])
 			vmrc_doc.starttime = data.get('starttime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
 			vmrc_doc.endtime = data.get('endtime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
 			vmrc_doc.endshift = 1 if data.get('endshift') == True else 0
 			vmrc_doc.update(row)
 			vmrc_doc.update({
-				'amount':flt(row.get('rate') * row.get('milkquantity'),2)
+				'amount':flt(row.get('rate') * row.get('milkquantity'),2),
+				'collectionroute':collectionroute
 			})
-			
+			#end here SD
 			# vmrc_doc.milkquality = row.get('milkquality')
 			vmrc_doc.flags.ignore_permissions = True
 			vmrc_doc.flags.is_api = True
@@ -582,8 +603,8 @@ def make_uom_config(doc):
 
 def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc):
 	try:
-		rate, milkquantity = 1, 1
-		if row.get('milk_quality_type') in ['CT', 'CS', 'G'] and row.get('rate'):
+		rate = 1
+		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
 			rate = row.get('rate')
 		customer = frappe.db.get_value("Village Level Collection Centre", vlcc, "plant_office")
 		warehouse = frappe.db.get_value("Village Level Collection Centre", {"amcu_id": row.get('farmerid')}, 'warehouse')
@@ -599,9 +620,9 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 			"description": item_.item_code,
 			"uom": "Litre",
 			"qty": row.get('milkquantity'),
-			"rate": row.get('rate'),
+			"rate": rate,
 			"price_list_rate": rate,
-			"amount": flt(row.get('rate') * row.get('milkquantity'),2),
+			"amount": flt(rate * row.get('milkquantity'),2),
 			"warehouse": warehouse,
 			"cost_center": cost_center
 		})
@@ -624,7 +645,7 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost_center, response_dict, dn_name, vmrc):
 	try:
 		rate = 0
-		if row.get('milk_quality_type') in ['CT', 'CS', 'G'] and row.get('rate'):
+		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
 			rate = row.get('rate')
 		days = frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') if frappe.db.get_value("VLCC Settings", vlcc, 'configurable_days') else 0
  		si_obj = frappe.new_doc("Sales Invoice")
@@ -636,7 +657,7 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
  		{
  			"item_code": item_.item_code,
  			"qty":row.get('milkquantity'),
- 			"rate": 0,
+ 			"rate": rate,
  			"amount": flt(rate * row.get('milkquantity'),2),
  			"warehouse": warehouse,
 			"cost_center": cost_center,
@@ -654,9 +675,14 @@ def sales_invoice_against_dairy(data, row, customer, warehouse, item_,vlcc, cost
 
 def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co,warehouse=None):
 	try:
+		rate = 0
+		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
+			rate = row.get('rate')
+
 		purchase_rec = frappe.new_doc("Purchase Receipt")
 		purchase_rec.supplier =  vlcc
 		purchase_rec.vlcc_milk_collection_record = vmrc
+		purchase_rec.milk_type = row.get('milkquality')
 		purchase_rec.company = company
 		purchase_rec.chilling_centre = frappe.db.get_value("Address", {"centre_id" : data.get('societyid')},'name')
 		# purchase_rec.camp_office = co
@@ -667,9 +693,9 @@ def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,c
 				"description": item_.item_code,
 				"uom": "Litre",
 				"qty": row.get('milkquantity'),
-				"rate": row.get('rate'),
-				"price_list_rate": row.get('rate'),
-				"amount": flt(row.get('milkquantity') * row.get('rate'),2),
+				"rate": rate,
+				"price_list_rate": rate,
+				"amount": flt(row.get('milkquantity') * rate,2),
 				"warehouse": warehouse #frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse')
 			}
 		)
@@ -705,6 +731,9 @@ def create_item(row):
 def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co,warehouse=None):
 
 	try:
+		rate = 0
+		if row.get('milkquality') in ['CT', 'CS', 'G'] and row.get('rate'):
+			rate = row.get('rate')
 		dairy_setting = frappe.get_doc("Dairy Setting")
 		days = dairy_setting.configurable_days if dairy_setting.configurable_days else 0
 		pi_obj = frappe.new_doc("Purchase Invoice")
@@ -722,8 +751,8 @@ def purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict
 				"description": item_.item_code,
 				"uom": "Litre",
 				"qty": row.get('milkquantity'),
-				"rate": row.get('rate'),
-				"amount": flt(row.get('rate') * row.get('milkquantity'),2),
+				"rate": rate,
+				"amount": flt(rate * row.get('milkquantity'),2),
 				"warehouse": warehouse, #frappe.db.get_value("Address", {"centre_id":data.get('societyid')}, 'warehouse'),
 				"purchase_receipt": pr_co
 			}

@@ -110,10 +110,51 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 	},
 	
 	associated_vlcc:function(frm){
-		if(frm.doc.associated_vlcc && frm.doc.long_format_farmer_id){
+		/*if(frm.doc.associated_vlcc && frm.doc.long_format_farmer_id){
 			var collectionroute = frm.doc.long_format_farmer_id.split('_')[2]
 			frm.set_value("collectionroute",collectionroute)
-		}
+		}*/
+		//Created by Shrikant 15:00
+			frappe.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Village Level Collection Centre",
+					filters: {"name": frm.doc.associated_vlcc },
+					fieldname: ["longformatfarmerid","longformatsocietyid_e"]
+				},
+				async:false,
+				callback: function(r){
+					if(r.message){
+						if (frm.doc.shift == "MORNING") {
+							frm.set_value("long_format_farmer_id",r.message.longformatfarmerid)
+							frm.refresh_fields('long_format_farmer_id')
+							 if(frm.doc.associated_vlcc && frm.doc.long_format_farmer_id){
+							 var collectionroute = frm.doc.long_format_farmer_id.split('_')[2]
+							 frm.set_value("collectionroute",collectionroute)
+							 }
+						}
+						else if(frm.doc.shift == "EVENING"){
+							frm.set_value("long_format_farmer_id_e",r.message.longformatsocietyid_e)
+							frm.refresh_fields('long_format_farmer_id_e')
+							 if(frm.doc.associated_vlcc && frm.doc.long_format_farmer_id_e){
+							 var collectionroute = frm.doc.long_format_farmer_id_e.split('_')[2]
+							 frm.set_value("collectionroute",collectionroute)
+							 }
+						}
+
+
+					}
+				}
+			});
+		//end
+	},
+	shift:function(frm){
+		frm.set_value("associated_vlcc","");
+		frm.set_value("farmerid","");
+		frm.set_value("long_format_farmer_id","");
+		frm.set_value("long_format_farmer_id_e","");
+		frm.set_value("collectionroute","");
+
 	}
 
 });

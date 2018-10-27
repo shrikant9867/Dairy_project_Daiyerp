@@ -24,41 +24,52 @@
 </table>
 {% for(var i=0, l=data.length; i<l; i++) { %}
 	{% if (i == l-1) { %}
-		<div class="row bold">
-			<div class="col-xs-2">Grand Total</div>
-			<div class="col-xs-10"></div>
-		</div>
+		<hr size="100">
+			<div class="row bold">
+				<div class="col-xs-4">Grand Total:</div>
+				<div class="col-xs-8"></div>
+			</div>
 
-		<div class="row bold">
-			<div class="col-xs-1"></div>
-			<div class="col-xs-2">Good Milk :</div>
-			<div class="col-xs-3 text-left">{%= data[i][__("Shift")] %}</div>
-			<div class="col-xs-6"></div>
-		</div>
-		<div class="row bold">
-			<div class="col-xs-1"></div>
-			<div class="col-xs-5">Curdled by Society (CS):</div>
-			<div class="col-xs-2 text-left">{%= data[i][__("Route")] %}</div>
-			<div class="col-xs-4"></div>
-		</div>
-		<div class="row bold">
-			<div class="col-xs-1"></div>
-			<div class="col-xs-5">Curdled by Transporter (CT):</div>
-			<div class="col-xs-2 text-left">{%= data[i][__("CC")] %}</div>
-			<div class="col-xs-4"></div>
-		</div>
-		<div class="row bold">
-			<div class="col-xs-1"></div>
-			<div class="col-xs-5">Sub Standard (SS):</div>
-			<div class="col-xs-2 text-left">{%= data[i][__("VLCC")] %}</div>
-			<div class="col-xs-4"></div>
-		</div>
-		<div class="row bold">
-			<div class="col-xs-1"></div>
-			<div class="col-xs-2">Total Milk:</div>
-			<div class="col-xs-3 text-left">{%= data[i][__("Shift")] %}</div>
-			<div class="col-xs-7"></div>
-		</div>
+			<div class="row bold">
+				<div class="col-xs-1"></div>
+				<div class="col-xs-4">Good Milk :</div>
+				<div class="col-xs-1" style="margin-left:-50px">
+					{%= data[i][__("Shift")] %}
+				</div>
+				<div class="col-xs-1"></div>
+			</div>
+			<div class="row bold">
+				<div class="col-xs-1"></div>
+				<div class="col-xs-4">Curdled by Society (CS):</div>
+				<div class="col-xs-1" style="margin-left:-50px">
+					{%= data[i][__("Route")] %}
+				</div>
+				<div class="col-xs-1"></div>
+			</div>
+			<div class="row bold">
+				<div class="col-xs-1"></div>
+				<div class="col-xs-4">Curdled by Transporter (CT):</div>
+				<div class="col-xs-1" style="margin-left:-50px">
+					{%= data[i][__("CC")] %}
+				</div>
+				<div class="col-xs-1"></div>
+			</div>
+			<div class="row bold">
+				<div class="col-xs-1"></div>
+				<div class="col-xs-4">Sub Standard (SS):</div>
+				<div class="col-xs-1" style="margin-left:-50px">
+					{%= data[i][__("VLCC")] %}</div>
+				<div class="col-xs-1"></div>
+			</div>
+			<div class="row bold">
+				<div class="col-xs-3"></div>
+				<div class="col-xs-2"></div>
+				<div class="col-xs-2 text-left">Total Milk:</div>
+				<div class="col-xs-1" style="margin-left:-50px">
+					{%= data[i][__("Shift")] %}
+				</div>
+			</div>
+		<hr size="100">
 	{% } else { %}
 		<div class="row">
 			<div class="col-xs-10 col-md-10 bold">

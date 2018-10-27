@@ -391,7 +391,7 @@ def make_vmrc(data, response_dict):
 											quality_type = 'CT,CS or SS'
 										response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"Milkquality must be {0}".format(quality_type)}) if quality_type else ""
 								else:
-									response_dict.get(row.get('longformatfarmerid')+"-"+row.get('milktype')).append({"status":["Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate,collectionroute are manadatory"]})
+									response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":["Error status_response Data Missing. status_message farmerid,milktype,collectiontime,milkquantity,rate,collectionroute are manadatory"]})
 							else:
 								response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"Error","response":"Data Missing","message":"imeinumber,collectionDate,shift,rcvdTime are manadatory"})
 						else:

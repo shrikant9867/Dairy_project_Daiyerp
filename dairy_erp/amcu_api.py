@@ -565,7 +565,7 @@ def make_purchase_receipt_dairy(data, row, vlcc, response_dict, vmrc):
 			rejected_milk_data =  get_curdled_warehouse(data,row)
 			pr_co = make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,co,rejected_milk_data.get('warehouse'))
 			price_list_ = frappe.db.get_value("Item Price", {'item_code': item_code, 'price_list':'Standard Buying'},'name')
-			frappe.delete_doc("Item Price", price_list_)
+			# frappe.delete_doc("Item Price", price_list_)
 			purchase_invoice_against_vlcc(data, row, vlcc, company, item_, response_dict, pr_co, vmrc,co,rejected_milk_data.get('warehouse'))
 
 		else:
@@ -630,7 +630,7 @@ def delivery_note_for_vlcc(data, row, item_, vlcc, company, response_dict, vmrc)
 		delivry_obj.flags.ignore_permissions = True
 		delivry_obj.submit()
 		item_price_c = frappe.db.get_value("Item Price",{'price_list':"Standard Selling",'item_code' : item_.item_code}, 'name')
-		frappe.delete_doc("Item Price", item_price_c)
+		# frappe.delete_doc("Item Price", item_price_c)
 		set_posting_datetime(delivry_obj,row)
 		set_stock_ledger_date(delivry_obj,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Delivery Note" : delivry_obj.name})
@@ -704,7 +704,7 @@ def make_purchase_receipt(data, row, vlcc, company, item_, response_dict, vmrc,c
 		purchase_rec.flags.ignore_permissions = True
 		purchase_rec.submit()
 		price_list_ = frappe.db.get_value("Item Price",{'item_code': item_.item_code,'price_list':"Standard Buying"},'name')
-		frappe.delete_doc("Item Price",price_list_)
+		# frappe.delete_doc("Item Price",price_list_)
 		set_posting_datetime(purchase_rec,row)
 		set_stock_ledger_date(purchase_rec,row)
 		response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"purchase_receipt": purchase_rec.name})

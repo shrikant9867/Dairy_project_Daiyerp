@@ -46,7 +46,11 @@ def get_data(filters=None):
 								    WHEN shift = "EVENING" THEN "2"
 								END,
 								" 001",
-								RIGHT(long_format_farmer_id,5),
+								RIGHT(
+									if(shift = "MORNING",
+										long_format_farmer_id,
+										long_format_farmer_id_e),
+								 	5),
 								RIGHT(collectionroute,3),
 								round(milkquantity,1),
 								round(fat,1),

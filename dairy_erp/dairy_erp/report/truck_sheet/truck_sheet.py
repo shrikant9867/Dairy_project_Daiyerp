@@ -51,7 +51,11 @@ def get_data(filters=None):
 								    WHEN shift = "EVENING" THEN "PM"
 								END,
 								collectionroute,
-								group_concat(long_format_farmer_id),
+								group_concat(
+									if(shift = "MORNING",
+										long_format_farmer_id,
+										long_format_farmer_id_e)
+									),
 								group_concat(associated_vlcc),
 								group_concat(fat+snf),
 								group_concat(milkquality),

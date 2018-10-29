@@ -43,19 +43,21 @@ dairy.price_list.set_price_list_= function(doc) {
 }
 
 dairy.price_list.guess_price_list = function(transaction_type,doc) {
-	frappe.call({
-		method: "dairy_erp.customization.price_list.price_list_customization.guess_price_list",
-		args: {"transaction_type": transaction_type, "doc": doc},
-		callback: function(r) {
-			price_list_field = transaction_type == "Selling" ? "selling_price_list" : "buying_price_list"
-			if(!r.exc && r.message){
-				cur_frm.set_value(price_list_field, r.message)
-				cur_frm.refresh_field(price_list_field)
+	if(cur_frm.doc.docstatus == 0) {
+		frappe.call({
+			method: "dairy_erp.customization.price_list.price_list_customization.guess_price_list",
+			args: {"transaction_type": transaction_type, "doc": doc},
+			callback: function(r) {
+				price_list_field = transaction_type == "Selling" ? "selling_price_list" : "buying_price_list"
+				if(!r.exc && r.message){
+					cur_frm.set_value(price_list_field, r.message)
+					cur_frm.refresh_field(price_list_field)
+					dairy.price_list.trigger_price_list();
+				}
 				dairy.price_list.trigger_price_list();
 			}
-			dairy.price_list.trigger_price_list();
-		}
-	})
+		})
+	}
 }
 
 dairy.price_list.trigger_price_list = function() {

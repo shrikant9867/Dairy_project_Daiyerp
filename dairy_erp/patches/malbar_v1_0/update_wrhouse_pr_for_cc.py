@@ -38,12 +38,12 @@ def update_gl_entry(child_doc):
 	frappe.db.sql("""
 			update `tabStock Ledger Entry` set warehouse = 'Pattambi - MM'
 			where voucher_no = %s
-		""",(child_doc.get('parent')),debug=0)
+		""",(child_doc.get('parent')),debug=1)
 
 def update_bin(child_doc):
 	frappe.db.sql("""
 		update `tabBin` set warehouse = 'Pattambi - MM' where warehouse = 'Stores - MM'
-		 and item_code = 'COW Milk'""")
+		 and item_code = 'COW Milk'""",debug=1)
 
 def insert_field_in_pr():
 	pass

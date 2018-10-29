@@ -6,7 +6,7 @@ def execute():
 	company = frappe.db.get_value("Company",{'is_dairy':1},'name')
 	if company:
 		pr_list = frappe.get_all("Purchase Receipt",filters={'company': company, \
-			'chilling_centre': "Pattambi-Chilling Centre",'milk_type':'Good'},
+			'chilling_centre': "Pattambi-Chilling Centre",'milk_type':'G'},
 			fields=['supplier','vlcc_milk_collection_record','posting_date','name'])
 		for row in pr_list:
 			if not frappe.db.get_value("Purchase Invoice Item",{'purchase_receipt': row.get('name')}):

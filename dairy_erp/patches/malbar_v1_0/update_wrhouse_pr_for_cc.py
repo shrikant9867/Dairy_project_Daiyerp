@@ -11,7 +11,7 @@ def execute():
 	if company:
 		update_milktype_on_pr()
 		pr_list = frappe.get_all("Purchase Receipt",filters={'company': company, \
-				'chilling_centre': "Pattambi-Chilling Centre",'milk_type':'Good'})
+				'chilling_centre': "Pattambi-Chilling Centre",'milk_type':'G'})
 		for row in pr_list:
 			child_pr_list = frappe.get_all("Purchase Receipt Item",filters={'parent':row.get('name')},fields=['name','parent'])
 			update_child_warehouse(child_pr_list[0], company)

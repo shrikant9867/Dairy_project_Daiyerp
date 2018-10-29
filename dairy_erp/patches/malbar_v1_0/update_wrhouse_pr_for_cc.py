@@ -11,7 +11,7 @@ def execute():
 	if company:
 		update_milktype_on_pr()
 		pr_list = frappe.get_all("Purchase Receipt",filters={'company': company, \
-				'chilling_centre': "Pattambi-Chilling Centre",'milk_type':'Good'})
+				'chilling_centre': "Pattambi-Chilling Centre",'milk_type':'G'})
 		for row in pr_list:
 			child_pr_list = frappe.get_all("Purchase Receipt Item",filters={'parent':row.get('name')},fields=['name','parent'])
 			update_child_warehouse(child_pr_list[0], company)
@@ -38,12 +38,12 @@ def update_gl_entry(child_doc):
 	frappe.db.sql("""
 			update `tabStock Ledger Entry` set warehouse = 'Pattambi - MM'
 			where voucher_no = %s
-		""",(child_doc.get('parent')),debug=0)
+		""",(child_doc.get('parent')),debug=1)
 
 def update_bin(child_doc):
 	frappe.db.sql("""
 		update `tabBin` set warehouse = 'Pattambi - MM' where warehouse = 'Stores - MM'
-		 and item_code = 'COW Milk'""")
+		 and item_code = 'COW Milk'""",debug=1)
 
 def insert_field_in_pr():
 	pass

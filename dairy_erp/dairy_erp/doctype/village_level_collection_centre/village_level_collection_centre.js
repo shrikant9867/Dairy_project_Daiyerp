@@ -23,7 +23,7 @@ frappe.ui.form.on('Village Level Collection Centre', {
 		// address mandatory after save
 		frm.toggle_reqd("address", frm.doc.__islocal ? 0:1)
 		frm.events.set_dynamic_cc(frm)
-		if(frappe.user.has_role("Stellapps Support")){
+		if(!frm.doc.__islocal && frappe.user.has_role("Stellapps Support")){
 			frm.set_df_property("longformatfarmerid", "read_only", 0);
 			frm.set_df_property("longformatsocietyid_e", "read_only", 0);
 		}

@@ -58,6 +58,9 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 			frm.events.calculate_advance_emi(frm)
 			frm.events.calculate_advance_outstanding(frm)
 			frm.events.calculate_net_pay(frm)
+			if(!frm.doc.farmer_phone_no) {
+				frm.set_value('farmer_phone_no',"NA")
+			}
 		}
 	},
 	add_cycle_child: function(frm) {

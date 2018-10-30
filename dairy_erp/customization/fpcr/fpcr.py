@@ -102,7 +102,7 @@ def generate_fpcr(cur_cycle, farmer, vlcc, start_date, end_date):
 
 		# generate weighted fmcr_details present in the bottom of the FMCR Table
 		if len(fmcr) > 0:
-	        fpcr_doc.append('fmcr_details', {
+			fpcr_doc.append('fmcr_details', {
 	                'amount' : weighted_fmcr_data.get('amount'),
 	                'date' : '',
 	                'shift' : '<b>Total Quantity</b>',

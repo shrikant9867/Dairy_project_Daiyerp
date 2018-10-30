@@ -189,8 +189,8 @@ class VlccMilkCollectionRecord(Document):
 				"description": item.description,
 				"uom": "Litre",
 				"qty": self.milkquantity,
-				"rate": 1 if self.milkquality == "SS" else self.rate,
-				"price_list_rate": 1 if self.milkquality == "SS" else self.rate,
+				"rate": self.rate,
+				"price_list_rate": self.rate,
 				"amount": self.amount,
 				"warehouse": warehouse,
 				"cost_center": cost_center

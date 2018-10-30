@@ -7,7 +7,7 @@ import frappe
 
 def execute():
 	company = frappe.db.get_value("Company",{'is_dairy':1},'name')
-	insert_field_in_pr()
+	# insert_field_in_pr()
 	if company:
 		update_cc_on_pr()
 		update_milktype_on_pr()

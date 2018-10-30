@@ -421,7 +421,6 @@ def get_interest_amount(amount, data):
 
 @frappe.whitelist()
 def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
-	
 	fmcr =  frappe.db.sql("""
 			select rcvdtime,shift,milkquantity,fat,snf,rate,amount
 		from 
@@ -449,22 +448,26 @@ def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
 	}
 
 def get_weighted_fmcr_data(fmcr_data):
-	milkquantity, fat, snf, rate = 0, 0, 0, 0
-	
+	if len(fmcr_data) == 0:
+		return
+	milkquantity, fat, snf, rate, amount = 0, 0, 0, 0, 0
+
 	for data in fmcr_data:
 		milkquantity += data.get('milkquantity')
 		fat += data.get('fat')*data.get('milkquantity')
 		snf += data.get('snf')*data.get('milkquantity') 
 		rate += data.get('rate')*data.get('milkquantity')
+		amount += data.get('amount')
 
-	fat, snf , rate = fat/milkquantity, snf/milkquantity, rate/milkquantity
+	fat, snf , rate = round(fat/milkquantity, 2), round(snf/milkquantity, 2), round(rate/milkquantity, 2)
 
 	return {
 		"milkquantity" : milkquantity,
 		"fat" : fat,
 		"snf" : snf,
-		"rate": rate
-	} 
+		"rate": rate,
+		"amount" : amount
+	}
 
 def get_incentives(amount, qty, vlcc=None):
 	if vlcc and amount and qty:

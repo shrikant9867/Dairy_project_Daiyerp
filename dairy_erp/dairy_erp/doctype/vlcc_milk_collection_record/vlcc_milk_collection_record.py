@@ -124,7 +124,11 @@ class VlccMilkCollectionRecord(Document):
 
 	def calculate_amount(self):
 		if self.milkquantity and self.rate:
-			self.amount = self.milkquantity * self.rate
+			if self.milkquality == "SS":
+				self.rate = 0
+				self.amount = 0
+			else:
+				self.amount = self.milkquantity * self.rate
 
 	def make_purchase_receipt(self):
 		try:
@@ -179,8 +183,8 @@ class VlccMilkCollectionRecord(Document):
 				"description": item.description,
 				"uom": "Litre",
 				"qty": self.milkquantity,
-				"rate": self.rate,
-				"price_list_rate": self.rate,
+				"rate": 1 if self.milkquality == "SS" else self.rate,
+				"price_list_rate": 1 if self.milkquality == "SS" else self.rate,
 				"amount": self.amount,
 				"warehouse": warehouse,
 				"cost_center": cost_center

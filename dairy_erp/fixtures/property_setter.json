@@ -4622,5 +4622,22 @@
   "property": "read_only_onload", 
   "property_type": "Check", 
   "value": null
+ }, 
+ {
+  "_assign": null, 
+  "_comments": null, 
+  "_liked_by": null, 
+  "_user_tags": null, 
+  "default_value": null, 
+  "doc_type": "Farmer Payment Cycle Report", 
+  "docstatus": 0, 
+  "doctype": "Property Setter", 
+  "doctype_or_field": "DocField", 
+  "field_name": "section_break_14", 
+  "modified": "2018-10-27 13:34:40.616253", 
+  "name": "Farmer Payment Cycle Report-section_break_14-label", 
+  "property": "label", 
+  "property_type": "Data", 
+  "value": ""
  }
 ]

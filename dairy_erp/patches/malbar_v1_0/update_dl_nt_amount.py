@@ -46,7 +46,7 @@ def update_si_rate(vmcr, si):
 				rate = {0}, amount = {1}
 			where
 				parent = '{2}'
-		""".format(vmcr.get('rate'),vmcr.get('amount'), si),debug=1)
+		""".format(vmcr.get('rate'),vmcr.get('amount'), si),debug=0)
 
 	frappe.db.sql("""
 			update
@@ -57,7 +57,7 @@ def update_si_rate(vmcr, si):
 				rounded_total = round({0})
 			where
 				name = '{1}'
-		""".format(vmcr.get('amount'), si),debug=1)
+		""".format(vmcr.get('amount'), si),debug=0)
 
 
 def create_gl_entry(vmcr, si_name):
@@ -150,7 +150,7 @@ def make_dn(vmcr):
 	delivry_obj.status = "Completed"
 	delivry_obj.flags.ignore_permissions = True
 	delivry_obj.submit()
-	print "Delivery Note created -",delivry_obj.name
+	print "Delivery Note created - ",delivry_obj.name
 	create_si(delivry_obj,vmcr.get('associated_vlcc'),vmcr,warehouse,cost_center)
 
 

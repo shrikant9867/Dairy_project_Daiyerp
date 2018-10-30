@@ -41,4 +41,5 @@ def create_pi(company,row):
 	pi_obj.remarks = "[#"+account+"#]"
 	pi_obj.flags.ignore_permissions = True
 	pi_obj.submit()
+	print "created -",pi_obj.name
 

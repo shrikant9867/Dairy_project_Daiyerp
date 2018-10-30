@@ -63,9 +63,6 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 			frm.events.calculate_advance_emi(frm)
 			frm.events.calculate_advance_outstanding(frm)
 			frm.events.calculate_net_pay(frm)
-			if(!frm.doc.farmer_phone_no) {
-				frm.set_value('farmer_phone_no',"NA")
-			}
 		}
 	},
 	add_cycle_child: function(frm) {
@@ -96,19 +93,21 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 							row.amount = d.amount
 							row.rate = d.rate
 						}); 
-						
-						// Added by : Niraj
-						var last_row = frappe.model.add_child(cur_frm.doc,
-							"FMCR Table",
-							"fmcr_details"
-						)
-						last_row.date = "";
-						last_row.shift = "<b>Total Quantity</b>";
-						last_row.litres = r.message.weighted_data.milkquantity;
-						last_row.fat = r.message.weighted_data.fat;
-						last_row.snf = r.message.weighted_data.snf;
-						last_row.amount = "";
-						last_row.rate = r.message.weighted_data.rate;
+						console.log("FMCR Count IS ::", r.message.fmcr.length)
+						if(r.message.fmcr.length > 0){
+							// Added by : Niraj
+							var last_row = frappe.model.add_child(cur_frm.doc,
+								"FMCR Table",
+								"fmcr_details"
+							)
+							last_row.date = "";
+							last_row.shift = "<b>Total Quantity</b>";
+							last_row.litres = r.message.weighted_data.milkquantity;
+							last_row.fat = r.message.weighted_data.fat;
+							last_row.snf = r.message.weighted_data.snf;
+							last_row.amount = r.message.weighted_data.amount;
+							last_row.rate = r.message.weighted_data.rate;
+						}
 
 						$.each(r.message.child_loan, function(i, d) {
 							var row = frappe.model.add_child(cur_frm.doc, "Loan Child", "loan_child");

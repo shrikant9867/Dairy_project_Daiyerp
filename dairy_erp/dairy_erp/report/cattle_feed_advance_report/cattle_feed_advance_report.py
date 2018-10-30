@@ -44,7 +44,8 @@ def get_data(filters):
 							where
 								si.local_sale = 1
 								and si.name = si_item.parent
-								and si.customer_or_farmer = "Farmer" 
+								and si.local_sale_type = 'Feed And Fodder Advance'
+								and si.customer_or_farmer = "Farmer"
 								and si_item.item_code not in ('COW Milk','BUFFALO Milk')
 								and si.docstatus = 1 and si.company = '{0}'
 								{1} GROUP BY si.name """.format(filters.get('vlcc'),get_conditions(filters)),filters,as_list=1,debug=0)

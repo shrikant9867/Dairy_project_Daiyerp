@@ -505,6 +505,12 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 				farmerid_len = vmrc_doc.long_format_farmer_id_e.split('_')
 				if len(farmerid_len) >= 4 and farmerid_len[2]:
 					collectionroute = str(farmerid_len[2])
+
+			# Set Long Format Society ID value based which is beong used in list view of VMCR
+			longsocietyid_listview = vmrc_doc.long_format_farmer_id if vmrc_doc.long_format_farmer_id else \
+											vmrc_doc.long_format_farmer_id_e
+			vmrc_doc.longsocietyid_listview = longsocietyid_listview.split('_')[-1]
+
 			vmrc_doc.starttime = data.get('starttime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))
 			vmrc_doc.endtime = data.get('endtime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('endtime')/1000))
 			vmrc_doc.endshift = 1 if data.get('endshift') == True else 0

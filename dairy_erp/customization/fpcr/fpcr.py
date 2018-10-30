@@ -43,8 +43,30 @@ def get_current_cycle(data):
 			 end_date < now() and vlcc = '{0}'
 		order by end_date
 		""".format(data.get('vlcc_name')),as_list=1,debug=0)
-
 	return cycle_name[-1]
+
+
+def get_weighted_fmcr_data(fmcr_data):
+	if len(fmcr_data) == 0:
+		return
+	milkquantity, fat, snf, rate, amount = 0, 0, 0, 0, 0
+
+	for data in fmcr_data:
+		milkquantity += data.get('milkquantity')
+		fat += data.get('fat')*data.get('milkquantity')
+		snf += data.get('snf')*data.get('milkquantity') 
+		rate += data.get('rate')*data.get('milkquantity')
+		amount += data.get('amount')
+
+	fat, snf , rate = fat/milkquantity, snf/milkquantity, rate/milkquantity
+
+	return {
+		"milkquantity" : milkquantity,
+		"fat" : fat,
+		"snf" : snf,
+		"rate": rate,
+		"amount" : amount
+	}
 
 def generate_fpcr(cur_cycle, farmer, vlcc, start_date, end_date):
 	total_bill, tota_qty = 0, 0
@@ -61,6 +83,9 @@ def generate_fpcr(cur_cycle, farmer, vlcc, start_date, end_date):
 	advance = get_advance_child(start_date,end_date,vlcc,farmer,cur_cycle)
 
 	if fmcr and not advance and not loans:
+		# get weighted fmcr data
+		weighted_fmcr_data = get_weighted_fmcr_data(fmcr)
+
 		for row in  fmcr:
 			total_bill += row.get('amount')
 			tota_qty += row.get('milkquantity')
@@ -72,8 +97,20 @@ def generate_fpcr(cur_cycle, farmer, vlcc, start_date, end_date):
 				'litres': row.get('milkquantity'),
 				'fat': row.get('fat'),
 				'snf': row.get('snf'),
-				'rate': row.get('rate'),
+				'rate': row.get('rate'),	
 			})
+
+		# generate weighted fmcr_details present in the bottom of the FMCR Table
+		if len(fmcr) > 0:
+	        fpcr_doc.append('fmcr_details', {
+	                'amount' : weighted_fmcr_data.get('amount'),
+	                'date' : '',
+	                'shift' : '<b>Total Quantity</b>',
+	                'litres' : weighted_fmcr_data.get('milkquantity'),
+	                'fat' : weighted_fmcr_data.get('fat'),
+	                'snf' : weighted_fmcr_data.get('snf'),
+	                'rate' : weighted_fmcr_data.get('rate') 
+	        })
 
 		# for row in get_loans_child(start_date,end_date,vlcc,farmer,cur_cycle):
 		# 	fpcr_doc.append('loan_child',{

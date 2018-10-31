@@ -17,7 +17,7 @@ class Farmer(Document):
 			self.create_supplier()
 			self.create_customer()
 		except Exception as e:
-			frappe.db.rollback();
+			frappe.db.rollback()
 			# frappe.msgprint(e)
 
 	def on_update(self):

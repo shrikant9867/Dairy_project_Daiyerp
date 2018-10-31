@@ -17,38 +17,44 @@ class Farmer(Document):
 			self.create_supplier()
 			self.create_customer()
 		except Exception as e:
-			frappe.db.rollback();
-			frappe.msgprint(e)
+			frappe.db.rollback()
+			# frappe.msgprint(e)
 
 	def on_update(self):
 		pass
 		# self.update_date = self.modified
 	
 	def create_supplier(self):
-		supl_doc = frappe.new_doc("Supplier")
-		supl_doc.supplier_name = self.full_name
-		supl_doc.supplier_type = "Farmer"
-		supl_doc.company = self.vlcc_name
-		supl_doc.farmer = self.name
-		supl_doc.append("accounts",
-			{
-			"company": self.vlcc_name,
-			"account": frappe.db.get_value("Company",self.vlcc_name, "default_payable_account")
-			})
-		supl_doc.insert()
+		if not frappe.db.exists("Supplier", self.full_name):
+			supl_doc = frappe.new_doc("Supplier")
+			supl_doc.supplier_name = self.full_name
+			supl_doc.supplier_type = "Farmer"
+			supl_doc.company = self.vlcc_name
+			supl_doc.farmer = self.name
+			supl_doc.append("accounts",
+				{
+				"company": self.vlcc_name,
+				"account": frappe.db.get_value("Company",self.vlcc_name, "default_payable_account")
+				})
+			supl_doc.insert()
+		else:
+			frappe.throw("Supplier name already exist")
 
 	def create_customer(self):
-		custmer_doc = frappe.new_doc("Customer")
-		custmer_doc.customer_name = self.full_name
-		custmer_doc.customer_group = "Farmer"
-		custmer_doc.company = self.vlcc_name
-		custmer_doc.farmer = self.name
-		custmer_doc.append("accounts",
-			{
-			"company": self.vlcc_name,
-			"account": frappe.db.get_value("Company",self.vlcc_name, "default_receivable_account")
-			})
-		custmer_doc.insert()
+		if not frappe.db.exists("Supplier", self.full_name):
+			custmer_doc = frappe.new_doc("Customer")
+			custmer_doc.customer_name = self.full_name
+			custmer_doc.customer_group = "Farmer"
+			custmer_doc.company = self.vlcc_name
+			custmer_doc.farmer = self.name
+			custmer_doc.append("accounts",
+				{
+				"company": self.vlcc_name,
+				"account": frappe.db.get_value("Company",self.vlcc_name, "default_receivable_account")
+				})
+			custmer_doc.insert()
+		else:
+			frappe.throw("Customer name already exist")
 
 	def validate(self):
 		# validate existing supplier/customer

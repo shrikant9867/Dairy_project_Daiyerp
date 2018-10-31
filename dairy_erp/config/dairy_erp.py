@@ -340,6 +340,12 @@ def get_data():
 					"label":_("Material Indent Detail Report"),
 					"doctype": "Material Request",
 					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"is_query_report": False,
+					"name": "Stock Entry Report",
+					"doctype": "Stock Entry",
 				}
 			]
 		},
@@ -431,6 +437,12 @@ def get_data():
 					"name": "VLCC Payment Cycle",
 					"description": _(" "),
 				},
+				{
+					"type": "report",
+					"is_query_report": False,
+					"name": "Payment Settlement Report",
+					"doctype": "Farmer Payment Log",
+				}
 			]
 		},
 		{

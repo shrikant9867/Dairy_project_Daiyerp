@@ -8,6 +8,15 @@ var milk_quality_type = {
 }
 
 frappe.ui.form.on('Vlcc Milk Collection Record', {
+	refresh: function(frm){
+		if(frm.doc.docstatus == 0){
+			if(frm.doc.status == "Accept"){
+				frm.set_value('milk_quality_type','Good')
+				frm.set_df_property('milk_quality_type','read_only',1)
+			}
+		}
+	},
+
 	milkquantity: function(frm) {
 		if(frm.doc.milkquantity > 0){
 			frm.trigger("calculate_amount");
@@ -75,27 +84,18 @@ frappe.ui.form.on('Vlcc Milk Collection Record', {
 				})
 			})
 		}
-		/*if(frm.doc.status){
-			if(frm.doc.status == "Accept") {
-				frm.set_df_property("milk_quality_type", "options", ['Good']);
-				frm.set_value("milk_quality_type","Good")
-				frm.set_value("milkquality","G")
-			}
-			else if(frm.doc.status == "Reject") {
-				frm.set_df_property("milk_quality_type", "options", ['Curdled by Society','Curdled by Transporter','Sub Standard']);
-				frm.set_value("milk_quality_type","")
-				frm.set_value("milkquality","")
-			}
-		}*/
 	},
 
 	status: function(frm){
 		if(frm.doc.status == "Accept") {
 			frm.set_value("milk_quality_type","Good")
 			frm.set_value("milkquality","G")
+			frm.set_df_property('milk_quality_type','read_only',1)
 		}
 		else if(frm.doc.status == "Reject") {
-			frm.set_value("milk_quality_type","")
+			q_t = ['Curdled by Society','Curdled by Transporter','Sub Standard']
+			frm.set_df_property('milk_quality_type','read_only',0)
+			frm.set_df_property("milk_quality_type", "options", q_t);
 			frm.set_value("milkquality","")
 		}
 	},

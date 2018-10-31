@@ -19,7 +19,8 @@ class FarmerAdvance(Document):
 	def validate(self):
 		self.status = "Unpaid"
 		self.outstanding_amount = self.advance_amount
-		self.date_of_disbursement = today()
+		if not self.advance_type == "Feed And Fodder Advance":
+			self.date_of_disbursement = today()
 		if self.advance_amount <= 0:
 			frappe.throw(_("Advance Amount cannot be zero"))
 	
@@ -32,7 +33,7 @@ class FarmerAdvance(Document):
 				debit_account = "Loans and Advances - ",credit_account = "Cash - ", type = "Debit to Advance",
 				amount = self.advance_amount, master_no = self.name,advance_type=self.advance_type)
 		elif self.advance_type == "Feed And Fodder Advance":
-			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc,posting_date = nowdate(),
+			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc,posting_date = self.date_of_disbursement,
 				debit_account = "Feed And Fodder Advance - ",credit_account = "Cash - ", type = "Debit to Advance",
 				amount = self.advance_amount, master_no = self.name,advance_type=self.advance_type)
 		if je_doc.name:

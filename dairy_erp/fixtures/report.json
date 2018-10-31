@@ -3473,11 +3473,11 @@
   "disabled": 0, 
   "docstatus": 0, 
   "doctype": "Report", 
-  "is_standard": "No", 
+  "is_standard": "Yes", 
   "javascript": null, 
   "json": "{\"add_total_row\": 0, \"sort_by\": \"Farmer Payment Log.modified\", \"add_totals_row\": 0, \"sort_order\": \"desc\", \"sort_by_next\": null, \"filters\": [], \"sort_order_next\": \"desc\", \"columns\": [[\"farmer\", \"Farmer Payment Log\"], [\"cycle\", \"Farmer Payment Log\"], [\"total_pay\", \"Farmer Payment Log\"], [\"receivable\", \"Farmer Payment Log\"], [\"payble\", \"Farmer Payment Log\"], [\"set_amt_manual\", \"Farmer Payment Log\"], [\"outstanding_amount\", \"Farmer Payment Log\"], [\"settlement_date\", \"Farmer Payment Log\"]]}", 
   "letter_head": null, 
-  "modified": "2018-10-15 12:21:37.515583", 
+  "modified": "2018-10-31 17:53:22.937460", 
   "module": "Dairy Erp", 
   "name": "Payment Settlement Report", 
   "query": null, 
@@ -3490,6 +3490,74 @@
    }, 
    {
     "role": "Administrator"
+   }
+  ]
+ }, 
+ {
+  "add_total_row": 0, 
+  "apply_user_permissions": 1, 
+  "disabled": 0, 
+  "docstatus": 0, 
+  "doctype": "Report", 
+  "is_standard": "No", 
+  "javascript": null, 
+  "json": "{\"add_total_row\": 0, \"sort_by\": \"Stock Entry.modified\", \"add_totals_row\": 0, \"sort_order\": \"desc\", \"sort_by_next\": null, \"filters\": [], \"sort_order_next\": \"desc\", \"columns\": [[\"name\", \"Stock Entry\"], [\"purpose\", \"Stock Entry\"], [\"s_warehouse\", \"Stock Entry Detail\"], [\"t_warehouse\", \"Stock Entry Detail\"]]}", 
+  "letter_head": null, 
+  "modified": "2018-10-31 17:44:32.354271", 
+  "module": "Stock", 
+  "name": "Stock Entry Report", 
+  "query": null, 
+  "ref_doctype": "Stock Entry", 
+  "report_name": "Stock Entry Report", 
+  "report_type": "Report Builder", 
+  "roles": [
+   {
+    "role": "Stock User"
+   }, 
+   {
+    "role": "Stock Manager"
+   }, 
+   {
+    "role": "Manufacturing Manager"
+   }, 
+   {
+    "role": "Manufacturing User"
+   }, 
+   {
+    "role": "Dairy Manager"
+   }, 
+   {
+    "role": "Dairy Operator"
+   }, 
+   {
+    "role": "Camp Manager"
+   }, 
+   {
+    "role": "Camp Operator"
+   }, 
+   {
+    "role": "Vlcc Manager"
+   }, 
+   {
+    "role": "Chilling Center Manager"
+   }, 
+   {
+    "role": "Vlcc Operator"
+   }, 
+   {
+    "role": "Chilling Center Operator"
+   }, 
+   {
+    "role": "Dairy Tech Superintendent"
+   }, 
+   {
+    "role": "Plant Manager"
+   }, 
+   {
+    "role": "Plant Operator"
+   }, 
+   {
+    "role": "Stellapps Support"
    }
   ]
  }

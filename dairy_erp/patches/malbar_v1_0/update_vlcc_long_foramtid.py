@@ -5,7 +5,7 @@ def execute():
 	vlcc_list = [{'Kolalambu KSS':'MILMA01_3000_0006_8516'},{'Kolalambu KSS':'MILMA01_3000_0006_8516'},
 	{'Kakkattiri KSS':'MILMA01_3000_0009_8664'},{'Kakkattiri KSS':'MILMA01_3000_0009_8664'},
 	{'Cherpulassery KSS':'MILMA01_3000_0002_6734'},{'Cherpulassery KSS':'MILMA01_3000_0002_6734'},
-	{'Vattenad KSS':'MILMA01_3000_0009_9628'},{'Vattenad KSS':'MILMA01_3000_0009_9628'},
+	{'Vattenad KSS':'MILMA01_3000_0009_9628'},{'Vattenad KSS':'MILMA01_3000_0006_9628'},
 	{'Vattamkulam KSS':'MILMA01_3000_0012_8532'},{'Vattamkulam KSS':'MILMA01_3000_0012_8532'},
 	{'Varode KSS':'MILMA01_3000_0011_6671'},{'Varode KSS':'MILMA01_3000_0011_6671'},
 	{'Valanchery KSS':'MILMA01_3000_0010_40137'},{'Valanchery KSS':'MILMA01_3000_0010_40137'},

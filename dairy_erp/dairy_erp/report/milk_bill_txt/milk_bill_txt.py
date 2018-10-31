@@ -107,7 +107,7 @@ def add_txt_in_file(filters=None):
 			start_date = datetime.datetime.strptime(filters.get('start_date'),  "%Y-%m-%d").strftime("%d-%b-%Y")
 			end_date = datetime.datetime.strptime(filters.get('end_date'),  "%Y-%m-%d").strftime("%d-%b-%Y")
 			txt_data = "#TS From "+start_date+" to "+end_date+"\n"
-			txt_data += " DRY|Date      |S|Type| Party| Rout|        Qty|    Fat|    SNF|Q"+"\n"
+			txt_data += " DRY|Date      |S|Type|Party|Rout|        Qty|    Fat|    SNF|Q"+"\n"
 			txt_data += "#----------------------------------------------------------------"+"\n"
 			for row in data:
 				my_date = str(row[1])

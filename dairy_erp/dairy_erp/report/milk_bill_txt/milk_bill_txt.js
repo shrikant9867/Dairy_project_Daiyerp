@@ -33,7 +33,7 @@ frappe.query_reports["Milk Bill txt"] = {
 						}
 					},
 					callback: function(r) {
-						console.log("insidr e",r.message)
+						console.log("insdie",r.message)
 						if (r.message && r.message.file_name && r.message.file_url) {
 							file_url = r.message.file_url.replace(/#/g, '%23');
 							window.open(file_url);

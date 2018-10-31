@@ -30,7 +30,8 @@ def get_columns():
 		_("Fat") + ":Data:100", 
 		_("Snf") + ":Data:100",
 		_("Rate") + ":Data:100",
-		_("Value") + ":Data:100"
+		_("Value") + ":Data:100",
+		_("SampleNumber") + ":Data:100"
 	]
 
 	return columns
@@ -56,7 +57,7 @@ def get_data(filters=None):
 										long_format_farmer_id,
 										long_format_farmer_id_e)
 									),
-								group_concat(associated_vlcc),
+								group_concat(upper(associated_vlcc)),
 								group_concat(fat+snf),
 								group_concat(milkquality),
 								group_concat(numberofcans),
@@ -64,13 +65,15 @@ def get_data(filters=None):
 								group_concat(round(milkquantity*fat/1000,2)),
 								group_concat(round(milkquantity*snf/1000,2)),
 								group_concat(round((((milkquantity*(fat+snf)*289.3)/100)/milkquantity),2)),
-								group_concat(round((milkquantity*(fat+snf)*289.3)/100,2))
+								group_concat(round((milkquantity*(fat+snf)*289.3)/100,2)),
+								group_concat(samplenumber)
 							from
 								`tabVlcc Milk Collection Record`
 							where
 							{0} and docstatus = 1
 							group by collectionroute
-							order by date(collectiontime),collectionroute """.format(date_filters),as_list=1,debug=0)
+							order by date(collectiontime),collectionroute""".\
+							format(date_filters),as_list=1,debug=0)
 
 	for row in vmcr_data:
 		for index,data in enumerate(row):	
@@ -85,12 +88,13 @@ def get_data(filters=None):
 					else:
 						row[index] = [str(val) for val in data.split(',')]
 					row[index].append(" ")
-				if index == 5:
+				if index == 5:	
 					row[index] = [flt(val,2) for val in data.split(',')]
 					row[index].append(" ")
 
 	last_row = ["Grand Total",get_total_and_good_milk_qty(date_filters,"Accept"),get_total_and_good_milk_qty(date_filters,"Reject","CS"),get_total_and_good_milk_qty(date_filters,"Reject","CT"),get_total_and_good_milk_qty(date_filters,"Reject","SS")]
 	vmcr_data.append(last_row)
+
 	return vmcr_data
 
 

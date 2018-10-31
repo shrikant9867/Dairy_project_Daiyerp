@@ -41,7 +41,7 @@ class Farmer(Document):
 			frappe.throw("Supplier name already exist")
 
 	def create_customer(self):
-		if not frappe.db.exists("Supplier", self.full_name):
+		if not frappe.db.exists("Customer", self.full_name):
 			custmer_doc = frappe.new_doc("Customer")
 			custmer_doc.customer_name = self.full_name
 			custmer_doc.customer_group = "Farmer"

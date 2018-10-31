@@ -364,15 +364,14 @@ def get_vmcr_milk_quality_data(filters,status):
 	if status == "good":
 		cond += " and vmcr.milkquality = 'G' and vmcr.status = 'Accept' "
 	if status == "bad":
-		cond += " and vmcr.milkquality in ('CT', 'CS', 'SS') and vmcr.status = 'Reject' "	
+		cond += " and vmcr.milkquality in ('CT', 'CS', 'SS') and vmcr.status = 'Reject' "
 	milk_quality = frappe.db.sql("""
 									select 
 										COALESCE(round(sum(vmcr.milkquantity),2),0) as milk_quantity
 									from
 										`tabVlcc Milk Collection Record` vmcr
 									where
-										{0} 
-										and vmcr.long_format_farmer_id IS NOT NULL
+										{0}
 										and vmcr.associated_vlcc = '{1}'
 										and date(vmcr.collectiontime) between '{2}' and '{3}'
 										

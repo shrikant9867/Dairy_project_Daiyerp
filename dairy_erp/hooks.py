@@ -194,8 +194,8 @@ doc_events = {
 scheduler_events = {
  
   "hourly": [
-      "dairy_erp.customization.farmer_loan.farmer_loan.create_si",
-      "dairy_erp.customization.farmer_advance.farmer_advance.create_si"
+      "dairy_erp.customization.farmer_loan.farmer_loan.create_jv",
+      "dairy_erp.customization.farmer_advance.farmer_advance.create_jv"
     ]
 }
 fixtures=['Property Setter','Custom Field','Print Format','Report']

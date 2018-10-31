@@ -75,6 +75,12 @@ def stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse
 		stock_doc.societyid = data.get('societyid')
 		stock_doc.is_reserved_farmer = 1 if method == "create_fmrc" else 0
 		stock_doc.farmer_id = row.get('farmerid')
+		farmerid = ""
+		if data.get('shift') == 'EVENING':
+			farmerid = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row.get('farmerid')},"longformatsocietyid_e")
+		else:
+			farmerid = row.get('longformatfarmerid')
+		stock_doc.long_format_id = farmerid
 		stock_doc.fat = row.get('fat')
 		stock_doc.snf = row.get('snf')
 		stock_doc.clr = row.get('clr')

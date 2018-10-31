@@ -28,8 +28,8 @@ def get_columns():
 
 def get_data(filters):
 	data = frappe.db.sql("""select
-									si.customer,
 									si.farmer,
+									si.customer,
 									si.name,
 									si.posting_date,
 									SUBSTRING_INDEX(GROUP_CONCAT(si_item.item_name), ' ', 2),

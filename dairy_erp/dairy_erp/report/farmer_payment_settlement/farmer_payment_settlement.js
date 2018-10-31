@@ -226,6 +226,7 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 				"fieldname": "mode_of_payment",
 				"fieldtype": "Link",
 				"options":"Mode of Payment",
+				"reqd":1,
 				onchange: () => {
 					frappe.query_reports['Farmer Payment Settlement'].set_check_reqd(dialog)
 				}

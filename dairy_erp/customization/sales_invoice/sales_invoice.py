@@ -160,6 +160,7 @@ def feed_fooder_advance(doc, method):
 			farmer_advance.advance_type = "Feed And Fodder Advance"
 			farmer_advance.farmer_id = doc.farmer
 			farmer_advance.farmer_name = doc.customer
+			farmer_advance.date_of_disbursement = doc.posting_date
 			farmer_advance.no_of_instalment = doc.no_of_instalment
 			farmer_advance.advance_amount = doc.grand_total
 			farmer_advance.emi_amount = flt(doc.grand_total/doc.no_of_instalment,2)

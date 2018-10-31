@@ -709,9 +709,17 @@ def add_config_settings(args=None):
 		add_values(args)
 		add_dairy_language(args)
 		create_item_group()
+		create_mode_of_payment()
 	except Exception,e:
 		make_dairy_log(title="Config settings Failed",method="add_config_settings", status="Error",
 		data = args, message=e, traceback=frappe.get_traceback())	
+
+def create_mode_of_payment():
+	if not frappe.db.exists("Mode of Payment", 'Direct Agrupay Payment'):
+		mode_of_pay_doc = frappe.new_doc("Mode of Payment")
+		mode_of_pay_doc.mode_of_payment = "Direct Agrupay Payment"
+		mode_of_pay_doc.type = "Bank"
+		mode_of_pay_doc.save(ignore_permissions=True)
 
 def add_values(args=None):
 	dairy_configuration = frappe.get_doc("Dairy Configuration")

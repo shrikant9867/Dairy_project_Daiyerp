@@ -20,7 +20,7 @@ def get_columns():
 		_("Item Details") + ":Link/Item:150",
 		_("Advance Amount") + ":Float:150",
 		_("Cleared Amount") + ":Float:150",
-		_("Pending/Balance") + ":Float:150",
+		_("Pending / Balance") + ":Float:90",
 		_("Remarks") + ":Data:200"
 	]
 

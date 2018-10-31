@@ -13,7 +13,7 @@ def execute(filters=None):
 def get_columns():
 
 	columns = [
-		_("Farmer Id") + ":Link/Farmer:150",
+		_("Farmer Id") + ":Data:150",
 		_("Famer Name") + ":Data:200",
 		_("Sales Invoice") + ":Link/Sales Invoice:150",
 		_("Date Of Advance Taken") + ":Date:170", 
@@ -28,7 +28,7 @@ def get_columns():
 
 def get_data(filters):
 	data = frappe.db.sql("""select
-									si.farmer,
+									RIGHT(si.farmer,5),
 									si.customer,
 									si.name,
 									si.posting_date,
@@ -55,6 +55,11 @@ def get_data(filters):
 		for row in data:
 			if row[9] == "Feed And Fodder Advance" and len(row[2].split('-')) > 2:
 				advance_data = get_feed_advance(row[2])
+				farmerid = row[0].split("_")
+				if len(farmerid) == 2 and farmerid[1] and len(farmerid[1]) < 5:
+					row[0] = (5 - len(farmerid[1]))*"0"+str(farmerid[1])
+				if len(farmerid) == 1 and farmerid[0] and len(farmerid[0]) < 5:
+					row[0] = (5 - len(farmerid[0]))*"0"+str(farmerid[0])
 				if advance_data:
 					row[5] = advance_data[0]
 					row[6] = advance_data[1]

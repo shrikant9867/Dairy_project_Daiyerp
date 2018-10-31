@@ -591,26 +591,26 @@ def skip_cycle(row_data,filters):
 			not isnull(name) and supplier = '{1}' and posting_date between '{2}' and '{3}'""".
 			format(dairy,filters.get('vlcc'),filters.get('start_date'),filters.get('end_date')),as_dict=True)
 
-	si = frappe.db.sql("""select name  
-		from    
-			`tabSales Invoice`  
-		where    
-			status in ('Overdue','Unpaid') and 
-			company = '{0}' and 
-			not isnull(name) and customer = '{1}' and posting_date between '{2}' and '{3}'""".
-			format(dairy,filters.get('vlcc'),filters.get('start_date'),filters.get('end_date')),as_dict=True)
-
 	pi_list = [d.name for d in pi]
+	# si = frappe.db.sql("""select name  
+	# 	from    
+	# 		`tabSales Invoice`  
+	# 	where    
+	# 		status in ('Overdue','Unpaid') and 
+	# 		company = '{0}' and 
+	# 		not isnull(name) and customer = '{1}' and posting_date between '{2}' and '{3}'""".
+	# 		format(dairy,filters.get('vlcc'),filters.get('start_date'),filters.get('end_date')),as_dict=True)
 
-	si_list = [d.name for d in si]
 
-	invoice_list = pi_list+si_list
+	# si_list = [d.name for d in si]
+
+	# invoice_list = pi_list+si_list
 
 
 	if filters.get('vlcc') and filters.get('cycle'):
 		log =frappe.db.get_value("VLCC Payment Log",{"vlcc":filters.get('vlcc'),"cycle":filters.get('cycle')},"name")
 		if not log:
-			if invoice_list:
+			if pi_list:
 				frappe.throw("You cannot skip the cycle because invoice are yet to settled.")
 			else:
 				log_doc = frappe.new_doc("VLCC Payment Log")

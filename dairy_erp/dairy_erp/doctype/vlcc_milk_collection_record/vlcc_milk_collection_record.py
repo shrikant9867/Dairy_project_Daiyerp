@@ -223,6 +223,7 @@ class VlccMilkCollectionRecord(Document):
 					"uom": "Litre",
 					"qty": self.milkquantity,
 					"rate": self.rate,
+					"price_list_rate":self.rate,
 					"amount": self.amount,
 					"warehouse": frappe.db.get_value("Village Level Collection Centre", {"amcu_id":self.farmerid}, 'warehouse'),
 					"purchase_receipt": pr
@@ -255,6 +256,7 @@ class VlccMilkCollectionRecord(Document):
 				"item_code": item.item_code,
 				"qty": self.milkquantity,
 				"rate": self.rate,
+				"price_list_rate":self.rate,
 				"amount": self.amount,
 				"warehouse": warehouse,
 				"cost_center": cost_center,

@@ -68,11 +68,11 @@
 				<td>{%= data[i][__("Farmer Id")] %}</td>
 				<td>{%= data[i][__("Famer Name")] %}</td>
 				<td>{%= data[i][__("Sales Invoice")] %}</td>
-				<td>{%= data[i][__("Date Of Advance Taken")] %}</td>
+				<td>{%= dateutil.str_to_user(data[i][__("Date Of Advance Taken")]) %}</td>
 				<td>{%= data[i][__("Item Details")] %}</td>
 				<td>{%= data[i][__("Advance Amount")] %}</td>
-				<td>{%= data[i][__("Cleared Amount")] %}</td>
-				<td>{%= data[i][__("Pending/Balance")] %}</td>
+				<td>{%= flt(data[i][__("Cleared Amount")],2) %}</td>
+				<td>{%= data[i][__("Pending / Balance")] %}</td>
 				<td>{%= data[i][__("Remarks")] %}</td>
 			</tr>
 		{% } %}

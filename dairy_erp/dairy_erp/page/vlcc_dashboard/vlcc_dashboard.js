@@ -1,8 +1,16 @@
+var i = 0
 frappe.pages['vlcc-dashboard'].on_page_load = function(wrapper) {
 	new frappe.vlcc_dashboard({
 		$wrapper: $(wrapper)
 	});
 	frappe.breadcrumbs.add("Dairy Erp");
+}
+
+frappe.pages['vlcc-dashboard'].refresh = function (wrapper) {
+	if (i!=0) {
+		location.reload()
+	}
+	i=i+1
 }
 
 frappe.vlcc_dashboard = Class.extend({

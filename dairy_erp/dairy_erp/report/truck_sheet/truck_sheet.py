@@ -78,7 +78,7 @@ def get_data(filters=None):
 	for row in vmcr_data:
 		for index,data in enumerate(row):	
 			if index > 2:
-				if index > 6:
+				if index > 6 and index < 13:
 					row_ = [float(val) for val in data.split(',')]
 					row[index] = row_
 					row[index].append(flt(sum(row_),2))
@@ -91,9 +91,15 @@ def get_data(filters=None):
 				if index == 5:	
 					row[index] = [flt(val,2) for val in data.split(',')]
 					row[index].append(" ")
+				if index == 13: # condition check for samplenumber field
+					try:
+						row[index] = [float(val) for val in data.split(',')]
+					except Exception as e: # samplenumber is null;so ignoring for existing VMCR
+						row[index] = []
 
 	last_row = ["Grand Total",get_total_and_good_milk_qty(date_filters,"Accept"),get_total_and_good_milk_qty(date_filters,"Reject","CS"),get_total_and_good_milk_qty(date_filters,"Reject","CT"),get_total_and_good_milk_qty(date_filters,"Reject","SS")]
 	vmcr_data.append(last_row)
+	print vmcr_data
 
 	return vmcr_data
 

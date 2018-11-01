@@ -127,12 +127,15 @@ def fetch_farmer_data(fmcr_data,filters):
 	return final_
 
 def get_member_non_menber(fmcr_data,filters):
-	# farmer_list = frappe.db.get_all("Farmer", { "vlcc_name": filters.get('vlcc') }, "name")
-	farmer_list = [data.get('farmerid') for data in fmcr_data]
+	farmer_list = []
+	for data in fmcr_data:
+		if data.get('shift') == filters.get('shift'):
+			farmer_list.append(data.get('farmerid'))
+	# farmer_list = [data.get('farmerid') for data in fmcr_data]
 	non_member_count,member_count,non_member_qty,member_qty,member_amt,non_member_amt = 0 , 0 , 0, 0,0,0
 	member_dict = {}
 	if farmer_list:
-		for farmer in farmer_list:
+		for farmer in set(farmer_list):
 			farmer_id = frappe.db.get_value("Farmer",farmer,["registration_date","is_member"],as_dict=1)
 			months_to_member = frappe.db.get_value("VLCC Settings",{"vlcc":filters.get('vlcc')},"months_to_member")
 			if farmer_id and months_to_member:
@@ -157,7 +160,7 @@ def get_member_non_menber(fmcr_data,filters):
 					""".format(farmer,get_member_non_menber_cond(filters)),as_dict=1,debug=0)
 				member_qty += flt(member_data[0].get('qty'))
 				member_amt += flt(member_data[0].get('amt'))
-				
+
 	 	if filters.get('from_report') == "Dairy Register 2":
 		 	member_dict.update({
 					"total_milk_qty":round(member_qty+non_member_qty,2),

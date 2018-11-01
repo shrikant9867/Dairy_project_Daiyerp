@@ -116,8 +116,8 @@
 							<td><b>{%= ("Route Total") %}</b></td>
 							<td><b>{%= data[i][__("Cans")][ci] %}</b></td>
 							<td><b>{%= data[i][__("Qty")][ci] %}</b></td>
-							<td><b>{%= data[i][__("Fat")][ci] %}</b></td>
-							<td><b>{%= data[i][__("Snf")][ci] %}</b></td>
+							<td><b>{%= flt(data[i][__("Fat")][ci]/data[i][__("Qty")][ci],2) %}</b></td>
+							<td><b>{%= flt(data[i][__("Snf")][ci]/data[i][__("Qty")][ci],2) %}</b></td>
 							<td></td>
 							<td></td>
 							<td></td>

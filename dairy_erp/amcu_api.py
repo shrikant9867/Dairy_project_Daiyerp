@@ -494,8 +494,9 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			# })
 			vmrc_doc.shift = data.get('shift')#creats Shrikant 27-10-18 20:24
 			if data.get('shift') == "MORNING":
-				vmrc_doc.long_format_farmer_id = row.get('longformatfarmerid')
-				farmerid_len = row.get('longformatfarmerid').split('_')
+				# vmrc_doc.long_format_farmer_id = row.get('longformatfarmerid')
+				vmrc_doc.long_format_farmer_id = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row.get('farmerid')},"longformatfarmerid")
+				farmerid_len = vmrc_doc.long_format_farmer_id.split('_')
 				if len(farmerid_len) >= 4 and farmerid_len[2]:
 					collectionroute = str(farmerid_len[2])
 

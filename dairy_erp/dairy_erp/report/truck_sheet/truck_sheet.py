@@ -31,7 +31,9 @@ def get_columns():
 		_("Snf") + ":Data:100",
 		_("Rate") + ":Data:100",
 		_("Value") + ":Data:100",
-		_("SampleNumber") + ":Data:100"
+		_("SampleNumber") + ":Data:100",
+		_("wfat") + ":Data:100",
+		_("wsnf") + ":Data:100"
 	]
 
 	return columns
@@ -62,11 +64,13 @@ def get_data(filters=None):
 								group_concat(milkquality),
 								group_concat(numberofcans),
 								group_concat(milkquantity),
-								group_concat(round(milkquantity*fat/1000,2)),
-								group_concat(round(milkquantity*snf/1000,2)),
+								group_concat(round(fat,2)),
+								group_concat(round(snf,2)),
 								group_concat(round((((milkquantity*(fat+snf)*289.3)/100)/milkquantity),2)),
 								group_concat(round((milkquantity*(fat+snf)*289.3)/100,2)),
-								group_concat(samplenumber)
+								group_concat(samplenumber),
+								group_concat(round(fat*milkquantity,2)),
+								group_concat(round(snf*milkquantity,2))
 							from
 								`tabVlcc Milk Collection Record`
 							where
@@ -82,6 +86,17 @@ def get_data(filters=None):
 					row_ = [float(val) for val in data.split(',')]
 					row[index] = row_
 					row[index].append(flt(sum(row_),2))
+					
+				if index == 14:
+					row_ = [float(val) for val in data.split(',')]
+					row[9].pop()
+					row[9].append(flt(sum(row_),2))
+
+				if index == 15:
+					row_ = [float(val) for val in data.split(',')]
+					row[10].pop()
+					row[10].append(flt(sum(row_),2))	
+				
 				if index == 4 or index == 3 or index == 6:
 					if index == 3:
 						row[index] = [str(val.split('_')[3]) for val in data.split(',')]
@@ -97,9 +112,9 @@ def get_data(filters=None):
 					except Exception as e: # samplenumber is null;so ignoring for existing VMCR
 						row[index] = []
 
+
 	last_row = ["Grand Total",get_total_and_good_milk_qty(date_filters,"Accept"),get_total_and_good_milk_qty(date_filters,"Reject","CS"),get_total_and_good_milk_qty(date_filters,"Reject","CT"),get_total_and_good_milk_qty(date_filters,"Reject","SS")]
 	vmcr_data.append(last_row)
-	print vmcr_data
 
 	return vmcr_data
 
@@ -123,6 +138,6 @@ def get_total_and_good_milk_qty(filters,status=None,bad_milk_type=None):
 		where
 			{0} and docstatus = 1
 			{1}
-		""".format(filters,cond),as_list=1,debug=1)
+		""".format(filters,cond),as_list=1,debug=0)
 
 	return qty

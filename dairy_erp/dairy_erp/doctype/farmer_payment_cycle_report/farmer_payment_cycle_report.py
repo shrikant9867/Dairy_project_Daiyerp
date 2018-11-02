@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from dairy_erp.dairy_utils import make_dairy_log, make_journal_entry
 from frappe.utils import flt, cstr,nowdate,cint
+import json
 
 class FarmerPaymentCycleReport(Document):
 	
@@ -707,31 +708,25 @@ def get_vlcc():
 
 # SG-6-10
 @frappe.whitelist()
-def get_updated_advance(cycle, adv_id=None, amount=None, total = None):
-	if amount:
+def get_updated_advance(cycle, data, adv_id, amount, total):
+	data, total_paid, total_amount, overriding_amount = json.loads(data), 0, 0, 0
+	for row in data.get('advance_child'):
 		sum_ = frappe.db.sql("""
 				select ifnull(sum(total_debit),0) as total
 			from 
 				`tabJournal Entry` 
 			where 
-			farmer_advance =%s  and cycle !=%s and type='Farmer Advance' """,(adv_id,cycle),as_dict=1,debug=0)
-		if len(sum_):
-			adv_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
-			return adv_amount
-		else: return 0
+			farmer_advance =%s  and cycle =%s and type='Farmer Advance' """,(row.get('adv_id'),cycle),as_dict=1,debug=0)
+		total_paid += sum_[0].get('total')
+		total_amount += row.get('principle')
+		overriding_amount += flt(row.get('amount'))
+	return flt((total_amount - overriding_amount),2) or 0
 
 
 @frappe.whitelist()
-def get_updated_loan(cycle, loan_id=None, amount=None, total = None):
-	if amount:
-		sum_ = frappe.db.sql("""
-					select ifnull(sum(total_debit),0) as total
-				from 
-					`tabJournal Entry` 
-				where 
-				farmer_advance =%s  and cycle !=%s and type='Farmer loan' """,(loan_id,cycle),as_dict=1,debug=0)
-		if len(sum_):
-			loan_amount =  float(total) - float(sum_[0].get('total')) - float(amount)
-			return loan_amount
-		else: return 0
-
+def get_updated_loan(cycle, data, loan_id=None, amount=None, total = None):
+	data, total_paid, total_amount, overriding_amount = json.loads(data), 0, 0, 0
+	for row in data.get('loan_child'):
+		total_amount += row.get('principle')
+		overriding_amount += row.get('amount')
+	return flt((total_amount - overriding_amount),2) or 0

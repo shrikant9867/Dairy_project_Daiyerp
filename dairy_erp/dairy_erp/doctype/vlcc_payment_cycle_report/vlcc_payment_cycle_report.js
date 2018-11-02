@@ -213,10 +213,17 @@ frappe.ui.form.on('VLCC Loan Child',  {
 			frappe.model.set_value(cdt,cdn,"amount", 0.0)
 			frappe.throw(__("Amount can not be greater than total amount"))
 		}
-		if(frm.doc.cycle && row.loan_id && row.amount && frm.doc.vlcc_name) {
+		if(frm.doc.cycle && row.loan_id && frm.doc.vlcc_name) {
 			frappe.call({
 				method: "dairy_erp.dairy_erp.doctype.vlcc_payment_cycle_report.vlcc_payment_cycle_report.get_updated_loan",
-				args: {"cycle": frm.doc.cycle, "loan_id": row.loan_id, "amount": row.amount, "total": row.principle, "vlcc": frm.doc.vlcc_name},
+				args: {
+					"cycle": frm.doc.cycle,
+					"data": frm.doc,
+					"loan_id": row.loan_id,
+					"amount": row.amount,
+					"total": row.principle,
+					"vlcc": frm.doc.vlcc_name
+				},
 				callback: function(r) {
 					if (r.message){
 						frm.set_value("loan_outstanding",r.message)
@@ -242,10 +249,17 @@ frappe.ui.form.on('VLCC Advance Child', 'amount', function(frm, cdt, cdn){
 		frappe.model.set_value(cdt,cdn,"amount", 0.0)
 		frappe.throw(__("Amount can not be greater than total amount"))
 		}
-	if(frm.doc.cycle && row.adv_id && row.amount) {
+	if(frm.doc.cycle && row.adv_id) {
 		frappe.call({
 			method: "dairy_erp.dairy_erp.doctype.vlcc_payment_cycle_report.vlcc_payment_cycle_report.get_updated_advance",
-			args: {"cycle": frm.doc.cycle, "adv_id": row.adv_id, "amount": row.amount, "total": row.principle, "vlcc": frm.doc.vlcc_name},
+			args: {
+				"cycle": frm.doc.cycle,
+				"data": frm.doc, 
+				"adv_id": row.adv_id, 
+				"amount": row.amount, 
+				"total": row.principle, 
+				"vlcc": frm.doc.vlcc_name
+			},
 			callback: function(r) {
 				if (r.message){
 					frm.set_value("advance_outstanding",r.message)

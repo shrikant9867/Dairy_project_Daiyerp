@@ -23,8 +23,8 @@ def get_columns():
 		_("Route") + ":Data:100",
 		_("CC") + ":Data:100",
 		_("VLCC") + ":Data:100",
-		_("Qlty") + ":Data:100",
 		_("TS") + ":Data:100",
+		_("Qlty") + ":Data:100",
 		_("Cans") + ":Data:100",
 		_("Qty") + ":Data:100",
 		_("Fat") + ":Data:100", 
@@ -53,31 +53,55 @@ def get_data(filters=None):
 								collectionroute,
 								group_concat(societyid),
 								group_concat(associated_vlcc),
-								group_concat("TS"),
+								group_concat(fat+snf),
 								CASE
 								    WHEN status = "Accept" THEN group_concat("G")
 								    WHEN status = "Reject" THEN group_concat("CS")
 								END,
 								group_concat(numberofcans),
 								group_concat(milkquantity),
-								group_concat(fat),
-								group_concat(snf),
-								group_concat(rate),
-								group_concat(round(rate*milkquantity,2))
+								group_concat(round(milkquantity*fat/1000,2)),
+								group_concat(round(milkquantity*snf/1000,2)),
+								group_concat(round((((milkquantity*(fat+snf)*289.3)/100)/milkquantity),2)),
+								group_concat(round((milkquantity*(fat+snf)*289.3)/100,2))
 							from
 								`tabVlcc Milk Collection Record`
 							where
 							{0} and docstatus = 1
 							group by collectionroute
-							order by date(collectiontime)""".format(date_filters),as_list=1,debug=1)
+							order by date(collectiontime)""".format(date_filters),as_list=1,debug=0)
+
 	for row in vmcr_data:
 		for index,data in enumerate(row):	
 			if index > 2:
 				if index > 6:
 					row_ = [float(val) for val in data.split(',')]
 					row[index] = row_
-					row[index].append(sum(row_))
-				else:
+					row[index].append(flt(sum(row_),2))
+				if index == 4 or index == 3 or index == 6:
 					row[index] = [str(val) for val in data.split(',')]
-	print vmcr_data,"row\n\n\n\n"
+					row[index].append(" ")
+				if index == 5:
+					row[index] = [flt(val,2) for val in data.split(',')]
+					row[index].append(" ")
+
+	last_row = ["Grand Total",get_total_and_good_milk_qty(date_filters,"Accept"),get_total_and_good_milk_qty(date_filters)]
+	vmcr_data.append(last_row)
 	return vmcr_data
+
+
+def get_total_and_good_milk_qty(filters,status=None):
+	cond = " and 1=1 "
+	if status and status == "Accept":
+		cond += " and status = 'Accept' "
+	qty = frappe.db.sql("""
+		select 
+				sum(milkquantity)
+		from
+				`tabVlcc Milk Collection Record`
+		where
+			{0} and docstatus = 1
+			{1}
+		""".format(filters,cond),as_list=1,debug=1)
+
+	return qty

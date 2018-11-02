@@ -95,13 +95,13 @@ def  make_cross_jv(data, cur_cycl=None, company=None):
 	je_doc.append('accounts', {
 		'account': "Loans and Advances Payable - "+ vlcc_attr.get('abbr'),
 		'debit_in_account_currency': data.get('emi_amount'),
-		'party_type': "Supplier",
-		'party': company.get('name'),
 		'cost_center': vlcc_attr.get('cost_center')
 		})
 	je_doc.append('accounts', {
 		'account': "Creditors - "+ vlcc_attr.get('abbr'),
 		'credit_in_account_currency': data.get('emi_amount'),
+		'party_type': "Supplier",
+		'party': company.get('name'),
 		'cost_center': vlcc_attr.get('cost_center'),
 		})
 	je_doc.flags.ignore_permissions = True

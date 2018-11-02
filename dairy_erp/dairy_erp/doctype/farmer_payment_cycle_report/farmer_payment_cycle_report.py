@@ -433,6 +433,7 @@ def get_fmcr(start_date, end_date, vlcc, farmer_id, cycle=None):
 		amount += i.get('amount')
 		qty += i.get('milkquantity')
 	
+	amount = flt(amount,2)
 	return {
 		"fmcr":fmcr, 
 		"incentive": get_incentives(amount, qty, vlcc) or 0, 

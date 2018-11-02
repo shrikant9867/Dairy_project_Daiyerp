@@ -39,20 +39,13 @@ def vlcc_date_computation():
 			filters = { 'month': current_month_abbr,
 			'fiscal_year':current_fiscal_year.get('name')})
 
-	if not len(cycle_exist) and dairy_setting.no_of_cycles and dairy_setting.no_of_interval:
-		for cycle_index in range(1,cint(dairy_setting.no_of_cycles)+cint(1)):
-			cycle_name = "Cycle "+str(cycle_index)
+	if not len(cycle_exist) and dairy_setting.no_of_cycles>0 and dairy_setting.no_of_interval>0:
+		if dairy_setting.no_of_cycles == 1:
+			cycle_name = "Cycle "+str(1)
 			cycle_data.setdefault(cycle_name, {})
-
-			if cycle_index == 1:
-				s_date = month_details.month_start_date
-				e_date = datetime.date(month_details.year, cint(current_month), cint(dairy_setting.no_of_interval))
-			elif cycle_index == cint(dairy_setting.no_of_cycles):
-				s_date = add_days(getdate(s_date),cint(dairy_setting.no_of_interval))
-				e_date = month_details.month_end_date
-			else:
-				s_date = add_days(getdate(s_date),cint(dairy_setting.no_of_interval))
-				e_date = add_days(getdate(e_date),cint(dairy_setting.no_of_interval))
+			
+			s_date = month_details.month_start_date
+			e_date = month_details.month_end_date
 
 			args = {
 				"start_date": s_date,
@@ -61,6 +54,30 @@ def vlcc_date_computation():
 				"fiscal_year":current_fiscal_year.get('name')
 			}
 			cycle_data[cycle_name].update(args)
+
+
+		if dairy_setting.no_of_cycles > 1:
+			for cycle_index in range(1,cint(dairy_setting.no_of_cycles)+cint(1)):
+				cycle_name = "Cycle "+str(cycle_index)
+				cycle_data.setdefault(cycle_name, {})
+
+				if cycle_index == 1:
+					s_date = month_details.month_start_date
+					e_date = datetime.date(month_details.year, cint(current_month), cint(dairy_setting.no_of_interval))
+				elif cycle_index == cint(dairy_setting.no_of_cycles):
+					s_date = add_days(getdate(s_date),cint(dairy_setting.no_of_interval))
+					e_date = month_details.month_end_date
+				else:
+					s_date = add_days(getdate(s_date),cint(dairy_setting.no_of_interval))
+					e_date = add_days(getdate(e_date),cint(dairy_setting.no_of_interval))
+
+				args = {
+					"start_date": s_date,
+					"end_date": e_date,
+					"month":current_month_abbr,
+					"fiscal_year":current_fiscal_year.get('name')
+				}
+				cycle_data[cycle_name].update(args)
 
 		vlcc_cycle_date_computation(cycle_data)
 
@@ -83,22 +100,12 @@ def farmer_date_computation():
 					'fiscal_year':current_fiscal_year.get('name')})
 
 			if not len(cycle_exist) and vlcc.get('no_of_cycles')>0 and vlcc.get('no_of_interval')>0:
-				for cycle_index in range(1,cint(vlcc.get('no_of_cycles'))+cint(1)):
-					cycle_name = "Cycle "+str(cycle_index)
+				if vlcc.get('no_of_cycles') == 1:
+					cycle_name = "Cycle "+str(1)
 					cycle_data.setdefault(cycle_name, {})
-
-					if cycle_index == 1:
-						s_date = month_details.month_start_date
-						if cint(vlcc.get('no_of_interval')) < 31:
-							e_date = datetime.date(month_details.year, cint(current_month), cint(vlcc.get('no_of_interval')))
-						else:
-							e_date = month_details.month_end_date
-					elif cycle_index == cint(vlcc.get('no_of_cycles')):
-						s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
-						e_date = month_details.month_end_date
-					else:
-						s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
-						e_date = add_days(getdate(e_date),cint(vlcc.get('no_of_interval')))
+					
+					s_date = month_details.month_start_date
+					e_date = month_details.month_end_date
 
 					args = {
 						"start_date": s_date,
@@ -108,6 +115,34 @@ def farmer_date_computation():
 						"vlcc":vlcc.get('name')
 					}
 					cycle_data[cycle_name].update(args)
+				
+				if vlcc.get('no_of_cycles') > 1:
+					for cycle_index in range(1,cint(vlcc.get('no_of_cycles'))+cint(1)):
+						cycle_name = "Cycle "+str(cycle_index)
+						cycle_data.setdefault(cycle_name, {})
+
+						if cycle_index == 1:
+							s_date = month_details.month_start_date
+							if cint(vlcc.get('no_of_interval')) < 31:
+								e_date = datetime.date(month_details.year, cint(current_month), cint(vlcc.get('no_of_interval')))
+							else:
+								e_date = month_details.month_end_date
+
+						elif cycle_index == cint(vlcc.get('no_of_cycles')):
+							s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
+							e_date = month_details.month_end_date
+						else:
+							s_date = add_days(getdate(s_date),cint(vlcc.get('no_of_interval')))
+							e_date = add_days(getdate(e_date),cint(vlcc.get('no_of_interval')))
+
+						args = {
+							"start_date": s_date,
+							"end_date": e_date,
+							"month":current_month_abbr,
+							"fiscal_year":current_fiscal_year.get('name'),
+							"vlcc":vlcc.get('name')
+						}
+						cycle_data[cycle_name].update(args)
 
 			farmer_cycle_date_computation(cycle_data)
 

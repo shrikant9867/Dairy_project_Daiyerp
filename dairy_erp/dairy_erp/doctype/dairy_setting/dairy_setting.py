@@ -63,23 +63,24 @@ def get_csv(doc):
 								vlcc.contact_no = row[4]
 								vlcc.plant_office = row[5]
 								vlcc.camp_office = row[6]
-								vlcc.vlcc_type = row[9]
-								vlcc.global_percent_effective_credit = row[10]
-								vlcc.chilling_centre =row[11]
+								vlcc.vlcc_type = row[10]
+								vlcc.global_percent_effective_credit = row[11]
+								vlcc.chilling_centre =row[12]
 								vlcc.longformatfarmerid = row [8] #SD 17-10-2018 17:00
+								vlcc.longformatsocietyid_e = row [9]
 								vlcc.amcu_id = row[7]  #SD 17-10-2018 17:00
 
-								if int(row[12]) == 1:
+								if int(row[13]) == 1:
 									vlcc.operator_same_as_agent = 1
-									vlcc.operator_number = row[13]
-									vlcc.operator_email_id = row[14]
-									vlcc.operator_name = row[15]
+									vlcc.operator_number = row[14]
+									vlcc.operator_email_id = row[15]
+									vlcc.operator_name = row[16]
 
 								vlcc.is_auto_society_id = 1
 								vlcc.flags.ignore_permissions = True
 								
 								vlcc.save()
-								address=make_address(address_title=row[16],address_type=row[17],address_line1=row[18],city=row[19],vlcc_name=vlcc.name)
+								address=make_address(address_title=row[17],address_type=row[18],address_line1=row[19],city=row[20],vlcc_name=vlcc.name)
 								frappe.db.set_value("Village Level Collection Centre",vlcc.name,"address",address.name)
 								address_display = address.address_line1+"\n"+address.city+"\n"+address.country
 								frappe.db.set_value("Village Level Collection Centre",vlcc.name,"address_display",address_display)

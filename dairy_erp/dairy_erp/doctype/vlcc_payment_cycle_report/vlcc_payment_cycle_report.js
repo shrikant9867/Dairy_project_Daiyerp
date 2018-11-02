@@ -205,10 +205,10 @@ frappe.ui.form.on('VLCC Loan Child',  {
 	},
 	amount: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn]
-		if(frm.doc.cycle && row.loan_id && row.amount) {
+		if(frm.doc.cycle && row.loan_id && row.amount && frm.doc.vlcc_name) {
 			frappe.call({
 				method: "dairy_erp.dairy_erp.doctype.vlcc_payment_cycle_report.vlcc_payment_cycle_report.get_updated_loan",
-				args: {"cycle": frm.doc.cycle, "loan_id": row.loan_id, "amount": row.amount, "total": row.principle},
+				args: {"cycle": frm.doc.cycle, "loan_id": row.loan_id, "amount": row.amount, "total": row.principle, "vlcc": frm.doc.vlcc_name},
 				callback: function(r) {
 					if (r.message){
 						frm.set_value("loan_outstanding",r.message)

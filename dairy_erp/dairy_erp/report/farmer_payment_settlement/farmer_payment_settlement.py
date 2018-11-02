@@ -139,10 +139,11 @@ def get_payment_amt(row_data,filters):
 			if data[9] == "Sales Invoice": receivable += data[5]
 			if data[7] == "Journal Entry": receivable += data[5]
 
-	return {"payble":payble,"receivable":receivable,"set_amt": min(payble,receivable)}
+	manual_amt = flt(payble-min(payble,receivable),2)
+	return {"payble":payble,"receivable":receivable,"set_amt": min(payble,receivable),"manual_amt":manual_amt}
 
 @frappe.whitelist()
-def make_payment(data,row_data,filters):
+def make_payment(data,row_data,filters,credit_amt):
 	
 	payable_data = get_payment_amt(row_data,filters)
 	data = json.loads(data)
@@ -167,7 +168,7 @@ def make_payment(data,row_data,filters):
 		due_pay = make_manual_payment(data=data,row_data=row_data,filters=filters,company=vlcc,payble_list=payble_list)
 
 		voucher_nos = [payable, receivable, due_pay]
-		make_payment_log(data=data,filters=filters, row_data= row_data, voucher_nos=voucher_nos,payable_data=payable_data)
+		make_payment_log(data=data,filters=filters, row_data= row_data, voucher_nos=voucher_nos,payable_data=payable_data,credit_amt=credit_amt)
 		return {"payable":payable,"receivable":receivable,"due_pay":due_pay}
 	except Exception,e:
 		frappe.db.rollback() 
@@ -177,6 +178,7 @@ def make_payment(data,row_data,filters):
 
 def make_payment_log(**kwargs):
 
+	credit_amt = json.loads(kwargs.get('credit_amt'))
 	user_doc = frappe.db.get_value("User",{"name":frappe.session.user},
 			  ['operator_type','company','branch_office'], as_dict =1)
 
@@ -217,16 +219,25 @@ def make_payment_log(**kwargs):
 				farmer_payment_log[cycle.name]['receivable'] += gl_doc.debit
 
 	for cycle, args in farmer_payment_log.items():
-		make_farmer_voucher_log(cycle, args)
+		actual_pay = get_actual_payable(args,credit_amt)
+		make_farmer_voucher_log(cycle, args,actual_pay)
 
-def make_farmer_voucher_log(cycle, args):
+def get_actual_payable(args,credit_amt):
+	actual_pay = 0
+	for data in credit_amt:
+		if (getdate(args.get('start_date')) <= getdate(data.get('posting_date'))
+			and getdate(data.get('posting_date')) <= getdate(args.get('end_date'))):
+			actual_pay += data.get('credit_amt')
+	return actual_pay
+
+def make_farmer_voucher_log(cycle, args,actual_pay):
 
 	try:
 		sales_amount, purchase_amount = get_cycle_sales_purchase_paid_amt(args)
 		if sales_amount > 0 or purchase_amount > 0:
 			log_doc = frappe.new_doc("Farmer Payment Log")
 			log_doc.total_pay = args.get('total_pay')
-			log_doc.payble = args.get('payable_data').get('payble') if args.get('total_pay') else 0#args.get('payable')
+			log_doc.payble = actual_pay#args.get('payable') #args.get('payable_data').get('payble') if args.get('total_pay') else 0#args.get('payable')
 			log_doc.receivable = args.get('receivable')  
 			log_doc.start_date = args.get('start_date') 
 			log_doc.end_date = args.get('end_date') 
@@ -247,9 +258,9 @@ def make_farmer_voucher_log(cycle, args):
 
 			log_doc.sales_amount = sales_amount
 			log_doc.purchase_amount = purchase_amount
-			log_doc.settled_amount = args.get('dialog_data').get('set_amt') 
-			log_doc.set_amt_manual = args.get('dialog_data').get('set_amt_manual')
-			log_doc.outstanding_amount = (flt(log_doc.payble,2) - flt(purchase_amount,2)) or 0
+			log_doc.settled_amount = auto  
+			log_doc.set_amt_manual = manual 
+			log_doc.outstanding_amount =  get_outstanding_amt_pi(args)
 
 			previous_amt = get_previous_amt(cycle, args.get('farmer'))
 			total_pay = auto + manual + previous_amt
@@ -260,6 +271,16 @@ def make_farmer_voucher_log(cycle, args):
 	except Exception, e:
 		make_dairy_log(title="Farmer Payment Log Error",method="make_farmer_voucher_log", status="Error",
 							 message=e, traceback=frappe.get_traceback())
+
+def get_outstanding_amt_pi(args):
+	return frappe.db.sql("""
+		select ifnull(sum(outstanding_amount),0) as outstanding_amount
+	from 
+		`tabPurchase Invoice` 
+	where 
+		company = %s and supplier = %s and posting_date 
+		between %s and %s""",(args.get('company'),args.get('farmer'),args.get('start_date'),
+			args.get('end_date')),as_dict=1,debug=0)[0].get('outstanding_amount')
 
 def get_previous_amt(cycle, farmer):
 	previous_amt = frappe.db.sql("""select ifnull(sum(settled_amount),0) +
@@ -592,7 +613,7 @@ def check_cycle(row_data,filters):
 
 def check_receivable(recv_list):
 	
-	if ('Sales Invoice' or 'Journal Entry') in recv_list and 'Purchase Invoice' not in recv_list:
+	if ('Sales Invoice' in recv_list or 'Journal Entry' in recv_list) and 'Purchase Invoice' not in recv_list:
 		return "You can not settle only Receivable Amount"
 
 

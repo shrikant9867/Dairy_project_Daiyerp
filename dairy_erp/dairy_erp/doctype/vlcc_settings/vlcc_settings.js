@@ -68,6 +68,9 @@ frappe.ui.form.on('VLCC Settings', {
 	validate: function(frm) {
 		frm.events.validate_cycle_hours(frm)
 		frm.events.validate_item_table(frm)
+		if(frm.doc.no_of_cycles <= 0 || frm.doc.no_of_interval <= 0) {
+			frappe.throw("Number of cycles/Number of Intervals must be between <b>1-31</b>")
+		}
 	},
 	validate_item_table:function(frm){
 		var c_type_wise_item = {}
@@ -173,7 +176,28 @@ frappe.ui.form.on('VLCC Settings', {
 		frm.set_value("allow_negative_effective_credit",0)
 		frm.set_value("flag_negative_effective_credit",1)
 		frm.set_df_property("allow_negative_effective_credit","read_only",1)
+	},
+	no_of_cycles: function(frm) {
+		if(frm.doc.no_of_cycles > 31){
+			frm.set_value("no_of_cycles",1)
+			frappe.throw("Number of cycles must be between <b>1-31</b>")
+		}
+		else if(frm.doc.no_of_cycles <= 0){
+			frm.set_value("no_of_cycles",1)
+			frappe.throw("Number of cycles can not be less than <b>1</b>")
+		}
+	},
+	no_of_interval: function(frm) {
+		if(frm.doc.no_of_interval > 31){
+			frm.set_value("no_of_interval",1)
+			frappe.throw("Number of intervals must be between <b>1-31</b>")
+		}
+		else if(frm.doc.no_of_interval <= 0){
+			frm.set_value("no_of_interval",1)
+			frappe.throw("Number of intervals can not be less than <b>1</b>")
+		}
 	}
+
 });
 
 

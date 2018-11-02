@@ -227,11 +227,11 @@ def create_farmer(data):
 	if api_data:
 		for row in api_data:
 			response_dict.update({row.get('farmer_id'):[]})
-			vlcc_ = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('longformatsocietyid')},'name')
+			vlcc_ = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
 			farmer_ = frappe.db.get_value("Farmer",row.get('farmer_id'),'name')
 			try:
-				if row.get('longformatsocietyid') and row.get('farmer_id') and row.get('full_name') and row.get('mode') == "CREATE" and row.get('cattle_type'):
-					vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('longformatsocietyid')},'name')
+				if row.get('society_id') and row.get('farmer_id') and row.get('full_name') and row.get('mode') == "CREATE" and row.get('cattle_type'):
+					vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('society_id')},'name')
 					if vlcc :
 						if not frappe.db.sql("select full_name from `tabFarmer` where full_name=%s",(row.get("full_name"))):
 							if  reserved_farmer_exist(row,vlcc):

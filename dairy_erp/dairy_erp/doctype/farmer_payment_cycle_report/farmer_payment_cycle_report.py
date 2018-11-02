@@ -175,7 +175,7 @@ class FarmerPaymentCycleReport(Document):
 			frappe.db.set_value("Journal Entry", je_doc.name, 'posting_date', self.collection_to)
 
 			company_abbr = frappe.db.get_value("Company",get_vlcc(),'abbr')
-			frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advances Temporary Account - '+company_abbr, "voucher_no": je_doc.name},\
+			frappe.db.set_value("GL Entry", {"account": 'Debtors - '+company_abbr, "voucher_no": je_doc.name},\
 						'posting_date', self.collection_to )
 			frappe.db.set_value("GL Entry", {"account": 'Feed And Fodder Advance - '+company_abbr, "voucher_no": je_doc.name},\
 						'posting_date', self.collection_to )
@@ -279,12 +279,12 @@ class FarmerPaymentCycleReport(Document):
 
 		if advance_type == "Feed And Fodder Advance":
 			accounts_row_debit = frappe.db.get_value("Journal Entry Account", {'parent':je_no,"account":\
-				'Feed And Fodder Advances Temporary Account - '+company.get('abbr')}, 'name')
+				'Debtors - '+company.get('abbr')}, 'name')
 
 			accounts_row_credit = frappe.db.get_value("Journal Entry Account", {'parent':je_no,"account":\
 				'Feed And Fodder Advance - '+company.get('abbr')}, 'name')
 			
-			frappe.db.set_value("Journal Entry Account",{'name':accounts_row_debit, 'account':'Feed And Fodder Advances Temporary Account - '+company.get('abbr')}, 'debit_in_account_currency', row.amount)
+			frappe.db.set_value("Journal Entry Account",{'name':accounts_row_debit, 'account':'Debtors - '+company.get('abbr')}, 'debit_in_account_currency', row.amount)
 			frappe.db.set_value("Journal Entry Account",{'name':accounts_row_credit, 'account':'Feed And Fodder Advance - '+company.get('abbr')}, 'credit_in_account_currency', row.amount)
 			frappe.db.set_value("Journal Entry", je_no, 'total_credit', row.amount)
 			frappe.db.set_value("Journal Entry", je_no, 'total_debit', row.amount)

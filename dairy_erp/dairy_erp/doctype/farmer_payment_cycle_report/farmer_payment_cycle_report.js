@@ -22,14 +22,16 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 				}
 			})
 		}
-		if(!frm.doc.date) {
-			frm.set_value("date",frappe.datetime.get_today())
-		}
-		if(!frm.doc.vlcc_name){
-			get_vlcc(frm)
-		}
-		if(!frm.doc.address) {
-			get_address(frm)
+		if(frm.doc.docstatus == 0){
+			if(!frm.doc.date) {
+				frm.set_value("date",frappe.datetime.get_today())
+			}
+			if(!frm.doc.vlcc_name){
+				get_vlcc(frm)
+			}
+			if(!frm.doc.address) {
+				get_address(frm)
+			}
 		}
 	},
 	vlcc_name: function(frm) {

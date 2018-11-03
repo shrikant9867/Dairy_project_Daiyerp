@@ -2294,7 +2294,7 @@
    "read_only": 0, 
    "remember_last_selected_value": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -2430,7 +2430,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-10-30 17:42:48.168838", 
+ "modified": "2018-11-01 11:03:55.077045", 
  "modified_by": "Administrator", 
  "module": "Dairy Erp", 
  "name": "Vlcc Milk Collection Record", 

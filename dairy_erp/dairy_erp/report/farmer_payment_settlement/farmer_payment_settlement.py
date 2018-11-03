@@ -129,9 +129,9 @@ def get_conditions(filters):
 
 @frappe.whitelist()
 def get_payment_amt(row_data,filters):
-
 	report_data = get_data(json.loads(filters))
-	row_data = json.loads(row_data)
+	row_data, filters_ = json.loads(row_data), json.loads(filters)
+	validate_agrupay_pending(report_data, row_data, filters_)
 	payble, receivable, set_amt = 0.0, 0.0, 0.0
 
 	for data in report_data:
@@ -141,7 +141,24 @@ def get_payment_amt(row_data,filters):
 			if data[7] == "Journal Entry": receivable += data[5]
 
 	manual_amt = flt(payble-min(payble,receivable),2)
-	return {"payble":payble,"receivable":receivable,"set_amt": min(payble,receivable),"manual_amt":manual_amt}
+	return {
+		"payble":payble,
+		"receivable":receivable,
+		"set_amt": min(payble,receivable),
+		"manual_amt":manual_amt, 
+		"is_agrupay":frappe.db.get_value("VLCC Settings", frappe.db.get_value("Farmer", \
+					filters_.get('farmer'), 'vlcc_name'),'enable')
+	}
+
+def validate_agrupay_pending(report_data,row_data,filters):
+	is_agrupay_pe = frappe.db.sql("""
+			select name 
+		from `tabPayment Entry` 
+		where 
+			posting_date 
+		between 
+			'{0}' and '{1}' and docstatus=0 and mode_of_payment = 'Direct Agrupay Payment'"""
+			.format(filters.get('start_date'), filters.get('end_date')),debug=0)
 
 @frappe.whitelist()
 def make_payment(data,row_data,filters,credit_amt):

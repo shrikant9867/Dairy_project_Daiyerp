@@ -275,6 +275,9 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 				dialog.get_field('sec_brk').df.hidden = 1;
 				dialog.get_field('sec_brk').refresh();
 			}
+			if(r.message.is_agrupay){
+				dialog.set_value("mode_of_payment", "Direct Agrupay Payment")
+			}
 		}
 	})
 	dialog.show()
@@ -338,6 +341,7 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 	set_check_reqd:function(dialog){
 		if(dialog.get_value('mode_of_payment') == "Cash"){
 			dialog.get_field('ref_no').df.reqd = 0;
+			dialog.get_field('ref_no').df.read_only = 1;
 			dialog.get_field('ref_no').refresh();
 		}
 		else{

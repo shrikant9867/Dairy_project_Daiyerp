@@ -346,13 +346,16 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 
 
 	set_check_reqd:function(dialog){
-		if(dialog.get_value('mode_of_payment') == "Cash"){
+		if(dialog.get_value('mode_of_payment') == "Cash" || dialog.get_value('mode_of_payment') == "Direct Agrupay Payment"){
 			dialog.get_field('ref_no').df.reqd = 0;
-			dialog.get_field('ref_no').df.read_only = 1;
+			if(dialog.get_value('mode_of_payment') == "Cash"){
+				dialog.get_field('ref_no').df.read_only = 1;
+			}
 			dialog.get_field('ref_no').refresh();
 		}
 		else{
 			dialog.get_field('ref_no').df.reqd = 1;
+			dialog.get_field('ref_no').df.read_only = 0;
 			dialog.get_field('ref_no').refresh();
 		}
 	},

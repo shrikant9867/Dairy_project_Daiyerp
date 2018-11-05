@@ -253,34 +253,39 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 		method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_payment_amt",
 		args : {"row_data":frappe.selected_rows,"filters":report.get_values()},
 		callback : function(r){
-			dialog.set_values({
-				'payble': r.message.payble,
-				'receivable': r.message.receivable,
-				"set_amt":r.message.set_amt,
-				"set_amt_manual": r.message.manual_amt //r.message.payble - r.message.set_amt
-			});
-			if(flt(r.message.payble,2) <= flt(r.message.receivable,2)){
-				dialog.get_field('set_amt_manual').df.hidden = 1;
-				dialog.get_field('set_amt_manual').refresh();
-				dialog.get_field('mode_of_payment').df.hidden = 1;
-				dialog.get_field('mode_of_payment').refresh();
-				dialog.get_field('ref_no').df.reqd = 0;
-				dialog.get_field('ref_no').refresh();
-				dialog.get_field('ref_date').df.reqd = 0;
-				dialog.get_field('ref_date').refresh();
-				dialog.get_field('ref_no').df.hidden = 1;
-				dialog.get_field('ref_no').refresh();
-				dialog.get_field('ref_date').df.hidden = 1;
-				dialog.get_field('ref_date').refresh();
-				dialog.get_field('sec_brk').df.hidden = 1;
-				dialog.get_field('sec_brk').refresh();
+			if(r.message){
+				dialog.set_values({
+					'payble': r.message.payble,
+					'receivable': r.message.receivable,
+					"set_amt":r.message.set_amt,
+					"set_amt_manual": r.message.manual_amt //r.message.payble - r.message.set_amt
+				});
+				if(flt(r.message.payble,2) <= flt(r.message.receivable,2)){
+					dialog.get_field('set_amt_manual').df.hidden = 1;
+					dialog.get_field('set_amt_manual').refresh();
+					dialog.get_field('mode_of_payment').df.hidden = 1;
+					dialog.get_field('mode_of_payment').refresh();
+					dialog.get_field('ref_no').df.reqd = 0;
+					dialog.get_field('ref_no').refresh();
+					dialog.get_field('ref_date').df.reqd = 0;
+					dialog.get_field('ref_date').refresh();
+					dialog.get_field('ref_no').df.hidden = 1;
+					dialog.get_field('ref_no').refresh();
+					dialog.get_field('ref_date').df.hidden = 1;
+					dialog.get_field('ref_date').refresh();
+					dialog.get_field('sec_brk').df.hidden = 1;
+					dialog.get_field('sec_brk').refresh();
+				}
+				if(r.message.is_agrupay){
+					dialog.set_value("mode_of_payment", "Direct Agrupay Payment")
+				}
+				dialog.show()
 			}
-			if(r.message.is_agrupay){
-				dialog.set_value("mode_of_payment", "Direct Agrupay Payment")
+			else {
+
 			}
 		}
 	})
-	dialog.show()
 
 	dialog.set_primary_action(__("Submit"), function() {
 

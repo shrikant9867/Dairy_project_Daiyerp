@@ -249,43 +249,45 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 		]
 	});
 
-	frappe.call({
-		method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_payment_amt",
-		args : {"row_data":frappe.selected_rows,"filters":report.get_values()},
-		callback : function(r){
-			if(r.message){
-				dialog.set_values({
-					'payble': r.message.payble,
-					'receivable': r.message.receivable,
-					"set_amt":r.message.set_amt,
-					"set_amt_manual": r.message.manual_amt //r.message.payble - r.message.set_amt
-				});
-				if(flt(r.message.payble,2) <= flt(r.message.receivable,2)){
-					dialog.get_field('set_amt_manual').df.hidden = 1;
-					dialog.get_field('set_amt_manual').refresh();
-					dialog.get_field('mode_of_payment').df.hidden = 1;
-					dialog.get_field('mode_of_payment').refresh();
-					dialog.get_field('ref_no').df.reqd = 0;
-					dialog.get_field('ref_no').refresh();
-					dialog.get_field('ref_date').df.reqd = 0;
-					dialog.get_field('ref_date').refresh();
-					dialog.get_field('ref_no').df.hidden = 1;
-					dialog.get_field('ref_no').refresh();
-					dialog.get_field('ref_date').df.hidden = 1;
-					dialog.get_field('ref_date').refresh();
-					dialog.get_field('sec_brk').df.hidden = 1;
-					dialog.get_field('sec_brk').refresh();
+	if(frappe.selected_rows.length != 0){
+		frappe.call({
+			method:"dairy_erp.dairy_erp.report.farmer_payment_settlement.farmer_payment_settlement.get_payment_amt",
+			args : {"row_data":frappe.selected_rows,"filters":report.get_values()},
+			callback : function(r){
+				if(r.message){
+					dialog.set_values({
+						'payble': r.message.payble,
+						'receivable': r.message.receivable,
+						"set_amt":r.message.set_amt,
+						"set_amt_manual": r.message.manual_amt //r.message.payble - r.message.set_amt
+					});
+					if(flt(r.message.payble,2) <= flt(r.message.receivable,2)){
+						dialog.get_field('set_amt_manual').df.hidden = 1;
+						dialog.get_field('set_amt_manual').refresh();
+						dialog.get_field('mode_of_payment').df.hidden = 1;
+						dialog.get_field('mode_of_payment').refresh();
+						dialog.get_field('ref_no').df.reqd = 0;
+						dialog.get_field('ref_no').refresh();
+						dialog.get_field('ref_date').df.reqd = 0;
+						dialog.get_field('ref_date').refresh();
+						dialog.get_field('ref_no').df.hidden = 1;
+						dialog.get_field('ref_no').refresh();
+						dialog.get_field('ref_date').df.hidden = 1;
+						dialog.get_field('ref_date').refresh();
+						dialog.get_field('sec_brk').df.hidden = 1;
+						dialog.get_field('sec_brk').refresh();
+					}
+					if(r.message.is_agrupay){
+						dialog.set_value("mode_of_payment", "Direct Agrupay Payment")
+					}
+					dialog.show()
 				}
-				if(r.message.is_agrupay){
-					dialog.set_value("mode_of_payment", "Direct Agrupay Payment")
-				}
-				dialog.show()
-			}
-			else {
+				else {
 
+				}
 			}
-		}
-	})
+		})
+	}
 
 	dialog.set_primary_action(__("Submit"), function() {
 
@@ -344,13 +346,16 @@ frappe.query_reports["Farmer Payment Settlement"] = {
 
 
 	set_check_reqd:function(dialog){
-		if(dialog.get_value('mode_of_payment') == "Cash"){
+		if(dialog.get_value('mode_of_payment') == "Cash" || dialog.get_value('mode_of_payment') == "Direct Agrupay Payment"){
 			dialog.get_field('ref_no').df.reqd = 0;
-			dialog.get_field('ref_no').df.read_only = 1;
+			if(dialog.get_value('mode_of_payment') == "Cash"){
+				dialog.get_field('ref_no').df.read_only = 1;
+			}
 			dialog.get_field('ref_no').refresh();
 		}
 		else{
 			dialog.get_field('ref_no').df.reqd = 1;
+			dialog.get_field('ref_no').df.read_only = 0;
 			dialog.get_field('ref_no').refresh();
 		}
 	},

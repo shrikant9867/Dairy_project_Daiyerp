@@ -392,12 +392,10 @@ def make_manual_payment(**kwargs):
 def make_payment_entry(**kwargs):
 
 	try:
-		print "################",kwargs
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = kwargs.get('payment_type')
 		pe.company = kwargs.get('args').get('company')
 		pe.posting_date = nowdate()
-		pe.cycle = kwargs.get('cycle_pe').get('cycle')
 		pe.mode_of_payment = kwargs.get('args').get('data').get('mode_of_payment')
 		pe.party_type = kwargs.get('party_type')
 		pe.party = kwargs.get('args').get('filters').get('farmer')

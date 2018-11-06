@@ -160,7 +160,7 @@ def validate_agrupay_pending(report_data,row_data,filters):
 				`tabPayment Entry` pe on pe.name = per.parent 
 			where 
 				pe.docstatus = 0 and mode_of_payment = 'Direct Agrupay Payment' and cycle = %s and party=%s""",
-			(filters.get('cycle'), row[4]),debug=1, as_dict=1):
+			(filters.get('cycle'), row[4]),debug=0, as_dict=1):
 			
 			frappe.throw("""Payment Entry is in Pipeline for <b>AgRuapy Confirmation</b>, please wait agrupay server to confirm the payment""")
 

@@ -10,11 +10,11 @@ frappe.ui.form.on('Dairy Setting', {
 		// SG-16-10
 		if (msg_flag == 0){//SD 17-10-18 18:00
 			if(frm.doc.no_of_cycles <= 0 || frm.doc.no_of_interval <= 0) {
-				frappe.throw("Number of Cycles/Number of Intervals must be between <b>1-31</b>")
+				frappe.throw("Number of Cycles/Number of days in a Payment Cycle must be between <b>1-31</b>")
 			}
 			// SG-17-10
 			if(frm.doc.no_of_cycles * frm.doc.no_of_interval > 31) {
-				frappe.throw("Combination of <b>Number of Cycles & Number of Intervals</b> is incorrect")
+				frappe.throw("Combination of <b>Number of Cycles & Number of days in a Payment Cycle</b> is incorrect")
 			}
 		}
 
@@ -65,11 +65,11 @@ frappe.ui.form.on('Dairy Setting', {
 	no_of_interval: function(frm) {
 		if(frm.doc.no_of_interval > 31){
 			frm.set_value("no_of_interval",1)
-			frappe.throw("Number of Intervals must be between <b>1-31</b>")
+			frappe.throw("Number of days in a Payment Cycle must be between <b>1-31</b>")
 		}
 		else if(frm.doc.no_of_interval <= 0){
 			frm.set_value("no_of_interval",1)
-			frappe.throw("Number of Intervals can not be less than <b>1</b>")
+			frappe.throw("Number of days in a Payment Cycle can not be less than <b>1</b>")
 		}
 	},
 	upload_vlcc:function(frm) {//SD 17-10-18 18:00

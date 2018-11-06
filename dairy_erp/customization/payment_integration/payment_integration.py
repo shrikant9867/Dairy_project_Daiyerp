@@ -19,6 +19,9 @@ def pay_to_farmers_account(pe_obj):
 		  "erpRefNo": pe_obj.erp_ref_no
 		}
 		response = requests.post(url, data=json.dumps(payload), headers = {'content-type': 'application/json'})
+		response_ = json.loads(response.content)
+		if response_.get('status') == "FAILURE":
+			frappe.delete_doc("Payment Entry", pe_obj.name)
 		make_agrupay_log(status=json.loads(response.content).get('status'),request_data=json.dumps(payload),
 			sync_time=now_datetime(),response_text=json.dumps(response.content),response_code=response.status_code)
 	except Exception,e:

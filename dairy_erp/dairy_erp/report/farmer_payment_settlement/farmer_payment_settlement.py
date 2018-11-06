@@ -151,17 +151,18 @@ def get_payment_amt(row_data,filters):
 	}
 
 def validate_agrupay_pending(report_data,row_data,filters):
-	if frappe.db.sql("""
-			select pe.name 
-		from 
-			`tabPayment Entry Reference` per 
-		join 
-			`tabPayment Entry` pe on pe.name = per.parent 
-		where 
-			pe.docstatus = 0 and mode_of_payment = 'Direct Agrupay Payment'"""
-			.format(filters.get('start_date'), filters.get('end_date')),debug=0, as_dict=1):
-		
-		frappe.throw("""Payment Entry is in Pipeline for <b>AgRuapy Confirmation</b>, please wait agrupay server to confirm the payment""")
+	for row in report_data:
+		if len(row) and frappe.db.sql("""
+				select pe.name 
+			from 
+				`tabPayment Entry Reference` per 
+			join 
+				`tabPayment Entry` pe on pe.name = per.parent 
+			where 
+				pe.docstatus = 0 and mode_of_payment = 'Direct Agrupay Payment' and cycle = %s and party=%s""",
+			(filters.get('cycle'), row[4]),debug=1, as_dict=1):
+			
+			frappe.throw("""Payment Entry is in Pipeline for <b>AgRuapy Confirmation</b>, please wait agrupay server to confirm the payment""")
 
 @frappe.whitelist()
 def make_payment(data,row_data,filters,credit_amt):
@@ -395,6 +396,8 @@ def make_payment_entry(**kwargs):
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = kwargs.get('payment_type')
 		pe.company = kwargs.get('args').get('company')
+		if kwargs.get('is_manual'):
+			pe.cycle = kwargs.get('cycle_pe').get('cycle')
 		pe.posting_date = nowdate()
 		pe.mode_of_payment = kwargs.get('args').get('data').get('mode_of_payment')
 		pe.party_type = kwargs.get('party_type')

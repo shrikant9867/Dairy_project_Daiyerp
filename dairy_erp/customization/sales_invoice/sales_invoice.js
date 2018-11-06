@@ -73,6 +73,7 @@ frappe.ui.form.on("Sales Invoice", {
 						frm.set_value("update_stock",1)
 						local_sale_operations(frm)
 						frm.set_value("due_date",frappe.datetime.nowdate())
+						frm.set_value("local_sale_type", "No Advance")
 					}
 				}
 			})

@@ -102,6 +102,7 @@ def make_fmcr(data,row,response_dict,is_fmcr_created=0):
 								fmrc_doc.fmcr_created = is_fmcr_created
 								fmrc_doc.processedstatus = data.get('processedstatus')
 								fmrc_doc.societyid = data.get('societyid')
+								fmrc_doc.longformatsocietyid = data.get('longformatsocietyid')
 								fmrc_doc.collectiondate = data.get('collectiondate') # time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('collectiondate')/1000))
 								fmrc_doc.shift = data.get('shift')
 								fmrc_doc.starttime = data.get('starttime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))

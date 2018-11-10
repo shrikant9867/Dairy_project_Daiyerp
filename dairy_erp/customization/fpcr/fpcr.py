@@ -28,13 +28,6 @@ def auto_fpcr():
 		data = "data", message=e, traceback=frappe.get_traceback())
 
 def get_current_cycle(data):
-	# return frappe.db.sql("""
-	# 		select name
-	# 	from
-	# 		`tabFarmer Date Computation`
-	# 	where
-	# 		vlcc = %s and date(now()) between start_date and end_date
-	# 	""",(data.get('vlcc_name')),as_dict=1, debug=0)
 	cycle_name = frappe.db.sql("""
 			select name
 		from
@@ -43,8 +36,11 @@ def get_current_cycle(data):
 			 end_date < now() and vlcc = '{0}'
 		order by end_date
 		""".format(data.get('vlcc_name')),as_list=1,debug=0)
-	return cycle_name[-1]
 
+	if cycle_name:
+		return cycle_name[-1]
+	else:
+		return []
 
 def get_weighted_fmcr_data(fmcr_data):
 	if len(fmcr_data) == 0:

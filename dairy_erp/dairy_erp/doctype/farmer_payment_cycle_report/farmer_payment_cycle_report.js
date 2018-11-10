@@ -3,10 +3,12 @@
 
 frappe.ui.form.on('Farmer Payment Cycle Report', {
 	refresh: function(frm) {
-		frm.set_df_property('vlcc_name', 'read_only', 1);
-		if(frm.doc.farmer_id) {
-			if(!frm.doc.farmer_phone_no) {
-				frm.set_value('farmer_phone_no',"NA")
+		if(frm.doc.docstatus == 0){
+			frm.set_df_property('vlcc_name', 'read_only', 1);
+			if(frm.doc.farmer_id) {
+				if(!frm.doc.farmer_phone_no && frm.doc.docstatus == 0) {
+					frm.set_value('farmer_phone_no',"NA")
+				}
 			}
 		}
 	},
@@ -22,14 +24,16 @@ frappe.ui.form.on('Farmer Payment Cycle Report', {
 				}
 			})
 		}
-		if(!frm.doc.date) {
-			frm.set_value("date",frappe.datetime.get_today())
-		}
-		if(!frm.doc.vlcc_name){
-			get_vlcc(frm)
-		}
-		if(!frm.doc.address) {
-			get_address(frm)
+		if(frm.doc.docstatus == 0){
+			if(!frm.doc.date) {
+				frm.set_value("date",frappe.datetime.get_today())
+			}
+			if(!frm.doc.vlcc_name){
+				get_vlcc(frm)
+			}
+			if(!frm.doc.address) {
+				get_address(frm)
+			}
 		}
 	},
 	vlcc_name: function(frm) {

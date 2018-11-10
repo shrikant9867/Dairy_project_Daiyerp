@@ -123,17 +123,20 @@ def fetch_farmer_data(fmcr_data,filters):
 				'date':row.split('#')[0],
 				'shift':row.split('#')[1]
 				})
-		final_[row] = get_member_non_menber(filters)
+		final_[row] = get_member_non_menber(fmcr_data,filters)
 	return final_
 
-def get_member_non_menber(filters):
-	# print "inside get_member_non_menber\n\n\n\n"
-	farmer_list = frappe.db.get_all("Farmer", { "vlcc_name": filters.get('vlcc') }, "name")
+def get_member_non_menber(fmcr_data,filters):
+	farmer_list = []
+	for data in fmcr_data:
+		if data.get('shift') == filters.get('shift'):
+			farmer_list.append(data.get('farmerid'))
+	# farmer_list = [data.get('farmerid') for data in fmcr_data]
 	non_member_count,member_count,non_member_qty,member_qty,member_amt,non_member_amt = 0 , 0 , 0, 0,0,0
 	member_dict = {}
 	if farmer_list:
-		for farmer in farmer_list:
-			farmer_id = frappe.db.get_value("Farmer",farmer.get('name'),["registration_date","is_member"],as_dict=1)
+		for farmer in set(farmer_list):
+			farmer_id = frappe.db.get_value("Farmer",farmer,["registration_date","is_member"],as_dict=1)
 			months_to_member = frappe.db.get_value("VLCC Settings",{"vlcc":filters.get('vlcc')},"months_to_member")
 			if farmer_id and months_to_member:
 				date_ = add_months(getdate(farmer_id.get('registration_date')),months_to_member)
@@ -144,7 +147,7 @@ def get_member_non_menber(filters):
 								from 
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1} 
-					""".format(farmer.get('name'),get_member_non_menber_cond(filters)),as_dict=1,debug=0)
+					""".format(farmer,get_member_non_menber_cond(filters)),as_dict=1,debug=0)
 					non_member_qty += flt(non_member_data[0].get('qty'))
 					non_member_amt += flt(non_member_data[0].get('amt'))
 			if farmer_id and farmer_id.get('is_member'):
@@ -154,7 +157,7 @@ def get_member_non_menber(filters):
 								from
 									`tabFarmer Milk Collection Record`
 								where docstatus = 1 and farmerid = '{0}' {1}
-					""".format(farmer.get('name'),get_member_non_menber_cond(filters)),as_dict=1,debug=0)
+					""".format(farmer,get_member_non_menber_cond(filters)),as_dict=1,debug=0)
 				member_qty += flt(member_data[0].get('qty'))
 				member_amt += flt(member_data[0].get('amt'))
 

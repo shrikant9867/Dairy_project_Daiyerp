@@ -1,0 +1,37 @@
+from __future__ import unicode_literals
+import frappe
+
+def execute():	
+	vmcr_list = [{'VMCR- 1811-00163':'MILMA01_3000_0001_50173'},
+	{'VMCR- 1811-00164':'MILMA01_3000_0001_50416'},
+	{'VMCR- 1811-00171':'MILMA01_3000_0002_50262'},
+	{'VMCR- 1811-00170':'MILMA01_3000_0002_50361'},
+	{'VMCR- 1811-00169':'MILMA01_3000_0002_50327'},
+	{'VMCR- 1811-00179':'MILMA01_3000_0003_8869'},
+	{'VMCR- 1811-00219':'MILMA01_3000_0005_6092'},
+	{'VMCR- 1811-00218':'MILMA01_3000_0005_9563'},
+	{'VMCR- 1811-00215':'MILMA01_3000_0005_8011'},
+	{'VMCR- 1811-00232':'MILMA01_3000_0006_40226'},
+	{'VMCR- 1811-00159':'MILMA01_3000_0007_8907'},
+	{'VMCR- 1811-00156':'MILMA01_3000_0007_8893'},
+	{'VMCR- 1811-00158':'MILMA01_3000_0007_40498'},
+	{'VMCR- 1811-00157':'MILMA01_3000_0007_8575'},
+	{'VMCR- 1811-00200':'MILMA01_3000_0009_7961'},
+	{'VMCR- 1811-00198':'MILMA01_3000_0009_50191'},
+	{'VMCR- 1811-00246':'MILMA01_3000_0010_40730'},
+	{'VMCR- 1811-00201':'MILMA01_3000_0011_50254'},
+	{'VMCR- 1811-00217':'MILMA01_3000_0012_40641'},
+	{'VMCR- 1811-00238':'MILMA01_3000_0012_40668'},
+	{'VMCR- 1811-00240':'MILMA01_3000_0012_50297'},
+	{'VMCR- 1811-00235':'MILMA01_3000_0012_8931'},
+	{'VMCR- 1811-00241':'MILMA01_3000_0012_40579'},
+	{'VMCR- 1811-00242':'MILMA01_3000_0012_40676'},
+	{'VMCR- 1811-00233':'MILMA01_3000_0012_8559'},
+	{'VMCR- 1811-00209':'MILMA01_3000_0013_8613'}]
+	update_vmcr_longformatid(vmcr_list)
+
+def update_vmcr_longformatid(vmcr_list):
+	for vmcr in vmcr_list:
+		frappe.db.set_value("Vlcc Milk Collection Record", vmcr.keys()[0], 'long_format_farmer_id', vmcr.values()[0])
+		frappe.db.set_value("Vlcc Milk Collection Record", vmcr.keys()[0], 'collectionroute', vmcr.values()[0].split('_')[2])
+		print "VMCR - Updated",vmcr.keys()[0]

@@ -14,7 +14,8 @@ import json
 from dairy_erp.dairy_utils import  make_dairy_log
 from dairy_erp.customization.payment_integration.payment_integration import pay_to_farmers_account
 import calendar
-
+from dairy_erp.dairy_erp.doctype.farmer_payment_cycle_report.farmer_payment_cycle_report\
+import get_loans_child, get_advance_child
 
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
@@ -693,9 +694,16 @@ def is_fpcr_generated(filters):
 	jv_records = frappe.get_all("Journal Entry",fields=['name'],filters={'cycle': filters.get('cycle'),\
 	 	'type': ('in', ['Farmer Loan','Farmer Advance']),'reference_party': frappe.db.get_value("Farmer",filters.get('farmer'),'full_name')})
 
+	fpcr_records = frappe.get_all("Farmer Payment Cycle Report",fields=['count(name) as count']\
+			,filters={'cycle': filters.get('cycle'), 'farmer_id': filters.get('farmer')})
+	
+	vlcc = frappe.db.get_value("User", frappe.session.user, "company")
+	loans = get_loans_child(filters.get('start_date'),filters.get('end_date'),vlcc,filters.get('farmer'),filters.get('cycle'))
+	advance = get_advance_child(filters.get('start_date'),filters.get('end_date'),vlcc,filters.get('farmer'),filters.get('cycle'))
+	
 	if filters.get('cycle') and filters.get('farmer'):
-		fpcr_records = frappe.db.get_value("Farmer Payment Cycle Report",{'cycle': filters.get('cycle'), 'farmer_id': filters.get('farmer')},"name")
-		if not fpcr_records:
+		fpcr_records = frappe.db.get_value("Farmer Payment Cycle Report",{'cycle': filters.get('cycle'), 'farmer_id': filters.get('farmer')}, "name")
+		if not fpcr_records and (loans or advance):
 			return "creat"
 		elif not len(jv_records):
 			return "ncreat"

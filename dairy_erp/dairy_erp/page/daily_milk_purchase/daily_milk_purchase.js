@@ -78,8 +78,8 @@ frappe.daily_milk_purchase = Class.extend({
             fieldtype: "Select",
             label:__("Shift"),
             fieldname: "shift",
-            options:["MORNING", "EVENING", "Both"],
-            default_value:"Both",
+            options:["MORNING", "EVENING", "BOTH"],
+            default_value:"BOTH",
             placeholder: __("Shift"),
                 onchange: function(){
                     $(me.page).find(".render-table").empty();
@@ -90,7 +90,7 @@ frappe.daily_milk_purchase = Class.extend({
             },
             render_input: true
         });
-        me.shift.set_value("Both")
+        me.shift.set_value("BOTH")
         me.wrapper_page.set_primary_action(__("Print"), function () {
             me.create_pdf(me.curr_date.get_value(),me.shift.get_value())
         })
@@ -111,7 +111,7 @@ frappe.daily_milk_purchase = Class.extend({
         me.render_layout(date_,shift_);
     },
     create_pdf: function(date_,shift_){
-        if(shift_ == "Both"){
+        if(shift_ == "BOTH"){
             shift_ = "MORNING and EVENING"
         }
         var me = this;

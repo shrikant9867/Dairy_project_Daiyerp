@@ -69,13 +69,19 @@ frappe.ui.form.on('VLCC Settings', {
 	validate: function(frm) {
 		frm.events.validate_cycle_hours(frm)
 		frm.events.validate_item_table(frm)
-		// SG-16-10
-		if(frm.doc.no_of_cycles <= 0 || frm.doc.no_of_interval <= 0) {
-			frappe.throw("Number of Cycles/Number of days in a Payment Cycle must be between <b>1-31</b>")
+		// SG-12-11
+		if(frm.doc.no_of_cycles && frm.doc.no_of_interval) {
+			// SG-16-10
+			if(frm.doc.no_of_cycles <= 0 || frm.doc.no_of_interval <= 0) {
+				frappe.throw("Number of Cycles/Number of days in a Payment Cycle must be between <b>1-31</b>")
+			}
+			// SG-17-10
+			if(frm.doc.no_of_cycles * frm.doc.no_of_interval > 31) {
+				frappe.throw("Combination of <b>Number of Cycles & Number of days in a Payment Cycle</b> is incorrect")
+			}
 		}
-		// SG-17-10
-		if(frm.doc.no_of_cycles * frm.doc.no_of_interval > 31) {
-			frappe.throw("Combination of <b>Number of Cycles & Number of days in a Payment Cycle</b> is incorrect")
+		else {
+			frappe.throw("Number of cycles or Number of intervals cannot be blank")
 		}
 	},
 	validate_item_table:function(frm){
@@ -88,10 +94,10 @@ frappe.ui.form.on('VLCC Settings', {
 			})
 		}
 		if(!in_list(Object.keys(c_type_wise_item),'Farmer')) {
-			frappe.throw(__("Please Add Item For Farmer"))
+			frappe.throw(__("Please Add Item For Farmer under <b>VLCC ITEM SETTING</b>"))
 		}
 		else if(!in_list(Object.keys(c_type_wise_item),'Vlcc Local Customer')) {
-			frappe.throw(__("Please Add Item For Vlcc Local Customer"))
+			frappe.throw(__("Please Add Item For Vlcc Local Customer under <b>VLCC ITEM SETTING</b>"))
 		}
 	},
 	get_csv: function(frm) {
@@ -141,8 +147,8 @@ frappe.ui.form.on('VLCC Settings', {
 							frm.set_value("farmer_id2",r.message.longformatfarmerid+"_0999")
 						}
 						else{
-							frm.set_value("farmer_id1","0999")
-							frm.set_value("farmer_id2","9994")
+							frm.set_value("farmer_id1","9994")
+							frm.set_value("farmer_id2","0999")
 						}
 					}
 				}

@@ -470,7 +470,7 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 					"associated_vlcc": frappe.db.get_value("Village Level Collection Centre",{"amcu_id": row.get('farmerid')},'name'),
 					"farmerid": row.get('farmerid'),
 					"milkquality": str(row.get('milkquality')),
-					"status": 'Reject' if str(row.get('milkquality')) in ("SS","CT","CS") else 'Accept',
+					"status": row.get('status'),
 					"milk_quality_type": get_curdled_warehouse(data,row).get('milk_quality_type')
 				})
 

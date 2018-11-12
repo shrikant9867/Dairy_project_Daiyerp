@@ -9,6 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import add_to_date
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
+from dairy_erp.customization.manual_loss_gain.loss_gain import handling_loss_gain
 
 class VlccMilkCollectionRecord(Document):
 
@@ -26,10 +27,31 @@ class VlccMilkCollectionRecord(Document):
 		try:
 			self.validate_status()
 			if not self.flags.is_api:
+				data = {}
+				row = {}
+				data.update({
+						"shift": self.shift,
+						"societyid": self.societyid
+					})
+				row.update(
+					{
+						"collectiontime": self.collectiontime,
+						"farmerid": self.farmerid,
+						"milkquantity": self.milkquantity,
+						"milktype": self.milktype,
+						"fat": self.fat,
+						"snf": self.snf,
+						"clr": self.clr,
+						"rate": self.rate
+					})
+
 				pr = self.make_purchase_receipt()
 				dn = self.make_delivery_note_vlcc()
 				pi = self.make_purchase_invoice(pr)
 				si = self.make_sales_invoice(dn)
+
+				handling_loss_gain(data,row,self)
+
 				frappe.msgprint(_("Delivery Note <b>{0}</b>, Sales Invoice <b>{1}</b> Created at Vlcc level \
 					AND Purchase Receipt <b>{2}</b>, Purchase Invoice <b>{3}</b> Created at Chilling centre level".format(
 						'<a href="#Form/Delivery Note/'+dn+'">'+dn+'</a>',

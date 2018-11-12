@@ -16,7 +16,7 @@ import json
 
 
 
-def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,s_warehouse,societyid,vmcr_doc=None,fmcr=None):
+def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,societyid,s_warehouse=None,vmcr_doc=None,fmcr=None):
 
 	try:
 		item_code = ""
@@ -51,7 +51,7 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,s_war
 	return response_dict
 
 
-def stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse,societyid,vmcr_doc,fmcr):
+def stock_entry_creation(message,item_,method,data,row,qty,warehouse,societyid,s_warehouse,vmcr_doc,fmcr):
 
 	vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":societyid},["name","warehouse"],as_dict=True)
 	company_details = frappe.db.get_value("Company",{"name":vlcc.get('name')},['default_payable_account','abbr','cost_center'],as_dict=1)

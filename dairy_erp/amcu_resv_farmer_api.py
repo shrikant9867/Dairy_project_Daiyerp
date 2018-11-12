@@ -35,11 +35,11 @@ def make_stock_receipt(message,method,data,row,response_dict,qty,warehouse,socie
 		if method == 'create_fmrc':
 			if not frappe.db.get_value('Stock Entry',
 				{"transaction_id":row.get('transactionid')},"name"):
-				stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse,societyid,vmcr_doc,fmcr)
+				stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,societyid,s_warehouse,vmcr_doc,fmcr)
 			else:
 				response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"status":"success","response":"Record already created please check on server,if any exception check 'Dairy log'."})
 		else:
-			stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse,societyid,vmcr_doc,fmcr)	
+			stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,societyid,s_warehouse,vmcr_doc,fmcr)	
 			
 		if stock_doc:
 			response_dict.get(row.get('farmerid')+"-"+row.get('milktype')).append({"Stock Receipt": stock_doc.name})

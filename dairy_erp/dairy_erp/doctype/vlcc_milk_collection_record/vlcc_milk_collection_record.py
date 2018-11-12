@@ -33,8 +33,7 @@ class VlccMilkCollectionRecord(Document):
 						"shift": self.shift,
 						"societyid": self.societyid
 					})
-				row.update(
-					{
+				row.update({
 						"collectiontime": self.collectiontime,
 						"farmerid": self.farmerid,
 						"milkquantity": self.milkquantity,
@@ -50,15 +49,26 @@ class VlccMilkCollectionRecord(Document):
 				pi = self.make_purchase_invoice(pr)
 				si = self.make_sales_invoice(dn)
 
-				handling_loss_gain(data,row,self)
+				se = handling_loss_gain(data,row,self)
 
-				frappe.msgprint(_("Delivery Note <b>{0}</b>, Sales Invoice <b>{1}</b> Created at Vlcc level \
+				if se.get('name'):
+					frappe.msgprint(_("Delivery Note <b>{0}</b>, Sales Invoice <b>{1}</b> Created at Vlcc level \
+						AND Purchase Receipt <b>{2}</b>, Purchase Invoice <b>{3}</b> Created at Chilling centre level, Stock Entry <b>{4}</b> created for HL/CG".format(
+							'<a href="#Form/Delivery Note/'+dn+'">'+dn+'</a>',
+							'<a href="#Form/Sales Invoice/'+si+'">'+si+'</a>',
+							'<a href="#Form/Purchase Receipt/'+pr+'">'+pr+'</a>',
+							'<a href="#Form/Purchase Invoice/'+pi+'">'+pi+'</a>',
+							'<a href="#Form/Stock Entry/'+se.get('name')+'">'+se.get('name')+'</a>',
+						)))
+				else:
+					frappe.msgprint(_("Delivery Note <b>{0}</b>, Sales Invoice <b>{1}</b> Created at Vlcc level \
 					AND Purchase Receipt <b>{2}</b>, Purchase Invoice <b>{3}</b> Created at Chilling centre level".format(
-						'<a href="#Form/Delivery Note/'+dn+'">'+dn+'</a>',
-						'<a href="#Form/Sales Invoice/'+si+'">'+si+'</a>',
-						'<a href="#Form/Purchase Receipt/'+pr+'">'+pr+'</a>',
-						'<a href="#Form/Purchase Invoice/'+pi+'">'+pi+'</a>',
+					'<a href="#Form/Delivery Note/'+dn+'">'+dn+'</a>',
+					'<a href="#Form/Sales Invoice/'+si+'">'+si+'</a>',
+					'<a href="#Form/Purchase Receipt/'+pr+'">'+pr+'</a>',
+					'<a href="#Form/Purchase Invoice/'+pi+'">'+pi+'</a>',
 					)))
+
 
 		except Exception as e:
 			raise e

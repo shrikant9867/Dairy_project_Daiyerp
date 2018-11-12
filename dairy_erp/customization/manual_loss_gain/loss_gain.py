@@ -13,12 +13,8 @@ import dairy_erp.dairy_utils as utils
 
 def handling_loss_gain(data,row,vmcr_doc):
 
-	print"\n\n\n\nHL Data......\t",data
-	print"\n\n\n\nHL Row......\t",row
-	print"\n\n\n\nHL VMCR......\t",vmcr_doc
-	print"\n\n\n\nHL Responce......\t",
-
 	fmcr_stock_qty,local_sale_qty = 0,0
+	se = ""
 	vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row.get('farmerid')},"name")
 	fmcr_record = frappe.db.sql("""select name,ifnull(sum(milkquantity),0) as qty,
 								shift,milktype,fat,snf,rate,
@@ -73,7 +69,7 @@ def handling_loss_gain(data,row,vmcr_doc):
 
 			fmcr_stock_qty = (flt(fmcr.get('qty'),2) + flt(stock_record[0].get('qty'),2)) - flt(local_sale_qty,2)
 			
-			loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,
+			se = loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,
 						data=data,vmcr_doc=vmcr_doc,total_vmcr_qty=row.get('milkquantity'))
 			make_fmcr_qty_log(data=data,row=row,stock_qty = stock_record[0].get('qty'),
 				local_sale_qty=local_sale_qty,fmcr_qty=fmcr.get('qty'))
@@ -82,7 +78,7 @@ def handling_loss_gain(data,row,vmcr_doc):
 	elif stock_data:
 		for stock in stock_record:
 			fmcr_stock_qty = flt(stock.get('qty'),2) - flt(local_sale_qty,2)
-			loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,data=data,
+			se = loss_gain_computation(fmcr_stock_qty=fmcr_stock_qty,row=row,data=data,
 				vmcr_doc=vmcr_doc,stock=stock,total_vmcr_qty=row.get('milkquantity'))
 			make_fmcr_qty_log(data=data,row=row,stock_qty=stock.get('qty')
 				,local_sale_qty=local_sale_qty)
@@ -90,6 +86,7 @@ def handling_loss_gain(data,row,vmcr_doc):
 	else:
 		create_loss_gain(fmcr_stock_qty=fmcr_stock_qty,row=row,
 						data=data,vmcr_doc=vmcr_doc)
+	return se
 
 
 def get_local_sale_data(row,data):
@@ -122,20 +119,16 @@ def create_loss_gain(fmcr_stock_qty,row,data,vmcr_doc,stock=None):
 		"farmer_id":row.get('farmerid'),"societyid":data.get('societyid'),"docstatus":1,
 		"wh_type":('in', ['Loss','Gain'])},"name")
 
-	print se,"se_________________\n\n"
-
 	if se:
 		se_doc = frappe.get_doc("Stock Entry",se)
 		se_qty = frappe.db.get_value("Stock Entry Detail",{"parent":se},"qty") or 0
 		actual_fmcr_qty = flt(get_actual_fmcr_qty(data,row),2)
 		if se_doc.wh_type == 'Loss':
 			total_vmcr_qty = flt((actual_fmcr_qty - se_qty + row.get('milkquantity')),2)
-			print total_vmcr_qty,"total_vmcr_qty_loss_________________\n\n"
 			loss_gain_computation(actual_fmcr_qty,row,data,vmcr_doc,stock,total_vmcr_qty)
 			cancel_se(se)
 		elif se_doc.wh_type == 'Gain':
 			total_vmcr_qty =  flt((actual_fmcr_qty + se_qty + row.get('milkquantity')),2)
-			print total_vmcr_qty,"total_vmcr_qty_gain_________________\n\n"
 			loss_gain_computation(actual_fmcr_qty,row,data,vmcr_doc,stock,total_vmcr_qty)
 			cancel_se(se)
 
@@ -165,17 +158,15 @@ def cancel_se(se):
 	se_doc.cancel()
 
 def loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,stock=None,total_vmcr_qty=0):
-	print fmcr_stock_qty,"fmcr_stock_qty______________________\n\n"
-	print total_vmcr_qty,"total_vmcr_qty__________________\n\n"
-	print "inside loss_gain_computation_________________________\n\n"
 
+	se = ""
 	vlcc = frappe.db.get_value("Village Level Collection Centre",
 		{"amcu_id":row.get('farmerid')},
 		["name","warehouse","handling_loss","calibration_gain"],as_dict=True)
 	if fmcr_stock_qty:
 		if flt(fmcr_stock_qty,2) > flt(total_vmcr_qty,2):
 			qty = flt(fmcr_stock_qty,2) - flt(total_vmcr_qty)
-			make_stock_receipt(
+			se = make_stock_receipt(
 				message="Material Receipt for Handling Loss",method="handling_loss",
 				data=data,row=row,
 				qty=qty,warehouse=vlcc.get('handling_loss'),s_warehouse=vlcc.get('warehouse'),
@@ -183,7 +174,7 @@ def loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,stock=None,total_vmcr
 		
 		elif flt(fmcr_stock_qty,2) < flt(total_vmcr_qty,2):
 			qty = flt(total_vmcr_qty) - flt(fmcr_stock_qty,2)
-			make_stock_receipt(
+			se = make_stock_receipt(
 				message="Material Receipt for Calibration Gain",
 				method="handling_gain",data=data,row=row,
 				qty=qty,warehouse=vlcc.get('calibration_gain'),s_warehouse=vlcc.get('warehouse'),
@@ -194,6 +185,7 @@ def loss_gain_computation(fmcr_stock_qty,row,data,vmcr_doc,stock=None,total_vmcr
 				method="handling_loss_gain", status="Success",data="Qty" ,
 				message= "Quantity is Balanced so stock entry is not created",
 				traceback="Manual VMCR")
+	return se
 
 def make_fmcr_qty_log(data,row,stock_qty,local_sale_qty,fmcr_qty=0):
 
@@ -342,6 +334,7 @@ def make_stock_receipt(message,method,data,row,qty,warehouse,s_warehouse,society
 				stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse,societyid,vmcr_doc,fmcr)
 		else:
 			stock_doc = stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse,societyid,vmcr_doc,fmcr)	
+		return stock_doc
 	except Exception,e:
 		utils.make_dairy_log(title="Sync failed for Data push",method=method, status="Error",
 		data = data, message=e, traceback=frappe.get_traceback())
@@ -351,11 +344,11 @@ def stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse
 	vlcc = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":societyid},["name","warehouse"],as_dict=True)
 	company_details = frappe.db.get_value("Company",{"name":vlcc.get('name')},['default_payable_account','abbr','cost_center'],as_dict=1)
 	remarks = {}
+	farmerid = ""
 
 	stock_doc = frappe.new_doc("Stock Entry")
 	stock_doc.purpose =  "Material Receipt"
 	stock_doc.company = vlcc.get('name')
-	stock_doc.transaction_id = row.get('transactionid')
 	stock_doc.fmcr = fmcr.name if method == 'handling_loss_after_vmcr' or method == 'handling_gain_after_vmcr' else ""
 	stock_doc.vmcr = vmcr_doc.name if method == 'handling_loss' or method == 'handling_gain' else ""
 	if method == 'handling_loss' or method == 'handling_loss_after_vmcr':
@@ -364,27 +357,23 @@ def stock_entry_creation(message,item_,method,data,row,qty,warehouse,s_warehouse
 	elif method == 'handling_gain' or method == 'handling_gain_after_vmcr':
 		stock_doc.wh_type = 'Gain'
 
-	if row.get('transactionid'):
-		stock_doc.shift = data.get('shift')
-		stock_doc.milktype = row.get('milktype')
-		stock_doc.societyid = data.get('societyid')
-		stock_doc.is_reserved_farmer = 1 if method == "create_fmrc" else 0
-		stock_doc.farmer_id = row.get('farmerid')
-		farmerid = ""
-		if data.get('shift') == 'EVENING':
-			farmerid = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row.get('farmerid')},"longformatsocietyid_e")
-		else:
-			farmerid = row.get('longformatfarmerid')
-		stock_doc.long_format_id = farmerid
-		stock_doc.fat = row.get('fat')
-		stock_doc.snf = row.get('snf')
-		stock_doc.clr = row.get('clr')
-		remarks.update({"Farmer ID":row.get('farmerid'),"Transaction Id":row.get('transactionid'),
-			"Collection Time":row.get('collectiontime'),"Message": message,"shift":data.get('shift')})
-	else:
-		remarks.update({"Farmer ID":row.get('farmerid'),
-			"Collection Time":row.get('collectiontime'),"Message": message,"shift":data.get('shift')})
+	stock_doc.shift = data.get('shift')
+	stock_doc.milktype = row.get('milktype')
+	stock_doc.societyid = data.get('societyid')
+	stock_doc.is_reserved_farmer = 1 if method == "create_fmrc" else 0
+	stock_doc.farmer_id = row.get('farmerid')
 
+	if data.get('shift') == 'EVENING':
+		farmerid = frappe.db.get_value("Village Level Collection Centre",{"amcu_id":row.get('farmerid')},"longformatsocietyid_e")
+	else:
+		farmerid = row.get('longformatfarmerid')
+
+	stock_doc.long_format_id = farmerid
+	stock_doc.fat = row.get('fat')
+	stock_doc.snf = row.get('snf')
+	stock_doc.clr = row.get('clr')
+	remarks.update({"Farmer ID":row.get('farmerid'),"Transaction Id":row.get('transactionid'),
+		"Collection Time":row.get('collectiontime'),"Message": message,"shift":data.get('shift')})
 	stock_doc.remarks = "\n".join("{}: {}".format(k, v) for k, v in remarks.items())
 	stock_doc_item = {
 		"item_code": item_.item_code,

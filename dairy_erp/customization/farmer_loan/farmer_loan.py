@@ -136,7 +136,7 @@ def get_jv_amount(data):
 		from 
 			`tabJournal Entry` 
 		where 
-		farmer_advance =%s and type = 'Farmer Loan'""",(data.get('name')),as_dict=1,debug=1)
+		farmer_advance =%s and type = 'Farmer Loan'""",(data.get('name')),as_dict=1,debug=0)
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
 	else: return 0

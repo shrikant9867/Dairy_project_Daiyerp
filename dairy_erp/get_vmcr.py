@@ -17,6 +17,7 @@ import json
 @frappe.whitelist()
 def get_vmcr(data):
 	api_data = json.loads(data)
+	response_dict = {}
 	try:
 		posting_date = datetime.datetime.strptime(api_data[0].get("date"),  "%d/%m/%Y").strftime("%Y-%m-%d")
 		longformatid = api_data[0].get('soccode')
@@ -38,14 +39,18 @@ def get_vmcr(data):
 						`tabVlcc Milk Collection Record`
 				where
 						posting_date = '{0}'
-						and (ifnull(SUBSTRING_INDEX(long_format_farmer_id, '_',-1),' ') like {1}
-						or ifnull(SUBSTRING_INDEX(long_format_farmer_id_e, '_',-1),' ') like {1})
-			""".format(posting_date,longformatid),as_list=1,debug=1)
-		for row in vmcr:
-			res_dict.get('data').append({'shift':row[1],'partycode':longformatid,\
-			'partyname':row[0],'qty':row[2],'fat':row[3],'snf':row[4],'rate':row[5],\
-			'amount':row[6],'status':'BILL PROCESSED','isbmc':1,'routecode':row[7],'prodconnection':' '})
-		return res_dict
+						and (ifnull(SUBSTRING_INDEX(long_format_farmer_id, '_',-1),' ') like '{1}'
+						or ifnull(SUBSTRING_INDEX(long_format_farmer_id_e, '_',-1),' ') like '{1}')
+			""".format(posting_date,longformatid),as_list=1,debug=0)
+		if vmcr:
+			for row in vmcr:
+				res_dict.get('data').append({'shift':row[1],'partycode':longformatid,\
+				'partyname':row[0],'qty':row[2],'fat':row[3],'snf':row[4],'rate':row[5],\
+				'amount':row[6],'status':'BILL PROCESSED','isbmc':1,'routecode':row[7],'prodconnection':' '})
+			
+			return res_dict
+		else:
+			return {}	
 
 	except Exception,e:
 		utils.make_dairy_log(title="Please Check Dairy Log",method="get_vmcr", status="Error",

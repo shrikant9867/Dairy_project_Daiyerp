@@ -440,6 +440,8 @@ def delete_previous_linked_doc(data,row,collectiontime,collectiondate,vlcc_name,
 	return ""
 
 def vmcr_stock_qty_computation(vmcr,se):
+	#to get the original quantity of fmcr calculating stock entry qty+ vmcr qty 
+	#in case of loss
 	vmcr_stock_qty = 0
 	vmcr_doc = frappe.get_doc("Vlcc Milk Collection Record",vmcr)
 	se_qty = frappe.db.get_value('Stock Entry Detail',
@@ -455,7 +457,9 @@ def vmcr_stock_qty_computation(vmcr,se):
 
 def update_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,vmcr_stock_qty,response_dict):
 	edited_vmcr_doc = create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict)
-	loss_gain_computation(vmcr_stock_qty,row,data,edited_vmcr_doc,response_dict)
+	loss_gain_computation(fmcr_stock_qty=vmcr_stock_qty,row=row,
+						data=data,vmcr_doc=edited_vmcr_doc,response_dict=response_dict,
+						total_vmcr_qty=row.get('milkquantity'))
 
 def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_dict,is_vmcr_created=0):
 	if validate_society_exist_dairy(data):

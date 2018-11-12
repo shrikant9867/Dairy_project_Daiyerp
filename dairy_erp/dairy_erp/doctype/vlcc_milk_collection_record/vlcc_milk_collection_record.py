@@ -25,6 +25,7 @@ class VlccMilkCollectionRecord(Document):
 
 	def on_submit(self):
 		try:
+			self.validate_status()
 			if not self.flags.is_api:
 				data = {}
 				row = {}
@@ -58,6 +59,7 @@ class VlccMilkCollectionRecord(Document):
 						'<a href="#Form/Purchase Receipt/'+pr+'">'+pr+'</a>',
 						'<a href="#Form/Purchase Invoice/'+pi+'">'+pi+'</a>',
 					)))
+
 		except Exception as e:
 			raise e
 			print frappe.get_traceback()
@@ -134,6 +136,14 @@ class VlccMilkCollectionRecord(Document):
 		# user only create transactions with status - Accept
 		if self.status == "Accept" and (self.milkquantity == 0 or self.rate == 0) and not self.flags.is_api:
 			frappe.throw(_("Milk Quantity And Rate Can not be less or equal to zero for Accept Status"))
+
+		if self.status == "Accept" and self.milkquality != 'G' and self.flags.is_api:
+			frappe.db.rollback()
+			frappe.throw(_("Milk Quality Should be G for Accept Milk"))
+
+		if self.status == "Reject" and self.milkquality not in ['CT','CS','SS'] and self.flags.is_api:
+			frappe.db.rollback()
+			frappe.throw(_("Milk Quality can be ('CT','CS','SS') for Reject Milk"))
 
 	def check_stock(self):
 		"""check stock is available for transactions"""

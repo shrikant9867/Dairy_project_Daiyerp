@@ -3,6 +3,9 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frappe.session.user != "Administrator" && has_common(frappe.user_roles, ["Camp Manager","Camp Operator","Vlcc Manager","Vlcc Operator"])) {	
 			frm.set_df_property("is_negative", "hidden", 1);
 		}
+		if (frm.doc.local_sale && ["Vlcc Local Customer", "Vlcc Local Institution"].includes(frm.doc.local_sale_type)){ 
+			frm.set_value("local_sale_type", "No Advance")
+		}
 	},
 	onload: function(frm) {
 		if (get_session_user_type().operator_type == "Vet AI Technician")
@@ -73,6 +76,7 @@ frappe.ui.form.on("Sales Invoice", {
 						frm.set_value("update_stock",1)
 						local_sale_operations(frm)
 						frm.set_value("due_date",frappe.datetime.nowdate())
+						frm.set_value("local_sale_type", "No Advance")
 					}
 				}
 			})
@@ -141,7 +145,7 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frm.doc.customer_or_farmer == "Vlcc Local Customer" || frm.doc.customer_or_farmer == "Vlcc Local Institution"){
 			frm.set_value("effective_credit","")
 			local_sale_operations(frm)
-			frm.set_value("local_sale_type","")
+			frm.set_value("local_sale_type","No Advance")
 			frm.set_df_property("local_sale_type","reqd",0)
 			frm.set_df_property("emi_start_cycle","reqd",0)
 			frm.set_df_property("no_of_instalment","reqd",0)

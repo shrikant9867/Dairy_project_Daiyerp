@@ -3,12 +3,10 @@
 
 frappe.ui.form.on('Farmer Payment Cycle Report', {
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 0){
-			frm.set_df_property('vlcc_name', 'read_only', 1);
-			if(frm.doc.farmer_id) {
-				if(!frm.doc.farmer_phone_no && frm.doc.docstatus == 0) {
-					frm.set_value('farmer_phone_no',"NA")
-				}
+		frm.set_df_property('vlcc_name', 'read_only', 1);
+		if(frm.doc.farmer_id) {
+			if(!frm.doc.farmer_phone_no && frm.doc.docstatus == 0) {
+				frm.set_value('farmer_phone_no',"NA")
 			}
 		}
 	},

@@ -22,8 +22,6 @@ def get_local_institution(company):
 	data = fetch_balance_qty()
 	return data
 
-
-
 @frappe.whitelist()
 def get_farmer_config(farmer, invoice=None, company =None):
 	# check local eff credit % else take global eff credit % defined on vlcc iff not ignored
@@ -38,7 +36,6 @@ def get_farmer_config(farmer, invoice=None, company =None):
 		percent_eff_credit = (eff_credit * eff_percent/100) if eff_percent else eff_credit
 		data.update({'eff_credit': eff_credit, "percent_eff_credit":flt(percent_eff_credit, 2),'customer': frappe.db.get_value("Farmer",farmer,'full_name')})
 		return data
-
 
 @frappe.whitelist()
 def fetch_balance_qty():
@@ -170,8 +167,6 @@ def feed_fooder_advance(doc, method):
 			farmer_advance.save(ignore_permissions=True)
 			farmer_advance.submit()
 
-
-
 @frappe.whitelist()
 def make_payment_entry(si_doc):
 	si_payment = frappe.new_doc("Payment Entry")
@@ -202,12 +197,10 @@ def make_payment_entry(si_doc):
 	si_payment.submit()
 	frappe.msgprint(_("Payment Entry : {0} Created!!!".format("<a href='#Form/Payment Entry/{0}'>{0}</a>".format(si_payment.name))))
 
-
 @frappe.whitelist()
 def get_wrhous():
 	warehouse = frappe.db.get_value("Village Level Collection Centre", {"email_id": frappe.session.user}, 'warehouse')
 	return warehouse
-
 
 @frappe.whitelist()
 def get_service_note_item(doctype, txt, searchfield, start, page_len, filters):
@@ -298,7 +291,6 @@ def validate_price_list(doc):
 	if doc.customer_or_farmer in ["Vlcc Local Customer","Vlcc Local Institution"] and doc.selling_price_list not in ["GTCS","LCS"+"-"+user_doc]:
 		frappe.throw(_("Please Create Material price List First for <b>Customer</b>"))
 
-
 @frappe.whitelist()
 def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filters):
 	vlcc_settings = frappe.get_doc("VLCC Settings",filters.get('vlcc'))
@@ -322,7 +314,6 @@ def get_item_by_customer_type(doctype, txt, searchfield, start, page_len, filter
 		item_list_update = [item for item in item_list if item[0] not in p_item]
 
 	return item_list_update
-
 
 def get_net_off(farmer, company):
 	#filters are must as it is net off report data retrival

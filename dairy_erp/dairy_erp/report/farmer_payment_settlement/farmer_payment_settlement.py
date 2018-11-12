@@ -129,9 +129,9 @@ def get_conditions(filters):
 
 @frappe.whitelist()
 def get_payment_amt(row_data,filters):
-
 	report_data = get_data(json.loads(filters))
-	row_data = json.loads(row_data)
+	row_data, filters_ = json.loads(row_data), json.loads(filters)
+	validate_agrupay_pending(report_data, row_data, filters_)
 	payble, receivable, set_amt = 0.0, 0.0, 0.0
 
 	for data in report_data:
@@ -141,7 +141,28 @@ def get_payment_amt(row_data,filters):
 			if data[7] == "Journal Entry": receivable += data[5]
 
 	manual_amt = flt(payble-min(payble,receivable),2)
-	return {"payble":payble,"receivable":receivable,"set_amt": min(payble,receivable),"manual_amt":manual_amt}
+	return {
+		"payble":payble,
+		"receivable":receivable,
+		"set_amt": min(payble,receivable),
+		"manual_amt":manual_amt, 
+		"is_agrupay":frappe.db.get_value("VLCC Settings", frappe.db.get_value("Farmer", \
+					filters_.get('farmer'), 'vlcc_name'),'enable')
+	}
+
+def validate_agrupay_pending(report_data,row_data,filters):
+	for row in report_data:
+		if len(row) and frappe.db.sql("""
+				select pe.name 
+			from 
+				`tabPayment Entry Reference` per 
+			join 
+				`tabPayment Entry` pe on pe.name = per.parent 
+			where 
+				pe.docstatus = 0 and mode_of_payment = 'Direct Agrupay Payment' and cycle = %s and party=%s""",
+			(filters.get('cycle'), row[4]),debug=0, as_dict=1):
+			
+			frappe.throw("""Payment Entry is in Pipeline for <b>AgRuapy Confirmation</b>, please wait agrupay server to confirm the payment""")
 
 @frappe.whitelist()
 def make_payment(data,row_data,filters,credit_amt):
@@ -358,7 +379,6 @@ def make_receivable_payment(**kwargs):
 		return amt
 
 def make_manual_payment(**kwargs):
-
 	party_account = get_party_account("Supplier", kwargs.get('filters').get('farmer'), kwargs.get('company'))
 	default_bank_cash_account = get_default_bank_cash_account(kwargs.get('company'), "Bank")
 	if not default_bank_cash_account:
@@ -367,7 +387,7 @@ def make_manual_payment(**kwargs):
 
 	if kwargs.get('data').get('set_amt_manual'):
 		amt = make_payment_entry(payment_type='Pay',args=kwargs,party_type='Supplier',bank=default_bank_cash_account,
-					party_account=party_account,party_account_currency=party_account_currency,is_manual=True)
+					party_account=party_account,cycle_pe =kwargs.get('filters'),party_account_currency=party_account_currency,is_manual=True)
 		return amt
 
 def make_payment_entry(**kwargs):
@@ -376,6 +396,8 @@ def make_payment_entry(**kwargs):
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = kwargs.get('payment_type')
 		pe.company = kwargs.get('args').get('company')
+		if kwargs.get('is_manual'):
+			pe.cycle = kwargs.get('cycle_pe').get('cycle')
 		pe.posting_date = nowdate()
 		pe.mode_of_payment = kwargs.get('args').get('data').get('mode_of_payment')
 		pe.party_type = kwargs.get('party_type')

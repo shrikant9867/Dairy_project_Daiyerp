@@ -30,7 +30,7 @@ class FarmerLoan(Document):
 		try:
 			je_doc = make_journal_entry(voucher_type = "Journal Entry",company = self.vlcc, posting_date = nowdate(),
 				debit_account = "Loan and Advances - ",credit_account = "Cash - ", type = "Debit to Loan",
-				amount = self.advance_amount, master_no = self.name)
+				amount = self.advance_amount, master_no = self.name, party_type = "Customer", party = self.farmer_name)
 		except Exception,e:
 			frappe.db.rollback()
 			make_dairy_log(title="JV creation Against Advance Failed",method="make_jv", status="Error",

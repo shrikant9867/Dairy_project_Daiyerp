@@ -6,14 +6,14 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
-from dairy_erp.dairy_utils import make_dairy_log
+from dairy_erp.dairy_utils import make_dairy_log, make_journal_entry
 import re
 import datetime
-from frappe.utils import flt, today, getdate
+from frappe.utils import flt, today, getdate, nowdate
 from frappe.model.document import Document
 
 
-def create_si():
+def create_jv():
 	docs = frappe.db.sql("""
 			select name,farmer_name,emi_amount,advance_amount,farmer_id,
 			vlcc,emi_deduction_start_cycle,outstanding_amount,date_of_disbursement,
@@ -44,19 +44,19 @@ def make_jv(data,cur_cycl=None):
 			if je_doc.name:
 				update_loan_doc(data, je_doc, cur_cycl)			
 	except Exception,e:
-		make_dairy_log(title="Sync failed for Data push",method="get_items", status="Error",
+		make_dairy_log(title="JV creation Against Advance Failed",method="get_items", status="Error",
 		data = "data", message=e, traceback=frappe.get_traceback())
 
 def update_loan_doc(data, je_doc, cur_cycl):
 	paid_instlmnt = 0
 	loan_doc = frappe.get_doc("Farmer Loan",data.get('name'))
-	loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_si_amount(data)
+	loan_doc.outstanding_amount = float(data.get('advance_amount'))- get_jv_amount(data)
 	if loan_doc.outstanding_amount == 0:
 		loan_doc.outstanding_amount = 0
 		loan_doc.status = "Paid"
 	loan_doc.append("cycle",{
 		"cycle":cur_cycl,
-		"sales_invoice": si_doc.name
+		"sales_invoice": je_doc.name
 		})
 	for i in loan_doc.cycle:
 		paid_instlmnt += 1
@@ -115,13 +115,13 @@ def req_cycle_computation(data):
 
 	return []
 
-def get_si_amount(data):
+def get_jv_amount(data):
 	sum_ = frappe.db.sql("""
 			select ifnull(sum(total_debit),0) as total
 		from 
 			`tabJournal Entry` 
 		where 
-		farmer_advance =%s""",(data.get('name')),as_dict=1,debug=0)
+		farmer_advance =%s""",(data.get('name')),as_dict=1,debug=1)
 	if len(sum_):
 		return sum_[0].get('total') if sum_[0].get('total') != None else 0
 	else: return 0

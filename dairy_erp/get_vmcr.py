@@ -14,7 +14,7 @@ import requests
 import json
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_vmcr(data):
 	api_data = json.loads(data)
 	response_dict = {}

@@ -14,7 +14,7 @@ import requests
 import json
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_vmcr(data):
 	api_data = json.loads(data)
 	response_dict = {}
@@ -38,6 +38,7 @@ def get_vmcr(data):
 				from
 						`tabVlcc Milk Collection Record`
 				where
+						docstatus = 1 and
 						posting_date = '{0}'
 						and (ifnull(SUBSTRING_INDEX(long_format_farmer_id, '_',-1),' ') like '{1}'
 						or ifnull(SUBSTRING_INDEX(long_format_farmer_id_e, '_',-1),' ') like '{1}')
@@ -50,7 +51,7 @@ def get_vmcr(data):
 			
 			return res_dict
 		else:
-			return {}	
+			return ({"status":"Error","error":"Please Check Society Id or Date"})
 
 	except Exception,e:
 		utils.make_dairy_log(title="Please Check Dairy Log",method="get_vmcr", status="Error",

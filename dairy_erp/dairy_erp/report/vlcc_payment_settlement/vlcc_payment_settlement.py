@@ -128,7 +128,6 @@ def get_payment_amt(row_data,filters):
 	
 	for data in report_data:
 		if data[12] in row_data:
-			print "$$$$$$$$$$$$$$$",data[5],data[7]
 			if data[9] == "Purchase Invoice": payble += data[6]
 			if data[9] == "Sales Invoice": receivable += data[5]
 			if data[7] == "Journal Entry": receivable += data[5]

@@ -119,22 +119,21 @@ def create_loss_gain(fmcr_stock_qty,row,data,vmcr_doc,response_dict,stock=None):
 		"farmer_id":row.get('farmerid'),"societyid":data.get('societyid'),"docstatus":1,
 		"wh_type":('in', ['Loss','Gain'])},"name")
 
-	print se,"se_________________\n\n"
-
+	actual_fmcr_qty = flt(get_actual_fmcr_qty(data,row),2)
 	if se:
 		se_doc = frappe.get_doc("Stock Entry",se)
 		se_qty = frappe.db.get_value("Stock Entry Detail",{"parent":se},"qty") or 0
-		actual_fmcr_qty = flt(get_actual_fmcr_qty(data,row),2)
 		if se_doc.wh_type == 'Loss':
 			total_vmcr_qty = flt((actual_fmcr_qty - se_qty + row.get('milkquantity')),2)
-			print total_vmcr_qty,"total_vmcr_qty_loss_________________\n\n"
 			loss_gain_computation(actual_fmcr_qty,row,data,vmcr_doc,response_dict,stock,total_vmcr_qty)
 			cancel_se(se)
 		elif se_doc.wh_type == 'Gain':
 			total_vmcr_qty =  flt((actual_fmcr_qty + se_qty + row.get('milkquantity')),2)
-			print total_vmcr_qty,"total_vmcr_qty_gain_________________\n\n"
 			loss_gain_computation(actual_fmcr_qty,row,data,vmcr_doc,response_dict,stock,total_vmcr_qty)
 			cancel_se(se)
+	else:
+		total_vmcr_qty =  flt((actual_fmcr_qty + row.get('milkquantity')),2)
+		loss_gain_computation(actual_fmcr_qty,row,data,vmcr_doc,stock,total_vmcr_qty)
 
 def get_actual_fmcr_qty(data,row):
 

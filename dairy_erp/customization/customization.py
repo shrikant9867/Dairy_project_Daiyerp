@@ -888,7 +888,7 @@ def get_pr_from_warehouse_ref(branch_office):
 			`tabPurchase Receipt Item`
 		where
 			warehouse in {0}		
-		""".format(bad_milk_warehouses),as_dict=1,debug=1)
+		""".format(bad_milk_warehouses),as_dict=1,debug=0)
 	# pr_list = frappe.get_all("Purchase Receipt Item", {"warehouse", "name", "in", bad_milk_warehouses}, "distinct parent")
 	pr_nos = ''
 	if pr_list:
@@ -931,7 +931,6 @@ def pi_permission(user):
 def get_pi_from_exp_head_ref(branch_office):
 	# check expense_head in PI Item and return distinct PI
 	exp_head = frappe.db.get_value("Address", branch_office, "expense_account")
-	print "$$$$$$$$$$$$$$",exp_head,branch_office
 	pi_list = frappe.db.get_all("Purchase Invoice Item", {"expense_account": exp_head}, "distinct parent")
 	print pi_list
 	pi_nos = ''

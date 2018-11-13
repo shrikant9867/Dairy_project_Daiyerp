@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import re
 from frappe import _
+import json
 from frappe.model.document import Document
 from frappe.utils.data import add_to_date
 from frappe.utils import flt, cstr,nowdate,cint,get_datetime, now_datetime,getdate,get_time
@@ -15,66 +16,63 @@ class VlccMilkCollectionRecord(Document):
 
 	def validate(self):
 		if not self.flags.is_api:
+			self.set_posting_date()
 			self.validate_duplicate_entry()
 			self.validate_status()
 			self.validate_route()
 			self.validate_vlcc_chilling_centre()
 			# self.check_stock()
 			self.calculate_amount()
-			self.set_posting_date()
 
 	def on_submit(self):
 		try:
 			self.validate_status()
 			if not self.flags.is_api:
-				data = {}
-				row = {}
-				data.update({
-						"shift": self.shift,
-						"societyid": self.societyid
-					})
-				row.update({
-						"collectiontime": self.collectiontime,
-						"farmerid": self.farmerid,
-						"milkquantity": self.milkquantity,
-						"milktype": self.milktype,
-						"fat": self.fat,
-						"snf": self.snf,
-						"clr": self.clr,
-						"rate": self.rate
-					})
-
 				pr = self.make_purchase_receipt()
 				dn = self.make_delivery_note_vlcc()
 				pi = self.make_purchase_invoice(pr)
 				si = self.make_sales_invoice(dn)
+				vmcr_data = self.get_vmcr_data()
 
-				se = handling_loss_gain(data,row,self)
+				se = handling_loss_gain(vmcr_data.get('data'),
+						vmcr_data.get('row'),self)
 
-				if se.get('name'):
-					frappe.msgprint(_("Delivery Note <b>{0}</b>, Sales Invoice <b>{1}</b> Created at Vlcc level \
-						AND Purchase Receipt <b>{2}</b>, Purchase Invoice <b>{3}</b> Created at Chilling centre level, Stock Entry <b>{4}</b> created for HL/CG".format(
-							'<a href="#Form/Delivery Note/'+dn+'">'+dn+'</a>',
-							'<a href="#Form/Sales Invoice/'+si+'">'+si+'</a>',
-							'<a href="#Form/Purchase Receipt/'+pr+'">'+pr+'</a>',
-							'<a href="#Form/Purchase Invoice/'+pi+'">'+pi+'</a>',
-							'<a href="#Form/Stock Entry/'+se.get('name')+'">'+se.get('name')+'</a>',
-						)))
-				else:
-					frappe.msgprint(_("Delivery Note <b>{0}</b>, Sales Invoice <b>{1}</b> Created at Vlcc level \
-					AND Purchase Receipt <b>{2}</b>, Purchase Invoice <b>{3}</b> Created at Chilling centre level".format(
+				frappe.msgprint(_("Delivery Note <b>{0}</b>, Sales Invoice <b>{1}</b> Created at Vlcc level \
+					AND Purchase Receipt <b>{2}</b>, Purchase Invoice <b>{3}</b> Created at Chilling centre level{4}".format(
 					'<a href="#Form/Delivery Note/'+dn+'">'+dn+'</a>',
 					'<a href="#Form/Sales Invoice/'+si+'">'+si+'</a>',
 					'<a href="#Form/Purchase Receipt/'+pr+'">'+pr+'</a>',
 					'<a href="#Form/Purchase Invoice/'+pi+'">'+pi+'</a>',
-					)))
-
-
+					self.get_conditions(se)
+				)))
 		except Exception as e:
-			raise e
-			print frappe.get_traceback()
-			frappe.db.rollback()
-			frappe.throw(e)
+			self.make_dairy_log(title="VMCR Manual Creation",method="manual_vmcr", status="Error",
+			data = "data", message=e, traceback=frappe.get_traceback())
+
+	def get_conditions(self,se):
+		conditions = ""
+		if se and se.get('name'):
+			conditions += ", Stock Entry <b>{0}</b> created for HL/CG".format('<a href="#Form/Purchase Invoice/'+se.get('name')+'">'+se.get('name')+'</a>')
+		return conditions
+
+	def get_vmcr_data(self):
+
+		data ,row = {},{}
+		data.update({
+				"shift": self.shift,
+				"societyid": self.societyid
+			})
+		row.update({
+				"collectiontime": self.collectiontime,
+				"farmerid": self.farmerid,
+				"milkquantity": self.milkquantity,
+				"milktype": self.milktype,
+				"fat": self.fat,
+				"snf": self.snf,
+				"clr": self.clr,
+				"rate": self.rate
+			})
+		return {"data":data,"row":row}
 
 	def set_posting_date(self):
 		self.posting_date = getdate(self.collectiontime)
@@ -106,16 +104,21 @@ class VlccMilkCollectionRecord(Document):
 		if not self.flags.is_api:
 			filters = {
 				"societyid": self.societyid,
-				"collectiontime": self.collectiontime,
-				"collectiondate": self.collectiondate,
-				"rcvdtime": self.rcvdtime,
+				# "collectiontime": self.collectiontime, #cw commented 13/11
+				# "collectiondate": self.collectiondate,
+				# "rcvdtime": self.rcvdtime,
 				"shift": self.shift,
 				"farmerid": self.farmerid,
-				"milktype": self.milktype
+				"milktype": self.milktype,
+				"posting_date":self.posting_date,
+				"milk_quality_type":self.milk_quality_type
 			}
 			is_duplicate = frappe.db.get_value("Vlcc Milk Collection Record", filters, "name")
 			if is_duplicate and is_duplicate != self.name:
-				frappe.throw(_("Duplicate Entry found - {0}".format(is_duplicate)))
+				frappe.throw(_("""Vlcc Milk Collection Record with shift <b>{0}</b>,
+								milktype <b>{1}</b>,Posting Date <b>{2}</b>,Milk Quality Type <b>{3}</b>,Societyid <b>{4}</b>
+				is already created""".\
+				format(self.shift,self.milktype,getdate(self.posting_date),self.milk_quality_type,self.societyid)))
 
 	def validate_vlcc_chilling_centre(self):
 		vlcc_data = frappe.db.get_value("Village Level Collection Centre", {
@@ -177,6 +180,21 @@ class VlccMilkCollectionRecord(Document):
 				self.amount = 0
 			else:
 				self.amount = self.milkquantity * self.rate
+
+	def make_dairy_log(self,**kwargs):
+		dlog = frappe.get_doc({"doctype":"Dairy Log"})
+		dlog.update({
+				"title":kwargs.get("title"),
+				"method":kwargs.get("method"),
+				"sync_time": now_datetime(),
+				"status":kwargs.get("status"),
+				"data":json.dumps(kwargs.get("data", "")),
+				"error_message":kwargs.get("message", ""),
+				"traceback":kwargs.get("traceback", "")
+			})
+		dlog.insert(ignore_permissions=True)
+		frappe.db.commit()
+		return dlog.name
 
 	def make_purchase_receipt(self):
 		try:

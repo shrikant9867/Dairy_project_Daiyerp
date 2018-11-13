@@ -554,6 +554,16 @@ def vet_service_amnt(start_date, end_date, farmer_id, vlcc=None):
 	else: return 0
 
 
+# @frappe.whitelist()
+# def get_cycle(doctype,text,searchfields,start,pagelen,filters):
+# 	return frappe.db.sql("""
+# 			select name 
+# 		from
+# 			`tabFarmer Date Computation`
+# 		where
+# 			 end_date < now() and vlcc = '{vlcc}' and name like '{txt}' and name not in (select cycle from `tabFarmer Payment Cycle Report` where farmer_id = '{farmer}')
+# 		""".format(farmer = filters.get('farmer') , vlcc = filters.get('vlcc'),txt= "%%%s%%" % text,as_list=True))
+
 @frappe.whitelist()
 def get_cycle(doctype,text,searchfields,start,pagelen,filters):
 	return frappe.db.sql("""
@@ -561,7 +571,21 @@ def get_cycle(doctype,text,searchfields,start,pagelen,filters):
 		from
 			`tabFarmer Date Computation`
 		where
-			 end_date < now() and vlcc = '{vlcc}' and name like '{txt}' and name not in (select cycle from `tabFarmer Payment Cycle Report` where farmer_id = '{farmer}')
+			end_date < now() and 
+			end_date >= (select 
+			 				date(creation) 
+			 			from 
+			 				`tabFarmer` 
+			 			where 
+			 				farmer_id='{farmer}') and 
+			vlcc = '{vlcc}' and 
+			name like '{txt}' and 
+			name not in (select 
+							cycle 
+						from 
+							`tabFarmer Payment Cycle Report` 
+						where 
+							farmer_id = '{farmer}')
 		""".format(farmer = filters.get('farmer') , vlcc = filters.get('vlcc'),txt= "%%%s%%" % text,as_list=True))
 
 def req_cycle_computation(data):

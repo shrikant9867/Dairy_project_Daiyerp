@@ -37,7 +37,7 @@ def confirm_farmer_payment(**kwargs):
 		if pe:
 			if kwargs.get('status') == "SUCCESS":
 				pe_doc = frappe.get_doc("Payment Entry",pe)
-				pe_doc.flags.inore_permission = True
+				pe_doc.flags.ignore_permissions = True
 				pe_doc.submit()
 				response_dict.update({"status": "Success","remarks":"Payment entry submitted successfully","payment_entry": pe_doc.name})
 				make_agrupay_log(status="Success",request_data=kwargs,sync_time=now_datetime(),

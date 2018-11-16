@@ -486,7 +486,7 @@ def create_vmcr_doc(data,row,collectiontime,collectiondate,vlcc_name,response_di
 			vmrc_doc.societyid = data.get('societyid')
 			vmrc_doc.vmcr_created = is_vmcr_created
 			vmrc_doc.collectiondate =  collectiondate
-			vmrc_doc.posting_date = getdate(data.get('collectiontime'))
+			vmrc_doc.posting_date = getdate(row.get('collectiontime'))
 			# vmrc_doc.shift = data.get('shift')
 			# vmrc_doc.long_format_farmer_id = data.get('longformatfarmerid')
 			# vmrc_doc.starttime = data.get('starttime') #time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data.get('starttime')/1000))

@@ -1,4 +1,4 @@
-// Copyright (c) 2018, indictrans technologies and contributors
+// Copyright (c) 2018, Stellapps Technologies Private Ltd.
 // For license information, please see license.txt
 
 var msg_flag = 0;//SD 17-10-18 18:00

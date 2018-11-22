@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2015, Stellapps Technologies and Contributors
+# Copyright (c) 2018, Stellapps Technologies Private Ltd.
 # For license information, please see license.txt
-# Author Stellapps Technologies and Contributors
+# Author Stellapps Technologies Private Ltd.
 
 from __future__ import unicode_literals
 import frappe

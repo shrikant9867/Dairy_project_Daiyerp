@@ -1,4 +1,4 @@
-// Copyright (c) 2016, indictrans technologies and contributors
+// Copyright (c) 2018, Stellapps Technologies Private Ltd.
 // For license information, please see license.txt
 /* eslint-disable */
 var field_list = [

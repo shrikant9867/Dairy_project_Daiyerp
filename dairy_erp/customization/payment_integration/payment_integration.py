@@ -1,4 +1,4 @@
-# Copyright (c) 2013, indictrans technologies and contributors
+# Copyright (c) 2018, Stellapps Technologies Private Ltd.
 # For license information, please see license.txt
 # Author Khushal Trivedi 
 from __future__ import unicode_literals

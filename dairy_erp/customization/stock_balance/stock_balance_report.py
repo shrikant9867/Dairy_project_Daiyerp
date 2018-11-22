@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Indictrans Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2018, Stellapps Technologies Private Ltd.
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import print_function, unicode_literals

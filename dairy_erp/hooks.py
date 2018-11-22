@@ -4,11 +4,11 @@ from . import __version__ as app_version
 
 app_name = "dairy_erp"
 app_title = "Dairy Erp"
-app_publisher = "indictrans technologies"
+app_publisher = "Stellapps Technologies Private Ltd."
 app_description = "Erp for co-operative Dairy"
 app_icon = "octicon octicon-file-directory"
 app_color = "green"
-app_email = "khushal.t@indictranstech.com"
+app_email = "khushal.t@stellapps.com"
 app_license = "MIT"
 
 # Includes in <head>

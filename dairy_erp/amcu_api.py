@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Stellapps Technologies Private Ltd.
+# Copyright (c) 2018, Stellapps Technologies Private Ltd.
+# Copyright (c) 2018, Stellapps Technologies Private Ltd.
 # For license information, please see license.txt
 # Author Khushal Trivedi
 
